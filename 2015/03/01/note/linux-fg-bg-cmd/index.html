@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="记录总结一下 Linux 中 fg、bg、jobs、&amp;、ctrl + z 等相关指令对任务进程的操作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux的fg bg jobs &amp; ctrl+z命令记录">
+<meta property="og:url" content="https://forgives.github.io/2015/03/01/note/linux-fg-bg-cmd/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="记录总结一下 Linux 中 fg、bg、jobs、&amp;、ctrl + z 等相关指令对任务进程的操作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-02-28T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.390Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2015/03/01/note/linux-fg-bg-cmd/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>linux的fg bg jobs & ctrl+z命令记录 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2015/03/01/note/linux-fg-bg-cmd/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          linux的fg bg jobs & ctrl+z命令记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-03-01 00:00:00" itemprop="dateCreated datePublished" datetime="2015-03-01T00:00:00+08:00">2015-03-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>记录总结一下 Linux 中 fg、bg、jobs、&amp;、ctrl + z 等相关指令对任务进程的操作。</p>
+<span id="more"></span>
+
+<h2 id="一、基本用法"><a href="#一、基本用法" class="headerlink" title="一、基本用法"></a>一、基本用法</h2><h3 id="1-1-和-jobs-指令"><a href="#1-1-和-jobs-指令" class="headerlink" title="1.1 &amp; 和 jobs 指令"></a>1.1 &amp; 和 jobs 指令</h3><p><code>&amp;</code> 用在一个命令的最后，可以把这个命令转换为后台运行的任务进程。</p>
+<p><code>jobs</code> 查看当前终端有多少在后台运行的进程。</p>
+<p><code>jobs</code> 命令执行的结果，<code>＋</code> 表示是一个当前的作业，<code>-</code> 减号表示是一个当前作业之后的一个作业。</p>
+<p><code>jobs -l</code> 选项可显示所有任务的进程号 pid</p>
+<p>jobs 的状态可以是 running，stopped，terminated。但是如果任务进程被终止了（kill），当前的终端环境中也就删除了任务的进程标识；也就是说 jobs 命令显示的是当前 shell 环境中后台正在运行或者被挂起的任务进程信息</p>
+<h3 id="1-2-fg-和-bg-指令"><a href="#1-2-fg-和-bg-指令" class="headerlink" title="1.2 fg 和 bg 指令"></a>1.2 fg 和 bg 指令</h3><p><code>fg</code> 将后台任务进程调至前台继续运行，如果后台中有多个任务进程，可以用 <code>fg %num</code> 将选中的任务进程调至前台。</p>
+<p><code>bg</code> 将挂起的任务进程重新启动运行，如果有多个暂停的任务进程，可以用 <code>bg %num</code> 将选中的任务进程启动运行。</p>
+<p>%num 是通过 jobs 命令查到的后台正在执行的任务的序号（不是 pid）</p>
+<h2 id="二、进程的挂起"><a href="#二、进程的挂起" class="headerlink" title="二、进程的挂起"></a>二、进程的挂起</h2><h3 id="2-1-后台进程的挂起"><a href="#2-1-后台进程的挂起" class="headerlink" title="2.1 后台进程的挂起"></a>2.1 后台进程的挂起</h3><p>在 solaris 中通过 stop 命令执行，通过 jobs 命令查看任务号（假设为 num），然后执行：stop %num</p>
+<p>在 redhat 中，不存在 stop 命令，可通过执行命令 <code>kill -stop PID</code>，将进程挂起</p>
+<h3 id="2-2-前台进程的挂起"><a href="#2-2-前台进程的挂起" class="headerlink" title="2.2 前台进程的挂起"></a>2.2 前台进程的挂起</h3><p>ctrl + z：可以将一个正在前台执行的任务放到后台运行，并且挂起</p>
+<h2 id="三、挂起进程重新运行"><a href="#三、挂起进程重新运行" class="headerlink" title="三、挂起进程重新运行"></a>三、挂起进程重新运行</h2><p>通过 bg %num 即可将挂起的任务进程的状态由 stopped 改为 running，仍在后台运行</p>
+<p>通过 fg %num 即可将挂起的任务进程转为前台执行</p>
+<h2 id="四、进程的终止"><a href="#四、进程的终止" class="headerlink" title="四、进程的终止"></a>四、进程的终止</h2><h3 id="4-1-后台进程的终止"><a href="#4-1-后台进程的终止" class="headerlink" title="4.1 后台进程的终止"></a>4.1 后台进程的终止</h3><p>方法一： 通过 jobs 命令查看任务号（假设为 num），然后执行：kill %num</p>
+<p>方法二： 通过 ps 命令查看任务的进程号（PID，假设为 pid），然后执行：kill pid</p>
+<h3 id="4-2-前台进程的终止"><a href="#4-2-前台进程的终止" class="headerlink" title="4.2 前台进程的终止"></a>4.2 前台进程的终止</h3><p>执行 <code>ctrl+c</code> 即可终止前台执行任务进程</p>
+<p>假设要后台运行 xmms，可通过命令：xmms &amp;。但万一你运行程序时忘记使用 &amp; 了，又不想重新执行，你可以先使用 ctrl+z 挂起任务进程，然后敲入bg 命令，这样任务进程就在后台继续运行了</p>
+<h2 id="五、进程永久执行"><a href="#五、进程永久执行" class="headerlink" title="五、进程永久执行"></a>五、进程永久执行</h2><p><code>nohup</code> 不挂断地运行命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup Command [ Arg ... ] [　&amp; ]</span><br></pre></td></tr></table></figure>
+<p>nohup 命令运行由 Command 参数和任何相关的 Arg 参数指定的命令，忽略所有挂断（SIGHUP）信号。在注销后使用 nohup 命令运行后台中的程序。要运行后台中的 nohup 命令，添加 &amp; （ 表示“and”的符号）到命令的尾部。</p>
+<p>无论是否将 nohup 命令的输出重定向到终端，输出都将附加到当前目录的 nohup.out 文件中。如果当前目录的 nohup.out 文件不可写，输出重定向到 $HOME&#x2F;nohup.out 文件中。如果没有文件能创建或打开以用于追加，那么 Command 参数指定的命令不可调用。如果标准错误是一个终端，那么把指定的命令写给标准错误的所有输出作为标准输出重定向到相同的文件描述符。</p>
+<h2 id="六、SIGHUP信号"><a href="#六、SIGHUP信号" class="headerlink" title="六、SIGHUP信号"></a>六、SIGHUP信号</h2><p>用户退出 <code>session</code> 以后，”后台任务”是否还会继续执行？Linux系统是这样设计的:</p>
+<ul>
+<li>用户准备退出 session</li>
+<li>系统向该 session 发出SIGHUP信号</li>
+<li>session 将SIGHUP信号发给所有子进程</li>
+<li>子进程收到SIGHUP信号后，自动退出</li>
+</ul>
+<p>上面的流程解释了，为什么”前台任务”会随着 session 的退出而退出：因为它收到了SIGHUP信号。<br>那么，”后台任务”是否也会收到SIGHUP信号？这由 Shell 的huponexit参数决定的。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">shopt</span> | grep huponexit</span></span><br></pre></td></tr></table></figure>
+<p>执行上面的命令，就会看到<code>huponexit</code>参数的值。<br>大多数Linux系统，这个参数默认关闭<code>（off）</code>。因此，session 退出的时候，**不会把SIGHUP信号发给”后台任务”**。所以，一般来说，”后台任务”不会随着 session 一起退出。</p>
+<p>参考：<a target="_blank" rel="noopener" href="http://www.jb51.net/article/80184.htm">http://www.jb51.net/article/80184.htm</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/12/16/java/gc-and-memory-optimize/" rel="prev" title="Java内存与垃圾回收调优">
+      <i class="fa fa-chevron-left"></i> Java内存与垃圾回收调优
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/03/09/note/spring-common-properties/" rel="next" title="Spring通用PropertiesUtil">
+      Spring通用PropertiesUtil <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">一、基本用法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E5%92%8C-jobs-%E6%8C%87%E4%BB%A4"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 &amp; 和 jobs 指令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-fg-%E5%92%8C-bg-%E6%8C%87%E4%BB%A4"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 fg 和 bg 指令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%8C%82%E8%B5%B7"><span class="nav-number">2.</span> <span class="nav-text">二、进程的挂起</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E5%90%8E%E5%8F%B0%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%8C%82%E8%B5%B7"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 后台进程的挂起</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E5%89%8D%E5%8F%B0%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%8C%82%E8%B5%B7"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 前台进程的挂起</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%8C%82%E8%B5%B7%E8%BF%9B%E7%A8%8B%E9%87%8D%E6%96%B0%E8%BF%90%E8%A1%8C"><span class="nav-number">3.</span> <span class="nav-text">三、挂起进程重新运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%BB%88%E6%AD%A2"><span class="nav-number">4.</span> <span class="nav-text">四、进程的终止</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E5%90%8E%E5%8F%B0%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%BB%88%E6%AD%A2"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 后台进程的终止</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E5%89%8D%E5%8F%B0%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%BB%88%E6%AD%A2"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 前台进程的终止</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E8%BF%9B%E7%A8%8B%E6%B0%B8%E4%B9%85%E6%89%A7%E8%A1%8C"><span class="nav-number">5.</span> <span class="nav-text">五、进程永久执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81SIGHUP%E4%BF%A1%E5%8F%B7"><span class="nav-number">6.</span> <span class="nav-text">六、SIGHUP信号</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

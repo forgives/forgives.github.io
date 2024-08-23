@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="jdk 14 主要的新特性参考:openjdk JDK 14 baeldung New Features in Java 14">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 14 新特性">
+<meta property="og:url" content="https://forgives.github.io/2022/12/19/java/20221219-java14-new-features/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="jdk 14 主要的新特性参考:openjdk JDK 14 baeldung New Features in Java 14">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-12-19T08:59:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.378Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="java14">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/12/19/java/20221219-java14-new-features/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 14 新特性 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/12/19/java/20221219-java14-new-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 14 新特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-19 16:59:00" itemprop="dateCreated datePublished" datetime="2022-12-19T16:59:00+08:00">2022-12-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>jdk 14 主要的新特性参考:<br>openjdk <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/14/">JDK 14</a></p>
+<p>baeldung <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-14-new-features">New Features in Java 14</a></p>
+<span id="more"></span>  
+
+<h2 id="JDK-14-的新特性"><a href="#JDK-14-的新特性" class="headerlink" title="JDK 14 的新特性"></a>JDK 14 的新特性</h2><p>Java 14 于<em>2020年3月17日</em>发布，包含新特性：</p>
+<ul>
+<li>305:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/305">Pattern Matching for instanceof (Preview)</a></li>
+<li>343:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/343">Packaging Tool (Incubator)</a></li>
+<li>345:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/345">NUMA-Aware Memory Allocation for G1</a></li>
+<li>349:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/349">JFR Event Streaming</a></li>
+<li>352:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/352">Non-Volatile Mapped Byte Buffers</a></li>
+<li>358:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/358">Helpful NullPointerExceptions</a></li>
+<li>359:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/359">Records (Preview)</a></li>
+<li>361:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/361">Switch Expressions (Standard)</a></li>
+<li>362:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/362">Deprecate the Solaris and SPARC Ports</a></li>
+<li>363:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/363">Remove the Concurrent Mark Sweep (CMS) Garbage Collector</a></li>
+<li>364:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/364">ZGC on macOS</a></li>
+<li>365:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/365">ZGC on Windows</a></li>
+<li>366:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/366">Deprecate the ParallelScavenge + SerialOld GC Combination</a></li>
+<li>367:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/367">Remove the Pack200 Tools and API</a></li>
+<li>368:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/368">Text Blocks (Second Preview)</a></li>
+<li>370:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/370">Foreign-Memory Access API (Incubator)</a></li>
+</ul>
+<h2 id="早期版本实验特性"><a href="#早期版本实验特性" class="headerlink" title="早期版本实验特性"></a>早期版本实验特性</h2><h3 id="Switch-Expressions-JEP-361"><a href="#Switch-Expressions-JEP-361" class="headerlink" title="Switch Expressions (JEP 361)"></a>Switch Expressions (JEP 361)</h3><p>switch 表达式终于成为正式特性了，从JDK12引入，JDK13迭代，终于成为了标准的特性了。<br>这意味着switch 表达式可以用在生产环境了，而不是仅仅在预览模式下由开发来试试。</p>
+<p>还是上次那个例子，判断是否是节假日，之前的写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">boolean</span> isTodayHoliday;</span><br><span class="line"><span class="keyword">switch</span> (day) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;MONDAY&quot;</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;TUESDAY&quot;</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;WEDNESDAY&quot;</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;THURSDAY&quot;</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;FRIDAY&quot;</span>:</span><br><span class="line">        isTodayHoliday = <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;SATURDAY&quot;</span>:</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;SUNDAY&quot;</span>:</span><br><span class="line">        isTodayHoliday = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;What&#x27;s a &quot;</span> + day);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如今可以使用switch 表达式，更简介明了(注意直接赋值)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">boolean</span> <span class="variable">isTodayHoliday</span> <span class="operator">=</span> <span class="keyword">switch</span> (day) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;MONDAY&quot;</span>, <span class="string">&quot;TUESDAY&quot;</span>, <span class="string">&quot;WEDNESDAY&quot;</span>, <span class="string">&quot;THURSDAY&quot;</span>, <span class="string">&quot;FRIDAY&quot;</span> -&gt; <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&quot;SATURDAY&quot;</span>, <span class="string">&quot;SUNDAY&quot;</span> -&gt; <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">default</span> -&gt; <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;What&#x27;s a &quot;</span> + day);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>掌握吧，已经可以直接用了。</p>
+<h3 id="Text-Blocks-JEP-368"><a href="#Text-Blocks-JEP-368" class="headerlink" title="Text Blocks (JEP 368)"></a>Text Blocks (JEP 368)</h3><p>好消息是第二个版本了，坏消息是依然是预览特性。这个版本新增了两个转意：</p>
+<ul>
+<li><code>\</code> : 代表行还没有结束</li>
+<li><code>\s</code>: 代表一个空字符</li>
+</ul>
+<p>例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">multiline</span> <span class="operator">=</span> <span class="string">&quot;A quick brown fox jumps over a lazy dog; the lazy dog howls loudly.&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>现在可以写成这样</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">multiline</span> <span class="operator">=</span> <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    A quick brown fox jumps over a lazy dog; \</span></span><br><span class="line"><span class="string">    the lazy dog howls loudly.&quot;&quot;&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>只是让语句变的更可读，并没有在 dog后面加入一个新行。（这就是各类命令行常用的啊）</p>
+<h2 id="新的实验特性"><a href="#新的实验特性" class="headerlink" title="新的实验特性"></a>新的实验特性</h2><h3 id="Pattern-Matching-for-instanceof-JEP-305"><a href="#Pattern-Matching-for-instanceof-JEP-305" class="headerlink" title="Pattern Matching for instanceof (JEP 305)"></a>Pattern Matching for instanceof (JEP 305)</h3><p>jdk 14 中新增了 instanceof的模式匹配特性，来让程序员的人生在轻松那么一些。</p>
+<blockquote>
+<p>ps. 我记得我在jdk12中提到过这一特性，又确认了一下，应该是当时搞错了，这个特性确认是在 jdk14中才加入的。出错的出处也找到了，<a target="_blank" rel="noopener" href="https://www.baeldung.com/java-12-new-features#instanceof">是这里搞错了</a> 。<br>另外该特性是在 JDK 16 中正式发布的</p>
+</blockquote>
+<p>有多轻松呢？这么轻松：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="string">&quot;Hello World!&quot;</span>;</span><br><span class="line"><span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> (String) obj;</span><br><span class="line">    <span class="type">int</span> <span class="variable">length</span> <span class="operator">=</span> s.length();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在我们可以这么写</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String str) &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> str.length();</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看一眼可以了，预览特性。</p>
+<h3 id="Records-JEP-359"><a href="#Records-JEP-359" class="headerlink" title="Records (JEP 359)"></a>Records (JEP 359)</h3><p>引入Records 可以帮助我们减少<strong>不可变数据模型</strong>中一堆无意义的重复的模板代码。我觉得 <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/359">JEP 359</a>中的<code>Motivation and Goals</code>写的很清楚，大意就是：</p>
+<blockquote>
+<p>都说java太啰嗦太多规范限定，写一个数据载体模型需要写一堆无意义的 get&#x2F;set&#x2F;equals&#x2F;hashcode&#x2F;toString 等方法，虽然IDE会帮忙处理这些重复的代码，<br>但是无法帮助代码阅读的人在一堆代码里面提取出 <em>这个类只是一个数据的载体</em> 这样的结论。写一个java数据模型应该是简单的：简单写，简单读，简单的判断是否有错误。</p>
+</blockquote>
+<p>例子，定一个 User 模型，包含 id 和 password 属性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">record</span> <span class="title class_">User</span><span class="params">(<span class="type">int</span> id, String password)</span> &#123; &#125;</span><br></pre></td></tr></table></figure>
+<p>使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="type">User</span> <span class="variable">user</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">User</span>(<span class="number">0</span>, <span class="string">&quot;UserOne&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">givenRecord_whenObjInitialized_thenValuesCanBeFetchedWithGetters</span><span class="params">()</span> &#123;</span><br><span class="line">    assertEquals(<span class="number">0</span>, user1.id());</span><br><span class="line">    assertEquals(<span class="string">&quot;UserOne&quot;</span>, user1.password());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">whenRecord_thenEqualsImplemented</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">User</span> <span class="variable">user2</span> <span class="operator">=</span> user1;</span><br><span class="line">    assertTrue(user1, user2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">whenRecord_thenToStringImplemented</span><span class="params">()</span> &#123;</span><br><span class="line">    assertTrue(user1.toString().contains(<span class="string">&quot;UserOne&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看见对 id&#x2F;password 的获取不是用 getXxx了，而是直接用数据名同名的方法名。没有set因为是不可变数据类型。</p>
+<p>record 还可以覆盖改造方法、创建静态类、定义自己的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">record</span> <span class="title class_">User</span><span class="params">(<span class="type">int</span> id, String password)</span> &#123;</span><br><span class="line">    <span class="comment">//再定义一个构造方法</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">User</span><span class="params">(<span class="type">int</span> id)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(id, <span class="literal">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//额外定义的方法</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">sayHello</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;hello&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//静态方法</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">IdAddPassword</span><span class="params">(User user)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> user.id + user.password;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总结下，感觉就是<code>lombok</code>的<code>@Data</code>，加了数据不可变的限制。</p>
+<h2 id="新的正式特性"><a href="#新的正式特性" class="headerlink" title="新的正式特性"></a>新的正式特性</h2><h3 id="Helpful-NullPointerExceptions-JEP-358"><a href="#Helpful-NullPointerExceptions-JEP-358" class="headerlink" title="Helpful NullPointerExceptions (JEP 358)"></a>Helpful NullPointerExceptions (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/358">JEP 358</a>)</h3><p>以前<code>NullPointerException</code>的异常栈并没有包含多少信息来告诉我们到底哪里NPE了，只告诉了我们异常的类以及对应的代码行。<br>现在Java 14增加了直接指出哪里NPE的能力，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] arr = <span class="literal">null</span>;</span><br><span class="line">arr[<span class="number">0</span>] = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<p>如果在以前</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread &quot;main&quot; java.lang.NullPointerException</span><br><span class="line">at com.baeldung.MyClass.main(MyClass.java:27)</span><br></pre></td></tr></table></figure>
+<p>而现在的报错是这样子的</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.NullPointerException: Cannot store to int array because &quot;a&quot; is null</span><br></pre></td></tr></table></figure>
+<p>我们可以准确的知道哪一个字段导致了NPE。<br>我们在用刚才那个Record试一下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testNPE</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">User</span> <span class="variable">user</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">User</span>(<span class="number">1</span>);</span><br><span class="line">    System.out.println(user.password().toUpperCase());</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.NullPointerException: Cannot invoke &quot;String.toUpperCase()&quot; because the return value of &quot;com.forg.java14.pojo.User.password()&quot; is null</span><br></pre></td></tr></table></figure>
+<p>很明确的就指出了哪个字段是null，舒服~</p>
+<h2 id="孵化中的特性"><a href="#孵化中的特性" class="headerlink" title="孵化中的特性"></a>孵化中的特性</h2><p>孵化中的特性不同于预览特性，都单独放在了独立模块的<code>jdk.incubator</code>包下面</p>
+<h3 id="Foreign-Memory-Access-API-JEP-370"><a href="#Foreign-Memory-Access-API-JEP-370" class="headerlink" title="Foreign Memory Access API (JEP 370)"></a>Foreign Memory Access API (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/370">JEP 370</a>)</h3><p>Java需要访问堆内存之外的内存空间是，通常有两种方法：</p>
+<ul>
+<li>java.nio.ByteBuffer</li>
+<li>sun.misc.Unsafe</li>
+</ul>
+<p><code>java.nio.ByteBuffer</code>允许使用<code>allocateDirect()</code>方法在堆内存之外分配内存空间。但是 <code>ByteBuffer</code> 大小不能超过2G，释放内存需要依赖垃圾回收器。<br><code>sun.misc.Unsafe</code> 的使用是不安全的，可能会造成JMV崩溃，另外<code>Unsafe</code> 并不推荐使用。</p>
+<p>JEP 370 引入了一套高效的API来访问外部内存地址，目前还是在孵化阶段，相关API在<code>jdk.incubator.foreign</code>模块的<code>jdk.incubator.foreign</code>包中。<br>该API包含三个核心接口: <code>MemorySegment</code>、<code>MemoryAddress</code>和<code>MemoryLayout</code>。</p>
+<p><code>MemorySegment</code>接口表示一个连续的内存区域，它有空间上和时间上的约束：空间上的约束指的是不能访问所分配内存空间之外的地址；时间上的约束指的是当MemorySegment被关闭之后，不能继续对它进行操作。关闭一个MemorySegment会释放内存。<br><code>MemoryAddress</code>接口描述在MemorySegment中的相对位置。通常是用法是通过<code>MemorySegment.baseAddress()</code>方法得到起始地址，再使用offset(long l)方法移到到新的地址。<br><code>MemoryLayout</code>接口描述MemorySegment中的内存布局。布局的最小单元有两种：表示单个值的ValueLayout，顺序布局SequenceLayout。</p>
+<h3 id="Packaging-Tool-JEP-343"><a href="#Packaging-Tool-JEP-343" class="headerlink" title="Packaging Tool (JEP 343)"></a>Packaging Tool (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/343">JEP 343</a>)</h3><p>通常java交付只需要给到对应的jar文件，然后在自己的JVM中运行，但是大部分人希望通过双击安装来在自己的平台上，就比如 windows和 macOS 。<br>JEP 343 就是这个目的，开发者可以使用 <a target="_blank" rel="noopener" href="https://www.baeldung.com/jlink">jlink</a> 来把最小化依赖的JDK模块压缩打包，然后创建一个轻量化的镜像，比如windows系统的exe，macOS的dmg 。</p>
+<h2 id="JVM-HotSpot-特性"><a href="#JVM-HotSpot-特性" class="headerlink" title="JVM&#x2F;HotSpot 特性"></a>JVM&#x2F;HotSpot 特性</h2><h3 id="ZGC-on-Windows-JEP-365-and-macOS-JEP-364-–-Experimental"><a href="#ZGC-on-Windows-JEP-365-and-macOS-JEP-364-–-Experimental" class="headerlink" title="ZGC on Windows (JEP 365) and macOS (JEP 364) – Experimental"></a>ZGC on Windows (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/365">JEP 365</a>) and macOS (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/364">JEP 364</a>) – Experimental</h3><p>早在java 11引入的实验性的ZGC一直都只支持 <strong>Linux&#x2F;x64</strong> 平台。<br>在java 14中已经支持了Windows与macOS，虽然只是个实验性的特性，以后终将会在正式版本中发布的。</p>
+<h3 id="NUMA-Aware-Memory-Allocation-for-G1-JEP-345"><a href="#NUMA-Aware-Memory-Allocation-for-G1-JEP-345" class="headerlink" title="NUMA-Aware Memory Allocation for G1 (JEP 345)"></a>NUMA-Aware Memory Allocation for G1 (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/345">JEP 345</a>)</h3><p>不像并行回收器，G1垃圾回收器至今没有实现 Non-uniform memory access (NUMA) ，在这次JEP中增加G1的NUMA支持。</p>
+<h3 id="JFR-Event-Streaming-JEP-349"><a href="#JFR-Event-Streaming-JEP-349" class="headerlink" title="JFR Event Streaming (JEP 349)"></a>JFR Event Streaming (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/349">JEP 349</a>)</h3><p>通过这一增强，JDK的飞行记录器数据现在被公开，以便可以持续监控。这涉及到对包jdk.jfr.cosumer的修改，以便用户现在可以直接读取或流式传输记录数据。</p>
+<h2 id="弃用或者删除的特性"><a href="#弃用或者删除的特性" class="headerlink" title="弃用或者删除的特性"></a>弃用或者删除的特性</h2><p>弃用的</p>
+<ul>
+<li>Solaris and SPARC Ports (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/362">JEP 362</a>) – because this Unix operating system and RISC processor are not in active development since the past few years</li>
+<li>ParallelScavenge + SerialOld GC Combination (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/366">JEP 366</a>) – since this is a rarely used combination of GC algorithms, and requires significant maintenance effort<br>删除的</li>
+<li>Concurrent Mark Sweep (CMS) Garbage Collector 在java 9 的时候已经被标记弃用，其代替者G1已经是默认的垃圾回收器了，而且还有其他很多可选的 ZGC,Shenandoah 。所以直接删除了。</li>
+<li>Pack200 Tools and API (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/367">JEP 367</a>) – these were deprecated for removal in Java 11, and now removed</li>
+</ul>
+<h2 id="总结一下"><a href="#总结一下" class="headerlink" title="总结一下"></a>总结一下</h2><p>正式特性有</p>
+<ul>
+<li>Switch Expressions</li>
+<li>Helpful NullPointerExceptions</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/14/">JDK 14</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-14-new-features">New Features in Java 14</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/98389056">一文看尽JDK 14全部新特性</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java14/" rel="tag"># java14</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/13/java/20221213-java13-new-features/" rel="prev" title="Java 13 新特性">
+      <i class="fa fa-chevron-left"></i> Java 13 新特性
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/21/java/20221221-java15-new-features/" rel="next" title="Java 15 新特性">
+      Java 15 新特性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK-14-%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">JDK 14 的新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A9%E6%9C%9F%E7%89%88%E6%9C%AC%E5%AE%9E%E9%AA%8C%E7%89%B9%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">早期版本实验特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Switch-Expressions-JEP-361"><span class="nav-number">2.1.</span> <span class="nav-text">Switch Expressions (JEP 361)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Text-Blocks-JEP-368"><span class="nav-number">2.2.</span> <span class="nav-text">Text Blocks (JEP 368)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B0%E7%9A%84%E5%AE%9E%E9%AA%8C%E7%89%B9%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">新的实验特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Pattern-Matching-for-instanceof-JEP-305"><span class="nav-number">3.1.</span> <span class="nav-text">Pattern Matching for instanceof (JEP 305)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Records-JEP-359"><span class="nav-number">3.2.</span> <span class="nav-text">Records (JEP 359)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B0%E7%9A%84%E6%AD%A3%E5%BC%8F%E7%89%B9%E6%80%A7"><span class="nav-number">4.</span> <span class="nav-text">新的正式特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Helpful-NullPointerExceptions-JEP-358"><span class="nav-number">4.1.</span> <span class="nav-text">Helpful NullPointerExceptions (JEP 358)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%B5%E5%8C%96%E4%B8%AD%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">5.</span> <span class="nav-text">孵化中的特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Foreign-Memory-Access-API-JEP-370"><span class="nav-number">5.1.</span> <span class="nav-text">Foreign Memory Access API (JEP 370)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Packaging-Tool-JEP-343"><span class="nav-number">5.2.</span> <span class="nav-text">Packaging Tool (JEP 343)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM-HotSpot-%E7%89%B9%E6%80%A7"><span class="nav-number">6.</span> <span class="nav-text">JVM&#x2F;HotSpot 特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ZGC-on-Windows-JEP-365-and-macOS-JEP-364-%E2%80%93-Experimental"><span class="nav-number">6.1.</span> <span class="nav-text">ZGC on Windows (JEP 365) and macOS (JEP 364) – Experimental</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NUMA-Aware-Memory-Allocation-for-G1-JEP-345"><span class="nav-number">6.2.</span> <span class="nav-text">NUMA-Aware Memory Allocation for G1 (JEP 345)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JFR-Event-Streaming-JEP-349"><span class="nav-number">6.3.</span> <span class="nav-text">JFR Event Streaming (JEP 349)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%83%E7%94%A8%E6%88%96%E8%80%85%E5%88%A0%E9%99%A4%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">7.</span> <span class="nav-text">弃用或者删除的特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E4%B8%80%E4%B8%8B"><span class="nav-number">8.</span> <span class="nav-text">总结一下</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">9.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

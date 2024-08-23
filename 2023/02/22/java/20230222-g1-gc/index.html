@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="G1 (Garbage First) 垃圾回收器是在Java7 update 4之后引入的一个新的垃圾回收器，JDK9 中成为默认垃圾回收器。G1是 HotSpot为解决CMS算法产生空间碎片和其它一系列的缺陷，而提供的另外一种垃圾回收策略。它是一个分代的，增量的，并行与并发的标记-复制垃圾回收器。G1的目标是使用当前的目标应用程序和环境在延迟和吞吐量之间达到最佳平衡。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="G1垃圾回收器">
+<meta property="og:url" content="https://forgives.github.io/2023/02/22/java/20230222-g1-gc/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="G1 (Garbage First) 垃圾回收器是在Java7 update 4之后引入的一个新的垃圾回收器，JDK9 中成为默认垃圾回收器。G1是 HotSpot为解决CMS算法产生空间碎片和其它一系列的缺陷，而提供的另外一种垃圾回收策略。它是一个分代的，增量的，并行与并发的标记-复制垃圾回收器。G1的目标是使用当前的目标应用程序和环境在延迟和吞吐量之间达到最佳平衡。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i3/O1CN01TL0I4C23GTaaGF8JI_!!6000000007228-0-tps-1172-870.jpg">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i3/O1CN01L9l8Ls1bEoux3Sk0E_!!6000000003434-0-tps-2138-658.jpg">
+<meta property="article:published_time" content="2023-02-22T08:33:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.379Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="jvm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/imgextra/i3/O1CN01TL0I4C23GTaaGF8JI_!!6000000007228-0-tps-1172-870.jpg">
+
+<link rel="canonical" href="https://forgives.github.io/2023/02/22/java/20230222-g1-gc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>G1垃圾回收器 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/02/22/java/20230222-g1-gc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          G1垃圾回收器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-02-22 16:33:00" itemprop="dateCreated datePublished" datetime="2023-02-22T16:33:00+08:00">2023-02-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>G1 (Garbage First) 垃圾回收器是在<code>Java7 update 4</code>之后引入的一个新的垃圾回收器，<strong>JDK9 中成为默认垃圾回收器</strong>。<br>G1是 HotSpot为解决CMS算法产生空间碎片和其它一系列的缺陷，而提供的另外一种垃圾回收策略。它是一个<strong>分代的，增量的，并行与并发的标记-复制垃圾回收器</strong>。<br>G1的目标是使用当前的目标应用程序和环境在延迟和吞吐量之间达到最佳平衡。</p>
+<span id="more"></span>  
+
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><ol>
+<li>Java1.7正式启用，Java9 中G1成为默认的垃圾回收器了，如果需要显示启用，使用参数 <code>-XX:+UseG1GC</code> 。</li>
+<li>G1 是一个并行回收器，他把堆内存分割成若干Region（物理上不连续），每个Region的大小1-32M不等，但必须是2的整数次幂（通过<code>-XX:G1HeapRegionSize=size</code>设置）。每个Region可以独立表示Eden、Survivor From、Survivor To、老年代等。</li>
+<li>每次根据允许的收集时间，优先回收垃圾最多的Region（在后台维护一个优先列表），整体使用标记+整理算法，Region之间使用了复制算法。</li>
+<li>官方给G1设定的目标是在延迟可控的情况下，获得尽可能高的吞吐量。</li>
+</ol>
+<h3 id="G1与CMS区别"><a href="#G1与CMS区别" class="headerlink" title="G1与CMS区别"></a>G1与CMS区别</h3><ol>
+<li>G1从整体上来看是 标记-整理 算法，但从局部（两个Region之间）是复制算法。而CMS是 标记-清除算法 所以说，G1不会产生内存碎片，而CMS会产生内存碎片</li>
+<li>CMS对Java堆内存使用的是传统的 _新生代和老年代划分方法_，而G1使用的全新的划分方法。</li>
+<li>CMS收集器只收集老年代，可以配合新生代的Serial和ParNew收集器一起使用。G1收集器收集范围是老年代和新生代。不需要结合其他收集器使用，G1内存回收是以region作为基本单位的。</li>
+<li>G1 是软实时的(soft real-time)。实时垃圾回收是指在要求时间内完成垃圾回收，软实时则指的是用户可以指定垃圾回收的时间限制，G1会努力在这个时限内完成垃圾回收，但并不保证。</li>
+</ol>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><h3 id="Heap-Region"><a href="#Heap-Region" class="headerlink" title="Heap Region"></a>Heap Region</h3><p>本质上说，G1依然是个分代垃圾回收器。不同的是，它引入了额外的概念：<strong>Region</strong>。</p>
+<p>G1垃圾回收器把堆划分成一个个大小相同的Region。在HotSpot的实现中，整个堆默认被划分成2048左右个Region。每个Region的大小在1-32MB之间。</p>
+<blockquote>
+<p>Region的大小必须为2的整数倍，如2MB、4MB、6MB等，可以通过-XX:G1HeapRegionSize参数手动指定，如果G1HeapRegionSize未设置，默认情况下则在堆初始化时计算Region的实际大小。</p>
+</blockquote>
+<p>G1垃圾回收器的分代是建立在这些Region的基础上的。对于Region来说，它会有一个分代的类型，并且是唯一的。即每一个Region要么是young的要么是old的。还有一类十分特殊的<code>Humongous</code>。<br>所谓的<code>Humongous</code>，就是一个对象的大小超过了某一个阈值——(<em>HotSpot中是Region的1&#x2F;2</em>)，那么它会被标记为<code>Humongous</code>。<br>如果我们审视HotSpot的其余的垃圾回收器，可以发现这种对象以前被称为大对象，会被直接分配老年代。而在G1回收器中，则是做了特殊的处理。</p>
+<p><strong>G1并不要求相同类型的region要相邻</strong>。换言之，就是G1回收器不要求它们连续。当然在逻辑上，分代依旧是连续的。如图<br><img src="https://img.alicdn.com/imgextra/i3/O1CN01TL0I4C23GTaaGF8JI_!!6000000007228-0-tps-1172-870.jpg" alt="G1 Regions"></p>
+<p>其中E代表的是Eden，S代表的是Survivor，H代表的是Humongous，剩余的深蓝色代表的是Old(或者Tenured)，灰色的代表的是空闲的Region。</p>
+<p>Region可以说是G1回收器一次回收的最小单元。即每一次回收都是回收N个Region。这个N是多少，主要受到G1回收的效率和用户设置的软实时目标有关。<br>每一次的回收，G1会选择可能回收最多垃圾的Region进行回收。</p>
+<h3 id="Remember-Set-Card-Table-Write-Barrier"><a href="#Remember-Set-Card-Table-Write-Barrier" class="headerlink" title="Remember Set &amp; Card Table &amp; Write Barrier"></a>Remember Set &amp; Card Table &amp; Write Barrier</h3><p><code>RS(Remember Set)</code>是一种抽象概念，用于记录从非收集部分指向收集部分的指针的集合。</p>
+<p>在传统的分代垃圾回收算法里面，RS被用来记录分代之间的指针。在G1回收器里面，RS被用来记录从其他Region指向本Region的指针情况。<br>因此，每个Region都有一个RS。这种记录可以带来一个极大的好处：<strong>在回收一个Region的时候不需要执行全堆扫描，只需要检查它的RS就可以找到外部引用</strong><br>（不管是G1还是其他分代收集器，JVM都是使用 记忆集(Remembered Set) 来避免全局扫描。），而这些引用就是initial mark的根之一。</p>
+<p>如果一个线程修改了Region内部的引用，就必须要去通知RS，更改其中的记录。为了达到这种目的，G1回收器引入了一种新的结构，<code>CT(Card Table)</code>——卡表。<br>每一个Region，又被分成了固定大小的若干张卡(Card)。每一张卡，都用一个Byte来记录是否修改过。卡表即这些byte的集合。</p>
+<p>每次Reference类型数据写操作时，都会产生一个 写屏障（<code>Write Barrier</code>）暂时去终止操作，然后检查将要写入的引用 指向的对象是否和该Reference类型数据在不同的 Region（其他收集器：检查老年代对象是否引用了新生代对象），<br>如果不同，通过 卡表（Card Table）把相关引用信息记录到引用指向对象的所在Region对应的记忆集(<code>Remembered Set</code>) 中。当进行垃圾收集时，在GC Roots枚举范围加上记忆集；就可以保证不进行全局扫描了。</p>
+<p><img src="https://img.alicdn.com/imgextra/i3/O1CN01L9l8Ls1bEoux3Sk0E_!!6000000003434-0-tps-2138-658.jpg" alt="RS"></p>
+<blockquote>
+<p>G1的记忆集可以理解为一个哈希表，Key就是别的Region的起始地址，Value就是卡表的索引号集合。</p>
+</blockquote>
+<blockquote>
+<p>因为G1将Java堆划分为一个个Region的缘故，而Region数量相比于传统分代数量明显多得多，所以G1相比于传统的垃圾回收器来说，<strong>需要消耗相当于Java堆容量 10%~20%的额外空间来维持收集器的工作</strong>。</p>
+</blockquote>
+<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><h3 id="Initial-Marking-STW"><a href="#Initial-Marking-STW" class="headerlink" title="Initial Marking (STW)"></a>Initial Marking (STW)</h3><p>初始标记(<code>Initial Marking</code>)：这阶段仅仅只是标记GC Roots能直接关联到的对象并修改TAMS(Next Top at Mark Start)的值，让下一阶段用户程序并发运行时，能在正确的可用的Region中创建新对象，<br>这阶段需要停顿线程，但是耗时很短。而且是借用进行Minor GC的时候同步完成的，所以G1收集器在这个阶段实际并没有额外的停顿。</p>
+<h3 id="Concurrent-Marking"><a href="#Concurrent-Marking" class="headerlink" title="Concurrent Marking"></a>Concurrent Marking</h3><p>并发标记(Concurrent Marking)：从GC Roots开始对堆的对象进行可达性分析，递归扫描整个堆里的对象图，找出存活的对象，这阶段耗时较长，<strong>但是可以与用户程序并发执行</strong>。<br>当对象图扫描完成以后，还要重新处理SATB(Snapshot At The Beginning)记录下的在并发时有引用变动的对象。</p>
+<h3 id="Final-Marking-STW"><a href="#Final-Marking-STW" class="headerlink" title="Final Marking (STW)"></a>Final Marking (STW)</h3><p>最终标记(Final Marking)：对用户线程做另一个短暂的暂停，用于处理并发阶段结束后仍遗留下来的最后那少量的 SATB 记录。</p>
+<h3 id="Live-Data-Counting-and-Evacuation-STW"><a href="#Live-Data-Counting-and-Evacuation-STW" class="headerlink" title="Live Data Counting and Evacuation (STW)"></a>Live Data Counting and Evacuation (STW)</h3><p>筛选回收(Live Data Counting and Evacuation)：负责更新 Region 的统计数据，对各个 Region 的回收价值和成本进行排序，根据用户所期望的停顿时间来制定回收计划。<br>可以自由选择多个Region来构成会收集，然后把回收的那一部分Region中的存活对象<strong>复制</strong>到空的Region中，在对那些Region进行清空。在该阶段还会重置Remember Set。</p>
+<blockquote>
+<p>除了并发标记外，其余过程都要 STW</p>
+</blockquote>
+<h3 id="YoungGC完整流程"><a href="#YoungGC完整流程" class="headerlink" title="YoungGC完整流程"></a>YoungGC完整流程</h3><p>YoungGC并不是说现有的Eden区放满了就会马上触发，G1会计算下现在Eden区回收大概要多久时间，如果回收时间远远小于参数<code>-XX:MaxGCPauseMills</code>设定的值，那么增加年轻代的region，继续给新对象存放，<br>不会马上做Young GC，直到下一次Eden区放满，G1计算回收时间接近参数<code>-XX:MaxGCPauseMills</code>设定的值，那么就会触发Young GC。</p>
+<h3 id="MixedGC完整流程"><a href="#MixedGC完整流程" class="headerlink" title="MixedGC完整流程"></a>MixedGC完整流程</h3><p>不是FullGC，老年代的堆占有率达到参数(<code>-XX:InitiatingHeapOccupancyPercent</code>)设定的值则触发，回收所有的Young和部分Old(根据期望的GC停顿时间确定old区垃圾收集的优先顺序)以及大对象区，<br>正常情况G1的垃圾收集是先做MixedGC，主要使用复制算法，需要把各个region中存活的对象拷贝到别的region里去，拷贝过程中如果发现没有足够的空region能够承载拷贝对象就会触发一次Full GC。</p>
+<h3 id="FullGC"><a href="#FullGC" class="headerlink" title="FullGC"></a>FullGC</h3><p>停止系统程序，然后采用单线程进行标记、清理和压缩整理，好空闲出来一批Region来供下一次MixedGC使用，这个过程是非常耗时的。</p>
+<h2 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">-XX:+UseG1GC：使用G1收集器</span><br><span class="line"></span><br><span class="line">-XX:ParallelGCThreads：指定GC工作的线程数量</span><br><span class="line"></span><br><span class="line">-XX:G1HeapRegionSize：指定分区大小(1MB~32MB，且必须是2的N次幂)，默认将整堆划分为2048个分区</span><br><span class="line"></span><br><span class="line">-XX:MaxGCPauseMillis：目标暂停时间(默认200ms)</span><br><span class="line"></span><br><span class="line">-XX:G1NewSizePercent：新生代内存初始空间(默认整堆5%)</span><br><span class="line"></span><br><span class="line">-XX:G1MaxNewSizePercent：新生代内存最大空间</span><br><span class="line"></span><br><span class="line">-XX:TargetSurvivorRatio：Survivor区的填充容量(默认50%)，Survivor区域里的一批</span><br><span class="line">        对象(年龄1+年龄2+年龄n的多个年龄对象)总和超过了Survivor区域的50%，</span><br><span class="line">        此时就会把年龄n(含)以上的对象都放入老年代</span><br><span class="line"></span><br><span class="line">-XX:MaxTenuringThreshold：最大年龄阈值(默认15)</span><br><span class="line"></span><br><span class="line">-XX:InitiatingHeapOccupancyPercent：老年代占用空间达到整堆内存阈值(默认45%)，</span><br><span class="line">        则执行新生代和老年代的混合收集(MixedGC)，比如我们之前说的堆默认有2048个region，</span><br><span class="line">        如果有接近1000个region都是老年代的region，则可能就要触发MixedGC了</span><br><span class="line"></span><br><span class="line">-XX:G1MixedGCLiveThresholdPercent(默认85%)：region中的存活对象低于这个值时才会回收该region，</span><br><span class="line">        如果超过这个值，存活对象过多，回收的的意义不大。</span><br><span class="line"></span><br><span class="line">-XX:G1MixedGCCountTarget：在一次回收过程中指定做几次筛选回收(默认8次)，在最后一个筛选回收阶段可以回收一会，</span><br><span class="line">        然后暂停回收，恢复系统运行，一会再开始回收，这样可以让系统不至于单次停顿时间过长。</span><br><span class="line"></span><br><span class="line">-XX:G1HeapWastePercent(默认5%)：gc过程中空出来的region是否充足阈值，在混合回收的时候，</span><br><span class="line">        对Region回收都是基于复制算法进行的，都是把要回收的Region里的存活对象放入其他Region，</span><br><span class="line">        然后这个Region中的垃圾对象全部清理掉，这样的话在回收过程就会不断空出来新的Region，</span><br><span class="line">        一旦空闲出来的Region数量达到了堆内存的5%，此时就会立即停止混合回收，意味着本次混合回收就结束了。</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>为什么G1能够让用户设置应用的暂停时间？</p>
+<p>根据Garbage First的原则，G1优先处理回收垃圾最大量的区间(Region)，G1每次并不会回收整代内存，到底回收多少内存就看用户配置的暂停时间，配置的时间短就少回收点，配置的时间长就多回收点，伸缩自如。<br>由于内存被分成了很多小块，又带来了另外好处，由于内存块比较小，进行内存压缩整理的代价都比较小，相比其它GC算法，可以有效的规避内存碎片的问题。</p>
+<p>缺点：如果应用的内存非常吃紧，对内存进行部分回收根本不够，始终要进行整个Heap的回收，那么G1要做的工作量就一点也不会比其它垃圾回收器少，而且因为本身算法复杂了一点，可能比其它回收器还要差。<br><strong>G1停顿时间的瓶颈主要是标记-复制中的转移阶段STW</strong>，主要是因为G1未能解决转移过程中准确定位对象地址的问题。因此G1比较适合内存稍大一点的应用(一般来说至少4G以上)，小内存的应用还是用传统的垃圾回收器比如CMS比较合适。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/jvm/" rel="tag"># jvm</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/22/java/20230222-cms-gc/" rel="prev" title="CMS垃圾回收器">
+      <i class="fa fa-chevron-left"></i> CMS垃圾回收器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/27/note/20230227-stable-diffusion/" rel="next" title="Stable Diffusion 初探">
+      Stable Diffusion 初探 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">1.</span> <span class="nav-text">结论</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#G1%E4%B8%8ECMS%E5%8C%BA%E5%88%AB"><span class="nav-number">1.1.</span> <span class="nav-text">G1与CMS区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">2.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Heap-Region"><span class="nav-number">2.1.</span> <span class="nav-text">Heap Region</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Remember-Set-Card-Table-Write-Barrier"><span class="nav-number">2.2.</span> <span class="nav-text">Remember Set &amp; Card Table &amp; Write Barrier</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">工作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Initial-Marking-STW"><span class="nav-number">3.1.</span> <span class="nav-text">Initial Marking (STW)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Concurrent-Marking"><span class="nav-number">3.2.</span> <span class="nav-text">Concurrent Marking</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Final-Marking-STW"><span class="nav-number">3.3.</span> <span class="nav-text">Final Marking (STW)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Live-Data-Counting-and-Evacuation-STW"><span class="nav-number">3.4.</span> <span class="nav-text">Live Data Counting and Evacuation (STW)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#YoungGC%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="nav-number">3.5.</span> <span class="nav-text">YoungGC完整流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MixedGC%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="nav-number">3.6.</span> <span class="nav-text">MixedGC完整流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FullGC"><span class="nav-number">3.7.</span> <span class="nav-text">FullGC</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="nav-number">4.</span> <span class="nav-text">参数说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

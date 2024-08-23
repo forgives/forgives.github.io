@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="jdk 12 主要的新特性参考:openjdk JDK 12 baeldung New Features in Java 12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 12 新特性">
+<meta property="og:url" content="https://forgives.github.io/2022/12/10/java/20221210-java12-new-features/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="jdk 12 主要的新特性参考:openjdk JDK 12 baeldung New Features in Java 12">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-12-10T12:37:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.378Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="java12">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/12/10/java/20221210-java12-new-features/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 12 新特性 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/12/10/java/20221210-java12-new-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 12 新特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-10 20:37:00" itemprop="dateCreated datePublished" datetime="2022-12-10T20:37:00+08:00">2022-12-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>jdk 12 主要的新特性参考:<br>openjdk <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/12/">JDK 12</a></p>
+<p>baeldung <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-12-new-features">New Features in Java 12</a></p>
+<span id="more"></span>  
+
+<h2 id="JDK-12-的新特性"><a href="#JDK-12-的新特性" class="headerlink" title="JDK 12 的新特性"></a>JDK 12 的新特性</h2><ul>
+<li>189: <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/189">Shenandoah: A Low-Pause-Time Garbage Collector (Experimental)</a></li>
+<li>230: <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/230">Microbenchmark Suite</a></li>
+<li>325: <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/325">Switch Expressions (Preview)</a></li>
+<li>334: <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/334">JVM Constants API</a></li>
+<li>340: <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/340">One AArch64 Port, Not Two</a></li>
+<li>341: <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/341">Default CDS Archives</a></li>
+<li>344: <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/344">Abortable Mixed Collections for G1</a></li>
+<li>346: <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/346">Promptly Return Unused Committed Memory from G1</a></li>
+</ul>
+<h2 id="语法变动"><a href="#语法变动" class="headerlink" title="语法变动"></a>语法变动</h2><h3 id="String-类的新增方法"><a href="#String-类的新增方法" class="headerlink" title="String 类的新增方法"></a>String 类的新增方法</h3><p>Java 12 为String 类引入了两个新方法 <code>indent</code> 和 <code>transform</code>。</p>
+<ul>
+<li>indent</li>
+</ul>
+<p><code>indent</code> 更具其int 参数调节了String 每一行的缩进。参数n大于0，则String 每行增加n个<strong>空格</strong>，参数n小于0则String 删除每行<strong>前面</strong>的空格。<br>如果每行前面的空格数小于参数n,则删除所有空格（其他内容完好无损的保留下来）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">text</span> <span class="operator">=</span> <span class="string">&quot;Hello Baeldung!\nThis is Java 12 article.&quot;</span>;</span><br><span class="line"></span><br><span class="line">text = text.indent(<span class="number">4</span>);</span><br><span class="line">System.out.println(text);</span><br><span class="line"></span><br><span class="line">text = text.indent(-<span class="number">10</span>);</span><br><span class="line">System.out.println(text);</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">    Hello Baeldung!</span><br><span class="line">    This is Java 12 article.</span><br><span class="line"></span><br><span class="line">Hello Baeldung!</span><br><span class="line">This is Java 12 article.</span><br></pre></td></tr></table></figure>
+<p>即时参数是 -10 也只会删除前面4个空格。</p>
+<ul>
+<li>transform</li>
+</ul>
+<p><code>transform</code>只有一个参数<code>Function</code>，把自己通过 <code>Function</code>进行转换</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;R&gt; R <span class="title function_">transform</span><span class="params">(Function&lt;? <span class="built_in">super</span> String, ? extends R&gt; f)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> f.apply(<span class="built_in">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>比如倒置一个String </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">givenString_thenRevertValue</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">text</span> <span class="operator">=</span> <span class="string">&quot;Baeldung&quot;</span>;</span><br><span class="line">    <span class="type">String</span> <span class="variable">transformed</span> <span class="operator">=</span> text.transform(value -&gt;</span><br><span class="line">      <span class="keyword">new</span> <span class="title class_">StringBuilder</span>(value).reverse().toString()</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    assertEquals(<span class="string">&quot;gnudleaB&quot;</span>, transformed);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="File-mismatch-方法"><a href="#File-mismatch-方法" class="headerlink" title="File::mismatch 方法"></a>File::mismatch 方法</h3><p>Java 12 中在 <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-nio-2-file-api">nio.file.Files</a> 工具类中新增了 <code>mismatch</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">long</span> <span class="title function_">mismatch</span><span class="params">(Path path, Path path2)</span> <span class="keyword">throws</span> IOException</span><br></pre></td></tr></table></figure>
+<p>这个方法比较两个文件，并返回第一处内容不相等的字节位置（<code>long</code>）。 如果文件完全相等，返回<code>-1L</code></p>
+<p>看两个列子，第一个例子比较完全相同的两个文件，返回<code>-1L</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">givenIdenticalFiles_thenShouldNotFindMismatch</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">Path</span> <span class="variable">filePath1</span> <span class="operator">=</span> Files.createTempFile(<span class="string">&quot;file1&quot;</span>, <span class="string">&quot;.txt&quot;</span>);</span><br><span class="line">    <span class="type">Path</span> <span class="variable">filePath2</span> <span class="operator">=</span> Files.createTempFile(<span class="string">&quot;file2&quot;</span>, <span class="string">&quot;.txt&quot;</span>);</span><br><span class="line">    Files.writeString(filePath1, <span class="string">&quot;Java 12 Article&quot;</span>);</span><br><span class="line">    Files.writeString(filePath2, <span class="string">&quot;Java 12 Article&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">long</span> <span class="variable">mismatch</span> <span class="operator">=</span> Files.mismatch(filePath1, filePath2);</span><br><span class="line">    assertEquals(-<span class="number">1</span>, mismatch);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第二个例子，两个文件内容分别是 <code>Java 12 Article</code> 和 <code>Java 12 Tutorial</code>，应该返回<code>8L</code>表示第八个字节是不一样的(<code>A and T</code>)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">givenDifferentFiles_thenShouldFindMismatch</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">Path</span> <span class="variable">filePath3</span> <span class="operator">=</span> Files.createTempFile(<span class="string">&quot;file3&quot;</span>, <span class="string">&quot;.txt&quot;</span>);</span><br><span class="line">    <span class="type">Path</span> <span class="variable">filePath4</span> <span class="operator">=</span> Files.createTempFile(<span class="string">&quot;file4&quot;</span>, <span class="string">&quot;.txt&quot;</span>);</span><br><span class="line">    Files.writeString(filePath3, <span class="string">&quot;Java 12 Article&quot;</span>);</span><br><span class="line">    Files.writeString(filePath4, <span class="string">&quot;Java 12 Tutorial&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">long</span> <span class="variable">mismatch</span> <span class="operator">=</span> Files.mismatch(filePath3, filePath4);</span><br><span class="line">    assertEquals(<span class="number">8</span>, mismatch);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Stream-API-中的-Collectors-teeing"><a href="#Stream-API-中的-Collectors-teeing" class="headerlink" title="Stream API 中的 Collectors.teeing()"></a>Stream API 中的 Collectors.teeing()</h3><p>Java 12中在 <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-8-collectors">Collectors</a> 类中新增了<code>teeing</code> 收集器：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Collector&lt;T, ?, R&gt; teeing(Collector&lt;? <span class="built_in">super</span> T, ?, R1&gt; downstream1,</span><br><span class="line">  Collector&lt;? <span class="built_in">super</span> T, ?, R2&gt; downstream2, BiFunction&lt;? <span class="built_in">super</span> R1, ? <span class="built_in">super</span> R2, R&gt; merger)</span><br></pre></td></tr></table></figure>
+<p>该收集器将其输入转发给其他两个收集器，然后将它们的结果使用函数合并。<br>下面例子使用利用 <code>teeing</code>处理一个数值 set, 第一个<code>collector</code> 求和，第二个<code>collector</code> 统计数值个数，最后通过 <code>merger</code> 合并结果计算平均值:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">givenSetOfNumbers_thenCalculateAverage</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">double</span> <span class="variable">mean</span> <span class="operator">=</span> Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)</span><br><span class="line">      .collect(Collectors.teeing(Collectors.summingDouble(i -&gt; i), </span><br><span class="line">        Collectors.counting(), (sum, count) -&gt; sum / count));</span><br><span class="line">    assertEquals(<span class="number">3.0</span>, mean);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="紧凑的数字格式"><a href="#紧凑的数字格式" class="headerlink" title="紧凑的数字格式"></a>紧凑的数字格式</h3><p>Java 12 新增了一个新的数字格式 —— <strong>紧凑数字格式</strong> 。因为较大的数字总是难以识别具体数值，紧凑的表示更容易阅读且占据更少的展示空间。<br>我们可以通过 <code>NumberFormat</code> 类的 <code>getCompactNumberInstance</code> 方法获取其实例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> NumberFormat <span class="title function_">getCompactNumberInstance</span><span class="params">(Locale locale, NumberFormat.Style formatStyle)</span></span><br></pre></td></tr></table></figure>
+<p>通过参数 <code>locale</code> 提供了一个合适的格式，<code>formatStyle</code>可以是 <code>SHORT</code> or <code>LONG</code> ，比如 <em>US locale</em> 中数字 1000<br><code>formatStyle</code>是 <code>SHORT</code>则对应的就是 <code>10K</code> ，而 <code>LONG</code> 则是 <code>10 thousand</code>。</p>
+<p>具体使用两个 <code>formatStyle</code>的代码例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">givenNumber_thenCompactValues</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">NumberFormat</span> <span class="variable">likesShort</span> <span class="operator">=</span> </span><br><span class="line">      NumberFormat.getCompactNumberInstance(<span class="keyword">new</span> <span class="title class_">Locale</span>(<span class="string">&quot;en&quot;</span>, <span class="string">&quot;US&quot;</span>), NumberFormat.Style.SHORT);</span><br><span class="line">    likesShort.setMaximumFractionDigits(<span class="number">2</span>);</span><br><span class="line">    assertEquals(<span class="string">&quot;2.59K&quot;</span>, likesShort.format(<span class="number">2592</span>));</span><br><span class="line"></span><br><span class="line">    <span class="type">NumberFormat</span> <span class="variable">likesLong</span> <span class="operator">=</span> </span><br><span class="line">      NumberFormat.getCompactNumberInstance(<span class="keyword">new</span> <span class="title class_">Locale</span>(<span class="string">&quot;en&quot;</span>, <span class="string">&quot;US&quot;</span>), NumberFormat.Style.LONG);</span><br><span class="line">    likesLong.setMaximumFractionDigits(<span class="number">2</span>);</span><br><span class="line">    assertEquals(<span class="string">&quot;2.59 thousand&quot;</span>, likesLong.format(<span class="number">2592</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="预览版的特性"><a href="#预览版的特性" class="headerlink" title="预览版的特性"></a>预览版的特性</h2><p>有一些特性是作为<strong>预览版本</strong>在 java 12 中发布的，如果要使用他们需要在编译的时候增加额外的配置</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac -Xlint:preview --enable-preview -source 12 src/main/java/File.java</span><br></pre></td></tr></table></figure>
+
+<h3 id="Switch表达式-Preview"><a href="#Switch表达式-Preview" class="headerlink" title="Switch表达式 (Preview)"></a>Switch表达式 (Preview)</h3><p>Java 12中引入的最有名的特性就是 <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-switch">Switch 表达式</a></p>
+<p>我们用一个例子（<code>LocalDate</code> 实例的<code>DayOfWeek</code> 枚举判断是否是工作日）看下新老 <code>switch</code> 表达式的区别，Java 12 之前的版本：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">DayOfWeek</span> <span class="variable">dayOfWeek</span> <span class="operator">=</span> LocalDate.now().getDayOfWeek();</span><br><span class="line"><span class="type">String</span> <span class="variable">typeOfDay</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="keyword">switch</span> (dayOfWeek) &#123;</span><br><span class="line">    <span class="keyword">case</span> MONDAY:</span><br><span class="line">    <span class="keyword">case</span> TUESDAY:</span><br><span class="line">    <span class="keyword">case</span> WEDNESDAY:</span><br><span class="line">    <span class="keyword">case</span> THURSDAY:</span><br><span class="line">    <span class="keyword">case</span> FRIDAY:</span><br><span class="line">        typeOfDay = <span class="string">&quot;Working Day&quot;</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SATURDAY:</span><br><span class="line">    <span class="keyword">case</span> SUNDAY:</span><br><span class="line">        typeOfDay = <span class="string">&quot;Day Off&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同样的逻辑使用 switch 表达式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">typeOfDay = <span class="keyword">switch</span> (dayOfWeek) &#123;</span><br><span class="line">    <span class="keyword">case</span> MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY -&gt; <span class="string">&quot;Working Day&quot;</span>;</span><br><span class="line">    <span class="keyword">case</span> SATURDAY, SUNDAY -&gt; <span class="string">&quot;Day Off&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>switch 表达式 更简洁易读，它取消了 <code>break</code> 语句，但不会再匹配后继续执行。另一个优势是现在可以把 <strong>switch表达式赋予一个变量</strong>， 这个在以前是不可能实现的。</p>
+<p>同时，在switch 语句中可以直接代码且并不要求一定要有返回值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> (dayOfWeek) &#123;</span><br><span class="line">    <span class="keyword">case</span> MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY -&gt; System.out.println(<span class="string">&quot;Working Day&quot;</span>);</span><br><span class="line">    <span class="keyword">case</span> SATURDAY, SUNDAY -&gt; System.out.println(<span class="string">&quot;Day Off&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果需要执行的逻辑比较复杂，可以使用 <code>&#123;&#125;</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY -&gt; &#123;</span><br><span class="line">    <span class="comment">// more logic</span></span><br><span class="line">    System.out.println(<span class="string">&quot;Working Day&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Java 12 中的switch 表达式只是一个<em>可选的</em>扩展语法，并不是说要直接代替了原来的 switch 。</p>
+<p>switch Expressions 会在　<code>Java 13</code> (转正了) 做更深入的说明。</p>
+<h3 id="instanceof-的匹配模式-Preview"><a href="#instanceof-的匹配模式-Preview" class="headerlink" title="instanceof 的匹配模式 (Preview)"></a>instanceof 的匹配模式 (Preview)</h3><p>另一个Preview 版本的特性就是 <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-pattern-matching-instanceof">instanceof</a>.</p>
+<p>在之前的Java版本，当使用 <code>instanceof</code> 的时候通常都会需要额外写一个类型转化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="string">&quot;Hello World!&quot;</span>;</span><br><span class="line"><span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> (String) obj;</span><br><span class="line">    <span class="type">int</span> <span class="variable">length</span> <span class="operator">=</span> s.length();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>java 12 中我们可以直接声明一个新的类型变量代表转化后的值</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String s) &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">length</span> <span class="operator">=</span> s.length();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译器自动帮我们转换成了 <em>String s</em> 。</p>
+<h2 id="JVM-相关的变化"><a href="#JVM-相关的变化" class="headerlink" title="JVM 相关的变化"></a>JVM 相关的变化</h2><p>Java 12 中引入了一系列 JVM的增强特性，这里只挑选了几个比较重要的说明。</p>
+<h3 id="Shenandoah-垃圾回收器"><a href="#Shenandoah-垃圾回收器" class="headerlink" title="Shenandoah 垃圾回收器"></a>Shenandoah 垃圾回收器</h3><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/189">Shenandoah</a> 是一个低延迟的垃圾回收器。Java 12中 Shenandoah 还是实验性质的 （在Java 15 中会正式启用）。</p>
+<p><code>Shenandoah</code> 通过与Java线程同时执行清理工作来减少GC暂停时间。这意味着使用 Shenandoah，无论堆有多大，垃圾回收200 GB堆或2 GB堆停顿的时间都是固定的（<strong>垃圾收集器的停顿时间限制在10ms以内</strong>）。</p>
+<blockquote>
+<p>ps. Shenandoah 收集器是由 RedHat 公司开发的项目，Oracle 拒绝在 OracleJDK12 中支持该收集器，Shenandoah 只有在 OpenJDK 中才会包含，而 OracleJDK 中不包含的。</p>
+</blockquote>
+<h3 id="Microbenchmark-Suite"><a href="#Microbenchmark-Suite" class="headerlink" title="Microbenchmark Suite"></a>Microbenchmark Suite</h3><p>Java 12 introduces a suite of around 100 microbenchmark tests to the JDK source code.<br>These tests will allow for continuous performance testing on a JVM and will become useful for every developer wishing to work on the JVM itself or create a new microbenchmark.</p>
+<p>Java 12 新增了大概100个 套微基准测试，提供给JVM性能测试用的。</p>
+<h3 id="Default-CDS-Archives"><a href="#Default-CDS-Archives" class="headerlink" title="Default CDS Archives"></a>Default CDS Archives</h3><p>The Class Data Sharing (CDS) feature helps reduce the startup time and memory footprint between multiple Java Virtual Machines. It uses a built-time generated default class list that contains the selected core library classes.</p>
+<p>The change that came with Java 12 is that the CDS archive is enabled by default. To run programs with CDS turned off we need to set the Xshare flag to off:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Xshare:off HelloWorld.java</span><br></pre></td></tr></table></figure>
+<p>Note, that this could delay the startup time of the program.</p>
+<p>就是 CDS 在Java 12 中默认就是开启的，需要通过 <code>-Xshare:off</code> 关闭（<strong>启动会变慢</strong>）， CDS 的内容在 Java 10 新特性中提到过。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>就写这么多吧， 关于 G1 垃圾回收器还是以后单独写一篇吧。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java12/" rel="tag"># java12</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/08/java/20221208-oss-util/" rel="prev" title="OSS上传小工具">
+      <i class="fa fa-chevron-left"></i> OSS上传小工具
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/13/java/20221213-java13-new-features/" rel="next" title="Java 13 新特性">
+      Java 13 新特性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK-12-%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">JDK 12 的新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E5%8F%98%E5%8A%A8"><span class="nav-number">2.</span> <span class="nav-text">语法变动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#String-%E7%B1%BB%E7%9A%84%E6%96%B0%E5%A2%9E%E6%96%B9%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">String 类的新增方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#File-mismatch-%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">File::mismatch 方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stream-API-%E4%B8%AD%E7%9A%84-Collectors-teeing"><span class="nav-number">2.3.</span> <span class="nav-text">Stream API 中的 Collectors.teeing()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A7%E5%87%91%E7%9A%84%E6%95%B0%E5%AD%97%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.4.</span> <span class="nav-text">紧凑的数字格式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E8%A7%88%E7%89%88%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">预览版的特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Switch%E8%A1%A8%E8%BE%BE%E5%BC%8F-Preview"><span class="nav-number">3.1.</span> <span class="nav-text">Switch表达式 (Preview)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#instanceof-%E7%9A%84%E5%8C%B9%E9%85%8D%E6%A8%A1%E5%BC%8F-Preview"><span class="nav-number">3.2.</span> <span class="nav-text">instanceof 的匹配模式 (Preview)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM-%E7%9B%B8%E5%85%B3%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">JVM 相关的变化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Shenandoah-%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8"><span class="nav-number">4.1.</span> <span class="nav-text">Shenandoah 垃圾回收器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Microbenchmark-Suite"><span class="nav-number">4.2.</span> <span class="nav-text">Microbenchmark Suite</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Default-CDS-Archives"><span class="nav-number">4.3.</span> <span class="nav-text">Default CDS Archives</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

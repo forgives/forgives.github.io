@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="The guava-retrying  module provides a general purpose method for retrying arbitrary Java code with specific stop, retry, and exception handling capabilities that are enhanced by Guava’s predicate matc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="guava-retrying基于guava的重试模块">
+<meta property="og:url" content="https://forgives.github.io/2018/06/27/java/guava-retrying/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="The guava-retrying  module provides a general purpose method for retrying arbitrary Java code with specific stop, retry, and exception handling capabilities that are enhanced by Guava’s predicate matc">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-06-27T12:45:12.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.381Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="guava">
+<meta property="article:tag" content="retry">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2018/06/27/java/guava-retrying/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>guava-retrying基于guava的重试模块 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2018/06/27/java/guava-retrying/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          guava-retrying基于guava的重试模块
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-06-27 20:45:12" itemprop="dateCreated datePublished" datetime="2018-06-27T20:45:12+08:00">2018-06-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://github.com/rholder/guava-retrying">The guava-retrying </a> module provides a general purpose method for retrying arbitrary Java code with specific stop, retry, and exception handling capabilities that are enhanced by Guava’s predicate matching.</p>
+<span id="more"></span>
+
+<h2 id="maven依赖"><a href="#maven依赖" class="headerlink" title="maven依赖"></a>maven依赖</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">      &lt;groupId&gt;com.github.rholder&lt;/groupId&gt;</span><br><span class="line">      &lt;artifactId&gt;guava-retrying&lt;/artifactId&gt;</span><br><span class="line">      &lt;version&gt;2.0.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h2><p>简单的demo</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Callable&lt;Boolean&gt; callable = <span class="keyword">new</span> <span class="title class_">Callable</span>&lt;Boolean&gt;() &#123;</span><br><span class="line">    <span class="keyword">public</span> Boolean <span class="title function_">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>; <span class="comment">// do something useful here</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Retryer&lt;Boolean&gt; retryer = RetryerBuilder.&lt;Boolean&gt;newBuilder()</span><br><span class="line">        .retryIfResult(Predicates.&lt;Boolean&gt;isNull())</span><br><span class="line">        .retryIfExceptionOfType(IOException.class)</span><br><span class="line">        .retryIfRuntimeException()</span><br><span class="line">        .withStopStrategy(StopStrategies.stopAfterAttempt(<span class="number">3</span>))</span><br><span class="line">        .build();</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    retryer.call(callable);</span><br><span class="line">&#125; <span class="keyword">catch</span> (RetryException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先重试的内容主体必须是一个<code>Callable</code>的实现，重试是根据其<code>call</code>方法的执行状态（异常、返回值）定制的重试策略来进行重试的。<br>比如上面的列子。重试者<code>retryer</code>由建造者<code>RetryerBuilder</code>创建的，RetryerBuilder提供了各种方法来定制重试策略。</p>
+<p>根据返回是否是null来决定是否重试</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.retryIfResult(Predicates.&lt;Boolean&gt;isNull())</span><br></pre></td></tr></table></figure>
+<p>根据异常类型是否是IOException来决定是否重试</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.retryIfExceptionOfType(IOException.class)</span><br></pre></td></tr></table></figure>
+<p>多个类型的时候还可以使用<code>Predicate</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Retryer&lt;Void&gt; retryer1 = RetryerBuilder.&lt;Void&gt;newBuilder()</span><br><span class="line">		.retryIfException(Predicates.or(Predicates.instanceOf(NullPointerException.class),</span><br><span class="line">				                        Predicates.instanceOf(IllegalStateException.class)))</span><br><span class="line">		.withStopStrategy(StopStrategies.stopAfterAttempt(<span class="number">3</span>)) <span class="comment">// 重试3次后停止</span></span><br><span class="line">		.build();</span><br></pre></td></tr></table></figure>
+<p>根据异常是否是RuntimeException来决定是否重试</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.retryIfRuntimeException()</span><br></pre></td></tr></table></figure>
+<p>设置重试的终止策略，尝试3次后终止</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.withStopStrategy(StopStrategies.stopAfterAttempt(<span class="number">3</span>))</span><br></pre></td></tr></table></figure>
+
+<p>除了上述重试判断外判断重试的方式与策略还有很多，比如</p>
+<h3 id="重试判断"><a href="#重试判断" class="headerlink" title="重试判断"></a>重试判断</h3><p>返回值匹配</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.retryIfResult(Predicates.containsPattern(<span class="string">&quot;_error$&quot;</span>))</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.retryIfResult(Predicates.equalTo(<span class="number">2</span>))</span><br></pre></td></tr></table></figure>
+<h3 id="终止策略"><a href="#终止策略" class="headerlink" title="终止策略"></a>终止策略</h3><p>常用的终止策略在<code>com.github.rholder.retry.StopStrategies</code>中。</p>
+<p>尝试3次后终止</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.withStopStrategy(StopStrategies.stopAfterAttempt(<span class="number">3</span>))</span><br></pre></td></tr></table></figure>
+<p>30s后终止</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.withStopStrategy(StopStrategies.stopAfterDelay(<span class="number">30</span>,TimeUnit.SECONDS))</span><br></pre></td></tr></table></figure>
+
+<p>不终止</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.withStopStrategy(StopStrategies.neverStop())</span><br></pre></td></tr></table></figure>
+
+<h3 id="等待策略"><a href="#等待策略" class="headerlink" title="等待策略"></a>等待策略</h3><p>很多场景下并不是立即重试（环境影响，立即重试的失败率依旧很高），一般会等待一段时间后继续重试。<br>提供了等待策略，常用策略在<code>com.github.rholder.retry.WaitStrategies</code>中。</p>
+<p>比如</p>
+<p>等待固定时间</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.withWaitStrategy(WaitStrategies.fixedWait(<span class="number">5L</span>, TimeUnit.SECONDS))</span><br></pre></td></tr></table></figure>
+
+<p>每次等待时间递增</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.withWaitStrategy(WaitStrategies.incrementingWait(<span class="number">3</span>, TimeUnit.SECONDS,<span class="number">1</span>,TimeUnit.SECONDS))</span><br></pre></td></tr></table></figure>
+
+<p>斐波那契式等待</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.withWaitStrategy(WaitStrategies.fibonacciWait())</span><br></pre></td></tr></table></figure>
+
+<h3 id="重试监听"><a href="#重试监听" class="headerlink" title="重试监听"></a>重试监听</h3><p><code>guava-retrying</code>提供每次重试的监听机制，每次重试后会回调注册的监听者，按顺序依次执行。</p>
+<p>监听者必须实现<code>RetryListener.onRetry</code>的方法。参数<code>attempt</code>是每次尝试的记录。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyRetryListener</span>&lt;Boolean&gt; <span class="keyword">implements</span> <span class="title class_">RetryListener</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> &lt;Boolean&gt; <span class="keyword">void</span> <span class="title function_">onRetry</span><span class="params">(Attempt&lt;Boolean&gt; attempt)</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 第几次重试,(注意:第一次重试其实是第一次调用)</span></span><br><span class="line">        System.out.print(<span class="string">&quot;[retry]time=&quot;</span> + attempt.getAttemptNumber());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 距离第一次重试的延迟</span></span><br><span class="line">        System.out.print(<span class="string">&quot;,delay=&quot;</span> + attempt.getDelaySinceFirstAttempt());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 重试结果: 是异常终止, 还是正常返回</span></span><br><span class="line">        System.out.print(<span class="string">&quot;,hasException=&quot;</span> + attempt.hasException());</span><br><span class="line">        System.out.print(<span class="string">&quot;,hasResult=&quot;</span> + attempt.hasResult());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 是什么原因导致异常</span></span><br><span class="line">        <span class="keyword">if</span> (attempt.hasException()) &#123;</span><br><span class="line">            System.out.print(<span class="string">&quot;,causeBy=&quot;</span> + attempt.getExceptionCause().toString());</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 正常返回时的结果</span></span><br><span class="line">            System.out.print(<span class="string">&quot;,result=&quot;</span> + attempt.getResult());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// bad practice: 增加了额外的异常处理代码</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">Boolean</span> <span class="variable">result</span> <span class="operator">=</span> attempt.get();</span><br><span class="line">            System.out.print(<span class="string">&quot;,rude get=&quot;</span> + result);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">            System.err.println(<span class="string">&quot;this attempt produce exception.&quot;</span> + e.getCause().toString());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>增加监听者（可以增加多个，顺序执行）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.withRetryListener(<span class="keyword">new</span> <span class="title class_">MyRetryListener</span>&lt;&gt;())</span><br><span class="line">.withRetryListener(<span class="keyword">new</span> <span class="title class_">RetryListener</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> &lt;V&gt; <span class="keyword">void</span> <span class="title function_">onRetry</span><span class="params">(Attempt&lt;V&gt; attempt)</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (attempt.hasException())&#123;</span><br><span class="line">                    attempt.getExceptionCause().printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="核心逻辑"><a href="#核心逻辑" class="headerlink" title="核心逻辑"></a>核心逻辑</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">long</span> <span class="variable">startTime</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">attemptNumber</span> <span class="operator">=</span> <span class="number">1</span>; ; attemptNumber++) &#123;</span><br><span class="line">    Attempt&lt;V&gt; attempt;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 执行成功</span></span><br><span class="line">        <span class="type">V</span> <span class="variable">result</span> <span class="operator">=</span> attemptTimeLimiter.call(callable);</span><br><span class="line">        attempt = <span class="keyword">new</span> <span class="title class_">ResultAttempt</span>&lt;V&gt;(result, attemptNumber, TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">        <span class="comment">// 执行失败</span></span><br><span class="line">        attempt = <span class="keyword">new</span> <span class="title class_">ExceptionAttempt</span>&lt;V&gt;(t, attemptNumber, TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 监听器处理</span></span><br><span class="line">    <span class="keyword">for</span> (RetryListener listener : listeners) &#123;</span><br><span class="line">        listener.onRetry(attempt);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 是否符合终止策略</span></span><br><span class="line">    <span class="keyword">if</span> (!rejectionPredicate.apply(attempt)) &#123;</span><br><span class="line">        <span class="keyword">return</span> attempt.get();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 是否符合停止策略</span></span><br><span class="line">    <span class="keyword">if</span> (stopStrategy.shouldStop(attempt)) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RetryException</span>(attemptNumber, attempt);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 计算下次重试间隔时间</span></span><br><span class="line">        <span class="type">long</span> <span class="variable">sleepTime</span> <span class="operator">=</span> waitStrategy.computeSleepTime(attempt);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            blockStrategy.block(sleepTime);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RetryException</span>(attemptNumber, attempt);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="主要接口"><a href="#主要接口" class="headerlink" title="主要接口"></a>主要接口</h2><h3 id="Attempt"><a href="#Attempt" class="headerlink" title="Attempt"></a>Attempt</h3><p>一次执行任务</p>
+<h3 id="AttemptTimeLimiter"><a href="#AttemptTimeLimiter" class="headerlink" title="AttemptTimeLimiter"></a>AttemptTimeLimiter</h3><p>单次任务执行时间限制（如果单次任务执行超时，则终止执行当前任务）</p>
+<h3 id="BlockStrategies"><a href="#BlockStrategies" class="headerlink" title="BlockStrategies"></a>BlockStrategies</h3><p>任务阻塞策略（通俗的讲就是当前任务执行完，下次任务还没开始这段时间做什么）</p>
+<p>默认策略为：BlockStrategies.THREAD_SLEEP_STRATEGY 也就是调用 Thread.sleep(sleepTime);</p>
+<h3 id="RetryException"><a href="#RetryException" class="headerlink" title="RetryException"></a>RetryException</h3><p>重试异常</p>
+<h3 id="RetryListener"><a href="#RetryListener" class="headerlink" title="RetryListener"></a>RetryListener</h3><p>自定义重试监听器，可以用于异步记录错误日志</p>
+<h3 id="StopStrategy"><a href="#StopStrategy" class="headerlink" title="StopStrategy"></a>StopStrategy</h3><p>停止重试策略，提供三种</p>
+<ul>
+<li>StopAfterDelayStrategy ：设定一个最长允许的执行时间比如设定最长执行10s，无论任务执行次数，只要重试的时候超出了最长时间，则任务终止，并返回重试异常RetryException</li>
+<li>NeverStopStrategy ：不停止，用于需要一直轮训知道返回期望结果的情况</li>
+<li>StopAfterAttemptStrategy ：设定最大重试次数，如果超出最大重试次数则停止重试，并返回重试异常</li>
+</ul>
+<h3 id="WaitStrategy"><a href="#WaitStrategy" class="headerlink" title="WaitStrategy"></a>WaitStrategy</h3><p>等待时长策略（控制时间间隔），返回结果为下次执行时长</p>
+<ul>
+<li>FixedWaitStrategy：固定等待时长策略</li>
+<li>RandomWaitStrategy：随机等待时长策略（可以提供一个最小和最大时长，等待时长为其区间随机值）</li>
+<li>IncrementingWaitStrategy：递增等待时长策略（提供一个初始值和步长，等待时间随重试次数增加而增加）</li>
+<li>ExponentialWaitStrategy：指数等待时长策略</li>
+<li>FibonacciWaitStrategy ：Fibonacci 等待时长策略</li>
+<li>ExceptionWaitStrategy ：异常时长等待策略</li>
+<li>CompositeWaitStrategy ：复合时长等待策略</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/guava/" rel="tag"># guava</a>
+              <a href="/tags/retry/" rel="tag"># retry</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/06/18/note/fiddler-note/" rel="prev" title="fiddler抓包笔记">
+      <i class="fa fa-chevron-left"></i> fiddler抓包笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/07/01/java/spring-retry/" rel="next" title="spring retry">
+      spring retry <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#maven%E4%BE%9D%E8%B5%96"><span class="nav-number">1.</span> <span class="nav-text">maven依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"><span class="nav-number">2.</span> <span class="nav-text">使用说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%AF%95%E5%88%A4%E6%96%AD"><span class="nav-number">2.1.</span> <span class="nav-text">重试判断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%88%E6%AD%A2%E7%AD%96%E7%95%A5"><span class="nav-number">2.2.</span> <span class="nav-text">终止策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%89%E5%BE%85%E7%AD%96%E7%95%A5"><span class="nav-number">2.3.</span> <span class="nav-text">等待策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%AF%95%E7%9B%91%E5%90%AC"><span class="nav-number">2.4.</span> <span class="nav-text">重试监听</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91"><span class="nav-number">3.</span> <span class="nav-text">核心逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E6%8E%A5%E5%8F%A3"><span class="nav-number">4.</span> <span class="nav-text">主要接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Attempt"><span class="nav-number">4.1.</span> <span class="nav-text">Attempt</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AttemptTimeLimiter"><span class="nav-number">4.2.</span> <span class="nav-text">AttemptTimeLimiter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BlockStrategies"><span class="nav-number">4.3.</span> <span class="nav-text">BlockStrategies</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RetryException"><span class="nav-number">4.4.</span> <span class="nav-text">RetryException</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RetryListener"><span class="nav-number">4.5.</span> <span class="nav-text">RetryListener</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StopStrategy"><span class="nav-number">4.6.</span> <span class="nav-text">StopStrategy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WaitStrategy"><span class="nav-number">4.7.</span> <span class="nav-text">WaitStrategy</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

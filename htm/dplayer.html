@@ -1,0 +1,70 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>DPlayer</title>
+    
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js"  crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
+
+    
+</head>
+<body>
+<div class="container">
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" id="inputGroup-sizing-default">video</span>
+    </div>
+    <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="u" />
+    <div class="input-group-append">
+        <button class="btn btn-primary" type="button" id="play">PLAY</button>
+    </div>
+
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary " type="button" id="play125">PLAY1.25</button>
+    </div>
+</div>
+
+<div id="video" ></div>
+</div>
+<script>
+    const dp = new DPlayer({
+            container: document.getElementById('video'),
+            screenshot: false, //否则要开启跨域
+            theme: '#FADFA3',
+            video: {
+                // url: 'https://api.dogecloud.com/player/get.mp4?vcode=5ac682e6f8231991&userId=17&ext=.mp4'
+            }
+    });
+    $(document).ready(function(){
+        $("#play").click(function(){
+            var v = $('#u').val();
+            if(v == ''){
+                return ;
+            }
+            dp.video.src = v ;
+            dp.play();
+        });
+
+        $("#play125").click(function(){
+            var v = $('#u').val();
+            if(v == ''){
+                return ;
+            }
+            dp.switchVideo({
+                url: v
+            });
+            dp.speed(1.25);
+            dp.play();
+        });
+    });
+</script>
+
+<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

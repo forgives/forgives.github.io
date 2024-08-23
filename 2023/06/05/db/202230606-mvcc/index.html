@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="MVCC (Multiversion Concurrency Control)，多版本并发控制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL MVCC 实现原理">
+<meta property="og:url" content="https://forgives.github.io/2023/06/05/db/202230606-mvcc/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="MVCC (Multiversion Concurrency Control)，多版本并发控制。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012010/WeChat2ea9ce6e69d62f822186f82e38068f56.png">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012010/WeChat023c433ee1d6e921b7e0278045db808d.png">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012010/WeChat090a265cec3fa34fb68cab2d27d0b975.png">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012010/WeChat6bc771b039ca78bc510a208c7c886f79.png">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012010/WeChatae018879c6e5f9af6aa79ab9ef5de736.png">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012010/WeChataa7905e4c0f095e37fe53f462a1041a4.png">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012010/WeChat58bcce7128597eab106be03489c328b2.png">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012810/WeChate8cacc5515fb9ab1353a6e136de69516.png">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012810/WechatIMG2005.jpeg">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012810/WechatIMG49.jpeg">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012810/WechatIMG50.jpeg">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012810/WechatIMG51.jpeg">
+<meta property="og:image" content="https://cdn.poizon.com/ctoo/012810/WechatIMG52.jpeg">
+<meta property="article:published_time" content="2023-06-05T11:53:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.371Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="database">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.poizon.com/ctoo/012010/WeChat2ea9ce6e69d62f822186f82e38068f56.png">
+
+<link rel="canonical" href="https://forgives.github.io/2023/06/05/db/202230606-mvcc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MySQL MVCC 实现原理 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/06/05/db/202230606-mvcc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL MVCC 实现原理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-06-05 19:53:00" itemprop="dateCreated datePublished" datetime="2023-06-05T19:53:00+08:00">2023-06-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DB/" itemprop="url" rel="index"><span itemprop="name">DB</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>MVCC (<code>Multiversion Concurrency Control</code>)，多版本并发控制。</p>
+<span id="more"></span>
+<p>转自 <a target="_blank" rel="noopener" href="https://my.oschina.net/u/5783135/blog/8587003">https://my.oschina.net/u/5783135/blog/8587003</a></p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>MVCC (Multiversion Concurrency Control)，多版本并发控制。顾名思义，MVCC 是通过数据行的多个版本管理实现数据库的并发控制。这项技术使得在 InnoDB 的事务隔离级别下执行一致性读操作有了保证。换言之，就是为了查询一些正在被另一个事务更新的行，并且可以看到它们被更新之前的值，这样在做查询的时候就不用等待另一个事务释放锁。</p>
+<p>MVCC 没有正式的标准，在不同的 DBMS 中 MVCC 的实现方式可能是不同的，也不是普遍使用的。本文讲解 <code>InnoDB</code> 中 MVCC 的实现机制（MySQL 其它的存储引擎并不支持它）。</p>
+<h2 id="快照读和当前读"><a href="#快照读和当前读" class="headerlink" title="快照读和当前读"></a>快照读和当前读</h2><p>MVCC 在 MySQL InnoDB 中的实现主要是为了提高数据库并发性能，用更好的方式去处理读 - 写冲突，做到即使有读写冲突时，也能做到不加锁，非阻塞并发读，而这个读指的就是快照读，而非当前读。当前读实际上是一种加锁的操作，是悲观锁的实现。而 MVCC 本质是采用乐观锁思想的一种方式。</p>
+<h3 id="快照读"><a href="#快照读" class="headerlink" title="快照读"></a>快照读</h3><p>快照读又叫一致性读，读取的是快照数据。不加锁的简单的 SELECT 都属于快照读，即不加锁的非阻塞读。比如这样：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> player <span class="keyword">WHERE</span> ...</span><br></pre></td></tr></table></figure>
+
+<p>之所以出现快照读的情况，是基于提高并发性能的考虑，快照读的实现是基于 MVCC，它在很多情况下，避免了加锁操作，降低了开销。既然是基于多版本，那么快照读可能读到的并不一定是数据的最新版本，而有可能是之前的历史版本。快照读的前提是隔离级别不是串行级别，串行级别下的快照读会退化成当前读。</p>
+<h3 id="当前读"><a href="#当前读" class="headerlink" title="当前读"></a>当前读</h3><p>当前读读取的是记录的最新版本（最新数据，而不是历史版本的数据)，读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁。加锁的 SELECT，或者对数据进行增删改都会进行当前读。比如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student LOCK <span class="keyword">IN</span> SHARE MODE; #共享锁</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student <span class="keyword">FOR</span> <span class="keyword">UPDATE</span>;         #排他锁</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> student <span class="keyword">values</span> ...        #排他锁</span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> student <span class="keyword">WHERE</span> ...        #排他锁</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> ...         #排他锁</span><br></pre></td></tr></table></figure>
+
+<h2 id="MVCC-实现"><a href="#MVCC-实现" class="headerlink" title="MVCC 实现"></a>MVCC 实现</h2><h3 id="隐藏字段"><a href="#隐藏字段" class="headerlink" title="隐藏字段"></a>隐藏字段</h3><p>对于使用 InnoDB 存储引擎的表来说，它的聚簇索引记录中都包含两个必要的隐藏列。</p>
+<p>trx_id：每次一个事务对某条聚簇索引记录进行改动时，都会把该事务的事务 id 赋值给 trx_id 隐藏列。</p>
+<p>roll_pointer：每次对某条聚簇索引记录进行改动时，都会把旧的版本写入到 undo 日志中，然后这个隐藏列就相当于一个指针，可以通过它来找到该记录修改前的信息。</p>
+<h3 id="Undo-Log-版本链"><a href="#Undo-Log-版本链" class="headerlink" title="Undo Log 版本链"></a>Undo Log 版本链</h3><p>举例: student 表数据如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student ;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">+----+--------+--------+</span></span><br><span class="line"><span class="comment">| id | name   | class  |</span></span><br><span class="line"><span class="comment">+----+--------+--------+</span></span><br><span class="line"><span class="comment">|  1 | 张三   | 一班    |</span></span><br><span class="line"><span class="comment">+----+--------+--------+</span></span><br><span class="line"><span class="comment">1 row in set (0.07 sec)</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>假设插入该记录的事务 id 为 8，那么此刻该条记录的示意图如下所示:</p>
+<p><img src="https://cdn.poizon.com/ctoo/012010/WeChat2ea9ce6e69d62f822186f82e38068f56.png"></p>
+<p>insert undo 只在事务回滚时起作用，当事务提交后，该类型的 undo 日志就没用了，它占用的 Undo Log Segment 也会被系统回收（也就是该 undo 日志占用的 Undo 页面链表要么被重用，要么被释放)。</p>
+<p>假设之后两个事务 id 分别为 10、20 的事务对这条记录进行 UPDATE 操作，操作流程如下:</p>
+<p><img src="https://cdn.poizon.com/ctoo/012010/WeChat023c433ee1d6e921b7e0278045db808d.png"></p>
+<p>能不能在两个事务中交叉更新同一条记录呢？</p>
+<p>不能！这就是一个事务修改了另一个未提交事务修改过的数据，脏写。</p>
+<p>InnoDB 使用锁来保证不会有脏写情况的发生，也就是在第一个事务更新了某条记录后，就会给这条记录加锁，另一个事务再次更新时就需要等待第一个事务提交了，把锁释放之后才可以继续更新。</p>
+<p>每次对记录进行改动，都会记录一条 undo 日志，每条 undo 日志也都有一个 roll_pointer 属性（INSERT 操作对应的 undo 日志没有该属性，因为该记录并没有更早的版本)，可以将这些 undo 日志都连起来，串成一个链表:</p>
+<p><img src="https://cdn.poizon.com/ctoo/012010/WeChat090a265cec3fa34fb68cab2d27d0b975.png"></p>
+<p>对该记录每次更新后，都会将旧值放到一条 undo 日志中，就算是该记录的一个旧版本，随着更新次数的增多，所有的版本都会被 roll_pointer 属性连接成一个链表，把这个链表称之为版本链，版本链的头节点就是当前记录最新的值。每个版本中还包含生成该版本时对应的事务 id。</p>
+<h3 id="ReadView"><a href="#ReadView" class="headerlink" title="ReadView"></a>ReadView</h3><p>在 MVCC 机制中，多个事务对同一个行记录进行更新会产生多个历史快照，这些历史快照保存在 Undo Log 里。如果一个事务想要查询这个行记录，需要读取哪个版本的行记录呢？这时就需要用到 ReadView 了，它帮我们解决了行的可见性问题。</p>
+<p>ReadView 就是事务在使用 MVCC 机制进行快照读操作时产生的读视图。当事务启动时，会生成数据库系统当前的一个快照，InnoDB 为每个事务构造了一个数组，用来记录并维护系统当前活跃事务的 ID (“活跃” 指的就是，启动了但还没提交）。</p>
+<h4 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h4><p>使用 READ UNCONNMITTED 隔离级别的事务，由于可以读到未提交事务修改过的记录，所以直接读取记录的最新版本就好了。</p>
+<p>使用 SERIALIZABLE 隔离级别的事务，InnoDB 规定使用加锁的方式来访问记录。</p>
+<p>使用 <strong>READ COMMITTED 和 REPEATABLE READ</strong> 隔离级别的事务，都必须保证读到 已经提交了的 事务修改过的历史记录。假如另一个事务已经修改了记录但是尚未提交，是不能直接读取最新版本的记录的，核心问题就是需要判断一下版本链中的哪个版本是当前事务可见的，这是 ReadView 要解决的主要问题。</p>
+<p>这个 ReadView 中主要包含 4 个比较重要的内容，分别如下：</p>
+<p><code>creator_trx_id</code> ，创建这个 Read View 的事务 ID。</p>
+<p>说明：只有在对表中的记录做改动时（执行 INSERT、DELETE、UPDATE 这些语句时）才会为事务分配事务 id，否则在一个只读事务中的事务 id 值都默认为 0。</p>
+<p><code>trx_ids</code> ，表示在生成 ReadView 时当前系统中活跃的读写事务的事务 id 列表 。</p>
+<p><code>up_limit_id</code> ，活跃的事务中最小的事务 ID。</p>
+<p><code>low_limit_id</code> ，表示生成 ReadView 时系统中应该分配给下一个事务的 id 值。low_limit_id 是系统<strong>最大</strong>的事务 id 值，这里要注意是系统中的事务 id，需要区别于正在活跃的事务 ID。</p>
+<p><strong>注意 :low_limit_id 并不是 trx_ids 中的最大值，事务 id 是递增分配的。比如，现在有 id 为 1，2，3 这三个事务，之后 id 为 3 的事务提交了。那么一个新的读事务在生成 ReadView 时，trx_ids 就包括 1 和 2，up_limit_id 的值就是 1，low_limit_id 的值就是 4。</strong></p>
+<p><strong>举例:</strong></p>
+<p>trx_ids 为 trx2、trx3、trx5 和 trx8 的集合，系统的最大事务 ID (low_limit_id) 为 trx8+1 (如果之前没有其他的新增事务)，活跃的最小事务 ID (up_limit_id) 为 trx2。</p>
+<p><img src="https://cdn.poizon.com/ctoo/012010/WeChat6bc771b039ca78bc510a208c7c886f79.png"></p>
+<h4 id="ReadView-的规则"><a href="#ReadView-的规则" class="headerlink" title="ReadView 的规则"></a>ReadView 的规则</h4><p>有了这个 ReadView，这样在访问某条记录时，只需要按照下边的步骤判断记录的某个版本是否可见。</p>
+<p>如果被访问版本的 trx_id 属性值与 ReadView 中的 creator_trx_id 值相同，意味着当前事务在访问它自己修改过的记录，所以该版本可以被当前事务访问。20 可以访问自己</p>
+<p>如果被访问版本的 trx_id 属性值小于 ReadView 中的 up_limit_id 值，表明生成该版本的事务在当前事务生成 ReadView 前已经提交，所以该版本可以被当前事务访问。</p>
+<p>如果被访问版本的 trx_id 属性值大于或等于 ReadView 中的 low_limit_id 值，表明生成该版本的事务在当前事务生成 ReadView 后才开启，所以该版本不可以被当前事务访问。</p>
+<p>如果被访问版本的 trx_id 属性值在 ReadView 的 up_limit_id 和 low_limit_id 之间，那就需要判断一下 trx_id 属性值是不是在 trx_ids 列表中。</p>
+<p>如果在，说明创建 ReadView 时生成该版本的事务还是活跃的，该版本不可以被访问。</p>
+<p>如果不在，说明创建 ReadView 时生成该版本的事务已经被提交，该版本可以被访问。</p>
+<h3 id="MVCC-整体操作流程"><a href="#MVCC-整体操作流程" class="headerlink" title="MVCC 整体操作流程"></a>MVCC 整体操作流程</h3><p>了解了这些概念之后，来看下当查询一条记录的时候，系统如何通过 MVCC 找到它：</p>
+<p>首先获取事务自己的版本号，也就是事务 ID；</p>
+<p>获取 ReadView；</p>
+<p>查询得到的数据，然后与 ReadView 中的事务版本号进行比较；</p>
+<p>如果不符合 ReadView 规则，就需要从 Undo Log 中获取历史快照；</p>
+<p>最后返回符合规则的数据。</p>
+<p>如果某个版本的数据对当前事务不可见的话，那就顺着版本链找到下一个版本的数据，继续按照上边的步骤判断可见性，依此类推，直到版本链中的最后一个版本。如果最后一个版本也不可见的话，那么就意味着该条记录对该事务完全不可见，查询结果就不包含该记录。InnoDB 中，MVCC 是通过 Undo Log + Read View 进行数据读取，Undo Log 保存了历史快照，而 Read View 规则帮我们判断当前版本的数据是否可见。在隔离级别为读已提交（Read Committed）时，一个事务中的每一次 SELECT 查询都会重新获取一次 Read View。</p>
+<p>如表所示：</p>
+<p><img src="https://cdn.poizon.com/ctoo/012010/WeChatae018879c6e5f9af6aa79ab9ef5de736.png"></p>
+<p>注意，此时同样的查询语句都会重新获取一次 Read View，这时如果 Read View 不同，就<strong>可能产生不可重复读或者幻读的情况</strong>。</p>
+<p>当隔离级别为可重复读的时候，就避免了不可重复读，这是因为一个事务只在第一次 SELECT 的时候会获取一次 Read View，而后面所有的 SELECT 都会复用这个 Read View，如下表所示:</p>
+<p><img src="https://cdn.poizon.com/ctoo/012010/WeChataa7905e4c0f095e37fe53f462a1041a4.png"></p>
+<h2 id="MVCC-示例"><a href="#MVCC-示例" class="headerlink" title="MVCC 示例"></a>MVCC 示例</h2><p>假设现在 student 表中只有一条由事务 id 为 8 的事务插入的一条记录：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student ;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">+----+--------+--------+</span></span><br><span class="line"><span class="comment">| id | name   | class  |</span></span><br><span class="line"><span class="comment">+----+--------+--------+</span></span><br><span class="line"><span class="comment">|  1 | 张三   | 一班    |</span></span><br><span class="line"><span class="comment">+----+--------+--------+</span></span><br><span class="line"><span class="comment">1 row in set (0.07 sec)</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>MVCC 只能在 READ COMMITTED 和 REPEATABLE READ 两个隔离级别下工作。READ COMMITTED 和 REPEATABLE READ 生成 ReadView 的时机是不同的。</p>
+<h3 id="READ-COMMITTED-隔离级别"><a href="#READ-COMMITTED-隔离级别" class="headerlink" title="READ COMMITTED 隔离级别"></a>READ COMMITTED 隔离级别</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">READ COMMITTED ：每次读取数据前都生成一个ReadView</span><br><span class="line">现在有两个 事务id 分别为 <span class="number">10</span> 、 <span class="number">20</span> 的事务在执行</span><br><span class="line"># Transaction <span class="number">10</span></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;李四&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;王五&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"># Transaction <span class="number">20</span></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"># 更新了一些别的表的记录(为了分配事务id)</span><br></pre></td></tr></table></figure>
+
+<p>说明：事务执行过程中，只有在第一次真正修改记录时 (比如使用 INSERT、DELETE、UPDATE 语句)，才会被分配一个单独的事务 id，这个事务 id 是递增的。所以我们才在事务 20 中更新一些别的表的记录，目的是让它分配事务 id。</p>
+<p>此刻，表 student 中 id 为 1 的记录得到的版本链表如下所示:</p>
+<p><img src="https://cdn.poizon.com/ctoo/012010/WeChat58bcce7128597eab106be03489c328b2.png"></p>
+<p>假设现在有一个使用 READ COMMITTED 隔离级别的事务开始执行</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 使用READ COMMITTED隔离级别的事务</span><br><span class="line"></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"># SELECT1：Transaction <span class="number">10</span>、<span class="number">20</span>未提交</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>; # 得到的列name的值为<span class="string">&#x27;张三&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这个・SELECT1・的执行过程如下:</p>
+<p>步骤 1：在执行 SELECT 语句时<strong>会先生成一个 ReadView</strong> ，ReadView 的 trx_ids 列表的内容就是 [10，20],up_limit_id 为 10, low_limit_id 为 21, creator_trx_id 为 0。</p>
+<p>步骤 2：从版本链中挑选可见的记录，从图中看出，最新版本的列 name 的内容是’王五’，该版本的 trx_id 值为 10，在 trx_ids 列表内，所以不符合可见性要求，根据 roll_pointer 跳到下一个版本</p>
+<p>步骤 3：下一个版本的列 name 的内容是’李四’，该版本的 trx_id 值也为 10，也在 trx_ids 列表内，所以也不符合要求，继续跳到下一个版本</p>
+<p>步骤 4：下一个版本的列 name 的内容是’张三’，该版本的 trx_id 值为 8，小于 ReadView 中的 up_limit_id 值 10，所以这个版本是符合要求的，最后返回给用户的版本就是这条列 name 为‘张三’的记录</p>
+<p>之后，把 事务 id 为 10 的事务提交一下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># Transaction <span class="number">10</span></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;李四&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;王五&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br></pre></td></tr></table></figure>
+
+<p>然后再到 事务 id 为 20 的事务中更新一下表 student 中 id 为 1 的记录：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># Transaction <span class="number">20</span></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"># 更新了一些别的表的记录</span><br><span class="line">...</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;钱七&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;宋八&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>此刻，表 student 中 id 为 1 的记录的版本链就长这样：</p>
+<p><img src="https://cdn.poizon.com/ctoo/012810/WeChate8cacc5515fb9ab1353a6e136de69516.png"></p>
+<p>然后再到刚才使用 READ COMMITTED 隔离级别的事务中继续查找这个 id 为 1 的记录，如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 使用READ COMMITTED隔离级别的事务</span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"></span><br><span class="line"># SELECT1：Transaction <span class="number">10</span>、<span class="number">20</span>均未提交</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>; # 得到的列name的值为<span class="string">&#x27;张三&#x27;</span></span><br><span class="line"></span><br><span class="line"># SELECT2：Transaction <span class="number">10</span>提交，Transaction <span class="number">20</span>未提交</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>; # 得到的列name的值为<span class="string">&#x27;王五&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个 SELECT2 的执行过程如下:</p>
+<p>步骤 1∶在执行 SELECT 语句时会又会单独生成一个 ReadView，该 ReadView 的 trx_ids 列表的内容就是 [20]，up_limit_id 为 20，low_limit_id 为 21, creator_trx_id 为 0。</p>
+<p>步骤 2: 从版本链中挑选可见的记录，从图中看出，最新版本的列 name 的内容是’宋八’，该版本的 trx_id 值为 20，在 trx_ids 列表内，所以不符合可见性要求，根据 roll_pointer 跳到下一个版本。</p>
+<p>步骤 3∶下一个版本的列 name 的内容是‘钱七’，该版本的 trx_id 值为 20，也在 trx_ids 列表内，所以也不符合要求，继续跳到下一个版本</p>
+<p>步骤 4∶下一个版本的列 name 的内容是’王五’，该版本的 trx_id 值为 10，小于 ReadView 中的 up_limit_id 值 20，所以这个版本是符合要求的，最后返回给用户的版本就是这条列 name 为’王五’的记录。</p>
+<p>以此类推，如果之后事务 id 为 20 的记录也提交了，再次在使用 READ COMMITED 隔离级别的事务查询表 student 中 id 值为 1 的记录时，得到的结果就是’宋八’了，具体流程我们就不分析了。</p>
+<p>强调：使用 READ COMMITTED 隔离级别的事务在每次查询开始时都会生成一个独立的 ReadView</p>
+<h3 id="REPEATABLE-READ-隔离级别"><a href="#REPEATABLE-READ-隔离级别" class="headerlink" title="REPEATABLE READ 隔离级别"></a>REPEATABLE READ 隔离级别</h3><p>使用 REPEATABLE READ 隔离级别的事务来说，只会在第一次执行查询语句时生成一个 ReadView ，之后的查询就不会重复生成了。</p>
+<p>比如，系统里有两个 事务 id 分别为 10 、 20 的事务在执行：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"># Transaction <span class="number">10</span></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;李四&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;王五&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"># Transaction <span class="number">20</span></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"># 更新了一些别的表的记录</span><br><span class="line">...</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>此刻，表 student 中 id 为 1 的记录得到的版本链表如下所示：</p>
+<p><img src="https://cdn.poizon.com/ctoo/012810/WechatIMG2005.jpeg"></p>
+<p>假设现在有一个使用 REPEATABLE READ 隔离级别的事务开始执行：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 使用REPEATABLE READ隔离级别的事务</span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"></span><br><span class="line"># SELECT1：Transaction <span class="number">10</span>、<span class="number">20</span>未提交</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>; # 得到的列name的值为<span class="string">&#x27;张三&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这个 SELECT1 的执行过程如下:</p>
+<p>步骤 1: 在执行・SELECT・语句时会先生成一个 ReadView，ReadView 的 trx_ids 列表的内容就是 [10，20]，up_limit_id 为 10, low_limit_id 为 21, creator_trx_id 为 0。</p>
+<p>步骤 2: 然后从版本链中挑选可见的记录，从图中看出，最新版本的列 name 的内容是’王五’，该版本的 trx_id 值为 10，在 trx_ids 列表内，所以不符合可见性要求，根据 roll_pointer 跳到下一个版本。</p>
+<p>步骤 3: 下一个版本的列 name 的内容是’李四’，该版本的 trx_id 值也为 10，也在 trx_ids 列表内，所以也不符合要求，继续跳到下一个版本。</p>
+<p>步骤 4∶下一个版本的列 name 的内容是’张三’，该版本的 trx_id 值为 8，小于 ReadView 中的 up_limit_id 值 10，所以这个版本是符合要求的，最后返回给用户的版本就是这条列 name 为’张三’的记录</p>
+<p>之后，我们把事务 id 为 10 的事务提交一下，就像这样:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># Transaction <span class="number">10</span></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;李四&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;王五&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br></pre></td></tr></table></figure>
+
+<p>然后再到 事务 id 为 20 的事务中更新一下表 student 中 id 为 1 的记录：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"># Transaction <span class="number">20</span></span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"></span><br><span class="line"># 更新了一些别的表的记录</span><br><span class="line">...</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;钱七&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> student <span class="keyword">SET</span> name<span class="operator">=</span>&quot;宋八&quot; <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p>此刻，表 student 中 id 为 1 的记录的版本链长这样：</p>
+<p><img src="https://cdn.poizon.com/ctoo/012810/WechatIMG49.jpeg"></p>
+<p>然后再到刚才使用 REPEATABLE READ 隔离级别的事务中继续查找这个 id 为 1 的记录，如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 使用REPEATABLE READ隔离级别的事务</span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"></span><br><span class="line"># SELECT1：Transaction <span class="number">10</span>、<span class="number">20</span>均未提交</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>; # 得到的列name的值为<span class="string">&#x27;张三&#x27;</span></span><br><span class="line"></span><br><span class="line"># SELECT2：Transaction <span class="number">10</span>提交，Transaction <span class="number">20</span>未提交</span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> student <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>; # 得到的列name的值仍为<span class="string">&#x27;张三&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>SELECT2 的执行过程如下:</p>
+<p>步骤 1: 因为当前事务的隔离级别为 REPEATABLE READ，而之前在执行 SELECT1 时已经生成过 ReadView 了，所以此时直接复用之前的 ReadView，之前的 ReadView 的 trx_ids 列表的内容就是 [10，20]，up_limit_id 为 10，low_limit_id 为 21, creator_trx_id 为 0。</p>
+<p>步骤 2: 然后从版本链中挑选可见的记录，从图中可以看出，最新版本的列 name 的内容是’宋八’，该版本的 trx_id 值为 20，在 trx_ids 列表内，所以不符合可见性要求，根据 roll_pointer 跳到下一个版本</p>
+<p>步骤 3: 下一个版本的列 name 的内容是’钱七’，该版本的 trx_id 值为 20，也在 trx_ids 列表内，所以也不符合要求，继续跳到下一个版本</p>
+<p>步骤 4∶下一个版本的列 name 的内容是’王五’，该版本的 trx_id 值为 10，而 trx_ids 列表中是包含值为 10 的事务 id 的，所以该版本也不符合要求，同理下一个列 name 的内容是‘李四’的版本也不符合要求。继续跳到下一个版本</p>
+<p>步骤 5: 下一个版本的列 name 的内容是’张三’，该版本的 trx_id 值为 8，小于 ReadView 中的 up_limit_id 值 10，所以这个版本是符合要求的，最后返回给用户的版本就是这条列 c 为‘张三’的记录。</p>
+<p>两次 SELECT 查询得到的结果是重复的，记录的列 c 值都是‘张三’，这就是可重复读的含义。如果我们之后再把事务 id 为 20 的记录提交了，然后再到刚才使用 REPEATABLE READ 隔离级别的事务中继续查找这个 id 为 1 的记得到的结果还是‘张三’。</p>
+<h3 id="如何解决幻读"><a href="#如何解决幻读" class="headerlink" title="如何解决幻读"></a>如何解决幻读</h3><p>接下来说明 InnoDB 是如何解决幻读的。</p>
+<p>假设现在表 student 中只有一条数据，数据内容中，主键 id&#x3D;1，隐藏的 trx_id&#x3D;10，它的 undo log 如下图所示。</p>
+<p><img src="https://cdn.poizon.com/ctoo/012810/WechatIMG50.jpeg"></p>
+<p>假设现在有事务 A 和事务 B 并发执行， 事务 A 的事务 id 为 20 ， 事务 B 的事务 id 为 30 。</p>
+<p>步骤 1：事务 A 开始第一次查询数据，查询的 SQL 语句如下</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> student <span class="keyword">where</span> id <span class="operator">&gt;=</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p>在开始查询之前，MySQL 会为事务 A 产生一个 ReadView，此时 ReadView 的内容如下：trx_ids&#x3D;[20,30] up_limit_id&#x3D;20 ， low_limit_id&#x3D;31 ， creator_trx_id&#x3D;20 。</p>
+<p>由于此时表 student 中只有一条数据，且符合 where id&gt;&#x3D;1 条件，因此会查询出来。然后根据 ReadView 机制，发现该行数据的 trx_id&#x3D;10，小于事务 A 的 ReadView 里 up_limit_id，这表示这条数据是事务 A 开启之前，其他事务就已经提交了的数据，因此事务 A 可以读取到。</p>
+<p>结论：事务 A 的第一次查询，能读取到一条数据，id&#x3D;1。</p>
+<p>步骤 2：接着事务 B (trx_id&#x3D;30)，往表 student 中新插入两条数据，并提交事务</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> student(id,name) <span class="keyword">values</span>(<span class="number">2</span>,<span class="string">&#x27;李四&#x27;</span>);</span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> student(id,name) <span class="keyword">values</span>(<span class="number">3</span>,<span class="string">&#x27;王五&#x27;</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>此时表 student 中就有三条数据了，对应的 undo 如下图所示：</p>
+<p><img src="https://cdn.poizon.com/ctoo/012810/WechatIMG51.jpeg"></p>
+<p>步骤 3：接着事务 A 开启第二次查询，根据可重复读隔离级别的规则，此时事务 A 并不会再重新生成 ReadView。此时表 student 中的 3 条数据都满足 where id&gt;&#x3D;1 的条件，因此会先查出来。然后根据 ReadView 机制，判断每条数据是不是都可以被事务 A 看到。</p>
+<p>1）首先 id&#x3D;1 的这条数据，前面已经说过了，可以被事务 A 看到。</p>
+<p>2）然后是 id&#x3D;2 的数据，它的 trx_id&#x3D;30，此时事务 A 发现，这个值处于 up_limit_id 和 low_limit_id 之间，因此还需要再判断 30 是否处于 trx_ids 数组内。由于事务 A 的 trx_ids&#x3D;[20,30]，因此在数组内，这表示 id&#x3D;2 的这条数据是与事务 A 在同一时刻启动的其他事务提交的，所以这条数据不能让事务 A 看到</p>
+<p>3）同理，id&#x3D;3 的这条数据，trx_id 也为 30，因此也不能被事务 A 看见</p>
+<p><img src="https://cdn.poizon.com/ctoo/012810/WechatIMG52.jpeg"></p>
+<p>结论：最终事务 A 的第二次查询，只能查询出 id&#x3D;1 的这条数据。这和事务 A 的第一次查询的结果是一样的，因此没有出现幻读现象，所以说在 MySQL 的可重复读隔离级别下，不存在幻读问题。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这里介绍了 MVCC 在 READ COMMITTD 、 REPEATABLE READ 这两种隔离级别的事务在执行快照读操作时访问记录的版本链的过程。这样使不同事务的 读 - 写 、 写 - 读 操作并发执行，从而提升系统性能。</p>
+<p>核心点在于 ReadView 的原理， READ COMMITTD 、 REPEATABLE READ 这两个隔离级别的一个很大不同就是生成 ReadView 的时机不同：</p>
+<ul>
+<li>READ COMMITTD 在每一次进行普通 SELECT 操作前都会生成一个 ReadView</li>
+<li>REPEATABLE READ 只在第一次进行普通 SELECT 操作前生成一个 ReadView，之后的查询操作都重复使用这个 ReadView 就好了</li>
+</ul>
+<p>说明：之前说执行 DELETE 语句或者更新主键的 UPDATE 语句并不会立即把对应的记录完全从页面中删除，而是执行一个所谓的 delete mark 操作，相当于只是对记录打上了一个删除标志位，这主要就是为 MVCC 服务的。</p>
+<p>通过 MVCC 可以解决:</p>
+<ol>
+<li><p>读写之间阻塞的问题。通过 MVCC 可以让读写互相不阻塞，即读不阻塞写，写不阻塞读，这样就可以提升事务并发处理能力</p>
+</li>
+<li><p>降低了死锁的概率。这是因为 MVCC 采用了乐观锁的方式，读取数据时并不需要加锁，对于写操作，也只锁定必要的行</p>
+</li>
+<li><p>解决快照读的问题。当查询数据库在某个时间点的快照时，只能看到这个时间点之前事务提交更新的结果，而不能看到这个时间点之后事务提交的更新结果</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/database/" rel="tag"># database</a>
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/05/31/fun/20230531-update-azerothcore-mysql/" rel="prev" title="升级AzerothCore的MySQL版本">
+      <i class="fa fa-chevron-left"></i> 升级AzerothCore的MySQL版本
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/07/06/note/20230706-nginx-too-big-header/" rel="next" title="nginx 请求头过大问题">
+      nginx 请求头过大问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E7%85%A7%E8%AF%BB%E5%92%8C%E5%BD%93%E5%89%8D%E8%AF%BB"><span class="nav-number">2.</span> <span class="nav-text">快照读和当前读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BF%AB%E7%85%A7%E8%AF%BB"><span class="nav-number">2.1.</span> <span class="nav-text">快照读</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%93%E5%89%8D%E8%AF%BB"><span class="nav-number">2.2.</span> <span class="nav-text">当前读</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MVCC-%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">MVCC 实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E8%97%8F%E5%AD%97%E6%AE%B5"><span class="nav-number">3.1.</span> <span class="nav-text">隐藏字段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Undo-Log-%E7%89%88%E6%9C%AC%E9%93%BE"><span class="nav-number">3.2.</span> <span class="nav-text">Undo Log 版本链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReadView"><span class="nav-number">3.3.</span> <span class="nav-text">ReadView</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF"><span class="nav-number">3.3.1.</span> <span class="nav-text">设计思路</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ReadView-%E7%9A%84%E8%A7%84%E5%88%99"><span class="nav-number">3.3.2.</span> <span class="nav-text">ReadView 的规则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MVCC-%E6%95%B4%E4%BD%93%E6%93%8D%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">3.4.</span> <span class="nav-text">MVCC 整体操作流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MVCC-%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">MVCC 示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#READ-COMMITTED-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">4.1.</span> <span class="nav-text">READ COMMITTED 隔离级别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#REPEATABLE-READ-%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">4.2.</span> <span class="nav-text">REPEATABLE READ 隔离级别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E5%B9%BB%E8%AF%BB"><span class="nav-number">4.3.</span> <span class="nav-text">如何解决幻读</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

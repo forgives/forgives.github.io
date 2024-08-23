@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="MySQL中的索引就如同指向数据条目的指针一样，可以快速找到匹配查询条件的数据条目。所有的MySQL数据类型都支持索引。 虽然可以为表中的每个查询的字段增加索引，但是不必要的索引会消耗更多的存储空间，查询中MySQL决定使用何种索引也会增加查询耗时。索引还会增加插入、更新、删除数据的耗时，因为每个索引都需要更新。所以，哪些字段建立索引需要深思熟虑，来达到最佳的性能。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL索引详解">
+<meta property="og:url" content="https://forgives.github.io/2023/05/15/db/20230515-mysql-index/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="MySQL中的索引就如同指向数据条目的指针一样，可以快速找到匹配查询条件的数据条目。所有的MySQL数据类型都支持索引。 虽然可以为表中的每个查询的字段增加索引，但是不必要的索引会消耗更多的存储空间，查询中MySQL决定使用何种索引也会增加查询耗时。索引还会增加插入、更新、删除数据的耗时，因为每个索引都需要更新。所以，哪些字段建立索引需要深思熟虑，来达到最佳的性能。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://forgives.github.io/res/20230515111800.png">
+<meta property="og:image" content="https://forgives.github.io/res/20230516105523.png">
+<meta property="og:image" content="https://forgives.github.io/res/20230713152800.png">
+<meta property="article:published_time" content="2023-05-15T02:53:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.372Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="database">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://forgives.github.io/res/20230515111800.png">
+
+<link rel="canonical" href="https://forgives.github.io/2023/05/15/db/20230515-mysql-index/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MySQL索引详解 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/05/15/db/20230515-mysql-index/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL索引详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-05-15 10:53:00" itemprop="dateCreated datePublished" datetime="2023-05-15T10:53:00+08:00">2023-05-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DB/" itemprop="url" rel="index"><span itemprop="name">DB</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>MySQL中的索引就如同指向数据条目的指针一样，可以快速找到匹配查询条件的数据条目。所有的MySQL数据类型都支持索引。</p>
+<p>虽然可以为表中的每个查询的字段增加索引，但是不必要的索引会消耗更多的存储空间，查询中MySQL决定使用何种索引也会增加查询耗时。索引还会增加插入、更新、删除数据的耗时，因为每个索引都需要更新。<br>所以，哪些字段建立索引需要深思熟虑，来达到最佳的性能。</p>
+<span id="more"></span>
+
+<h2 id="索引的分类"><a href="#索引的分类" class="headerlink" title="索引的分类"></a>索引的分类</h2><ul>
+<li>按 「数据结构」 分类：B+tree索引、Hash索引、Full-text索引</li>
+<li>按 「物理存储」 分类：聚簇索引（主键索引）、二级索引（辅助索引）</li>
+<li>按 「字段特性」 分类：主键索引、唯一索引、普通索引、前缀索引</li>
+<li>按 「字段个数」 分类：单列索引、联合索引</li>
+</ul>
+<h2 id="按数据结构分类"><a href="#按数据结构分类" class="headerlink" title="按数据结构分类"></a>按数据结构分类</h2><p>存储引擎支持的索引类型如下图<br><img src="/res/20230515111800.png" alt="20230515111800.png"></p>
+<p>InnoDB 是在 MySQL 5.5 之后成为默认的 MySQL 存储引擎，<strong>B+Tree</strong> 索引类型也是 MySQL 存储引擎采用最多的索引类型。InnoDB 存储引擎会根据不同的场景选择不同的列作为索引：</p>
+<ul>
+<li>如果有主键，默认会使用<strong>主键作为聚簇索引</strong>的索引键（key）；</li>
+<li>如果没有主键，就选择第一个不包含 NULL 值的唯一列作为聚簇索引的索引键（key）；</li>
+<li>在上面两个都没有的情况下，InnoDB 将自动生成一个<strong>隐式自增 id 列作为聚簇索引</strong>的索引键（key）；</li>
+</ul>
+<p>其它索引都属于辅助索引（Secondary Index），也被称为二级索引或非聚簇索引。创建的主键索引和二级索引默认使用的是 B+Tree 索引。</p>
+<p>B+Tree 是一种多叉树，叶子节点才存放数据，非叶子节点只存放索引，而且每个节点里的数据是按<strong>主键顺序</strong>存放的。每一层父节点的索引值都会出现在下层子节点的索引值中，因此在叶子节点中，包括了所有的索引值信息，并且每一个叶子节点都有两个指针，分别指向下一个叶子节点和上一个叶子节点，形成一个双向链表。</p>
+<p>B+Tree 存储千万级的数据只需要 3-4 层高度就可以满足，这意味着从千万级的表查询目标数据最多需要 3-4 次磁盘 I&#x2F;O，所以B+Tree 相比于 B 树和二叉树来说，<strong>最大的优势在于查询速度快</strong>，因为即使在数据量很大的情况，查询一个数据的磁盘 I&#x2F;O 依然维持在 3-4次。</p>
+<p>主键索引的 B+Tree 和二级索引的 B+Tree 区别如下：</p>
+<ul>
+<li>主键索引的 B+Tree 的叶子节点存放的是<strong>实际数据</strong>，所有完整的用户记录都存放在主键索引的 B+Tree 的叶子节点里；</li>
+<li>二级索引的 B+Tree 的叶子节点存放的是<strong>主键值</strong>，而不是实际数据。</li>
+</ul>
+<p>所以根据二级索引的字段查询，会先在二级索引的 B+Tree 中找到主键值，然后在主键索引的 B+Tree 中找到查询的具体数据，再次查找主键索引的这个过程叫做<strong>回表</strong> 也就是说要查两个 B+Tree 才能查到数据。</p>
+<p>不过当查询的数据在二级索引中能够直接获取到的，就不需要在根据主键索引在继续查询了，比如直接查询 id ，就不需要在做一次回表操作了。这种在二级索引的 B+Tree 就能查询到结果的过程就叫作 <strong>「覆盖索引」</strong> ，也就是只需要查一个 B+Tree 就能找到数据。</p>
+<h3 id="索引覆盖与索引下推"><a href="#索引覆盖与索引下推" class="headerlink" title="索引覆盖与索引下推"></a>索引覆盖与索引下推</h3><blockquote>
+<p>如何识别是否索引覆盖？</p>
+</blockquote>
+<p>判断是否索引覆盖，可以查看执行计划中的 Extra 字段是否包含 <code>Using index</code> 。比如</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE user_test</span><br><span class="line">(</span><br><span class="line">    id   int(11)     NOT NULL AUTO_INCREMENT,</span><br><span class="line">    name varchar(50) NOT NULL,</span><br><span class="line">    age  int(11)     NOT NULL,</span><br><span class="line">    gender char(1),</span><br><span class="line">    email varchar(64),</span><br><span class="line">    phone varchar(64),</span><br><span class="line">    PRIMARY KEY (id),</span><br><span class="line">    KEY idx_age (age)</span><br><span class="line">) ENGINE = InnoDB;</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;Amy&#x27;, 22, &#x27;F&#x27;, &#x27;amy@example.com&#x27;, &#x27;12345678&#x27;);</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;Bob&#x27;, 35, &#x27;M&#x27;, &#x27;bob@example.com&#x27;, &#x27;23456789&#x27;);</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;Cathy&#x27;, 28, &#x27;F&#x27;, &#x27;cathy@example.com&#x27;, &#x27;34567890&#x27;);</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;David&#x27;, 44, &#x27;M&#x27;, &#x27;david@example.com&#x27;, &#x27;45678901&#x27;);</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;Eric&#x27;, 19, &#x27;M&#x27;, &#x27;eric@example.com&#x27;, &#x27;56789012&#x27;);</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;Fiona&#x27;, 29, &#x27;F&#x27;, &#x27;fiona@example.com&#x27;, &#x27;67890123&#x27;);</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;George&#x27;, 33, &#x27;M&#x27;, &#x27;george@example.com&#x27;, &#x27;78901234&#x27;);</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;Harry&#x27;, 27, &#x27;M&#x27;, &#x27;harry@example.com&#x27;, &#x27;89012345&#x27;);</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;Ivy&#x27;, 31, &#x27;F&#x27;, &#x27;ivy@example.com&#x27;, &#x27;90123456&#x27;);</span><br><span class="line">INSERT INTO user_test(name, age, gender, email, phone) VALUES (&#x27;Jack&#x27;, 38, &#x27;M&#x27;, &#x27;jack@example.com&#x27;, &#x27;01234567&#x27;);</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">explain SELECT  <span class="built_in">id</span>, age FROM user_test WHERE age = 22;</span></span><br><span class="line">+----+-------------+-----------+------------+------+---------------+---------+---------+-------+------+----------+-------------+</span><br><span class="line">| id | select_type | table     | partitions | type | possible_keys | key     | key_len | ref   | rows | filtered | Extra       |</span><br><span class="line">+----+-------------+-----------+------------+------+---------------+---------+---------+-------+------+----------+-------------+</span><br><span class="line">|  1 | SIMPLE      | user_test | NULL       | ref  | idx_age       | idx_age | 4       | const |    1 |   100.00 | Using index |</span><br><span class="line">+----+-------------+-----------+------------+------+---------------+---------+---------+-------+------+----------+-------------+</span><br><span class="line">1 row in set, 1 warning (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p>另外两种常见的 Extra 的值：</p>
+<ul>
+<li>Using where： 表示Server端使用了WHERE子句中的条件进行过滤。</li>
+<li>Using index condition： 表示使用了索引下推优化。</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/index-condition-pushdown-optimization.html">索引下推(Index Condition Pushdown &#x2F; ICP)</a> 简单的说就是把where条件中 二级索引能够判断的交由存储引擎来判断，而不是交给Server层做过滤。<br>ps.很多文章说索引下推只会出现在多字段的联合索引中，但是根据官方文档，并没有这个限制，且的确通过二级索引的范围查询是可以触发<code>Using index condition</code>的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">explain SELECT name FROM user_test WHERE age = 35;</span></span><br><span class="line">+----+-------------+-----------+------------+------+---------------+---------+---------+-------+------+----------+-------+</span><br><span class="line">| id | select_type | table     | partitions | type | possible_keys | key     | key_len | ref   | rows | filtered | Extra |</span><br><span class="line">+----+-------------+-----------+------------+------+---------------+---------+---------+-------+------+----------+-------+</span><br><span class="line">|  1 | SIMPLE      | user_test | NULL       | ref  | idx_age       | idx_age | 4       | const |    1 |   100.00 | NULL  |</span><br><span class="line">+----+-------------+-----------+------------+------+---------------+---------+---------+-------+------+----------+-------+</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">explain SELECT  name FROM user_test WHERE age &gt; 35;</span></span><br><span class="line">+----+-------------+-----------+------------+-------+---------------+---------+---------+------+------+----------+-----------------------+</span><br><span class="line">| id | select_type | table     | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra                 |</span><br><span class="line">+----+-------------+-----------+------------+-------+---------------+---------+---------+------+------+----------+-----------------------+</span><br><span class="line">|  1 | SIMPLE      | user_test | NULL       | range | idx_age       | idx_age | 4       | NULL |    2 |   100.00 | Using index condition |</span><br><span class="line">+----+-------------+-----------+------------+-------+---------------+---------+---------+------+------+----------+-----------------------+</span><br></pre></td></tr></table></figure>
+<p>但其实这种情况判断是否有ICP意义不大，应该本身就是对与二级索引的范围筛选，存储引擎层肯定是做了筛选的，所以通常情况我们还是讨论在联合索引下执行ICP。<br>在看下官网的的翻译来深入理解一下ICP：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">要理解 ICP 这种优化是如何工作的，首先考虑当没有使用ICP时索引扫描是如何进行的:</span><br><span class="line">    1.获取下一行，首先通过读取索引元组，然后使用索引元组定位和读取整个表行。 </span><br><span class="line">    2.检查WHERE条件中应用于此表的部分。根据检查结果接受或拒绝行。</span><br><span class="line">使用ICP,则会变成下面这样：</span><br><span class="line">    1.获取下一行的索引元组(但不是整个表行，还没有进行回表)。 </span><br><span class="line">    2.检查应用于此表的WHERE条件的部分，仅使用索引列即可进行检查。如果条件不满足，则进入下一行的索引元组。（因为索引条件下推到了存储引擎层）</span><br><span class="line">    3.如果条件满足，则使用index元组定位和读取整个表行。</span><br><span class="line">    4.测试应用于此表的WHERE条件的其余部分。根据测试结果接受或拒绝行</span><br></pre></td></tr></table></figure>
+<p>还有就是索引下推<strong>是Server层决定的</strong>（优化器、执行器都是在Server层），当Server层决定使用索引下推之后，会吧下推的条件带给存储引擎，存储引擎每读取一条数据后就会去判断记录是否匹配下推下来的where条件，不匹配就直接获取下一条记录了。</p>
+<p>另外需要额外说明的是对于InnoDB表，ICP仅用于二级索引。ICP的目标是减少全行读取的数量，从而减少I&#x2F;O操作。对于InnoDB聚集索引，完整的记录已经被读取到InnoDB缓冲区中。在这种情况下使用ICP并不会减少I&#x2F;O。</p>
+<h3 id="索引结构为什么是-B-tree"><a href="#索引结构为什么是-B-tree" class="headerlink" title="索引结构为什么是 B+tree"></a>索引结构为什么是 B+tree</h3><h4 id="B-Tree-vs-B-Tree"><a href="#B-Tree-vs-B-Tree" class="headerlink" title="B+Tree vs B Tree"></a>B+Tree vs B Tree</h4><p>B+Tree <strong>只在叶子节点存储数据</strong>，而 B 树 的<strong>非叶子节点也要存储数据</strong>，所以 B+Tree 的单个非叶子节点可以存储更多的索引值，在相同的磁盘 I&#x2F;O 次数下，就能查询更多的节点。<br>另外，B+Tree 叶子节点采用的是双链表连接，适合 MySQL 中常见的基于范围的顺序查找，而 B 树无法做到这一点。</p>
+<h4 id="B-Tree-vs-二叉树"><a href="#B-Tree-vs-二叉树" class="headerlink" title="B+Tree vs 二叉树"></a>B+Tree vs 二叉树</h4><p>对于有 N 个叶子节点的 B+Tree，其搜索复杂度为O(logdN)，其中 d 表示节点允许的最大子节点个数为 d 个。<br>在实际的应用当中， d 值是大于100的，这样就保证了，即使数据达到千万级别时，B+Tree 的高度依然维持在 3<del>4 层左右，也就是说一次数据查询操作只需要做 3</del>4 次的磁盘 I&#x2F;O 操作就能查询到目标数据。</p>
+<p>而二叉树的每个父节点的儿子节点个数只能是 2 个，意味着其搜索复杂度为 O(logN)，这已经比 B+Tree 高出不少，因此二叉树检索到目标数据所经历的磁盘 I&#x2F;O 次数要更多。</p>
+<h4 id="B-Tree-vs-Hash"><a href="#B-Tree-vs-Hash" class="headerlink" title="B+Tree vs Hash"></a>B+Tree vs Hash</h4><p>Hash 在做等值查询的时候效率贼快，搜索复杂度为 O(1)。<br>但是 Hash 表不适合做范围查询，它更适合做等值的查询，这也是 B+Tree 索引要比 Hash 表索引有着更广泛的适用场景的原因。</p>
+<h2 id="按物理存储分类"><a href="#按物理存储分类" class="headerlink" title="按物理存储分类"></a>按物理存储分类</h2><p>从物理存储的角度来看，索引分为聚簇索引（主键索引）、二级索引（辅助索引）。</p>
+<p>这两个区别在前面也提到了：</p>
+<ul>
+<li>主键索引的 B+Tree 的叶子节点存放的是实际数据，所有完整的用户记录都存放在主键索引的 B+Tree 的叶子节点里；</li>
+<li>二级索引的 B+Tree 的叶子节点存放的是主键值，而不是实际数据。</li>
+</ul>
+<p>所以，在查询时使用了二级索引，如果查询的数据能在二级索引里查询的到，那么就不需要回表，这个过程就是覆盖索引。如果查询的数据不在二级索引里，就会先检索二级索引，找到对应的叶子节点，获取到主键值后，然后再检索主键索引，就能查询到数据了，这个过程就是回表。</p>
+<h2 id="按字段特性分类"><a href="#按字段特性分类" class="headerlink" title="按字段特性分类"></a>按字段特性分类</h2><p>从字段特性的角度来看，索引分为<code>主键索引</code>、<code>唯一索引</code>、<code>普通索引</code>、<code>前缀索引</code>。</p>
+<h3 id="主键索引"><a href="#主键索引" class="headerlink" title="主键索引"></a>主键索引</h3><p>主键索引就是建立在主键字段上的索引，通常在创建表的时候一起创建，一张表最多只有一个主键索引，索引列的值不允许有空值。</p>
+<p>创建主键索引的方式如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE table_name  (</span><br><span class="line">....</span><br><span class="line">PRIMARY KEY (index_column)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="唯一索引"><a href="#唯一索引" class="headerlink" title="唯一索引"></a>唯一索引</h3><p>唯一索引建立在 <code>UNIQUE</code> 字段上的索引，<strong>一张表可以有多个唯一索引，索引列的值必须唯一，但是允许有空值</strong>。</p>
+<p>创建唯一索引的方式如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE table_name  (</span><br><span class="line">  ....</span><br><span class="line">  UNIQUE KEY(index_column_1,index_column_2,...) </span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>或者在建表之后创建唯一索引</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE UNIQUE INDEX index_name</span><br><span class="line">ON table_name(index_column_1,index_column_2,...); </span><br></pre></td></tr></table></figure>
+
+<h3 id="普通索引"><a href="#普通索引" class="headerlink" title="普通索引"></a>普通索引</h3><p>普通索引就是建立在普通字段上的索引，既不要求字段为主键，也不要求字段为 UNIQUE。</p>
+<p>创建普通索引的方式如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE table_name  (</span><br><span class="line">....</span><br><span class="line">INDEX(index_column_1,index_column_2,...)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>或</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE INDEX index_name</span><br><span class="line">ON table_name(index_column_1,index_column_2,...); </span><br></pre></td></tr></table></figure>
+
+<h3 id="前缀索引"><a href="#前缀索引" class="headerlink" title="前缀索引"></a>前缀索引</h3><p>前缀索引是指对<strong>字符类型字段</strong>的前几个字符建立的索引，而不是在整个字段上建立的索引，前缀索引可以建立在字段类型为 char、 varchar、binary、varbinary 的列上。</p>
+<p>使用前缀索引的目的是<strong>为了减少索引占用的存储空间，提升查询效率</strong>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE table_name(</span><br><span class="line">    column_list,</span><br><span class="line">    INDEX(column_name(length))</span><br><span class="line">); </span><br></pre></td></tr></table></figure>
+<p>或</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE INDEX index_name</span><br><span class="line">ON table_name(column_name(length)); </span><br></pre></td></tr></table></figure>
+
+<h2 id="按字段个数分类"><a href="#按字段个数分类" class="headerlink" title="按字段个数分类"></a>按字段个数分类</h2><p>从字段个数的角度来看，索引分为单列索引、联合索引（复合索引）。</p>
+<ul>
+<li>建立在单列上的索引称为单列索引，比如主键索引；</li>
+<li>建立在多列上的索引称为联合索引；</li>
+</ul>
+<h3 id="联合索引"><a href="#联合索引" class="headerlink" title="联合索引"></a>联合索引</h3><p>通过将多个字段组合成一个索引，该索引就被称为联合索引。<br>使用联合索引时，存在<strong>最左匹配原则</strong>，也就是按照最左优先的方式进行索引的匹配。在使用联合索引进行查询的时候，如果不遵循「最左匹配原则」，联合索引会失效，这样就无法利用到索引快速查询的特性了。</p>
+<p>比如，如果创建了一个 (a, b, c) 联合索引，如果查询条件是以下这几种，就可以匹配上联合索引：</p>
+<ul>
+<li>where a&#x3D;1；</li>
+<li>where a&#x3D;1 and b&#x3D;2 and c&#x3D;3；</li>
+<li>where a&#x3D;1 and b&#x3D;2；</li>
+</ul>
+<p>需要注意的是，因为有查询优化器，所以 a 字段在 where 子句的<strong>顺序并不重要</strong>。</p>
+<p>如果查询条件是以下这几种，因为不符合最左匹配原则，所以就无法匹配上联合索引，联合索引就会失效:</p>
+<ul>
+<li>where b&#x3D;2；</li>
+<li>where c&#x3D;3；</li>
+<li>where b&#x3D;2 and c&#x3D;3；</li>
+</ul>
+<p>上面这些查询条件之所以会失效，是因为(a, b, c) 联合索引，是先按 a 排序，在 a 相同的情况再按 b 排序，在 b 相同的情况再按 c 排序。所以，<strong>b 和 c 是全局无序，局部相对有序的</strong>，这样在没有遵循最左匹配原则的情况下，是无法利用到索引的。</p>
+<h3 id="联合索引范围查询"><a href="#联合索引范围查询" class="headerlink" title="联合索引范围查询"></a>联合索引范围查询</h3><p>联合索引有一些特殊情况，并不是查询过程使用了联合索引查询，就代表联合索引中的所有字段都用到了联合索引进行索引查询，也就是可能存在部分字段用到联合索引的 B+Tree，部分字段没有用到联合索引的 B+Tree 的情况。</p>
+<p>这种特殊情况就发生在范围查询。联合索引的最左匹配原则会一直向右匹配直到遇到「范围查询」就会停止匹配。也<strong>就是范围查询的字段可以用到联合索引，但是在范围查询字段的后面的字段无法用到联合索引</strong>。</p>
+<p>范围查询有很多种，具体哪些范围会导致联合索引的最左匹配原则会停止匹配呢？下面来几个例子：</p>
+<blockquote>
+<p>Q1: select * from t_table where a &gt; 1 and b &#x3D; 2，联合索引（a, b）哪一个字段用到了联合索引的 B+Tree？</p>
+</blockquote>
+<p>由于联合索引（二级索引）是先按照 a 字段的值排序的，所以符合 a &gt; 1 条件的二级索引记录肯定是相邻，于是在进行索引扫描的时候，可以定位到符合 a &gt; 1 条件的第一条记录，然后沿着记录所在的链表向后扫描，直到某条记录不符合 a &gt; 1 条件位置。所以 <strong>a 字段可以在联合索引的 B+Tree 中进行索引查询</strong>。</p>
+<p>但是在符合 a &gt; 1 条件的二级索引记录的范围里，b 字段的值是无序的,不能根据查询条件 b &#x3D; 2 来进一步减少需要扫描的记录数量，因此，Q1 这条查询语句只有 a 字段用到了联合索引进行索引查询，而 b 字段并没有使用到联合索引。</p>
+<p>我们也可以在执行计划中的<code>key_len</code>字段佐证：</p>
+<p>举例个例子 ，a 和 b 都是 int 类型<em>且不为 NULL 的字段</em>，那么 Q1 这条查询语句执行计划如下，可以看到 key_len 为 4 字节（int类型4字节，如果字段允许为 NULL，就在字段类型占用的字节数上加 1，也就是 5 字节），说明只有 a 字段用到了联合索引进行索引查询，而且可以看到，即使 b 字段没用到联合索引，key 为 idx_a_b，说明 Q1 查询语句使用了 idx_a_b 联合索引。</p>
+<p>ps. key_len的计算方式：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">varchar()：表字符集长度*列长度+2(变长)+1(nullable) 若是列被定义为&quot;not null&quot;,则不需要加1</span><br><span class="line">char()：表字符集长度*列长度+1(null)  若是列被定义为&quot;not null&quot;,则不需要加1</span><br><span class="line">常用的字符集：</span><br><span class="line">utf8mb4：4个字节</span><br><span class="line">utf8：3个字节</span><br><span class="line">gbk：2个字节</span><br><span class="line">latin：1个字节</span><br><span class="line"></span><br><span class="line">示例：</span><br><span class="line">表的字符集选用utf8mb4,计算</span><br><span class="line">varchar(10),not null  ---&gt;  key_len=4*10+2=42</span><br><span class="line">char(10),null         ---&gt;  key_len=4*10+1=41</span><br><span class="line">int not null          ---&gt;  key_len=4</span><br></pre></td></tr></table></figure>
+
+<p>通过 Q1 查询语句我们可以知道，a 字段使用了 &gt; 进行范围查询，联合索引的最左匹配原则在遇到 a 字段的范围查询（ &gt;）后就停止匹配了，因此 b 字段并没有使用到联合索引。</p>
+<blockquote>
+<p>Q2: select * from t_table where a &gt;&#x3D; 1 and b &#x3D; 2，联合索引（a, b）哪一个字段用到了联合索引的 B+Tree？</p>
+</blockquote>
+<p>Q2 和 Q1 的查询语句很像，唯一的区别就是 a 字段的查询条件「大于等于」。<br>由于联合索引（二级索引）是先按照 a 字段的值排序的，所以符合 &gt;&#x3D; 1 条件的二级索引记录肯定是相邻，于是在进行索引扫描的时候，可以定位到符合 &gt;&#x3D; 1 条件的第一条记录，然后沿着记录所在的链表向后扫描，直到某条记录不符合 a&gt;&#x3D; 1 条件位置。所以 a 字段可以在联合索引的 B+Tree 中进行索引查询。<br>虽然在符合 a&gt;&#x3D; 1 条件的二级索引记录的范围里，b 字段的值是<strong>「无序」</strong>的，但是对于符合 a &#x3D; 1 的二级索引记录的范围里，b 字段的值是<strong>「有序」</strong>的（_因为对于联合索引，是先按照 a 字段的值排序，然后在 a 字段的值相同的情况下，再按照 b 字段的值进行排序_）。<br>于是，在确定需要扫描的二级索引的范围时，当二级索引记录的 a 字段值为 1 时，_可以通过 b &#x3D; 2 条件减少需要扫描的二级索引记录范围_（b 字段可以利用联合索引进行索引查询的意思）。也就是说，从符合 a &#x3D; 1 and b &#x3D; 2 条件的第一条记录开始扫描，而不需要从第一个 a 字段值为 1 的记录开始扫描。<br>所以，Q2 这条查询语句 a 和 b 字段都用到了联合索引进行索引查询。</p>
+<p>通过 Q2 查询语句我们可以知道，虽然 a 字段使用了 &gt;&#x3D; 进行范围查询，但是联合索引的最左匹配原则并没有在遇到 a 字段的范围查询（ &gt;&#x3D;）后就停止匹配了，b 字段还是可以用到了联合索引的（虽然是部分数据，但还是用到了）。</p>
+<blockquote>
+<p>Q3: SELECT * FROM t_table WHERE a BETWEEN 2 AND 8 AND b &#x3D; 2，联合索引（a, b）哪一个字段用到了联合索引的 B+Tree？</p>
+</blockquote>
+<p>由于 MySQL 的 BETWEEN 包含 value1 和 value2 边界值，所以类似于 Q2 查询语句，因此 Q3 这条查询语句 a 和 b 字段都用到了联合索引进行索引查询。</p>
+<blockquote>
+<p>Q4: SELECT * FROM t_user WHERE name like ‘j%’ and age &#x3D; 22，联合索引（name, age）哪一个字段用到了联合索引的 B+Tree？</p>
+</blockquote>
+<p>由于联合索引（二级索引）是先按照 name 字段的值排序的，所以前缀为 ‘j’ 的 name 字段的二级索引记录都是相邻的， 于是在进行索引扫描的时候，可以定位到符合前缀为 ‘j’ 的 name 字段的第一条记录，然后沿着记录所在的链表向后扫描，直到某条记录的 name 前缀不为 ‘j’ 为止。</p>
+<p>虽然在符合前缀为 ‘j’ 的 name 字段的二级索引记录的范围里，age 字段的值是「无序」的，但是对于符合 name &#x3D; j 的二级索引记录的范围里，age字段的值是「有序」的（因为对于联合索引，是先按照 name 字段的值排序，然后在 name 字段的值相同的情况下，再按照 age 字段的值进行排序）</p>
+<p>所以，Q4 这条查询语句 a 和 b 字段都用到了联合索引进行索引查询。</p>
+<p>综上所示，<strong>联合索引的最左匹配原则，在遇到范围查询（如 &gt;、&lt;）的时候，就会停止匹配，也就是范围查询的字段可以用到联合索引，但是在范围查询字段的后面的字段无法用到联合索引。注意，对于 &gt;&#x3D;、&lt;&#x3D;、BETWEEN、like 前缀匹配的范围查询，并不会停止匹配</strong>，前面我也用了四个例子说明了。</p>
+<h3 id="索引下推"><a href="#索引下推" class="headerlink" title="索引下推"></a>索引下推</h3><p>上面也介绍过了，这里在用例子说明下：对于联合索引（a, b），在执行 select * from table where a &gt; 1 and b &#x3D; 2 语句的时候，只有 a 字段能用到索引，那在联合索引的 B+Tree 找到第一个满足条件的主键值（ID 为 2）后，还需要判断其他条件是否满足（看 b 是否等于 2），那是在联合索引里判断？还是回主键索引去判断呢？<br>在 MySQL 5.6 之前，只能从 ID2 （主键值）开始一个个回表，到「主键索引」上找出数据行，再对比 b 字段值。<br>而 MySQL 5.6 引入的索引下推优化（<code>index condition pushdown</code>)， 可以在联合索引遍历过程中，对联合索引中包含的字段先做判断，直接过滤掉不满足条件的记录，减少回表次数。</p>
+<p>当你的查询语句的执行计划里，出现了 Extra 为 <code>Using index condition</code>，那么说明使用了索引下推的优化。</p>
+<h3 id="索引区分度"><a href="#索引区分度" class="headerlink" title="索引区分度"></a>索引区分度</h3><p>建立联合索引时的字段顺序，对索引效率也有很大影响。越靠前的字段被用于索引过滤的概率越高，实际开发工作中建立联合索引时，要把区分度大的字段排在前面，这样区分度大的字段越有可能被更多的 SQL 使用到。</p>
+<p>区分度就是某个字段 column 不同值的个数「除以」表的总行数: <code>区分度 = distinct(column) / count(*)</code></p>
+<p>因为如果索引的区分度很小，假设字段的值分布均匀，那么无论搜索哪个值都可能得到一半的数据。在这些情况下，还不如不要索引，因为 MySQL 还有一个查询优化器，查询优化器发现某个值出现在表的数据行中的百分比（惯用的百分比界线是”<strong>&lt;30%</strong>“）很高的时候，它一般会忽略索引，进行全表扫描。</p>
+<h3 id="联合索引进行排序"><a href="#联合索引进行排序" class="headerlink" title="联合索引进行排序"></a>联合索引进行排序</h3><p>针对下面这条 SQL，你怎么通过索引来提高查询效率呢？</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> <span class="keyword">order</span> <span class="keyword">where</span> status <span class="operator">=</span> <span class="number">1</span> <span class="keyword">order</span> <span class="keyword">by</span> create_time <span class="keyword">asc</span></span><br></pre></td></tr></table></figure>
+
+<p>很多人人为单独给 <code>status</code> 建立一个索引就可以了。但是更好的方式给 <code>status</code> 和 <code>create_time</code> 列建立一个联合索引，因为这样可以避免 MySQL 数据库发生文件排序。</p>
+<p>因为在查询时，如果只用到 <code>status</code> 的索引，但是这条语句还要对 <code>create_time</code> 排序，这时就要用文件排序 <code>filesort</code>，也就是在 SQL 执行计划中，Extra 列会出现<code>Using filesort</code>。</p>
+<p>所以，要利用索引的有序性，在 <code>status</code> 和 <code>create_time</code> 列建立联合索引，这样根据 <code>status</code> 筛选后的数据就是按照 <code>create_time</code> 排好序的，避免在文件排序，提高了查询效率。</p>
+<h2 id="索引优化"><a href="#索引优化" class="headerlink" title="索引优化"></a>索引优化</h2><ul>
+<li>前缀索引优化；</li>
+<li>覆盖索引优化；</li>
+<li>主键索引最好是自增的；</li>
+<li>防止索引失效</li>
+</ul>
+<h3 id="前缀索引优化"><a href="#前缀索引优化" class="headerlink" title="前缀索引优化"></a>前缀索引优化</h3><p>前缀索引顾名思义就是使用某个字段中字符串的前几个字符建立索引，使用前缀索引是为了减小索引字段大小，可以增加一个索引页中存储的索引值，有效提高索引的查询速度。在一些大字符串的字段作为索引时，使用前缀索引可以帮助我们减小索引项的大小。</p>
+<p>不过，前缀索引有一定的局限性，例如：</p>
+<ul>
+<li>order by 就无法使用前缀索引；</li>
+<li>无法把前缀索引用作覆盖索引；</li>
+</ul>
+<h3 id="覆盖索引优化"><a href="#覆盖索引优化" class="headerlink" title="覆盖索引优化"></a>覆盖索引优化</h3><p>覆盖索引是指 SQL 中 query 的所有字段，在索引 B+Tree 的叶子节点上都能找得到的那些索引，从二级索引中查询得到记录，而不需要通过聚簇索引查询获得，可以避免回表的操作。</p>
+<p>假设我们只需要查询商品的名称、价格，有什么方式可以避免回表呢？我们可以建立一个联合索引，即「商品ID、名称、价格」作为一个联合索引。如果索引中存在这些数据，查询将不会再次检索主键索引，从而避免回表。</p>
+<p>所以，使用覆盖索引的好处就是，不需要查询出包含整行记录的所有信息，也就减少了大量的 I&#x2F;O 操作。</p>
+<h3 id="主键索引最好是自增的"><a href="#主键索引最好是自增的" class="headerlink" title="主键索引最好是自增的"></a>主键索引最好是自增的</h3><p>InnoDB 创建主键索引默认为<code>聚簇索引</code>，数据被存放在了 B+Tree 的叶子节点上。也就是说，同一个叶子节点内的各个数据是<strong>按主键顺序存放的</strong>，因此，每当有一条新的数据插入时，数据库会根据主键将其插入到对应的叶子节点中。</p>
+<p><strong>如果我们使用自增主键，那么每次插入的新数据就会按顺序添加到当前索引节点的位置，不需要移动已有的数据</strong>，当页面写满，就会自动开辟一个新页面。因为每次插入一条新记录，都是追加操作，不需要重新移动数据，因此这种<strong>插入数据的效率非常高</strong>。<br>如果我们使用非自增主键，由于每次插入主键的索引值都是随机的，因此每次插入新的数据时，就可能会插入到现有数据页中间的某个位置，这将不得不移动其它数据来满足新数据的插入，甚至需要从一个页面复制数据到另外一个页面，我们通常将这种情况称为<strong>页分裂</strong>。<strong>页分裂还有可能会造成大量的内存碎片，导致索引结构不紧凑，从而影响查询效率</strong>。</p>
+<h3 id="索引最好设置为-NOT-NULL"><a href="#索引最好设置为-NOT-NULL" class="headerlink" title="索引最好设置为 NOT NULL"></a>索引最好设置为 NOT NULL</h3><p>为了更好的利用索引，索引列要设置为 <code>NOT NULL</code> 约束。有两个原因：</p>
+<p>第一原因：索引列存在 NULL 就会导致优化器在做索引选择的时候更加复杂，更加难以优化，因为可为 NULL 的列会使索引、索引统计和值比较都更复杂，比如进行索引统计时，count 会省略值为NULL 的行。</p>
+<p>第二个原因：NULL 值是一个没意义的值，但是它会占用物理空间，所以会带来的存储空间的问题，因为 InnoDB 存储记录的时候，如果表中存在允许为 NULL 的字段，那么行格式 (<code>opens new window</code>)中至少会用 <strong>1</strong> 字节空间存储 NULL 值列表，如下图的紫色部分：</p>
+<p><img src="/res/20230516105523.png" alt="20230516105523.png"></p>
+<h3 id="防止索引失效"><a href="#防止索引失效" class="headerlink" title="防止索引失效"></a>防止索引失效</h3><p>引发索引失效的情况：</p>
+<ul>
+<li>使用左或者左右模糊匹配的时候，也就是 like %xx 或者 like %xx%这两种方式都会造成索引失效；</li>
+<li>在查询条件中对索引列做了计算、函数、类型转换操作，这些情况下都会造成索引失效；</li>
+<li>联合索引要能正确使用需要遵循最左匹配原则，也就是按照最左优先的方式进行索引的匹配，否则就会导致索引失效。</li>
+<li>在 WHERE 子句中，如果在 OR 前的条件列是索引列，而在 OR 后的条件列不是索引列，那么索引会失效。</li>
+</ul>
+<p>可以使用执行计划来判断是否索引失效，执行计划中判断依据</p>
+<ul>
+<li>possible_keys 字段表示可能用到的索引；</li>
+<li>key 字段表示实际用的索引，如果这一项为 NULL，说明没有使用索引；</li>
+<li>key_len 表示索引的长度；</li>
+<li>rows 表示扫描的数据行数。</li>
+<li>type 表示数据扫描类型，我们需要重点看这个。</li>
+</ul>
+<p><code>type</code> 字段就是描述了找到所需数据时使用的扫描方式，常见扫描类型的执行效率从低到高的顺序为：</p>
+<ol>
+<li>All（全表扫描）；</li>
+<li>index（全索引扫描）；</li>
+<li>range（索引范围扫描）；</li>
+<li>ref（非唯一索引扫描）；</li>
+<li>eq_ref（唯一索引扫描）；</li>
+<li>const（结果只有一条的主键或唯一索引扫描）。</li>
+</ol>
+<p>在这些类型中，<code>all</code> 是最坏的情况，因为采用了<strong>全表扫描</strong>。<code>index</code> 和 <code>all</code> 差不多，只不过 <code>index</code> 对索引表进行全扫描，这样做的好处是不再需要对数据进行排序，但是开销依然很大。所以，要尽量避免全表扫描和全索引扫描。</p>
+<p><code>range</code> 表示采用了索引范围扫描，一般在 where 子句中使用 &lt; 、&gt;、in、between 等关键词，只检索给定范围的行，属于范围查找。从这一级别开始，索引的作用会越来越明显，因此我们需要尽量让 SQL 查询可以使用到 <code>range</code> 这一级别及以上的 <code>type</code> 访问方式。</p>
+<p><code>ref</code> 类型表示采用了<strong>非唯一索引</strong>，或者是<strong>唯一索引的非唯一性前缀</strong>，返回数据返回可能是多条。因为虽然使用了索引，但该索引列的值并不唯一，有重复。这样即使使用索引快速查找到了第一条数据，仍然不能停止，要进行目标值附近的小范围扫描。但它的好处是它并不需要扫全表，因为<strong>索引是有序的，即便有重复值，也是在一个非常小的范围内扫描</strong>。</p>
+<p><code>eq_ref</code> 类型是使用主键或唯一索引时产生的访问方式，通常使用在<strong>多表联查中</strong>。比如，对两张表进行联查，关联条件是两张表的 user_id 相等，且 user_id 是唯一索引，那么使用 EXPLAIN 进行执行计划查看的时候，type 就会显示 <code>eq_ref</code>。</p>
+<p><code>const</code> 类型表示使用了主键或者唯一索引与常量值进行比较。</p>
+<p>需要说明的是 <code>const</code> 类型和 <code>eq_ref</code> 都使用了主键或唯一索引，不过这两个类型有所区别，const 是与常量进行比较，查询效率会更快，而 eq_ref 通常用于多表联查中。</p>
+<p>除了 <code>type</code> 字段， <code>extra</code>字段也需要关注，常用的几种类型： </p>
+<p><code>Using filesort</code> ：当查询语句中包含 <code>group by</code> 操作，而且无法利用索引完成排序操作的时候， 这时不得不选择相应的排序算法进行，甚至可能会通过文件排序，效率是很低的，所以要避免这种问题的出现。</p>
+<p><code>Using temporary</code>：使了用临时表保存中间结果，MySQL 在对查询结果排序时使用临时表，常见于排序 <code>order by</code> 和分组查询 <code>group by</code>。效率低，要避免这种问题的出现。</p>
+<p><code>Using index</code>：所需数据只需在索引即可全部获得，不须要再到表中取数据，也就是使用了覆盖索引，避免了回表操作，效率不错。</p>
+<h3 id="强制使用索引"><a href="#强制使用索引" class="headerlink" title="强制使用索引"></a>强制使用索引</h3><p>如果 索引的基数 <code>Cardinality</code> 计算的不准确（因为是用抽样的页去粗略计算基数的），可能会导致走错索引。<br>可以强制使用索引 (<code>force index</code>) , 也可以重新统计索引信息 <code>analyze table</code> 。</p>
+<p>使用 show index form table_name  查看索引的基数<br><img src="/res/20230713152800.png" alt="20230713152800.png"></p>
+<p>强制使用索引 <code>select * from table force index (index_name) where condition</code></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show index from inventory ;</span><br><span class="line">+-----------+------------+----------------------+--------------+--------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+</span><br><span class="line">| Table     | Non_unique | Key_name             | Seq_in_index | Column_name  | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment | Index_comment | Visible | Expression |</span><br><span class="line">+-----------+------------+----------------------+--------------+--------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+</span><br><span class="line">| inventory |          0 | PRIMARY              |            1 | inventory_id | A         |        4581 |     NULL |   NULL |      | BTREE      |         |               | YES     | NULL       |</span><br><span class="line">| inventory |          1 | idx_fk_film_id       |            1 | film_id      | A         |         958 |     NULL |   NULL |      | BTREE      |         |               | YES     | NULL       |</span><br><span class="line">| inventory |          1 | idx_store_id_film_id |            1 | store_id     | A         |           2 |     NULL |   NULL |      | BTREE      |         |               | YES     | NULL       |</span><br><span class="line">| inventory |          1 | idx_store_id_film_id |            2 | film_id      | A         |        1521 |     NULL |   NULL |      | BTREE      |         |               | YES     | NULL       |</span><br><span class="line">+-----------+------------+----------------------+--------------+--------------+-----------+-------------+----------+--------+------+------------+---------+---------------+---------+------------+</span><br><span class="line">4 rows in set (0.01 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; explain select film_id,store_id from sakila.`inventory`  where film_id = 22 ;</span><br><span class="line">+----+-------------+-----------+------------+------+-------------------------------------+----------------+---------+-------+------+----------+-------+</span><br><span class="line">| id | select_type | table     | partitions | type | possible_keys                       | key            | key_len | ref   | rows | filtered | Extra |</span><br><span class="line">+----+-------------+-----------+------------+------+-------------------------------------+----------------+---------+-------+------+----------+-------+</span><br><span class="line">|  1 | SIMPLE      | inventory | NULL       | ref  | idx_fk_film_id,idx_store_id_film_id | idx_fk_film_id | 2       | const |    7 |   100.00 | NULL  |</span><br><span class="line">+----+-------------+-----------+------------+------+-------------------------------------+----------------+---------+-------+------+----------+-------+</span><br><span class="line">1 row in set, 1 warning (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; explain select film_id,store_id from sakila.`inventory` force index (`idx_store_id_film_id`) where film_id = 22 ;</span><br><span class="line">+----+-------------+-----------+------------+-------+----------------------+----------------------+---------+------+------+----------+----------------------------------------+</span><br><span class="line">| id | select_type | table     | partitions | type  | possible_keys        | key                  | key_len | ref  | rows | filtered | Extra                                  |</span><br><span class="line">+----+-------------+-----------+------------+-------+----------------------+----------------------+---------+------+------+----------+----------------------------------------+</span><br><span class="line">|  1 | SIMPLE      | inventory | NULL       | range | idx_store_id_film_id | idx_store_id_film_id | 3       | NULL |   28 |   100.00 | Using where; Using index for skip scan |</span><br><span class="line">+----+-------------+-----------+------------+-------+----------------------+----------------------+---------+------+------+----------+----------------------------------------+</span><br><span class="line">1 row in set, 1 warning (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p><code>analyze table table_name </code>分析并更新表的统计信息</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; analyze table inventory;</span><br><span class="line">+------------------+---------+----------+----------+</span><br><span class="line">| Table            | Op      | Msg_type | Msg_text |</span><br><span class="line">+------------------+---------+----------+----------+</span><br><span class="line">| sakila.inventory | analyze | status   | OK       |</span><br><span class="line">+------------------+---------+----------+----------+</span><br><span class="line">1 row in set (0.03 sec)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>注意<code>analyze table</code> 命令会对表进行锁定，因此在执行该命令时需要谨慎，避免对正在运行的业务产生影响。<br>同时，MySQL 也会定期自动进行统计信息的更新，因此在大多数情况下并不需要手动执行 <code>ANALYZE TABLE</code> 命令。<br>如果表中的数据发生了较大的变化，例如删除了大量的记录，建议手动执行 <code>ANALYZE TABLE</code> 命令来更新统计信息，以便 MySQL 能够快速地优化查询计划。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://xiaolincoding.com/mysql/index/index_interview.html">索引常见面试题</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/database/" rel="tag"># database</a>
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/05/08/db/20230508-how-mysql-execute/" rel="prev" title="一条SQL是如何在mysql执行的">
+      <i class="fa fa-chevron-left"></i> 一条SQL是如何在mysql执行的
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/05/25/java/travel-multi-level-tree/" rel="next" title="遍历多层级的树">
+      遍历多层级的树 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">1.</span> <span class="nav-text">索引的分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%89%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%88%86%E7%B1%BB"><span class="nav-number">2.</span> <span class="nav-text">按数据结构分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E8%A6%86%E7%9B%96%E4%B8%8E%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8"><span class="nav-number">2.1.</span> <span class="nav-text">索引覆盖与索引下推</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF-B-tree"><span class="nav-number">2.2.</span> <span class="nav-text">索引结构为什么是 B+tree</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#B-Tree-vs-B-Tree"><span class="nav-number">2.2.1.</span> <span class="nav-text">B+Tree vs B Tree</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-Tree-vs-%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="nav-number">2.2.2.</span> <span class="nav-text">B+Tree vs 二叉树</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-Tree-vs-Hash"><span class="nav-number">2.2.3.</span> <span class="nav-text">B+Tree vs Hash</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%89%E7%89%A9%E7%90%86%E5%AD%98%E5%82%A8%E5%88%86%E7%B1%BB"><span class="nav-number">3.</span> <span class="nav-text">按物理存储分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%89%E5%AD%97%E6%AE%B5%E7%89%B9%E6%80%A7%E5%88%86%E7%B1%BB"><span class="nav-number">4.</span> <span class="nav-text">按字段特性分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%94%AE%E7%B4%A2%E5%BC%95"><span class="nav-number">4.1.</span> <span class="nav-text">主键索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%94%AF%E4%B8%80%E7%B4%A2%E5%BC%95"><span class="nav-number">4.2.</span> <span class="nav-text">唯一索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E7%B4%A2%E5%BC%95"><span class="nav-number">4.3.</span> <span class="nav-text">普通索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%BC%80%E7%B4%A2%E5%BC%95"><span class="nav-number">4.4.</span> <span class="nav-text">前缀索引</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%89%E5%AD%97%E6%AE%B5%E4%B8%AA%E6%95%B0%E5%88%86%E7%B1%BB"><span class="nav-number">5.</span> <span class="nav-text">按字段个数分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%94%E5%90%88%E7%B4%A2%E5%BC%95"><span class="nav-number">5.1.</span> <span class="nav-text">联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%94%E5%90%88%E7%B4%A2%E5%BC%95%E8%8C%83%E5%9B%B4%E6%9F%A5%E8%AF%A2"><span class="nav-number">5.2.</span> <span class="nav-text">联合索引范围查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8"><span class="nav-number">5.3.</span> <span class="nav-text">索引下推</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E5%8C%BA%E5%88%86%E5%BA%A6"><span class="nav-number">5.4.</span> <span class="nav-text">索引区分度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%94%E5%90%88%E7%B4%A2%E5%BC%95%E8%BF%9B%E8%A1%8C%E6%8E%92%E5%BA%8F"><span class="nav-number">5.5.</span> <span class="nav-text">联合索引进行排序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96"><span class="nav-number">6.</span> <span class="nav-text">索引优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%BC%80%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96"><span class="nav-number">6.1.</span> <span class="nav-text">前缀索引优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96"><span class="nav-number">6.2.</span> <span class="nav-text">覆盖索引优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%94%AE%E7%B4%A2%E5%BC%95%E6%9C%80%E5%A5%BD%E6%98%AF%E8%87%AA%E5%A2%9E%E7%9A%84"><span class="nav-number">6.3.</span> <span class="nav-text">主键索引最好是自增的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E6%9C%80%E5%A5%BD%E8%AE%BE%E7%BD%AE%E4%B8%BA-NOT-NULL"><span class="nav-number">6.4.</span> <span class="nav-text">索引最好设置为 NOT NULL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%98%B2%E6%AD%A2%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88"><span class="nav-number">6.5.</span> <span class="nav-text">防止索引失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%BA%E5%88%B6%E4%BD%BF%E7%94%A8%E7%B4%A2%E5%BC%95"><span class="nav-number">6.6.</span> <span class="nav-text">强制使用索引</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

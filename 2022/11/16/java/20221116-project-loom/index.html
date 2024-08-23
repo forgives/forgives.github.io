@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="From Understanding Java’s Project Loom You can use this guide to understand what Java’s Project loom is all about and how its virtual threads (also called ‘fibers’) work under the hood.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Understanding Java’s Project Loom">
+<meta property="og:url" content="https://forgives.github.io/2022/11/16/java/20221116-project-loom/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="From Understanding Java’s Project Loom You can use this guide to understand what Java’s Project loom is all about and how its virtual threads (also called ‘fibers’) work under the hood.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-16T07:20:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.377Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="java19">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/11/16/java/20221116-project-loom/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Understanding Java’s Project Loom | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/11/16/java/20221116-project-loom/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Understanding Java’s Project Loom
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-16 15:20:00" itemprop="dateCreated datePublished" datetime="2022-11-16T15:20:00+08:00">2022-11-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>From <a target="_blank" rel="noopener" href="https://www.marcobehler.com/guides/java-project-loom">Understanding Java’s Project Loom</a></p>
+<p>You can use this guide to understand what Java’s Project loom is all about and how its virtual threads (also called ‘fibers’) work under the hood.</p>
+<span id="more"></span>
+
+<h2 id="Project-Loom’s-Virtual-Threads"><a href="#Project-Loom’s-Virtual-Threads" class="headerlink" title="Project Loom’s Virtual Threads"></a>Project Loom’s Virtual Threads</h2><p>Trying to get up to speed with <a target="_blank" rel="noopener" href="https://jdk.java.net/19">Java 19</a>’s <a target="_blank" rel="noopener" href="http://cr.openjdk.java.net/~rpressler/loom/Loom-Proposal.html">Project Loom</a>, I watched <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=EVZnk1ZyYeQ">Nicolai Parlog’s talk</a> and read <a target="_blank" rel="noopener" href="https://developer.okta.com/blog/2022/08/26/state-of-java-project-loom">several</a> <a target="_blank" rel="noopener" href="https://medium.com/javarevisited/how-i-spun-up-5-million-virtual-threads-without-stalling-the-jvm-1188d806e6bd">blog</a> posts.</p>
+<p>All of them showed, how <code>virtual threads</code> (or <code>fibers</code>) can essentially scale to hundred-thousands or millions, whereas good, old, OS-backed Java threads only could scale to a couple of thousand (TBD: check OS-thread hypothesis in real-world scenarios).</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> (<span class="type">var</span> <span class="variable">executor</span> <span class="operator">=</span> Executors.newVirtualThreadPerTaskExecutor()) &#123;</span><br><span class="line">    IntStream.range(<span class="number">0</span>, <span class="number">100_000</span>).forEach(i -&gt; executor.submit(() -&gt; &#123;  <span class="comment">// (1)</span></span><br><span class="line">        Thread.sleep(Duration.ofSeconds(<span class="number">1</span>));</span><br><span class="line">        System.out.println(i);</span><br><span class="line">        <span class="keyword">return</span> i;</span><br><span class="line">    &#125;));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>The example the blog posts used, letting 100.000 virtual threads sleep.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// what&#x27;s the difference?</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++) &#123;</span><br><span class="line">    <span class="comment">// good, old Java Threads</span></span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">Thread</span>( getURL(<span class="string">&quot;https://www.marcobehler.com&quot;</span>))</span><br><span class="line">        .start();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++) &#123;</span><br><span class="line">    <span class="comment">// Java 19 virtual threads to the rescue?</span></span><br><span class="line">    Thread.startVirtualThread(() -&gt; getURL(<span class="string">&quot;https://www.marcobehler.com&quot;</span>))</span><br><span class="line">        .start();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>Let’s find out.</p>
+<h2 id="Why-are-some-Java-calls-blocking"><a href="#Why-are-some-Java-calls-blocking" class="headerlink" title="Why are some Java calls blocking?"></a>Why are some Java calls blocking?</h2><p>Here is the code from our <code>getURL</code> method above, which opens a URL and returns its contents as a String.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> String <span class="title function_">getURL</span><span class="params">(String url)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">InputStream</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(url).openStream()) &#123;</span><br><span class="line">        <span class="type">byte</span>[] bytes = in.readAllBytes(); <span class="comment">// ALERT, ALERT!</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">String</span>(bytes);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>When you open up the JavaDoc of <code>inputStream.readAllBytes()</code> (or are lucky enough to remember your Java 101 class), it gets hammered into you that the call is blocking, i.e. won’t return until all the bytes are read - your current thread is blocked until then.</p>
+<p>How come, I can now supposedly execute this call a million times in parallel, when running inside virtual threads, but not when running inside normal threads?<br>(为什么我可以用虚拟线程并行的执行这个调用一百万次，但是用正常的线程却不可以？)<br>Parts of the puzzle - topics you never knew you wanted to know more about after CS 101: Sockets &amp; Syscalls.</p>
+<h2 id="Sockets"><a href="#Sockets" class="headerlink" title="Sockets"></a>Sockets</h2><p>When you want to make an HTTP call or rather send any sort of data to another server, you (or rather the library maintainer in a layer far, far away) will open up a Socket. And accessing sockets, by default, is blocking.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pseudo-code</span></span><br><span class="line"><span class="type">Socket</span> <span class="variable">s</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Socket</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// blocking call, until data is available</span></span><br><span class="line">s.read();</span><br></pre></td></tr></table></figure>
+<p>However, operating systems also allow you to put sockets into <code>non-blocking</code> mode, which return immediately when there is no data availabel. And then it’s your responsibility to check back again later, to find out if there is any new data to be read.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pseudo-code</span></span><br><span class="line"><span class="type">Socket</span> <span class="variable">s</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Socket</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// pseudo code, consult a random Java NIO tutorial</span></span><br><span class="line">s.setBlockingFalse(<span class="literal">true</span>);   </span><br><span class="line"></span><br><span class="line"><span class="comment">// yay, this call will return immediately, even if there is no data</span></span><br><span class="line">s.read();</span><br></pre></td></tr></table></figure>
+<h2 id="Syscalls"><a href="#Syscalls" class="headerlink" title="Syscalls"></a>Syscalls</h2><p>When executing the <code>getURL()</code> call above, Java doesn’t do the network call (open up a socket, read from it, etc) itself - it asks the underlying operating system to do the call. And here’s the trick: Whenever you are using good-old Java threads, the JVM will use a blocking system call (TBD: show OS call stack.).</p>
+<p>When run inside a virtual thread, however, the JVM will use a different system call to do the network request, which is non-blocking (e.g. use <a target="_blank" rel="noopener" href="https://man7.org/linux/man-pages/man7/epoll.7.html">epoll</a> on Unix-based systems.), without you, as Java programmer, having to write non-blocking code yourself, e.g. some clunky Java NIO code.</p>
+<p>To cut a long story short (and ignoring a whole lot of details), <strong>the real difference between our getURL calls inside good, old threads, and virtual threads is, that one call opens up a million blocking sockets, whereas the other call opens up a million non-blocking sockets</strong>.</p>
+<p>Now, if you tried out this (non-sensical) example in the real world⟨™), you’d find that depending on your operating system, and if you are sending or receiving data, you’d run into operating system <a target="_blank" rel="noopener" href="https://serverfault.com/questions/533611/how-do-high-traffic-sites-service-more-than-65535-tcp-connections">socket limits</a> - a reminder that using virtual threads is not an automagically scaling solution without you needing to know what you are doing (isn’t that always true? :) )</p>
+<h2 id="Filesystem-calls"><a href="#Filesystem-calls" class="headerlink" title="Filesystem calls"></a>Filesystem calls</h2><p>While we are at it. How would virtual threads behave when working with files?</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Let&#x27;s read in a million files in parallel!</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++) &#123;</span><br><span class="line">    <span class="comment">// Java 19 virtual threads to the rescue?</span></span><br><span class="line">    Thread.startVirtualThread(() -&gt; readFile(someFile))</span><br><span class="line">                                        .start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>With sockets it was easy, because you could just set them to <code>non-blocking</code>. But with file access, there is no async IO (well, except for <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Io_uring">io_uring</a> in new kernels).</p>
+<p>To cut a long story short, your file access call inside the virtual thread, will actually be delegated to a (…​.drum roll…​.) good-old operating system thread, to give you the illusion of non-blocking file access.</p>
+<h2 id="How-do-virtual-threads-work"><a href="#How-do-virtual-threads-work" class="headerlink" title="How do virtual threads work?"></a>How do virtual threads work?</h2><p>Even though good,old Java threads and virtual threads share the name… <code>Threads</code>, the comparisons&#x2F;online discussions feel a bit apple-to-oranges (风马牛不相及) to me.</p>
+<p>It helped me think of virtual threads as tasks, that will eventually run on a real thread⟨™) (called carrier thread) AND that need the underlying native calls to do the heavy non-blocking lifting.</p>
+<p>In the case of IO-work (REST calls, database calls, queue, stream calls etc.) this will absolutely yield benefits, and at the same time illustrates why they won’t help at all with CPU-intensive work (or make matters worse). So, don’t get your hopes high, thinking about mining Bitcoins in hundred-thousand virtual threads.</p>
+<h2 id="Hype-Promises"><a href="#Hype-Promises" class="headerlink" title="Hype &amp; Promises"></a>Hype &amp; Promises</h2><p>Almost every blog post on the first page of Google surrounding JDK 19 copied the following text, describing virtual threads, verbatim.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">A preview of virtual threads, which are lightweight threads that dramatically</span><br><span class="line">reduce the effort of writing, maintaining, and observing high-throughput,</span><br><span class="line">concurrent applications. Goals include enabling server applications written</span><br><span class="line">in the simple thread-per-request style to scale with near-optimal</span><br><span class="line">hardware utilization (...) enable troubleshooting, debugging, and</span><br><span class="line">profiling of virtual threads with existing JDK tools.</span><br></pre></td></tr></table></figure>
+
+<p>While I do think virtual threads are a great feature, I also feel paragraphs like the above will lead to a fair amount of scale hype-train’ism. Web servers like Jetty have long been using NIO connectors, where you have just a few threads able to keep open <a target="_blank" rel="noopener" href="https://stackoverflow.com/a/25195392">hundreds of thousand or even a million connections</a>.</p>
+<p>The problem with real applications is them doing silly things, like calling databases, working with the file system, executing REST calls or talking to some sort of queue&#x2F;stream.</p>
+<p>And yes, it’s this type of I&#x2F;O work where Project Loom will potentially shine. Loom gives you, the programmer or maybe even more “just” the (HTTP&#x2F;database&#x2F;queue) library &amp; framework maintainers, the benefit of essentially non-blocking code, without having to resort back to the somewhat unintuitive async programming model (think of <a target="_blank" rel="noopener" href="https://github.com/ReactiveX/RxJava">RxJava</a> &#x2F; <a target="_blank" rel="noopener" href="https://projectreactor.io/">Project Reactor</a> ) and all the consequences that entails (troubleshooting, debugging etc).</p>
+<p>However, forget about automagically scaling up to a million of private threads in real-life scenarios without knowing what you are doing. There is no free lunch.</p>
+<h2 id="What-about-the-Thread-sleep-example"><a href="#What-about-the-Thread-sleep-example" class="headerlink" title="What about the Thread.sleep example?"></a>What about the Thread.sleep example?</h2><p>We started this article with making threads sleep. So, how does that work?</p>
+<p>When calling <code>Thread.sleep()</code> on a good, old Java, OS-backed thread, you will in turn, generate a native call that makes the thread sleepey-sleep for a given amount of time. Which is <del>a non-sensical scenario anyway</del> quite costly for 100_000 threads.</p>
+<p>In case of <code>VirtualThread.sleep()</code>, you will mark the virtual thread as sleeping and create a scheduled task on a good, old Java (OS-thread-based) ScheduledThreadPoolExecutor. That task will unpark &#x2F; resume your virtual thread after the given [sleep-time]. Exercise for you: apples-to-oranges, again?</p>
+<h2 id="ps"><a href="#ps" class="headerlink" title="ps"></a>ps</h2><p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/67579790">如何看待Project Loom?</a></p>
+<p><a target="_blank" rel="noopener" href="http://cr.openjdk.java.net/~rpressler/loom/Loom-Proposal.html">Loom-Proposal</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=lIq-x_iI-kc">Project Loom: Helping Write Concurrent Applications on the Java Platform by Ron Pressler</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java19/" rel="tag"># java19</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/15/java/20221115-java-completablefuture/" rel="prev" title="Java CompletableFuture Tutorial with Examples">
+      <i class="fa fa-chevron-left"></i> Java CompletableFuture Tutorial with Examples
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/19/fun/20221119-install-azerothcore-mod/" rel="next" title="AzerothCore 安装Mod">
+      AzerothCore 安装Mod <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Project-Loom%E2%80%99s-Virtual-Threads"><span class="nav-number">1.</span> <span class="nav-text">Project Loom’s Virtual Threads</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Why-are-some-Java-calls-blocking"><span class="nav-number">2.</span> <span class="nav-text">Why are some Java calls blocking?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sockets"><span class="nav-number">3.</span> <span class="nav-text">Sockets</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Syscalls"><span class="nav-number">4.</span> <span class="nav-text">Syscalls</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Filesystem-calls"><span class="nav-number">5.</span> <span class="nav-text">Filesystem calls</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#How-do-virtual-threads-work"><span class="nav-number">6.</span> <span class="nav-text">How do virtual threads work?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hype-Promises"><span class="nav-number">7.</span> <span class="nav-text">Hype &amp; Promises</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#What-about-the-Thread-sleep-example"><span class="nav-number">8.</span> <span class="nav-text">What about the Thread.sleep example?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ps"><span class="nav-number">9.</span> <span class="nav-text">ps</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

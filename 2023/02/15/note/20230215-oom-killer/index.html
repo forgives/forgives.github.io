@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="有时候我们会发现系统中某个进程会突然挂掉，通过查看系统日志发现是由于 OOM机制 导致进程被杀掉。 今天我们就来介绍一下什么是 OOM机制 以及怎么防止进程因为 OOM机制 而被杀掉。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux Out Of Memory 机制">
+<meta property="og:url" content="https://forgives.github.io/2023/02/15/note/20230215-oom-killer/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="有时候我们会发现系统中某个进程会突然挂掉，通过查看系统日志发现是由于 OOM机制 导致进程被杀掉。 今天我们就来介绍一下什么是 OOM机制 以及怎么防止进程因为 OOM机制 而被杀掉。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i4/O1CN01RGPUMu1bevUY8vmmB_!!6000000003491-0-tps-1080-497.jpg">
+<meta property="article:published_time" content="2023-02-15T07:51:17.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.387Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="oom">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/imgextra/i4/O1CN01RGPUMu1bevUY8vmmB_!!6000000003491-0-tps-1080-497.jpg">
+
+<link rel="canonical" href="https://forgives.github.io/2023/02/15/note/20230215-oom-killer/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux Out Of Memory 机制 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/02/15/note/20230215-oom-killer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux Out Of Memory 机制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-02-15 15:51:17" itemprop="dateCreated datePublished" datetime="2023-02-15T15:51:17+08:00">2023-02-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>有时候我们会发现系统中某个进程会突然挂掉，通过查看系统日志发现是由于 OOM机制 导致进程被杀掉。</p>
+<p>今天我们就来介绍一下什么是 OOM机制 以及怎么防止进程因为 OOM机制 而被杀掉。</p>
+<span id="more"></span>
+
+<h2 id="什么是OOM机制"><a href="#什么是OOM机制" class="headerlink" title="什么是OOM机制"></a>什么是OOM机制</h2><p>OOM 是 <code>Out Of Memory</code> 的缩写，中文意思是内存不足。而 OOM机制 是指当系统内存不足时，系统触发的应急机制。</p>
+<p>当 Linux 内核发现系统中的物理内存不足时，首先会对系统中的可回收内存进行回收，能够被回收的内存有如下：</p>
+<ul>
+<li>读写文件时的页缓存。</li>
+<li>为了性能而延迟释放的空闲 slab 内存页。</li>
+</ul>
+<p>当系统内存不足时，内核会优先释放这些内存页。因为使用这些内存页只是为了提升系统的性能，释放这些内存页也不会影响系统的正常运行。</p>
+<p>如果释放上述的内存后，还不能解决内存不足的情况，那么内核会如何处理呢？答案就是：触发 OOM killer 杀掉系统中占用内存最大的进程。如下图所示：</p>
+<p><img src="https://img.alicdn.com/imgextra/i4/O1CN01RGPUMu1bevUY8vmmB_!!6000000003491-0-tps-1080-497.jpg"></p>
+<p>可以看出，OOM killer 是防止系统崩溃的最后一个手段，不到迫不得已的情况是不会触发的。</p>
+<h2 id="OOM-killer-实现"><a href="#OOM-killer-实现" class="headerlink" title="OOM killer 实现"></a>OOM killer 实现</h2><p>接下来，我们分析一下内核是如何实现 OOM killer 的。</p>
+<p>由于在 Linux 系统中，进程申请的都是虚拟内存地址。所以当程序调用 <code>malloc()</code> 申请内存时，如果虚拟内存空间足够的话，是不会触发 OOM 机制的。</p>
+<p>当进程访问虚拟内存地址时，如果此虚拟内存地址还没有映射到物理内存地址的话，那么将会触发 <strong>缺页异常</strong>。</p>
+<p>在缺页异常处理例程中，将会申请新的物理内存页，并且将进程的虚拟内存地址映射到刚申请的物理内存。</p>
+<p>如果在申请物理内存时，系统中的物理内存不足，那么内核将会回收一些能够被回收的文件页缓存。如果回收完后，物理内存还是不足的话，那么将会触发 <code>swapping机制</code>（如果开启了的话）。</p>
+<p><code>swapping机制</code> 会将某些进程不常用的内存页写入到交换区（硬盘分区或文件）中，然后释放掉这些内存页，从而达到缓解内存不足的情况。</p>
+<p>如果通过上面的手段还不能解决内存不足的情况，那么内核将会调用 <code>pagefault_out_of_memory()</code> 函数来杀掉系统中占用物理内存最多的进程。</p>
+<p>我们来看看 <code>pagefault_out_of_memory()</code> 函数的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">pagefault_out_of_memory</span><span class="params">(<span class="keyword">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line">out_of_memory(NULL, <span class="number">0</span>, <span class="number">0</span>, NULL, <span class="literal">false</span>);</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出，<code>pagefault_out_of_memory()</code> 函数最终会调用 <code>out_of_memory()</code> 来杀死系统中占用内存最多的进程。</p>
+<p>我们继续来看看 <code>out_of_memory()</code> 函数的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">out_of_memory</span><span class="params">(struct zonelist *zonelist, gfp_t gfp_mask, <span class="type">int</span> order,</span></span><br><span class="line"><span class="params">nodemask_t *nodemask, bool force_kill)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 1. 从系统中选择一个最坏(占用内存最多)的进程</span></span><br><span class="line">    p = select_bad_process(&amp;points, totalpages, mpol_mask, force_kill);</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 如果找到最坏的进程，那么调用 oom_kill_process 函数杀掉进程</span></span><br><span class="line">    <span class="keyword">if</span> (p != (<span class="keyword">void</span> *)-1UL) &#123;</span><br><span class="line">        oom_kill_process(p, gfp_mask, order, points, totalpages, NULL,</span><br><span class="line">                         nodemask, <span class="string">&quot;Out of memory&quot;</span>);</span><br><span class="line">        killed = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>out_of_memory()</code> 函数的逻辑比较简单，主要完成两个事情：</p>
+<p>调用 <code>select_bad_process()</code> 函数从系统中选择一个最坏（占用物理内存最多）的进程。</p>
+<p>如果找到最坏的进程，那么调用 <code>oom_kill_process()</code> 函数将此进程杀掉。</p>
+<p>从上面的分析可知，找到最坏的进程是 OOM killer 最为重要的事情。</p>
+<p>那么我们来看看 <code>select_bad_process()</code> 函数是怎样选择最坏的进程的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">struct</span> task_struct *</span><br><span class="line"><span class="title function_">select_bad_process</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> *ppoints, <span class="type">unsigned</span> <span class="type">long</span> totalpages,</span></span><br><span class="line"><span class="params"><span class="type">const</span> <span class="type">nodemask_t</span> *nodemask, <span class="type">bool</span> force_kill)</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> *<span class="title">g</span>, *<span class="title">p</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> *<span class="title">chosen</span> =</span> <span class="literal">NULL</span>;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> chosen_points = <span class="number">0</span>;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1. 遍历系统中所有的进程和线程</span></span><br><span class="line">    for_each_process_thread(g, p) &#123;</span><br><span class="line">        <span class="type">unsigned</span> <span class="type">int</span> points;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 计算进程最坏分数值, 选择分数最大的进程作为杀掉的目标进程</span></span><br><span class="line">        points = oom_badness(p, <span class="literal">NULL</span>, nodemask, totalpages);</span><br><span class="line">        <span class="keyword">if</span> (!points || points &lt; chosen_points)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        ...</span><br><span class="line">        chosen = p;</span><br><span class="line">        chosen_points = points;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> chosen;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>select_bad_process()</code> 函数的主要工作如下：</p>
+<ol>
+<li>遍历系统中所有的进程和线程，并且调用 oom_badness() 函数计算进程的最坏分数值。</li>
+<li>选择最坏分数值最大的进程作为被杀掉的目标进程。</li>
+</ol>
+<p>所以，计算进程的最坏分数值就是 OOM killer 的核心工作。我们接着来看看 oom_badness() 函数是怎么计算进程的最坏分数值的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">long</span></span><br><span class="line"><span class="title function_">oom_badness</span><span class="params">(<span class="keyword">struct</span> task_struct *p, <span class="keyword">struct</span> mem_cgroup *memcg,</span></span><br><span class="line"><span class="params"><span class="type">const</span> <span class="type">nodemask_t</span> *nodemask, <span class="type">unsigned</span> <span class="type">long</span> totalpages)</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="type">long</span> points;</span><br><span class="line"><span class="type">long</span> adj;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1. 如果进程不能被杀掉（init进程和内核进程是不能被杀的）</span></span><br><span class="line">    <span class="keyword">if</span> (oom_unkillable_task(p, memcg, nodemask))</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 我们可以通过 /proc/&#123;pid&#125;/oom_score_adj 文件来设置进程的被杀建议值，</span></span><br><span class="line">    <span class="comment">//    这个值越小，进程被杀的机会越低。如果设置为 -1000 时，进程将被禁止杀掉。</span></span><br><span class="line">    adj = (<span class="type">long</span>)p-&gt;signal-&gt;oom_score_adj;</span><br><span class="line">    <span class="keyword">if</span> (adj == OOM_SCORE_ADJ_MIN) &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 统计进程使用的物理内存数</span></span><br><span class="line">    points = get_mm_rss(p-&gt;mm)</span><br><span class="line">                + atomic_long_read(&amp;p-&gt;mm-&gt;nr_ptes)</span><br><span class="line">                + get_mm_counter(p-&gt;mm, MM_SWAPENTS);</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4. 加上进程被杀建议值，得出最终的分数值</span></span><br><span class="line">    adj *= totalpages / <span class="number">1000</span>;</span><br><span class="line">    points += adj;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> points &gt; <span class="number">0</span> ? points : <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>oom_badness()</code> 函数主要按照以下步骤来计算进程的最坏分数值：</p>
+<ol>
+<li>如果进程不能被杀掉（init进程和内核进程是不能被杀的），那么返回分数值为 0。</li>
+<li>可以通过 &#x2F;proc&#x2F;{pid}&#x2F;oom_score_adj 文件来设置进程的 OOM 建议值（取值范围为 -1000 ~ 1000）。建议值越小，进程被杀的机会越低。如果将其设置为 -1000 时，进程将被禁止杀掉。</li>
+<li>统计进程使用的物理内存数，包括实际使用的物理内存、页表占用的物理内存和 swap 机制占用的物理内存。</li>
+<li>最后加上进程的 OOM 建议值，得出最终的分数值。</li>
+</ol>
+<p>通过 <code>oom_badness()</code> 函数计算出进程的最坏分数值后，系统就能从中选择一个分数值最大的进程杀死，从而解决内存不足的情况。</p>
+<h2 id="禁止进程被-OOM-杀掉"><a href="#禁止进程被-OOM-杀掉" class="headerlink" title="禁止进程被 OOM 杀掉"></a>禁止进程被 OOM 杀掉</h2><p>有时候，我们不希望某些进程被 OOM killer 杀掉。例如 MySQL 进程如果被 OOM killer 杀掉的话，那么可能导致数据丢失的情况。</p>
+<p>那么如何防止进程被 OOM killer 杀掉呢？从上面的分析可知，在内核计算进程最坏分数值时，会加上进程的 <code>oom_score_adj</code>（OOM建议值）值。如果将此值设置为 <code>-1000</code> 时，那么系统将会禁止 OOM killer 杀死此进程。<br>（ps. 也可以在 <code>/proc/&lt;pid&gt;/oom_adj</code> 中设置 -17 （ <em>范围是 -17-15</em> ）来禁止 OOM killer 杀死此进程 ）</p>
+<p>例如使用如下命令，将会禁止杀死 PID 为 2000 的进程：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">echo</span> -1000 &gt; /proc/2000/oom_score_adj</span></span><br></pre></td></tr></table></figure>
+
+<p>这样，我们就能防止一些重要的进程被 OOM killer 杀死。</p>
+<p>转自： </p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzAxNDI5NzEzNg==&mid=2651173026&idx=1&sn=25e930008afc512d4565df2d0217ff4f">https://mp.weixin.qq.com/s?__biz=MzAxNDI5NzEzNg==&amp;mid=2651173026&amp;idx=1&amp;sn=25e930008afc512d4565df2d0217ff4f</a></p>
+<h2 id="OOM问题排查"><a href="#OOM问题排查" class="headerlink" title="OOM问题排查"></a>OOM问题排查</h2><p>当出现OOM之后进程被杀突然消失，如何排查确认是因为OOM引起的呢？</p>
+<p>有两个方法可以确认：</p>
+<ol>
+<li>查看<code>/var/log/messages</code>日志</li>
+</ol>
+<p>关键词 <code>oom-killer</code> &#x2F; <code>Out of memory</code> &#x2F; <code>Kill process</code></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Sep 28 23:50:01 VM-0-9-centos kernel: node invoked oom-killer: gfp_mask=0x201da, order=0, oom_score_adj=0</span><br><span class="line">Sep 28 23:50:01 VM-0-9-centos kernel: node cpuset=/ mems_allowed=0</span><br><span class="line">...</span><br><span class="line">Sep 28 14:50:01 VM-0-9-centos kernel: Out of memory: Kill process 5430 (java) score 800 or sacrifice child</span><br><span class="line">Sep 28 14:50:01 VM-0-9-centos kernel: Killed process 5430 (java) total-vm:124654756kB, anon-rss:2428635kB, file-rss:0kB</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><code>dmesg</code>查看服务器信息</li>
+</ol>
+<p>关键词 <code>out of memory</code> &#x2F; <code>Kill process</code> &#x2F; <code>oom</code></p>
+<p><code>dmesg | grep -E &#39;out of memory|Kill process|oom&#39;</code></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[1471454.635492] Out of memory: Kill process 17907 (procon) score 143 or sacrifice child</span><br><span class="line">[1471454.636345] Killed process 17907 (procon) total-vm:5617060kB, anon-rss:4848752kB, file-rss:0kB</span><br></pre></td></tr></table></figure>
+<p>使时间可读 <code>dmesg -T</code>  </p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Wed May 15 14:03:08 2019] Out of memory: Kill process 83446 (machine) score 250 or sacrifice child</span><br><span class="line">[Wed May 15 14:03:08 2019] Killed process 83446 (machine) total-vm:1920560kB, anon-rss:1177488kB, file-rss:1600kB</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+              <a href="/tags/oom/" rel="tag"># oom</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/14/java/20230214-all-about-java-util-date/" rel="prev" title="关于 java.util.Date">
+      <i class="fa fa-chevron-left"></i> 关于 java.util.Date
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/21/java/20230221-springboot-mybatis-plus/" rel="next" title="SpringBoot 接入Mybatis-Plus">
+      SpringBoot 接入Mybatis-Plus <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFOOM%E6%9C%BA%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">什么是OOM机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OOM-killer-%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">OOM killer 实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A6%81%E6%AD%A2%E8%BF%9B%E7%A8%8B%E8%A2%AB-OOM-%E6%9D%80%E6%8E%89"><span class="nav-number">3.</span> <span class="nav-text">禁止进程被 OOM 杀掉</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OOM%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5"><span class="nav-number">4.</span> <span class="nav-text">OOM问题排查</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

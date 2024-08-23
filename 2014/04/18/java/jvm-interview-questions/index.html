@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="2014JVM面试题及其答案">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2014JVM面试题及其答案">
+<meta property="og:url" content="https://forgives.github.io/2014/04/18/java/jvm-interview-questions/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="2014JVM面试题及其答案">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1RrCta_tYBeNjy1XdXXXXyVXa-920-274.png">
+<meta property="article:published_time" content="2014-04-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.384Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="面试">
+<meta property="article:tag" content="jvm">
+<meta property="article:tag" content="内存管理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/tfs/TB1RrCta_tYBeNjy1XdXXXXyVXa-920-274.png">
+
+<link rel="canonical" href="https://forgives.github.io/2014/04/18/java/jvm-interview-questions/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>2014JVM面试题及其答案 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2014/04/18/java/jvm-interview-questions/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          2014JVM面试题及其答案
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2014-04-18 00:00:00" itemprop="dateCreated datePublished" datetime="2014-04-18T00:00:00+08:00">2014-04-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>2014JVM面试题及其答案</p>
+<!-- more -->
+
+<h2 id="JVM内存模型？"><a href="#JVM内存模型？" class="headerlink" title="JVM内存模型？"></a>JVM内存模型？</h2><p>JVM内存区域可以被分为 堆、虚拟机栈、本地方法栈、方法区、程序计数器</p>
+<h2 id="写一段代码实现堆溢出？栈溢出？常量池溢出？方法区溢出？"><a href="#写一段代码实现堆溢出？栈溢出？常量池溢出？方法区溢出？" class="headerlink" title="写一段代码实现堆溢出？栈溢出？常量池溢出？方法区溢出？"></a>写一段代码实现堆溢出？栈溢出？常量池溢出？方法区溢出？</h2><p>堆溢出：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;OOheap&gt; l = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;OOheap&gt;();</span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    l.add(<span class="keyword">new</span> <span class="title class_">OOheap</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>栈溢出</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * VM Args : -Xss100k</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OverStack</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">leakStack</span><span class="params">()</span> &#123;</span><br><span class="line">		leakStack();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">		<span class="type">OverStack</span> <span class="variable">o</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">OverStack</span>();</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			o.leakStack();</span><br><span class="line">		&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>常量池</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * VM Args: -XX:PremSize=100k -XX:MaxPremSize=100k</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OverPremGen</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">		<span class="type">List</span> <span class="variable">l</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>();</span><br><span class="line">		<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">			</span><br><span class="line">			l.add(String.valueOf(i++).intern());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>方法区</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> net.sf.cglib.proxy.Enhancer;  </span><br><span class="line"><span class="keyword">import</span> net.sf.cglib.proxy.MethodInterceptor;  </span><br><span class="line"><span class="keyword">import</span> net.sf.cglib.proxy.MethodProxy;  </span><br><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment"> * VM args -XX:PermSize=10M -XX:MaxPermSize=10M </span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> */</span>  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JavaMethodAreaOOM</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;  </span><br><span class="line">            <span class="type">Enhancer</span> <span class="variable">enhancer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Enhancer</span>();  </span><br><span class="line">            enhancer.setSuperclass(OOM.class);  </span><br><span class="line">            enhancer.setUseCache(<span class="literal">false</span>);  </span><br><span class="line">            enhancer.setCallback(<span class="keyword">new</span> <span class="title class_">MethodInterceptor</span>() &#123;  </span><br><span class="line">  </span><br><span class="line">                <span class="meta">@Override</span>  </span><br><span class="line">                <span class="keyword">public</span> Object <span class="title function_">intercept</span><span class="params">(Object obj, Method arg1, Object[] args, MethodProxy proxy)</span> <span class="keyword">throws</span> Throwable &#123;  </span><br><span class="line">                    <span class="keyword">return</span> proxy.invokeSuper(obj, args);  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;);  </span><br><span class="line">            <span class="type">OOM</span> <span class="variable">oom</span> <span class="operator">=</span> (OOM) enhancer.create();  </span><br><span class="line">            oom.sayHello(<span class="string">&quot;xxx&quot;</span>);  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">OOM</span> &#123;  </span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">sayHello</span><span class="params">(String str)</span> &#123;  </span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;HI &quot;</span> + str;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br></pre></td></tr></table></figure>
+
+<h2 id="类的生命周期？"><a href="#类的生命周期？" class="headerlink" title="类的生命周期？"></a>类的生命周期？</h2><ol>
+<li>加载：查找并加载类的二进制数据 </li>
+<li>连接<ul>
+<li>验证：确保被加载的类的正确性 </li>
+<li>准备：为类的静态变量分配内存，并将其初始化为默认值 </li>
+<li>解析：把类中的符号引用转换为直接引用</li>
+</ul>
+</li>
+<li>初始化：为类的静态变量赋予正确的初始值 </li>
+<li>使用</li>
+<li>卸载</li>
+</ol>
+<p><img src="https://img.alicdn.com/tfs/TB1RrCta_tYBeNjy1XdXXXXyVXa-920-274.png" alt="类的生命周期"></p>
+<h2 id="哪四种情况会触发类的初始化（也就是主动引用）？"><a href="#哪四种情况会触发类的初始化（也就是主动引用）？" class="headerlink" title="哪四种情况会触发类的初始化（也就是主动引用）？"></a>哪四种情况会触发类的初始化（也就是主动引用）？</h2><ol>
+<li>遇到new、getstatic、putstatic、invokestatic这4条字节码指令时，如果类没有进行过初始化，则需要先触发其初始化。<ul>
+<li>new 一个类的时候会发生初始化</li>
+<li>调用类中的静态成员，除了final字段，看下面这个例子，final被调用但是没有初始化类</li>
+<li>调用某个类中的静态方法，那个类一定先被初始化了</li>
+</ul>
+</li>
+<li>使用java.lang.reflect包的方法对类进行反射调用的时候，如果类没有进行过初始化，则需要先触发其初始化。(如<code>Class.forName(&quot;my.xyz.Test&quot;)</code>)</li>
+<li>当初始化一个类的时候，如果发现其父类还没进行过初始化，则需要先触发其父类的初始化。</li>
+<li>当虚拟机启动时，用户需要指定一个要执行的主类，虚拟机会先初始化这个主类。</li>
+</ol>
+<h2 id="被动引用会触发初始化吗？请举例"><a href="#被动引用会触发初始化吗？请举例" class="headerlink" title="被动引用会触发初始化吗？请举例"></a>被动引用会触发初始化吗？请举例</h2><ol>
+<li><p>通过子类引用父类的静态字段，不会导致子类初始化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> test.class_life_cycle.initialize;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dfather</span>&#123;  </span><br><span class="line">    <span class="keyword">static</span> <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">1</span>;  </span><br><span class="line">    <span class="keyword">static</span>&#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;Initialize class Dfather&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dson</span> <span class="keyword">extends</span> <span class="title class_">Dfather</span>&#123;  </span><br><span class="line">    <span class="keyword">static</span>&#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;Initialize class Dson&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test4</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> Dson.count;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+</li>
+<li><p>通过数组定义类引用类，不会触发此类的初始化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> test.class_life_cycle.initialize;  </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">E</span>&#123;  </span><br><span class="line">    <span class="keyword">static</span>&#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;Initialize class E&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test5</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        E[] e = <span class="keyword">new</span> <span class="title class_">E</span>[<span class="number">10</span>];  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure></li>
+<li><p>常量在编译阶段会存入调用类的常量池中，本质上没有直接引用到定义常量的类，因此不会触发定义常量的类的初始化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> test.class_life_cycle.initialize;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">F</span>&#123;  </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">1</span>;  </span><br><span class="line">    <span class="keyword">static</span>&#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;Initialize class F&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test6</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> F.count;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="Class对象在堆中的作用？"><a href="#Class对象在堆中的作用？" class="headerlink" title="Class对象在堆中的作用？"></a>Class对象在堆中的作用？</h2><p>Class对象是存放在堆区的，不是方法区，这点很多人容易犯错。类的元数据（元数据并不是类的Class对象。Class对象是加载的最终产品，类的方法代码，变量名，方法名，访问权限，返回值等等都是在方法区的）才是存在方法区的。</p>
+<h2 id="类加载器（ClassLoader）的类加载模式？为什么要选择这种模式？双亲委托加载模式的代码实现？"><a href="#类加载器（ClassLoader）的类加载模式？为什么要选择这种模式？双亲委托加载模式的代码实现？" class="headerlink" title="类加载器（ClassLoader）的类加载模式？为什么要选择这种模式？双亲委托加载模式的代码实现？"></a>类加载器（ClassLoader）的类加载模式？为什么要选择这种模式？双亲委托加载模式的代码实现？</h2><p>Java中ClassLoader的加载采用了双亲委托机制</p>
+<p>要确定某一个类，需要类的全限定名以及加载此类的ClassLoader来共同确定。也就是说即使两个类的全限定名是相同的，但是因为不同的ClassLoader加载了此类，那么在JVM中它是不同的类。采用了委托模型以后加大了不同的 ClassLoader的交互能力，比如上面说的，我们JDK本生提供的类库，比如hashmap,linkedlist等等，这些类由bootstrp 类加载器加载了以后，无论你程序中有多少个类加载器，那么这些类其实都是可以共享的，这样就避免了不同的类加载器加载了同样名字的不同类以后造成混乱。</p>
+<p>参见代码<code>java.lang.ClassLoader#loadClass(java.lang.String, boolean)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> Class&lt;?&gt; loadClass(String name, <span class="type">boolean</span> resolve)</span><br><span class="line">     <span class="keyword">throws</span> ClassNotFoundException</span><br><span class="line"> &#123;</span><br><span class="line">     <span class="keyword">synchronized</span> (getClassLoadingLock(name)) &#123;</span><br><span class="line">         <span class="comment">// First, check if the class has already been loaded</span></span><br><span class="line">         Class&lt;?&gt; c = findLoadedClass(name);</span><br><span class="line">         <span class="keyword">if</span> (c == <span class="literal">null</span>) &#123;</span><br><span class="line">             <span class="type">long</span> <span class="variable">t0</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">             <span class="keyword">try</span> &#123;</span><br><span class="line">                 <span class="keyword">if</span> (parent != <span class="literal">null</span>) &#123;</span><br><span class="line">                     c = parent.loadClass(name, <span class="literal">false</span>);</span><br><span class="line">                 &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                     c = findBootstrapClassOrNull(name);</span><br><span class="line">                 &#125;</span><br><span class="line">             &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">                 <span class="comment">// ClassNotFoundException thrown if class not found</span></span><br><span class="line">                 <span class="comment">// from the non-null parent class loader</span></span><br><span class="line">             &#125;</span><br><span class="line"></span><br><span class="line">             <span class="keyword">if</span> (c == <span class="literal">null</span>) &#123;</span><br><span class="line">                 <span class="comment">// If still not found, then invoke findClass in order</span></span><br><span class="line">                 <span class="comment">// to find the class.</span></span><br><span class="line">                 <span class="type">long</span> <span class="variable">t1</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">                 c = findClass(name);</span><br><span class="line"></span><br><span class="line">                 <span class="comment">// this is the defining class loader; record the stats</span></span><br><span class="line">                 sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);</span><br><span class="line">                 sun.misc.PerfCounter.getFindClassTime().addElapsedTimeFrom(t1);</span><br><span class="line">                 sun.misc.PerfCounter.getFindClasses().increment();</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="keyword">if</span> (resolve) &#123;</span><br><span class="line">             resolveClass(c);</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="keyword">return</span> c;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="如何实现自定义的ClassLoader"><a href="#如何实现自定义的ClassLoader" class="headerlink" title="如何实现自定义的ClassLoader?"></a>如何实现自定义的ClassLoader?</h2><p><code>extends ClassLoader</code><br>自定义实现</p>
+<ul>
+<li>loadClass 实现类的加载（从文件加载，是否实施双亲委托）</li>
+<li>findClass 比如从文件加载类<code>java.lang.ClassLoader#defineClass(java.lang.String, byte[], int, int)</code>生成类</li>
+</ul>
+<h2 id="JDK动态代理的原理？"><a href="#JDK动态代理的原理？" class="headerlink" title="JDK动态代理的原理？"></a>JDK动态代理的原理？</h2><p>在java的动态代理机制中，有两个重要的类或接口，一个是 InvocationHandler(Interface)、另一个则是 Proxy(Class)，这一个类和接口是实现我们动态代理所必须用到的。</p>
+<h3 id="InvocationHandler"><a href="#InvocationHandler" class="headerlink" title="InvocationHandler"></a>InvocationHandler</h3><p>每一个动态代理类都必须要实现InvocationHandler这个接口，并且每个代理类的实例都关联了一个handler，当我们通过代理对象调用一个方法的时候，这个方法的调用就会被转发为由InvocationHandler这个接口的 invoke 方法来进行调用。我们来看看InvocationHandler这个接口的唯一一个方法 invoke 方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable</span><br></pre></td></tr></table></figure>
+<p>我们看到这个方法一共接受三个参数，那么这三个参数分别代表如下：</p>
+<ul>
+<li>proxy 指代JDK动态生成的最终代理对象</li>
+<li>method 指代的是我们所要调用真实对象的某个方法的Method对象</li>
+<li>args 指代的是调用真实对象某个方法时接受的参数</li>
+</ul>
+<h3 id="Proxy"><a href="#Proxy" class="headerlink" title="Proxy"></a>Proxy</h3><p>Proxy这个类的作用就是用来动态创建一个代理对象的类，它提供了许多的方法，但是我们用的最多的就是 newProxyInstance 这个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">newProxyInstance</span><span class="params">(ClassLoader loader, Class&lt;?&gt;[] interfaces,  InvocationHandler h)</span>  <span class="keyword">throws</span> IllegalArgumentException</span><br></pre></td></tr></table></figure>
+<p>这个方法的作用就是得到一个动态的代理对象，其接收三个参数，我们来看看这三个参数所代表的含义：</p>
+<ul>
+<li>loader 一个ClassLoader对象，定义了由哪个ClassLoader来对生成的代理对象进行加载</li>
+<li>interfaces 一个Interface对象的数组，表示的是我将要给我需要代理的对象提供一组什么接口，如果我提供了一组接口给它，那么这个代理对象就宣称实现了该接口(多态)，这样我就能调用这组接口中的方法了</li>
+<li>一个InvocationHandler对象，表示的是当我这个动态代理对象在调用方法的时候，会关联到哪一个InvocationHandler对象上</li>
+</ul>
+<p>其实我们所说的DynamicProxy（动态代理类）是这样一种class：它是在运行时生成的class，在生成它时你必须提供一组interface给它，然后该class就宣称它实现了这些 interface。如此一来，我们可以把该class的实例当作这些interface中的任何一个来用（可以强转为相应的接口类型）。当然，这个DynamicProxy其实就是一个Proxy，它不会做实质性的工作，在生成它的实例时你必须提供一个handler，由它接管实际的工作。</p>
+<h2 id="虚拟机栈栈帧包含哪些部分以及各部分功能？"><a href="#虚拟机栈栈帧包含哪些部分以及各部分功能？" class="headerlink" title="虚拟机栈栈帧包含哪些部分以及各部分功能？"></a>虚拟机栈栈帧包含哪些部分以及各部分功能？</h2><p>一个栈帧包括局部变量表，操作数栈，动态链接，方法返回地址和一些额外的附加信息组成.</p>
+<ul>
+<li>局部变量表：存放方法参数和方法内局部变量</li>
+<li>操作数栈：方法执行的过程中各种字节码指令往此写入和提取内容</li>
+<li>动态连接：栈帧中的符号引用在运行期间转化为直接引用</li>
+<li>方法返回地址：退出方法</li>
+<li>附加信息：jvm规范中没有描述的信息</li>
+</ul>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/jing99/p/6076102.html">https://www.cnblogs.com/jing99/p/6076102.html</a></p>
+<h2 id="字节码执行引擎方法调用中静态分派和动态分派区别？重写与重载？"><a href="#字节码执行引擎方法调用中静态分派和动态分派区别？重写与重载？" class="headerlink" title="字节码执行引擎方法调用中静态分派和动态分派区别？重写与重载？"></a>字节码执行引擎方法调用中静态分派和动态分派区别？重写与重载？</h2><h3 id="静态分派"><a href="#静态分派" class="headerlink" title="静态分派"></a>静态分派</h3><p>在编译期所有依赖静态类型来定位方法执行版本的分派动作称为静态分派，其典型应用是方法重载（根据参数的静态类型来定位目标方法）。<br>静态分派发生在编译阶段，因此确定静态分派的动作实际上不是由虚拟机执行的。静态类型在编译期是可知的；</p>
+<h3 id="动态分派"><a href="#动态分派" class="headerlink" title="动态分派"></a>动态分派</h3><p>运行期根据实际类型确定方法执行版本的分派动作称为动态分派，其典型应用是方法重写。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DynamicDispatch</span> &#123;  </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">Human</span>&#123;  </span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title function_">sayHello</span><span class="params">()</span>;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Man</span> <span class="keyword">extends</span> <span class="title class_">Human</span>&#123;   </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">sayHello</span><span class="params">()</span> &#123;   </span><br><span class="line">            System.out.println(<span class="string">&quot;man say hello!&quot;</span>);  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Woman</span> <span class="keyword">extends</span> <span class="title class_">Human</span>&#123;   </span><br><span class="line">        <span class="meta">@Override</span>  </span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">sayHello</span><span class="params">()</span> &#123;   </span><br><span class="line">            System.out.println(<span class="string">&quot;woman say hello!&quot;</span>);  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;   </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">          </span><br><span class="line">        Human man=<span class="keyword">new</span> <span class="title class_">Man</span>();  </span><br><span class="line">        Human woman=<span class="keyword">new</span> <span class="title class_">Woman</span>();  </span><br><span class="line">        man.sayHello();  </span><br><span class="line">        woman.sayHello();  </span><br><span class="line">        man=<span class="keyword">new</span> <span class="title class_">Woman</span>();  </span><br><span class="line">        man.sayHello();   </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">man say hello!</span><br><span class="line">woman say hello!</span><br><span class="line">woman say hello!</span><br></pre></td></tr></table></figure>
+
+<p>显然，这里不可能再根据静态类型来决定，因为静态类型同样是Human的两个变量man和woman在调用sayHello()方法时执行了不同的行为，并且变量man在两次调用中执行了不同的方法。导致这个现象的原因很明显，是这两个变量的实际类型不同，Java虚拟机是如何根据实际类型来分派方法执行版本的呢？<br>我们从invokevirtual指令的多态查找过程开始说起，invokevirtual指令的运行时解析过程大致分为以下几个步骤：</p>
+<ol>
+<li>找到操作数栈顶的第一个元素所指向的对象的实际类型，记作C。</li>
+<li>如果在类型C中找到与常量中的描述符和简单名称相符合的方法，然后进行访问权限验证，如果验证通过则返回这个方法的直接引用，查找过程结束；如果验证不通过，则抛出<code>java.lang.IllegalAccessError</code>异常。</li>
+<li>否则未找到，就按照继承关系从下往上依次对类型C的各个父类进行第2步的搜索和验证过程。</li>
+<li>如果始终没有找到合适的方法，则跑出java.lang.AbstractMethodError异常。</li>
+</ol>
+<p>由于invokevirtual指令执行的第一步就是在运行期确定接收者的实际类型，所以两次调用中的invokevirtual指令把常量池中的类方法符号引用解析到了不同的直接引用上，这个过程就是Java语言方法重写的本质。我们把这种在运行期根据实际类型确定方法执行版本的分派过程称为动态分派。</p>
+<p>参考：<a target="_blank" rel="noopener" href="http://blog.csdn.net/sunxianghuang/article/details/52280002">http://blog.csdn.net/sunxianghuang/article/details/52280002</a></p>
+<h3 id="重载-Overloading"><a href="#重载-Overloading" class="headerlink" title="重载(Overloading)"></a>重载(Overloading)</h3><p>方法重载是让类以统一的方式处理不同类型数据的一种手段。多个同名函数同时存在，具有不同的参数个数&#x2F;类型。重载Overloading是一个类中多态性的一种表现。 Java的方法重载，就是在类中可以创建多个方法，它们具有相同的名字，但具有不同的参数和不同的定义。调用方法时通过传递给它们的不同参数个数和参数类型来决定具体使用哪个方法, 这就是多态性。重载的时候，方法名要一样，但是参数类型和个数不一样，返回值类型可以相同也可以不相同。无法以返回型别作为重载函数的区分标准。</p>
+<p>重载的规则：</p>
+<p>1）、必须具有不同的参数列表；</p>
+<p>2）、可以有不同的返回类型，只要参数列表不同就可以了；</p>
+<p>3）、可以有不同的访问修饰符；</p>
+<p>4）、可以抛出不同的异常；</p>
+<h3 id="重写-overriding）"><a href="#重写-overriding）" class="headerlink" title="重写(overriding）"></a>重写(overriding）</h3><p>在Java程序中，类的继承关系可以产生一个子类，子类继承父类，它具备了父类所有的特征，继承了父类所有的方法和变量。<br>子类可以定义新的特征，当子类需要修改父类的一些方法进行扩展，增大功能，程序设计者常常把这样的一种操作方法称为重写，也叫称为覆写或覆盖。<br>重写体现了Java优越性，重写是建立在继承关系上，它使语言结构更加丰富。在Java中的继承中，子类既可以隐藏和访问父类的方法，也可以覆盖继承父类的方法。</p>
+<p>重写方法的规则：</p>
+<p>1）、参数列表必须完全与被重写的方法相同，否则不能称其为重写而是重载。</p>
+<p>2）、返回的类型必须一直与被重写的方法的返回类型相同，否则不能称其为重写而是重载。</p>
+<p>3）、访问修饰符的限制一定要大于被重写方法的访问修饰符（public&gt;protected&gt;default&gt;private）</p>
+<p>4）、重写方法一定不能抛出新的检查异常或者比被重写方法申明更加宽泛的检查型异常。例如：</p>
+<p>父类的一个方法申明了一个检查异常IOException，在重写这个方法是就不能抛出Exception,只能抛出IOException的子类异常，可以抛出非检查异常。</p>
+<h2 id="动态代理的原理？好处？JDK动态代理与Cglib动态代理的区别？"><a href="#动态代理的原理？好处？JDK动态代理与Cglib动态代理的区别？" class="headerlink" title="动态代理的原理？好处？JDK动态代理与Cglib动态代理的区别？"></a>动态代理的原理？好处？JDK动态代理与Cglib动态代理的区别？</h2><p>AOP，是通过动态代理实现的。</p>
+<h3 id="一、简单来说："><a href="#一、简单来说：" class="headerlink" title="一、简单来说："></a>一、简单来说：</h3><p>JDK动态代理只能对实现了接口的类生成代理，而不能针对类</p>
+<p>CGLIB是针对类实现代理，主要是对指定的类生成一个子类，覆盖其中的方法（继承）</p>
+<h3 id="二、Spring在选择用JDK还是CGLiB的依据："><a href="#二、Spring在选择用JDK还是CGLiB的依据：" class="headerlink" title="二、Spring在选择用JDK还是CGLiB的依据："></a>二、Spring在选择用JDK还是CGLiB的依据：</h3><p>(1)当Bean实现接口时，Spring就会用JDK的动态代理</p>
+<p>(2)当Bean没有实现接口时，Spring使用CGlib是实现</p>
+<p>(3)可以强制使用CGlib（在spring配置中加入&lt;aop:aspectj-autoproxy proxy-target-class&#x3D;”true”&#x2F;&gt;）</p>
+<h3 id="三、CGlib比JDK快？"><a href="#三、CGlib比JDK快？" class="headerlink" title="三、CGlib比JDK快？"></a>三、CGlib比JDK快？</h3><p>(1)使用CGLib实现动态代理，CGLib底层采用ASM字节码生成框架，使用字节码技术生成代理类，比使用Java反射效率要高。唯一需要注意的是，CGLib不能对声明为final的方法进行代理，因为CGLib原理是动态生成被代理类的子类。</p>
+<p>(2)在对JDK动态代理与CGlib动态代理的代码实验中看，1W次执行下，JDK7及8的动态代理性能比CGlib要好20%左右。</p>
+<h2 id="垃圾收集算法？标记-清除算法缺点？复制算法缺点？标记-整理算法适用区域？解释一下分代收集算法？"><a href="#垃圾收集算法？标记-清除算法缺点？复制算法缺点？标记-整理算法适用区域？解释一下分代收集算法？" class="headerlink" title="垃圾收集算法？标记-清除算法缺点？复制算法缺点？标记-整理算法适用区域？解释一下分代收集算法？"></a>垃圾收集算法？标记-清除算法缺点？复制算法缺点？标记-整理算法适用区域？解释一下分代收集算法？</h2><h3 id="Mark-Sweep（标记-清除）算法"><a href="#Mark-Sweep（标记-清除）算法" class="headerlink" title="Mark-Sweep（标记-清除）算法"></a>Mark-Sweep（标记-清除）算法</h3><p>标记-清除算法分为两个阶段：<strong>标记阶段</strong>和<strong>清除阶段</strong>。标记阶段的任务是标记出所有需要被回收的对象，清除阶段就是回收被标记的对象所占用的空间。<br>标记-清除算法实现起来比较容易，当时容易产生内存碎片。碎片太多可能会导致后续过程中需要为大对象分配空间时无法找到足够的空间而提前触发新的一次垃圾收集动作。</p>
+<h3 id="Copying（复制）算法"><a href="#Copying（复制）算法" class="headerlink" title="Copying（复制）算法"></a>Copying（复制）算法</h3><p>复制算法将可用内存按容量划分为大小相等的两块，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用的内存空间一次清理掉，这样一来就不容易出现内存碎片的问题。<br>这种算法虽然实现简单，运行高效且不容易产生内存碎片，但是却对内存空间的使用做出了高昂的代价，因为能够使用的内存缩减到原来的一半。<br>而且Copying算法的效率跟存活对象的数目多少有很大的关系，如果存活对象很多，那么Copying算法的效率将会大大降低。</p>
+<h3 id="Mark-Compact（标记-整理）算法"><a href="#Mark-Compact（标记-整理）算法" class="headerlink" title="Mark-Compact（标记-整理）算法"></a>Mark-Compact（标记-整理）算法</h3><p>为了解决Copying算法的缺陷，充分利用内存空间，提出了Mark-Compact算法。该算法标记阶段和Mark-Sweep一样，但是在完成标记之后，它不是直接清理可回收对象，而是将存活对象都向一端移动，然后清理掉端边界以外的内存。</p>
+<h3 id="Generational-Collection（分代收集）算法"><a href="#Generational-Collection（分代收集）算法" class="headerlink" title="Generational Collection（分代收集）算法"></a>Generational Collection（分代收集）算法</h3><p>将内存划分为若干个不同的区域。一般情况下将堆区划分为老年代（Tenured Generation）和新生代（Young Generation），老年代的特点是每次垃圾收集时只有少量对象需要被回收，而新生代的特点是每次垃圾回收时都有大量的对象需要被回收，那么就可以根据不同代的特点采取最适合的收集算法。</p>
+<h2 id="内存分配与回收策略？"><a href="#内存分配与回收策略？" class="headerlink" title="内存分配与回收策略？"></a>内存分配与回收策略？</h2><ol>
+<li>对象优先在Eden分配</li>
+<li>大对象直接进入老年代</li>
+<li>长期存活的对象将进入老年代</li>
+<li>空间分配担保</li>
+</ol>
+<h2 id="有哪些垃圾收集器以及各自区别？Serial与ParNew异同点-ParNew与Paralell-Scanvenge区别？"><a href="#有哪些垃圾收集器以及各自区别？Serial与ParNew异同点-ParNew与Paralell-Scanvenge区别？" class="headerlink" title="有哪些垃圾收集器以及各自区别？Serial与ParNew异同点? ParNew与Paralell Scanvenge区别？"></a>有哪些垃圾收集器以及各自区别？Serial与ParNew异同点? ParNew与Paralell Scanvenge区别？</h2><h2 id="CMS最大特点及显著缺点？"><a href="#CMS最大特点及显著缺点？" class="headerlink" title="CMS最大特点及显著缺点？"></a>CMS最大特点及显著缺点？</h2><h3 id="Serial（新生代）-Serial-Old（老年代）"><a href="#Serial（新生代）-Serial-Old（老年代）" class="headerlink" title="Serial（新生代）&#x2F;Serial Old（老年代）"></a>Serial（新生代）&#x2F;Serial Old（老年代）</h3><p>Serial&#x2F;Serial Old收集器是最基本最古老的收集器，它是一个单线程收集器，并且在它进行垃圾收集时，必须暂停所有用户线程。它的优点是实现简单高效，但是缺点是会给用户带来停顿。<br>Serial收集器是针对新生代的收集器，采用的是Copying算法。它的缺点是当Serial收集器想进行垃圾回收的时候，必须暂停用户的所有进程，即stop the world。但到现在为止，它依然是虚拟机运行在client模式下的默认新生代收集器，与其他收集器相比，对于限定在单个CPU的运行环境来说，Serial收集器由于没有线程交互的开销，专心做垃圾回收自然可以获得最高的单线程收集效率。<br>Serial Old收集器是针对老年代的收集器，采用的是Mark-Compact算法。这个收集器的主要意义也是被Client模式下的虚拟机使用。在Server模式下，它主要还有两大用途：一个是在JDK1.5及以前的版本中与Parallel Scanvenge收集器搭配使用，另外一个就是作为CMS收集器的后备预案，在并发收集发生Concurrent Mode Failure的时候使用。</p>
+<p>通过指定-UseSerialGC参数，使用Serial + Serial Old的串行收集器组合进行内存回收。</p>
+<h3 id="ParNew（新生代）"><a href="#ParNew（新生代）" class="headerlink" title="ParNew（新生代）"></a>ParNew（新生代）</h3><p>ParNew收集器是Serial收集器新生代的多线程实现，注意在进行垃圾回收的时候依然会stop the world，只是相比较Serial收集器而言它会运行多条进程进行垃圾回收。</p>
+<p>ParNew收集器在单CPU的环境中绝对不会有比Serial收集器更好的效果，甚至由于存在线程交互的开销，该收集器在通过超线程技术实现的两个CPU的环境中都不能百分之百的保证能超越Serial收集器。当然，随着可以使用的CPU的数量增加，它对于GC时系统资源的利用还是很有好处的。它默认开启的收集线程数与CPU的数量相同，在CPU非常多（譬如32个，现在CPU动辄4核加超线程，服务器超过32个逻辑CPU的情况越来越多了）的环境下，可以使用-XX:ParallelGCThreads参数来限制垃圾收集的线程数。</p>
+<p>-UseParNewGC: 打开此开关后，使用ParNew + Serial Old的收集器组合进行内存回收，这样新生代使用并行收集器，老年代使用串行收集器。</p>
+<h3 id="Parallel-Scavenge（新生代）-Parallel-Old（老年代）"><a href="#Parallel-Scavenge（新生代）-Parallel-Old（老年代）" class="headerlink" title="Parallel Scavenge（新生代）&#x2F;Parallel Old（老年代）"></a>Parallel Scavenge（新生代）&#x2F;Parallel Old（老年代）</h3><p>Parallel是采用复制算法的多线程新生代垃圾回收器，似乎和ParNew收集器有很多的相似的地方。但是Parallel Scanvenge收集器的一个特点是它所关注的目标是吞吐量(Throughput)。所谓吞吐量就是CPU用于运行用户代码的时间与CPU总消耗时间的比值，即吞吐量&#x3D;运行用户代码时间 &#x2F; (运行用户代码时间 + 垃圾收集时间)。停顿时间越短就越适合需要与用户交互的程序，良好的响应速度能够提升用户的体验；而高吞吐量则可以最高效率地利用CPU时间，尽快地完成程序的运算任务，主要适合在后台运算而不需要太多交互的任务。</p>
+<p>Parallel Old收集器是Parallel Scavenge收集器的老年代版本，<strong>采用多线程和”标记－整理”算法</strong>。这个收集器是在jdk1.6中才开始提供的，在此之前，新生代的Parallel Scavenge收集器一直处于比较尴尬的状态。原因是如果新生代Parallel Scavenge收集器，那么老年代除了Serial Old(PS MarkSweep)收集器外别无选择。由于单线程的老年代Serial Old收集器在服务端应用性能上的”拖累“，即使使用了Parallel Scavenge收集器也未必能在整体应用上获得吞吐量最大化的效果，又因为老年代收集中无法充分利用服务器多CPU的处理能力，在老年代很大而且硬件比较高级的环境中，这种组合的吞吐量甚至还不一定有<strong>ParNew加CMS的组合</strong>”给力“。直到Parallel Old收集器出现后，”吞吐量优先“收集器终于有了比较名副其实的应用祝贺，在注重吞吐量及CPU资源敏感的场合，都可以优先考虑Parallel Scavenge加Parallel Old收集器。</p>
+<p>-UseParallelGC: 虚拟机运行在Server模式下的默认值，打开此开关后，使用Parallel Scavenge + Serial Old的收集器组合进行内存回收。-UseParallelOldGC: 打开此开关后，使用Parallel Scavenge + Parallel Old的收集器组合进行垃圾回收</p>
+<h3 id="CMS（老年代）"><a href="#CMS（老年代）" class="headerlink" title="CMS（老年代）"></a>CMS（老年代）</h3><p>CMS(Concurrent Mark Swep)收集器是一个比较重要的回收器，应用非常广泛，CMS一种获取最短回收停顿时间为目标的收集器，这使得它很适合用于和用户交互的业务。从名字(Mark Swep)就可以看出，CMS收集器是基于标记清除算法实现的。它的收集过程分为四个步骤：</p>
+<p>初始标记(initial mark) -stop the world<br>并发标记(concurrent mark)<br>重新标记(remark) -stop the world<br>并发清除(concurrent sweep)<br><strong>注意初始标记和重新标记还是会stop the world</strong>，但是在耗费时间更长的并发标记和并发清除两个阶段都可以和用户进程同时工作。</p>
+<p>不过由于CMS收集器是基于标记清除算法实现的，会导致有大量的空间碎片产生，在为大对象分配内存的时候，往往会出现老年代还有很大的空间剩余，但是无法找到足够大的连续空间来分配当前对象，不得不提前开启一次Full GC。为了解决这个问题，CMS收集器默认提供了一个-XX:+UseCMSCompactAtFullCollection收集开关参数（<strong>默认就是开启的</strong>)，用于在CMS收集器进行FullGC完开启内存碎片的合并整理过程，内存整理的过程是无法并发的，这样内存碎片问题倒是没有了，不过停顿时间不得不变长。虚拟机设计者还提供了另外一个参数-XX:CMSFullGCsBeforeCompaction参数用于设置执行多少次不压缩的FULL GC后跟着来一次带压缩的（默认值为0，表示每次进入Full GC时都进行碎片整理）。</p>
+<p>不幸的是，它作为老年代的收集器，却无法与jdk1.4中已经存在的新生代收集器Parallel Scavenge配合工作，所以在jdk1.5中使用cms来收集老年代的时候，新生代只能选择ParNew或Serial收集器中的一个。<strong>ParNew收集器是使用-XX:+UseConcMarkSweepGC选项启用CMS收集器之后的默认新生代收集器</strong>，也可以使用-XX:+UseParNewGC选项来强制指定它。</p>
+<h3 id="G1"><a href="#G1" class="headerlink" title="G1"></a>G1</h3><p>G1收集器是一款面向服务端应用的垃圾收集器。HotSpot团队赋予它的使命是在未来替换掉JDK1.5中发布的CMS收集器。与其他GC收集器相比，G1具备如下特点：</p>
+<p><code>并行与并发</code>：G1能更充分的利用CPU，多核环境下的硬件优势来缩短stop the world的停顿时间。<br><code>分代收集</code>：和其他收集器一样，分代的概念在G1中依然存在，<strong>不过G1不需要其他的垃圾回收器的配合就可以独自管理整个GC堆</strong>。<br><code>空间整合</code>：G1收集器有利于程序长时间运行，分配大对象时不会无法得到连续的空间而提前触发一次GC。<br><code>可预测的非停顿</code>：这是G1相对于CMS的另一大优势，降低停顿时间是G1和CMS共同的关注点，能让使用者明确指定在一个长度为M毫秒的时间片段内，消耗在垃圾收集上的时间不得超过N毫秒。<br>在使用G1收集器时，Java堆的内存布局和其他收集器有很大的差别，它将这个Java堆分为多个大小相等的独立区域，虽然还保留新生代和老年代的概念，但是新生代和老年代不再是物理隔离的了，它们都是一部分Region（不需要连续）的集合。</p>
+<p>虽然G1看起来有很多优点，实际上CMS还是主流。</p>
+<h2 id="哪些对象可归为GC-Roots？"><a href="#哪些对象可归为GC-Roots？" class="headerlink" title="哪些对象可归为GC Roots？"></a>哪些对象可归为GC Roots？</h2><ol>
+<li>虚拟机栈中引用的对象；</li>
+<li>方法区中类静态属性引用的对象；</li>
+<li>方法区中常量引用的对象；</li>
+<li>本地方法栈中Native方法引用的对象。</li>
+</ol>
+<h2 id="MinorGC与FullGC？"><a href="#MinorGC与FullGC？" class="headerlink" title="MinorGC与FullGC？"></a>MinorGC与FullGC？</h2><h3 id="Minor-GC"><a href="#Minor-GC" class="headerlink" title="Minor GC"></a>Minor GC</h3><p>从年轻代空间（包括 Eden 和 Survivor 区域）回收内存被称为 Minor GC。</p>
+<ol>
+<li>当 JVM 无法为一个新的对象分配空间时会触发<code>Minor GC</code>，比如当 Eden 区满了。所以分配率越高，越频繁执行 Minor GC。</li>
+<li>内存池被填满的时候，其中的内容全部会被复制，指针会从0开始跟踪空闲内存。Eden 和 Survivor 区进行了标记和复制操作，取代了经典的标记、扫描、压缩、清理操作。所以 Eden 和 Survivor 区不存在内存碎片。写指针总是停留在所使用内存池的顶部。</li>
+<li>执行 Minor GC 操作时，不会影响到永久代。从永久代到年轻代的引用被当成 GC roots，从年轻代到永久代的引用在标记阶段被直接忽略掉。</li>
+<li>质疑常规的认知，所有的 Minor GC 都会触发“全世界的暂停（stop-the-world）”，停止应用程序的线程。对于大部分应用程序，停顿导致的延迟都是可以忽略不计的。其中的真相就 是，大部分 Eden 区中的对象都能被认为是垃圾，永远也不会被复制到 Survivor 区或者老年代空间。如果正好相反，Eden 区大部分新生对象不符合 GC 条件，Minor GC 执行时暂停的时间将会长很多。</li>
+</ol>
+<p>所以 Minor GC 的情况就相当清楚了——每次 Minor GC 会清理年轻代的内存。</p>
+<h3 id="Major-GC"><a href="#Major-GC" class="headerlink" title="Major GC"></a>Major GC</h3><p>是清理整个堆空间—包括年轻代和老年代。</p>
+<ul>
+<li>当年老代满时会引发Full GC，Full GC将会同时回收年轻代、年老代，</li>
+<li>当永久代满时也会引发Full GC，会导致Class、Method元信息的卸载</li>
+</ul>
+<p>许多 Major GC 是由 Minor GC 触发的，所以很多情况下将这两种 GC 分离是不太可能的.</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+              <a href="/tags/jvm/" rel="tag"># jvm</a>
+              <a href="/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag"># 内存管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/04/09/java/java-memory-management/" rel="prev" title="jvm内存管理">
+      <i class="fa fa-chevron-left"></i> jvm内存管理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/04/20/java/java-garbage-collection/" rel="next" title="java的垃圾回收总结">
+      java的垃圾回收总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">JVM内存模型？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E4%B8%80%E6%AE%B5%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%E5%A0%86%E6%BA%A2%E5%87%BA%EF%BC%9F%E6%A0%88%E6%BA%A2%E5%87%BA%EF%BC%9F%E5%B8%B8%E9%87%8F%E6%B1%A0%E6%BA%A2%E5%87%BA%EF%BC%9F%E6%96%B9%E6%B3%95%E5%8C%BA%E6%BA%A2%E5%87%BA%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">写一段代码实现堆溢出？栈溢出？常量池溢出？方法区溢出？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">类的生命周期？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%93%AA%E5%9B%9B%E7%A7%8D%E6%83%85%E5%86%B5%E4%BC%9A%E8%A7%A6%E5%8F%91%E7%B1%BB%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%EF%BC%88%E4%B9%9F%E5%B0%B1%E6%98%AF%E4%B8%BB%E5%8A%A8%E5%BC%95%E7%94%A8%EF%BC%89%EF%BC%9F"><span class="nav-number">4.</span> <span class="nav-text">哪四种情况会触发类的初始化（也就是主动引用）？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A2%AB%E5%8A%A8%E5%BC%95%E7%94%A8%E4%BC%9A%E8%A7%A6%E5%8F%91%E5%88%9D%E5%A7%8B%E5%8C%96%E5%90%97%EF%BC%9F%E8%AF%B7%E4%B8%BE%E4%BE%8B"><span class="nav-number">5.</span> <span class="nav-text">被动引用会触发初始化吗？请举例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Class%E5%AF%B9%E8%B1%A1%E5%9C%A8%E5%A0%86%E4%B8%AD%E7%9A%84%E4%BD%9C%E7%94%A8%EF%BC%9F"><span class="nav-number">6.</span> <span class="nav-text">Class对象在堆中的作用？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%EF%BC%88ClassLoader%EF%BC%89%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E9%80%89%E6%8B%A9%E8%BF%99%E7%A7%8D%E6%A8%A1%E5%BC%8F%EF%BC%9F%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%89%98%E5%8A%A0%E8%BD%BD%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%EF%BC%9F"><span class="nav-number">7.</span> <span class="nav-text">类加载器（ClassLoader）的类加载模式？为什么要选择这种模式？双亲委托加载模式的代码实现？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9A%84ClassLoader"><span class="nav-number">8.</span> <span class="nav-text">如何实现自定义的ClassLoader?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E7%9A%84%E5%8E%9F%E7%90%86%EF%BC%9F"><span class="nav-number">9.</span> <span class="nav-text">JDK动态代理的原理？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#InvocationHandler"><span class="nav-number">9.1.</span> <span class="nav-text">InvocationHandler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Proxy"><span class="nav-number">9.2.</span> <span class="nav-text">Proxy</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88%E6%A0%88%E5%B8%A7%E5%8C%85%E5%90%AB%E5%93%AA%E4%BA%9B%E9%83%A8%E5%88%86%E4%BB%A5%E5%8F%8A%E5%90%84%E9%83%A8%E5%88%86%E5%8A%9F%E8%83%BD%EF%BC%9F"><span class="nav-number">10.</span> <span class="nav-text">虚拟机栈栈帧包含哪些部分以及各部分功能？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8%E4%B8%AD%E9%9D%99%E6%80%81%E5%88%86%E6%B4%BE%E5%92%8C%E5%8A%A8%E6%80%81%E5%88%86%E6%B4%BE%E5%8C%BA%E5%88%AB%EF%BC%9F%E9%87%8D%E5%86%99%E4%B8%8E%E9%87%8D%E8%BD%BD%EF%BC%9F"><span class="nav-number">11.</span> <span class="nav-text">字节码执行引擎方法调用中静态分派和动态分派区别？重写与重载？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%88%86%E6%B4%BE"><span class="nav-number">11.1.</span> <span class="nav-text">静态分派</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%88%86%E6%B4%BE"><span class="nav-number">11.2.</span> <span class="nav-text">动态分派</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%BD%BD-Overloading"><span class="nav-number">11.3.</span> <span class="nav-text">重载(Overloading)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%86%99-overriding%EF%BC%89"><span class="nav-number">11.4.</span> <span class="nav-text">重写(overriding）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E7%9A%84%E5%8E%9F%E7%90%86%EF%BC%9F%E5%A5%BD%E5%A4%84%EF%BC%9FJDK%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E4%B8%8ECglib%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">12.</span> <span class="nav-text">动态代理的原理？好处？JDK动态代理与Cglib动态代理的区别？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%AE%80%E5%8D%95%E6%9D%A5%E8%AF%B4%EF%BC%9A"><span class="nav-number">12.1.</span> <span class="nav-text">一、简单来说：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Spring%E5%9C%A8%E9%80%89%E6%8B%A9%E7%94%A8JDK%E8%BF%98%E6%98%AFCGLiB%E7%9A%84%E4%BE%9D%E6%8D%AE%EF%BC%9A"><span class="nav-number">12.2.</span> <span class="nav-text">二、Spring在选择用JDK还是CGLiB的依据：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81CGlib%E6%AF%94JDK%E5%BF%AB%EF%BC%9F"><span class="nav-number">12.3.</span> <span class="nav-text">三、CGlib比JDK快？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E7%AE%97%E6%B3%95%EF%BC%9F%E6%A0%87%E8%AE%B0-%E6%B8%85%E9%99%A4%E7%AE%97%E6%B3%95%E7%BC%BA%E7%82%B9%EF%BC%9F%E5%A4%8D%E5%88%B6%E7%AE%97%E6%B3%95%E7%BC%BA%E7%82%B9%EF%BC%9F%E6%A0%87%E8%AE%B0-%E6%95%B4%E7%90%86%E7%AE%97%E6%B3%95%E9%80%82%E7%94%A8%E5%8C%BA%E5%9F%9F%EF%BC%9F%E8%A7%A3%E9%87%8A%E4%B8%80%E4%B8%8B%E5%88%86%E4%BB%A3%E6%94%B6%E9%9B%86%E7%AE%97%E6%B3%95%EF%BC%9F"><span class="nav-number">13.</span> <span class="nav-text">垃圾收集算法？标记-清除算法缺点？复制算法缺点？标记-整理算法适用区域？解释一下分代收集算法？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mark-Sweep%EF%BC%88%E6%A0%87%E8%AE%B0-%E6%B8%85%E9%99%A4%EF%BC%89%E7%AE%97%E6%B3%95"><span class="nav-number">13.1.</span> <span class="nav-text">Mark-Sweep（标记-清除）算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Copying%EF%BC%88%E5%A4%8D%E5%88%B6%EF%BC%89%E7%AE%97%E6%B3%95"><span class="nav-number">13.2.</span> <span class="nav-text">Copying（复制）算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mark-Compact%EF%BC%88%E6%A0%87%E8%AE%B0-%E6%95%B4%E7%90%86%EF%BC%89%E7%AE%97%E6%B3%95"><span class="nav-number">13.3.</span> <span class="nav-text">Mark-Compact（标记-整理）算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generational-Collection%EF%BC%88%E5%88%86%E4%BB%A3%E6%94%B6%E9%9B%86%EF%BC%89%E7%AE%97%E6%B3%95"><span class="nav-number">13.4.</span> <span class="nav-text">Generational Collection（分代收集）算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E4%B8%8E%E5%9B%9E%E6%94%B6%E7%AD%96%E7%95%A5%EF%BC%9F"><span class="nav-number">14.</span> <span class="nav-text">内存分配与回收策略？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E5%93%AA%E4%BA%9B%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E4%BB%A5%E5%8F%8A%E5%90%84%E8%87%AA%E5%8C%BA%E5%88%AB%EF%BC%9FSerial%E4%B8%8EParNew%E5%BC%82%E5%90%8C%E7%82%B9-ParNew%E4%B8%8EParalell-Scanvenge%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-number">15.</span> <span class="nav-text">有哪些垃圾收集器以及各自区别？Serial与ParNew异同点? ParNew与Paralell Scanvenge区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CMS%E6%9C%80%E5%A4%A7%E7%89%B9%E7%82%B9%E5%8F%8A%E6%98%BE%E8%91%97%E7%BC%BA%E7%82%B9%EF%BC%9F"><span class="nav-number">16.</span> <span class="nav-text">CMS最大特点及显著缺点？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Serial%EF%BC%88%E6%96%B0%E7%94%9F%E4%BB%A3%EF%BC%89-Serial-Old%EF%BC%88%E8%80%81%E5%B9%B4%E4%BB%A3%EF%BC%89"><span class="nav-number">16.1.</span> <span class="nav-text">Serial（新生代）&#x2F;Serial Old（老年代）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ParNew%EF%BC%88%E6%96%B0%E7%94%9F%E4%BB%A3%EF%BC%89"><span class="nav-number">16.2.</span> <span class="nav-text">ParNew（新生代）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Parallel-Scavenge%EF%BC%88%E6%96%B0%E7%94%9F%E4%BB%A3%EF%BC%89-Parallel-Old%EF%BC%88%E8%80%81%E5%B9%B4%E4%BB%A3%EF%BC%89"><span class="nav-number">16.3.</span> <span class="nav-text">Parallel Scavenge（新生代）&#x2F;Parallel Old（老年代）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CMS%EF%BC%88%E8%80%81%E5%B9%B4%E4%BB%A3%EF%BC%89"><span class="nav-number">16.4.</span> <span class="nav-text">CMS（老年代）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1"><span class="nav-number">16.5.</span> <span class="nav-text">G1</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%93%AA%E4%BA%9B%E5%AF%B9%E8%B1%A1%E5%8F%AF%E5%BD%92%E4%B8%BAGC-Roots%EF%BC%9F"><span class="nav-number">17.</span> <span class="nav-text">哪些对象可归为GC Roots？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MinorGC%E4%B8%8EFullGC%EF%BC%9F"><span class="nav-number">18.</span> <span class="nav-text">MinorGC与FullGC？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Minor-GC"><span class="nav-number">18.1.</span> <span class="nav-text">Minor GC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Major-GC"><span class="nav-number">18.2.</span> <span class="nav-text">Major GC</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

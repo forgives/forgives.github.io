@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="jdk 13 主要的新特性参考:openjdk JDK 13 baeldung New Features in Java 13">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 13 新特性">
+<meta property="og:url" content="https://forgives.github.io/2022/12/13/java/20221213-java13-new-features/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="jdk 13 主要的新特性参考:openjdk JDK 13 baeldung New Features in Java 13">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-12-13T03:15:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.378Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="java13">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/12/13/java/20221213-java13-new-features/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 13 新特性 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/12/13/java/20221213-java13-new-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 13 新特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-13 11:15:00" itemprop="dateCreated datePublished" datetime="2022-12-13T11:15:00+08:00">2022-12-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>jdk 13 主要的新特性参考:<br>openjdk <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/13/">JDK 13</a></p>
+<p>baeldung <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-13-new-features">New Features in Java 13</a></p>
+<span id="more"></span>  
+
+<h2 id="JDK-13-的新特性"><a href="#JDK-13-的新特性" class="headerlink" title="JDK 13 的新特性"></a>JDK 13 的新特性</h2><p>2019年9月，Java 13发布了（每六个月发布一次）,看下发布的新特性(这次加的不多)：</p>
+<ul>
+<li>350:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/350">Dynamic CDS Archives</a> 扩展了CDS允许应用结束的时动态归档类</li>
+<li>351:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/351">ZGC: Uncommit Unused Memory</a> 增强ZGC将未使用的堆内存返回给操作系统</li>
+<li>353:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/353">Reimplement the Legacy Socket API</a> 重构了 <code>java.net.Socket</code> 与 <code>java.net.ServerSocket</code> 底层实现</li>
+<li>354:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/354">Switch Expressions (Preview)</a> Switch表达式变更（依然是预览特性）</li>
+<li>355:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/355">Text Blocks (Preview)</a> (终于)支持文本块(还是预览特性)</li>
+</ul>
+<h2 id="预览版本的开发特性"><a href="#预览版本的开发特性" class="headerlink" title="预览版本的开发特性"></a>预览版本的开发特性</h2><p>感觉也就两个预览特性比较重要的了。注意，都是预览版特性，需要在命令行中添加 <code>–enable-preview</code> 参数来启用预览版特性。</p>
+<h3 id="Switch-Expressions-JEP-354"><a href="#Switch-Expressions-JEP-354" class="headerlink" title="Switch Expressions (JEP 354)"></a>Switch Expressions (JEP 354)</h3><p>在 Java 12 中加入的预览版 switch 表达式又更新了，这次加了 <code>yield</code> 语句。 <code>yield</code> 可以直接在 switch 表达式中返回一个值(复杂表达式中用<code>&#123;&#125;</code>包含后需要返回值)。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="meta">@SuppressWarnings(&quot;preview&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">whenSwitchingOnOperationSquareMe_thenWillReturnSquare</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">var</span> <span class="variable">me</span> <span class="operator">=</span> <span class="number">4</span>;</span><br><span class="line">    <span class="type">var</span> <span class="variable">operation</span> <span class="operator">=</span> <span class="string">&quot;squareMe&quot;</span>;</span><br><span class="line">    <span class="type">var</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">switch</span> (operation) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&quot;doubleMe&quot;</span> -&gt; &#123;</span><br><span class="line">            <span class="keyword">yield</span> me * <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&quot;squareMe&quot;</span> -&gt; &#123;</span><br><span class="line">            <span class="keyword">yield</span> me * me;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">default</span> -&gt; me;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    assertEquals(<span class="number">16</span>, result);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以更简单的使用 switch 来实现策略匹配。</p>
+<p>注意： <strong>当前依旧是预览版的特性</strong>。</p>
+<h3 id="Text-Blocks-JEP-355"><a href="#Text-Blocks-JEP-355" class="headerlink" title="Text Blocks (JEP 355)"></a>Text Blocks (JEP 355)</h3><p>Java 终于支持多行文本块了。</p>
+<p>以前</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">JSON_STRING</span> </span><br><span class="line">  <span class="operator">=</span> <span class="string">&quot;&#123;\r\n&quot;</span> + <span class="string">&quot;\&quot;name\&quot; : \&quot;Baeldung\&quot;,\r\n&quot;</span> + <span class="string">&quot;\&quot;website\&quot; : \&quot;https://www.%s.com/\&quot;\r\n&quot;</span> + <span class="string">&quot;&#125;&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>现在直接用文本块来实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">TEXT_BLOCK_JSON</span> <span class="operator">=</span> <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">    &quot;name&quot; : &quot;Baeldung&quot;,</span></span><br><span class="line"><span class="string">    &quot;website&quot; : &quot;https://www.%s.com/&quot;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p>有了这个特性，<code>JSON</code> <code>XML</code> <code>HTML</code> 等都更容易读写和维护了。 String 的各个方法都支持这类字符串。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">whenTextBlocks_thenStringOperationsWorkSame</span><span class="params">()</span> &#123;        </span><br><span class="line">    assertThat(TEXT_BLOCK_JSON.contains(<span class="string">&quot;Baeldung&quot;</span>)).isTrue();</span><br><span class="line">    assertThat(TEXT_BLOCK_JSON.indexOf(<span class="string">&quot;www&quot;</span>)).isGreaterThan(<span class="number">0</span>);</span><br><span class="line">    assertThat(TEXT_BLOCK_JSON.length()).isGreaterThan(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同时，<code>java.lang.String</code>也加入了三个方法来管理文本块:</p>
+<ul>
+<li>stripIndent()  模拟编译器以删除附带的空白</li>
+<li>translateEscapes() 将转义序列 (如“\t”转换为“\t”)</li>
+<li>formatted() 文本块的 <code>String::format</code> 方法</li>
+</ul>
+<p>因为文本块是预览特性，<strong>可能在未来的版本中删除</strong>，所以这些方法是被标记为 <code>deprecation</code> 。</p>
+<h2 id="Dynamic-CDS-Archives-JEP-350"><a href="#Dynamic-CDS-Archives-JEP-350" class="headerlink" title="Dynamic CDS Archives (JEP 350)"></a>Dynamic CDS Archives (JEP 350)</h2><p>Class data sharing (CDS) 成为 <code>HotSpot VM</code> 重要特性已经有一段时间了，它允许在不同JVM之间共享类元数据，以减少启动时间和内存占用。<br>JDK 10 扩展了 CDS 的能力，允许在应用之间CDS（AppCDS），让开发者有了控制应用类加入共享归档的能力，JDK 12 增强了这个特性，默认就使用 CDS 。</p>
+<p>当时归档应用的class有点麻烦。为了生成归档文件，开发人员必须先对其应用程序进行试运行以创建类列表，然后将其转储到归档中。之后，这个归档才可以用于在JVM之间共享元数据。<br>通过 <a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/350">dynamic archiving</a> JDK 13 简化了这个过程，现在我们可以在程序退出的时候在生成类的共享归档，就不必要试运行了。</p>
+<p>我们可以添加 <code> -XX:ArchiveClassesAtExit</code> 参数来启用退出执行动态归档，同时我们需要设定归档文件的名称。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -XX:ArchiveClassesAtExit=&lt;archive filename&gt; -cp &lt;app jar&gt; AppName</span><br></pre></td></tr></table></figure>
+<p>下次这个应用启动的时候把命令替换为 <code>-XX:SharedArchiveFile</code>来使用归档。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -XX:SharedArchiveFile=&lt;archive filename&gt; -cp &lt;app jar&gt; AppName</span><br></pre></td></tr></table></figure>
+
+<h2 id="ZGC-Uncommit-Unused-Memory-JEP-351"><a href="#ZGC-Uncommit-Unused-Memory-JEP-351" class="headerlink" title="ZGC: Uncommit Unused Memory (JEP 351)"></a>ZGC: Uncommit Unused Memory (JEP 351)</h2><p>ZGC 作为一个低延迟（GC暂停时间不会超过10ms）的垃圾回收器在Java 11中被引入。然而不像其他的 <code>HotSpot VM</code>的GC, 比如 G1 或者 Shenandoah ，ZGC 没有能力归还不再使用的堆内存。<br><a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/351">Java 13 中终于实现了ZGC这个能力</a>。当前我们可以减少内存占用来实现性能的提升。</p>
+<p>在 Java 13 中， ZGC <strong>释放不用的内存给操作系统直到达到了最小的堆大小</strong> 的这个特性是默认的，如果要回到像 Java 11 的样子，需要</p>
+<ul>
+<li>加上 <code>-XX:-ZUncommit</code> 参数</li>
+<li>把最小堆大小(<em>-Xms</em>) 设置成与最大堆大小(<em>-Xmx</em>)一样大<br>另外，ZGC 支持的最大堆大小已经从 <strong>4TB</strong> 升级到了 <strong>16TB</strong> 。</li>
+</ul>
+<h2 id="Reimplement-the-Legacy-Socket-API-JEP-353"><a href="#Reimplement-the-Legacy-Socket-API-JEP-353" class="headerlink" title="Reimplement the Legacy Socket API (JEP 353)"></a>Reimplement the Legacy Socket API (JEP 353)</h2><p>Socket API (<code>java.net.Socket</code> 和 <code>java.net.ServerSocket</code>) 在Java 诞生依赖就一直是一个重要的组成部分。但是在过去的20年中他一直都是这么老久，已经很难维护了。<br>Java 13 中用现代化的用户模式线程替换了其底层实现，<code>PlainSocketImpl</code>被替换成了 <code>NioSocketImpl</code>，这个新编码的实现基于与<code>java.nio</code>相同的内部架构。</p>
+<p>当然，我们是可以退回到 <code>PlainSocketImpl</code>的，在 JVM 参数中加入 <code>-Djdk.net.usePlainSocketImpl</code> 来实现回退，现在用的是<code>NioSocketImpl</code>了。</p>
+<h2 id="其他的变化"><a href="#其他的变化" class="headerlink" title="其他的变化"></a>其他的变化</h2><h3 id="FileSystems-newFileSystem"><a href="#FileSystems-newFileSystem" class="headerlink" title="FileSystems.newFileSystem"></a>FileSystems.newFileSystem</h3><p><code>java.nio.file.FileSystems</code>  添加了三个新方法，以便更好的使用 <code>FileSystem</code>。</p>
+<ul>
+<li>newFileSystem(Path)</li>
+<li>newFileSystem(Path, Map&lt;String, ?&gt;)</li>
+<li>newFileSystem(Path, Map&lt;String, ?&gt;, ClassLoader)</li>
+</ul>
+<h3 id="java-nio-ByteBuffer"><a href="#java-nio-ByteBuffer" class="headerlink" title="java.nio.ByteBuffer"></a>java.nio.ByteBuffer</h3><p><code>java.nio.ByteBuffer</code> 新增加方法 <code>get(byte[] dst)</code> 方法可将 ByteBuffer 的内容传输到指定的数组中，方法 <code>put(byte[] src)</code> 用于将指定字节数组中的内容全部传输到 ByteBuffer 中(批量)。</p>
+<h3 id="Unicode-12-1"><a href="#Unicode-12-1" class="headerlink" title="Unicode 12.1"></a>Unicode 12.1</h3><p>下面的相关 API 做了对 unicode 12.1 版本的支持：</p>
+<ul>
+<li>java.lang.Character</li>
+<li>java.text.Bidi 和 java.text.Normalizer</li>
+<li>java.util.regex 包</li>
+</ul>
+<h3 id="Javadoc"><a href="#Javadoc" class="headerlink" title="Javadoc"></a>Javadoc</h3><p>不再支持使用 html4 生成 api 文档，jdk9 开始就支持了 html5，生成 api 文档时要保证使用的 html 标签必须能完全符合 html5。<br>不再支持一些老的 <a target="_blank" rel="noopener" href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8215608">javadoc API</a>，包含 com.sun.javadoc , 旧的文档部件 (com.sun.tools.doclets.standard), 和旧的入口 (com.sun.tools.javadoc.Start)等。</p>
+<h3 id="杂七杂八-misc"><a href="#杂七杂八-misc" class="headerlink" title="杂七杂八(misc)"></a>杂七杂八(misc)</h3><ul>
+<li>删除系统属性 <code>awt.toolkit</code></li>
+<li>删除命令行参数 <code>-XX+AggressiveOpts</code></li>
+<li>SunJSSE 中删除了对<code>RSA KeyFactory</code>,<code>RSA KeyPairGenerator</code>,<code>MD2withRSA</code>,<code>MD5withRSA</code>, <code>和SHA1withRSA Signature</code>的支持</li>
+<li>删除两个 DocuSign 根证书：certplusclass2primaryca、certplusclass3pprimaryca</li>
+<li>删除两个Comodo根证书：utnuserfirstclientauthemailca、utnuserfirsthardwareca</li>
+<li>内部包 <code>com.sun.net.ssl</code> 被删除</li>
+<li><code>javax.security.cert</code> api 被废弃</li>
+<li>废弃java 命令行参数 -Xverifynone 和 -noverify</li>
+<li>等等</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/13/">JDK 13</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-13-new-features">New Features in Java 13</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/java_topper/article/details/123609647">Java13新特性及代码示例</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/354301875">还在用JDK6的同学，来看看JDK13新特性详解吧</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/491112832">java 13 引入文本块，对 switch 语法做了增强</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java13/" rel="tag"># java13</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/10/java/20221210-java12-new-features/" rel="prev" title="Java 12 新特性">
+      <i class="fa fa-chevron-left"></i> Java 12 新特性
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/19/java/20221219-java14-new-features/" rel="next" title="Java 14 新特性">
+      Java 14 新特性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK-13-%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">JDK 13 的新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E8%A7%88%E7%89%88%E6%9C%AC%E7%9A%84%E5%BC%80%E5%8F%91%E7%89%B9%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">预览版本的开发特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Switch-Expressions-JEP-354"><span class="nav-number">2.1.</span> <span class="nav-text">Switch Expressions (JEP 354)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Text-Blocks-JEP-355"><span class="nav-number">2.2.</span> <span class="nav-text">Text Blocks (JEP 355)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dynamic-CDS-Archives-JEP-350"><span class="nav-number">3.</span> <span class="nav-text">Dynamic CDS Archives (JEP 350)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZGC-Uncommit-Unused-Memory-JEP-351"><span class="nav-number">4.</span> <span class="nav-text">ZGC: Uncommit Unused Memory (JEP 351)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reimplement-the-Legacy-Socket-API-JEP-353"><span class="nav-number">5.</span> <span class="nav-text">Reimplement the Legacy Socket API (JEP 353)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">6.</span> <span class="nav-text">其他的变化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#FileSystems-newFileSystem"><span class="nav-number">6.1.</span> <span class="nav-text">FileSystems.newFileSystem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java-nio-ByteBuffer"><span class="nav-number">6.2.</span> <span class="nav-text">java.nio.ByteBuffer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Unicode-12-1"><span class="nav-number">6.3.</span> <span class="nav-text">Unicode 12.1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Javadoc"><span class="nav-number">6.4.</span> <span class="nav-text">Javadoc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%82%E4%B8%83%E6%9D%82%E5%85%AB-misc"><span class="nav-number">6.5.</span> <span class="nav-text">杂七杂八(misc)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

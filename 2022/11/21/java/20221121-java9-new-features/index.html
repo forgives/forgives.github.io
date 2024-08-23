@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="jdk 9 主要的新特性参考:openjdk JDK 9Oracle官方 Overview of What’s New in JDK 9baeldung New Features in Java 9">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 9新特性">
+<meta property="og:url" content="https://forgives.github.io/2022/11/21/java/20221121-java9-new-features/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="jdk 9 主要的新特性参考:openjdk JDK 9Oracle官方 Overview of What’s New in JDK 9baeldung New Features in Java 9">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-21T08:36:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.377Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="java9">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/11/21/java/20221121-java9-new-features/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 9新特性 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/11/21/java/20221121-java9-new-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 9新特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-21 16:36:00" itemprop="dateCreated datePublished" datetime="2022-11-21T16:36:00+08:00">2022-11-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>jdk 9 主要的新特性参考:<br>openjdk <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk9/">JDK 9</a><br>Oracle官方 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/9/whatsnew/toc.htm">Overview of What’s New in JDK 9</a><br>baeldung <a target="_blank" rel="noopener" href="https://www.baeldung.com/new-java-9">New Features in Java 9</a></p>
+<span id="more"></span>
+
+<h2 id="Java-模块化"><a href="#Java-模块化" class="headerlink" title="Java 模块化"></a>Java 模块化</h2><p>JPMS（Java Platform Module System）是Java 9发行版的核心亮点。它也被称为<a target="_blank" rel="noopener" href="https://openjdk.org/projects/jigsaw/">Jigshaw项目</a>。<br>项目目标是</p>
+<ul>
+<li>使Java SE平台和JDK 缩小尺寸能够在小型计算设备和密集云部署中使用；</li>
+<li>提高Java SE平台实现（特别是JDK）的安全性和可维护性；</li>
+<li>使开发人员更容易构建和维护库和大型应用程序；</li>
+<li>提高应用程序性能；</li>
+</ul>
+<p>JDK被拆分的模块 <a target="_blank" rel="noopener" href="http://cr.openjdk.java.net/~mr/jigsaw/jdk9-module-summary.html">http://cr.openjdk.java.net/~mr&#x2F;jigsaw&#x2F;jdk9-module-summary.html</a></p>
+<p>模块化的新手引导 <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jigsaw/quick-start">https://openjdk.org/projects/jigsaw/quick-start</a></p>
+<p>模块是多个package的集合，一个jar可以有多个module，一个module可以有多个package。代码上看<br><code>jar &gt; module &gt; package &gt; class/inteface</code></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/479857939">说明</a><br>Java9的模块通过<code>requires</code>和<code>exports</code>关键字，对自身所依赖（requires）的模块和自身暴露（exports）出去的内容（package）进行了声明。<br>本模块只能使用其他模块暴露（exports）出来的内容（package），其他模块也只能使用本模块暴露（exports）出去的内容（package）。</p>
+<h2 id="jshell"><a href="#jshell" class="headerlink" title="jshell"></a>jshell</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/222">JShell</a> 是 Java 9 新增的一个交互式的编程环境工具。<br>它允许你无需使用类或者方法包装来执行 Java 语句。它与 Python 的解释器类似，可以直接 输入表达式并查看其执行结果。<br>jshell还提供了供其他应用使用的API. <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/10/jshell/introduction-jshell.htm">具体使用文档</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ jshell</span><br><span class="line">|  欢迎使用 JShell -- 版本 17.0.2</span><br><span class="line">|  要大致了解该版本, 请键入: /help intro</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">jshell&gt; </span><span class="language-bash">/help intro</span></span><br><span class="line">|</span><br><span class="line">|                                   intro</span><br><span class="line">|                                   =====</span><br><span class="line">|</span><br><span class="line">|  使用 jshell 工具可以执行 Java 代码，从而立即获取结果。</span><br><span class="line">|  您可以输入 Java 定义（变量、方法、类等等），例如：int x = 8</span><br><span class="line">|  或 Java 表达式，例如：x + x</span><br><span class="line">|  或 Java 语句或导入。</span><br><span class="line">|  这些小块的 Java 代码称为“片段”。</span><br><span class="line">|</span><br><span class="line">|  这些 jshell 工具命令还可以让您了解和</span><br><span class="line">|  控制您正在执行的操作，例如：/list</span><br><span class="line">|</span><br><span class="line">|  有关命令的列表，请执行：/help</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">jshell&gt;</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash">jshell&gt; <span class="string">&quot;This is my long string. I want a part of it&quot;</span>.substring(8,19);</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">5 ==&gt; <span class="string">&quot;my long string&quot;</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">jshell&gt; </span><span class="language-bash">/save c:\develop\JShell_hello_world.txt</span></span><br><span class="line"><span class="meta prompt_">jshell&gt; </span><span class="language-bash">/open c:\develop\JShell_hello_world.txt</span></span><br><span class="line">Hello JShell!</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">jshell&gt; </span><span class="language-bash">/exit</span></span><br><span class="line">|  再见</span><br></pre></td></tr></table></figure>
+
+<h2 id="进程API"><a href="#进程API" class="headerlink" title="进程API"></a>进程API</h2><p>改进了用于控制和管理操作系统进程的API <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/102">https://openjdk.org/jeps/102</a> 。</p>
+<p>Java 9 向 Process API 添加了一个 <code>java.lang.ProcessHandle</code> 的接口来增强 <code>java.lang.Process</code> 类。</p>
+<p>实例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.time.ZoneId;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Collectors;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tester</span> &#123;</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">      <span class="type">ProcessBuilder</span> <span class="variable">pb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(<span class="string">&quot;notepad.exe&quot;</span>);</span><br><span class="line">      <span class="type">String</span> <span class="variable">np</span> <span class="operator">=</span> <span class="string">&quot;Not Present&quot;</span>;</span><br><span class="line">      <span class="type">Process</span> <span class="variable">p</span> <span class="operator">=</span> pb.start();</span><br><span class="line">      ProcessHandle.<span class="type">Info</span> <span class="variable">info</span> <span class="operator">=</span> p.info();</span><br><span class="line">      System.out.printf(<span class="string">&quot;Process ID : %s%n&quot;</span>, p.pid());</span><br><span class="line">      System.out.printf(<span class="string">&quot;Command name : %s%n&quot;</span>, info.command().orElse(np));</span><br><span class="line">      System.out.printf(<span class="string">&quot;Command line : %s%n&quot;</span>, info.commandLine().orElse(np));</span><br><span class="line"> </span><br><span class="line">      System.out.printf(<span class="string">&quot;Start time: %s%n&quot;</span>,</span><br><span class="line">         info.startInstant().map(i -&gt; i.atZone(ZoneId.systemDefault())</span><br><span class="line">         .toLocalDateTime().toString()).orElse(np));</span><br><span class="line"> </span><br><span class="line">      System.out.printf(<span class="string">&quot;Arguments : %s%n&quot;</span>,</span><br><span class="line">         info.arguments().map(a -&gt; Stream.of(a).collect(</span><br><span class="line">         Collectors.joining(<span class="string">&quot; &quot;</span>))).orElse(np));</span><br><span class="line"> </span><br><span class="line">      System.out.printf(<span class="string">&quot;User : %s%n&quot;</span>, info.user().orElse(np));</span><br><span class="line">   &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Process ID : 5800</span><br><span class="line">Command name : C:\Windows\System32\notepad.exe</span><br><span class="line">Command line : Not Present</span><br><span class="line">Start time: 2017-11-04T21:35:03.626</span><br><span class="line">Arguments : Not Present</span><br><span class="line">User: administrator</span><br></pre></td></tr></table></figure>
+
+<p>关闭子进程</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">childProc = ProcessHandle.current().children();</span><br><span class="line">childProc.forEach(procHandle -&gt; &#123;</span><br><span class="line">    assertTrue(<span class="string">&quot;Could not kill process &quot;</span> + procHandle.getPid(), procHandle.destroy());</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="一些小语法的变更"><a href="#一些小语法的变更" class="headerlink" title="一些小语法的变更"></a>一些小语法的变更</h2><p>具体参见 <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/213">https://openjdk.org/jeps/213</a></p>
+<h3 id="Try-With-Resources"><a href="#Try-With-Resources" class="headerlink" title="Try-With-Resources"></a>Try-With-Resources</h3><p>java 7中引入的<code>try-with-resources</code> 需要定一个新的变量来代表每个资源。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> (<span class="type">Resource</span> <span class="variable">r1</span> <span class="operator">=</span> resource1;</span><br><span class="line">             <span class="type">Resource</span> <span class="variable">r2</span> <span class="operator">=</span> resource2) &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>在java 9 中如果资源变量是<code>final</code>或者<code>表现成final</code>(<em>An “effectively final” variable is one whose value is never changed after it is initialized.</em>)的，就可以在<code>try-with-resources</code>中直接使用这个变量。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// A final resource</span></span><br><span class="line"><span class="keyword">final</span> <span class="type">Resource</span> <span class="variable">resource1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Resource</span>(<span class="string">&quot;resource1&quot;</span>);</span><br><span class="line"><span class="comment">// An effectively final resource</span></span><br><span class="line"><span class="type">Resource</span> <span class="variable">resource2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Resource</span>(<span class="string">&quot;resource2&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 多资源用分号隔开</span></span><br><span class="line"><span class="comment">// New and improved try-with-resources statement in Java SE 9</span></span><br><span class="line"><span class="keyword">try</span> (resource1; resource2) &#123;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="棱形运算符"><a href="#棱形运算符" class="headerlink" title="棱形运算符&lt;&gt;"></a>棱形运算符&lt;&gt;</h3><p>棱形运算符是java 7中引入的，可以让带吗更易读。但是他不能用于匿名内部类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">FooClass&lt;Integer&gt; fc = <span class="keyword">new</span> <span class="title class_">FooClass</span>&lt;&gt;(<span class="number">1</span>) &#123; <span class="comment">// anonymous inner class</span></span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line">FooClass&lt;? <span class="keyword">extends</span> <span class="title class_">Integer</span>&gt; fc0 = <span class="keyword">new</span> <span class="title class_">FooClass</span>&lt;&gt;(<span class="number">1</span>) &#123; </span><br><span class="line">    <span class="comment">// anonymous inner class</span></span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line">FooClass&lt;?&gt; fc1 = <span class="keyword">new</span> <span class="title class_">FooClass</span>&lt;&gt;(<span class="number">1</span>) &#123; <span class="comment">// anonymous inner class</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="接口私有方法"><a href="#接口私有方法" class="headerlink" title="接口私有方法"></a>接口私有方法</h3><p>java 9 允许接口中使用<code>私有方法</code>（目的是为了拆分冗长的默认方法 <code>default methods</code>）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">InterfaceWithPrivateMethods</span> &#123;</span><br><span class="line">    <span class="comment">// 可以是静态</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String <span class="title function_">staticPrivate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;static private&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 也可以不是静态</span></span><br><span class="line">    <span class="keyword">private</span> String <span class="title function_">instancePrivate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;instance private&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">default</span> <span class="keyword">void</span> <span class="title function_">check</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> staticPrivate();</span><br><span class="line">        <span class="type">InterfaceWithPrivateMethods</span> <span class="variable">pvt</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InterfaceWithPrivateMethods</span>() &#123;</span><br><span class="line">            <span class="comment">// anonymous class</span></span><br><span class="line">        &#125;;</span><br><span class="line">        result = pvt.instancePrivate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="String-存储结构变更"><a href="#String-存储结构变更" class="headerlink" title="String 存储结构变更"></a>String 存储结构变更</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/254">JEP 254</a><br>String 使用了更节省空间的内部存储结构。</p>
+<p>java 8 String</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="type">char</span> value[];</span><br></pre></td></tr></table></figure>
+
+<p>java 9 <a target="_blank" rel="noopener" href="https://github.com/AdoptOpenJDK/openjdk-jdk9/blob/master/jdk/src/java.base/share/classes/java/lang/String.java">String</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Stable</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="type">byte</span>[] value;</span><br></pre></td></tr></table></figure>
+<h2 id="集合增强"><a href="#集合增强" class="headerlink" title="集合增强"></a>集合增强</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/269">JEP 269</a><br>Java 9 List，Set 和 Map 接口中，新的静态工厂方法可以创建这些集合的<strong>不可变实例</strong>(Immutable)。提供了更简洁的方式创建集合。</p>
+<p>旧的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.HashSet;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tester</span> &#123;</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String []args)</span> &#123;</span><br><span class="line">      Set&lt;String&gt; set = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();</span><br><span class="line">      set.add(<span class="string">&quot;A&quot;</span>);</span><br><span class="line">      set.add(<span class="string">&quot;B&quot;</span>);</span><br><span class="line">      set.add(<span class="string">&quot;C&quot;</span>);</span><br><span class="line">      set = Collections.unmodifiableSet(set);</span><br><span class="line">      System.out.println(set);</span><br><span class="line">      List&lt;String&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"> </span><br><span class="line">      list.add(<span class="string">&quot;A&quot;</span>);</span><br><span class="line">      list.add(<span class="string">&quot;B&quot;</span>);</span><br><span class="line">      list.add(<span class="string">&quot;C&quot;</span>);</span><br><span class="line">      list = Collections.unmodifiableList(list);</span><br><span class="line">      System.out.println(list);</span><br><span class="line">      Map&lt;String, String&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line"> </span><br><span class="line">      map.put(<span class="string">&quot;A&quot;</span>,<span class="string">&quot;Apple&quot;</span>);</span><br><span class="line">      map.put(<span class="string">&quot;B&quot;</span>,<span class="string">&quot;Boy&quot;</span>);</span><br><span class="line">      map.put(<span class="string">&quot;C&quot;</span>,<span class="string">&quot;Cat&quot;</span>);</span><br><span class="line">      map = Collections.unmodifiableMap(map);</span><br><span class="line">      System.out.println(map);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[A, B, C]</span><br><span class="line">[A, B, C]</span><br><span class="line">&#123;A=Apple, B=Boy, C=Cat&#125;</span><br></pre></td></tr></table></figure>
+<p>Java 9 中创建</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.HashSet;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.AbstractMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tester</span> &#123;</span><br><span class="line"> </span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String []args)</span> &#123;</span><br><span class="line">      Set&lt;String&gt; set = Set.of(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>, <span class="string">&quot;C&quot;</span>);      </span><br><span class="line">      System.out.println(set);</span><br><span class="line">      List&lt;String&gt; list = List.of(<span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">      System.out.println(list);</span><br><span class="line">      Map&lt;String, String&gt; map = Map.of(<span class="string">&quot;A&quot;</span>,<span class="string">&quot;Apple&quot;</span>,<span class="string">&quot;B&quot;</span>,<span class="string">&quot;Boy&quot;</span>,<span class="string">&quot;C&quot;</span>,<span class="string">&quot;Cat&quot;</span>);</span><br><span class="line">      System.out.println(map);</span><br><span class="line">  </span><br><span class="line">      Map&lt;String, String&gt; map1 = Map.ofEntries (</span><br><span class="line">         <span class="keyword">new</span> <span class="title class_">AbstractMap</span>.SimpleEntry&lt;&gt;(<span class="string">&quot;A&quot;</span>,<span class="string">&quot;Apple&quot;</span>),</span><br><span class="line">         <span class="keyword">new</span> <span class="title class_">AbstractMap</span>.SimpleEntry&lt;&gt;(<span class="string">&quot;B&quot;</span>,<span class="string">&quot;Boy&quot;</span>),</span><br><span class="line">         <span class="keyword">new</span> <span class="title class_">AbstractMap</span>.SimpleEntry&lt;&gt;(<span class="string">&quot;C&quot;</span>,<span class="string">&quot;Cat&quot;</span>));</span><br><span class="line">      System.out.println(map1);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[A, B, C]</span><br><span class="line">[A, B, C]</span><br><span class="line">&#123;A=Apple, B=Boy, C=Cat&#125;</span><br><span class="line">&#123;A=Apple, B=Boy, C=Cat&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Stream-API-增强"><a href="#Stream-API-增强" class="headerlink" title="Stream API 增强"></a>Stream API 增强</h2><p>Java 9 改进的 Stream API 添加了一些便利的方法，使流处理更容易，并使用收集器编写复杂的查询。<br>Java 9 为 Stream 新增了几个方法：<code>dropWhile</code>、<code>takeWhile</code>、<code>ofNullable</code>，为 iterate 方法新增了一个重载方法。</p>
+<h3 id="takeWhile"><a href="#takeWhile" class="headerlink" title="takeWhile"></a>takeWhile</h3><p>takeWhile() 方法使用一个断言作为参数，返回给定 Stream 的子集直到断言语句第一次返回 false。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tester</span> &#123;</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">      Stream.of(<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>,<span class="string">&quot;&quot;</span>,<span class="string">&quot;e&quot;</span>,<span class="string">&quot;f&quot;</span>).takeWhile(s-&gt;!s.isEmpty())</span><br><span class="line">         .forEach(System.out::print);      </span><br><span class="line">   &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//abc  遇到满足条件的直接中断流， 注意与filter的区别</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="dropWhile"><a href="#dropWhile" class="headerlink" title="dropWhile"></a>dropWhile</h3><p>dropWhile 方法和 takeWhile 作用相反的，使用一个断言作为参数，直到断言语句第一次返回 false 才返回给定 Stream 的子集。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tester</span> &#123;</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">      Stream.of(<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>,<span class="string">&quot;&quot;</span>,<span class="string">&quot;e&quot;</span>,<span class="string">&quot;f&quot;</span>).dropWhile(s-&gt; !s.isEmpty())</span><br><span class="line">         .forEach(System.out::print);</span><br><span class="line">   &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ef 包含第一个不满足的元素</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="ofNullable"><a href="#ofNullable" class="headerlink" title="ofNullable"></a>ofNullable</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &lt;T&gt; Stream&lt;T&gt; <span class="title function_">ofNullable</span><span class="params">(T t)</span></span><br></pre></td></tr></table></figure>
+<p>ofNullable 方法可以预防 <code>NullPointerException</code> 异常， 可以通过检查流来避免 null 值。<br>如果指定元素为非 null，则获取一个元素并生成<strong>单个元素流</strong>，元素为 null 则返回一个空流。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tester</span> &#123;</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">      <span class="type">long</span> <span class="variable">count</span> <span class="operator">=</span> Stream.ofNullable(<span class="number">100</span>).count();</span><br><span class="line">      System.out.println(count);</span><br><span class="line">  </span><br><span class="line">      count = Stream.ofNullable(<span class="literal">null</span>).count();</span><br><span class="line">      System.out.println(count);</span><br><span class="line">   &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1</span></span><br><span class="line"><span class="comment">// 0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="iterate-方法"><a href="#iterate-方法" class="headerlink" title="iterate 方法"></a>iterate 方法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &lt;T&gt; Stream&lt;T&gt; <span class="title function_">iterate</span><span class="params">(T seed, Predicate&lt;? <span class="built_in">super</span> T&gt; hasNext, UnaryOperator&lt;T&gt; next)</span></span><br></pre></td></tr></table></figure>
+<p>方法允许使用初始种子值的迭代来创建一个顺序的（可能是无限）流 。 当指定的 hasNext 的 predicate 返回 false 时，迭代停止。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">java.util.stream.IntStream;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tester</span> &#123;</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">      IntStream.iterate(<span class="number">3</span>, x -&gt; x &lt; <span class="number">10</span>, x -&gt; x+ <span class="number">3</span>).forEach(System.out::println);</span><br><span class="line">   &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3 6 9</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Deprecated"><a href="#Deprecated" class="headerlink" title="@Deprecated"></a>@Deprecated</h2><p>注解 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/9/docs/api/java/lang/Deprecated.html">@Deprecated</a> 可以标记 Java API 状态，可以是以下几种：</p>
+<ul>
+<li>使用它存在风险，可能导致错误</li>
+<li>可能在未来版本中不兼容</li>
+<li>可能在未来版本中删除</li>
+<li>一个更好和更高效的方案已经取代它</li>
+</ul>
+<p>Java 9 中注解增加了两个新元素：<code>since</code> 和 <code>forRemoval</code>。</p>
+<ul>
+<li>(String) since: 指定已注解的API元素已被弃用的版本。</li>
+<li>(boolean) forRemoval: 表示是否在将来的版本中删除带注释的元素。默认值为false。</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/9/docs/api/java/lang/System.html#runFinalizersOnExit-boolean-">使用参见 <code>System</code>文档</a></p>
+<h2 id="改进Optional类"><a href="#改进Optional类" class="headerlink" title="改进Optional类"></a>改进Optional类</h2><p>Optional 类在 Java 8 中引入，Optional 类的引入很好的解决空指针异常。在 Java 9 中, 添加了三个方法来改进它的功能：</p>
+<ul>
+<li>stream()</li>
+<li>ifPresentOrElse()</li>
+<li>or()</li>
+</ul>
+<h3 id="stream"><a href="#stream" class="headerlink" title="stream()"></a>stream()</h3><p>stream 方法的作用就是将 Optional 转为一个 Stream，如果该 Optional 中包含值，那么就返回包含这个值的 Stream，否则返回一个空的 Stream（<code>Stream.empty()</code>）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.Optional;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Collectors;</span><br><span class="line"><span class="keyword">import</span> java.util.stream.Stream;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tester</span> &#123;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">   List&lt;Optional&lt;String&gt;&gt; list = Arrays.asList (</span><br><span class="line">      Optional.empty(), </span><br><span class="line">      Optional.of(<span class="string">&quot;A&quot;</span>), </span><br><span class="line">      Optional.empty(), </span><br><span class="line">      Optional.of(<span class="string">&quot;B&quot;</span>));</span><br><span class="line"> </span><br><span class="line">      <span class="comment">//filter the list based to print non-empty values</span></span><br><span class="line">  </span><br><span class="line">      <span class="comment">//if optional is non-empty, get the value in stream, otherwise return empty</span></span><br><span class="line">      List&lt;String&gt; filteredList = list.stream()</span><br><span class="line">         .flatMap(o -&gt; o.isPresent() ? Stream.of(o.get()) : Stream.empty())</span><br><span class="line">         .collect(Collectors.toList());</span><br><span class="line"> </span><br><span class="line">      <span class="comment">//Optional::stream method will return a stream of either one </span></span><br><span class="line">      <span class="comment">//or zero element if data is present or not.</span></span><br><span class="line">      List&lt;String&gt; filteredListJava9 = list.stream()</span><br><span class="line">         .flatMap(Optional::stream)</span><br><span class="line">         .collect(Collectors.toList());</span><br><span class="line"> </span><br><span class="line">      System.out.println(filteredList);</span><br><span class="line">      System.out.println(filteredListJava9);</span><br><span class="line">   &#125;  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//[A, B]</span></span><br><span class="line"><span class="comment">//[A, B]</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="多分辨率图像-API"><a href="#多分辨率图像-API" class="headerlink" title="多分辨率图像 API"></a>多分辨率图像 API</h2><p>在 <code>java.awt.image</code> 包下新增了支持多分辨率图片的API，用于支持多分辨率的图片。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.net.URL;</span><br><span class="line"><span class="keyword">import</span> java.net.MalformedURLException;</span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.awt.Image;</span><br><span class="line"><span class="keyword">import</span> java.awt.image.MultiResolutionImage;</span><br><span class="line"><span class="keyword">import</span> java.awt.image.BaseMultiResolutionImage;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.imageio.ImageIO;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tester</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, MalformedURLException &#123;</span><br><span class="line"></span><br><span class="line">        List&lt;String&gt; imgUrls = List.of(<span class="string">&quot;https://www.aaa.com/1.png&quot;</span>, </span><br><span class="line">            <span class="string">&quot;https://www.aaa.com/2.png&quot;</span>,</span><br><span class="line">            <span class="string">&quot;https://www.bbb.com/3.png&quot;</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;Image&gt; images = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Image&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (String url : imgUrls) &#123;</span><br><span class="line">            images.add(ImageIO.read(<span class="keyword">new</span> <span class="title class_">URL</span>(url)));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 读取所有图片</span></span><br><span class="line">        <span class="type">MultiResolutionImage</span> <span class="variable">multiResolutionImage</span> <span class="operator">=</span></span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">BaseMultiResolutionImage</span>(images.toArray(<span class="keyword">new</span> <span class="title class_">Image</span>[<span class="number">0</span>]));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 获取图片的所有分辨率</span></span><br><span class="line">        List&lt;Image&gt; variants = multiResolutionImage.getResolutionVariants();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;Total number of images: &quot;</span> + variants.size());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (Image img : variants) &#123;</span><br><span class="line">            System.out.println(img);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 根据不同尺寸获取对应的图像分辨率</span></span><br><span class="line">        <span class="type">Image</span> <span class="variable">variant1</span> <span class="operator">=</span> multiResolutionImage.getResolutionVariant(<span class="number">156</span>, <span class="number">45</span>);</span><br><span class="line">        System.out.printf(<span class="string">&quot;\nImage for destination[%d,%d]: [%d,%d]&quot;</span>,</span><br><span class="line">            <span class="number">156</span>, <span class="number">45</span>, variant1.getWidth(<span class="literal">null</span>), variant1.getHeight(<span class="literal">null</span>));</span><br><span class="line"></span><br><span class="line">        <span class="type">Image</span> <span class="variable">variant2</span> <span class="operator">=</span> multiResolutionImage.getResolutionVariant(<span class="number">311</span>, <span class="number">89</span>);</span><br><span class="line">        System.out.printf(<span class="string">&quot;\nImage for destination[%d,%d]: [%d,%d]&quot;</span>, <span class="number">311</span>, <span class="number">89</span>,</span><br><span class="line">            variant2.getWidth(<span class="literal">null</span>), variant2.getHeight(<span class="literal">null</span>));</span><br><span class="line"></span><br><span class="line">        <span class="type">Image</span> <span class="variable">variant3</span> <span class="operator">=</span> multiResolutionImage.getResolutionVariant(<span class="number">622</span>, <span class="number">178</span>);</span><br><span class="line">        System.out.printf(<span class="string">&quot;\nImage for destination[%d,%d]: [%d,%d]&quot;</span>, <span class="number">622</span>, <span class="number">178</span>,</span><br><span class="line">            variant3.getWidth(<span class="literal">null</span>), variant3.getHeight(<span class="literal">null</span>));</span><br><span class="line"></span><br><span class="line">        <span class="type">Image</span> <span class="variable">variant4</span> <span class="operator">=</span> multiResolutionImage.getResolutionVariant(<span class="number">300</span>, <span class="number">300</span>);</span><br><span class="line">        System.out.printf(<span class="string">&quot;\nImage for destination[%d,%d]: [%d,%d]&quot;</span>, <span class="number">300</span>, <span class="number">300</span>,</span><br><span class="line">            variant4.getWidth(<span class="literal">null</span>), variant4.getHeight(<span class="literal">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="HTTP-2-Client-Incubator"><a href="#HTTP-2-Client-Incubator" class="headerlink" title="HTTP&#x2F;2 Client (Incubator)"></a>HTTP&#x2F;2 Client (Incubator)</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/110">JEP 110</a></p>
+<p>A long-awaited replacement of the old HttpURLConnection.</p>
+<p>It should support both HTTP&#x2F;2 protocol and WebSocket handshake, with performance that should be comparable with the Apache HttpClient, Netty and Jetty.</p>
+<p>Let have a look at this new functionality by creating and sending a simple HTTP request.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HttpRequest</span> <span class="variable">request</span> <span class="operator">=</span> HttpRequest.newBuilder()</span><br><span class="line">  .uri(<span class="keyword">new</span> <span class="title class_">URI</span>(<span class="string">&quot;https://postman-echo.com/get&quot;</span>))</span><br><span class="line">  .GET()</span><br><span class="line">  .build();</span><br><span class="line"></span><br><span class="line">HttpResponse&lt;String&gt; response = HttpClient.newHttpClient()</span><br><span class="line">  .send(request, HttpResponse.BodyHandler.asString());</span><br></pre></td></tr></table></figure>
+
+<p>The HTTP Client JEP is being moved to Incubator module, so it is no longer available in the package java.net.http and instead is available under jdk.incubator.http.</p>
+<p>全新的 HTTP 客户端 API 可以从 jdk.incubator.httpclient 模块中获取。因为在默认情况下，这个模块是不能根据 classpath 获取的，需要使用 add modules 命令选项配置这个模块，将这个模块添加到 classpath中。</p>
+<h2 id="CompletableFuture-API"><a href="#CompletableFuture-API" class="headerlink" title="CompletableFuture API"></a>CompletableFuture API</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/266">JEP 266</a></p>
+<p>Java 8 引入了 <code>CompletableFuture&lt;T&gt;</code> 类，支持 future 完成时触发一些依赖的函数和动作。<br>Java 9 引入了一些 CompletableFuture 的改进 (支持延迟和超时，抽象出一个工具类和一些实用方法)：</p>
+<ul>
+<li>Time-based enhancements are added that enable a future to complete with a value or exceptionally after a certain duration, see methods orTimeout and completeTimeout. In addition, a complementary Executor returned by the static methods named delayedExecutor allow a task to execute after a certain duration. This may be combined with Executor receiving methods on CompletableFuture to support operations with time-delays.</li>
+<li>Subclass enhancements are added making it easier to extend from CompletableFuture, such as to provide a subclass that supports an alternative default executor.</li>
+</ul>
+<p>代码方面，API提供了八种新方法和五种新的静态方法。根据Open JDK描述，为了实现这样的添加，大约2400个代码行中的1500处被更改。</p>
+<h3 id="支持超时和延迟"><a href="#支持超时和延迟" class="headerlink" title="支持超时和延迟"></a>支持超时和延迟</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> CompletableFuture&lt;T&gt; <span class="title function_">orTimeout</span><span class="params">(<span class="type">long</span> timeout, TimeUnit unit)</span></span><br></pre></td></tr></table></figure>
+<p>上面的方法已用于指定任务是否在一定时间内未完成，程序会停止并抛出TimeoutException。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> CompletableFuture&lt;T&gt; <span class="title function_">completeOnTimeout</span><span class="params">(T value, <span class="type">long</span> timeout, TimeUnit unit)</span></span><br></pre></td></tr></table></figure>
+<p>上面的方法用提供的value完成了CompletableFuture 。如果没有，它将在给定的超时之前完成。</p>
+<h3 id="改进了对子类的支持"><a href="#改进了对子类的支持" class="headerlink" title="改进了对子类的支持"></a>改进了对子类的支持</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Executor <span class="title function_">defaultExecutor</span><span class="params">()</span></span><br></pre></td></tr></table></figure>
+<p>上面的方法返回用于不显示执行程序的异步方法的默认 执行程序 。在子类中可以重写它，以返回执行器以提供至少一个独立 线程。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;U&gt; CompletableFuture&lt;U&gt; <span class="title function_">newIncompleteFuture</span><span class="params">()</span></span><br></pre></td></tr></table></figure>
+<p>上面的方法返回要由<code>CompletionStage</code> 方法返回的规范的新的不完整的 <code>CompletableFuture</code> 。</p>
+<h3 id="新工厂方法"><a href="#新工厂方法" class="headerlink" title="新工厂方法"></a>新工厂方法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;U&gt; CompletableFuture&lt;U&gt; <span class="title function_">completedFuture</span><span class="params">(U value)</span></span><br></pre></td></tr></table></figure>
+<p>上面的工厂方法返回一个新的<code>CompletableFuture</code> ，它已经使用提供的值完成了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;U&gt; CompletionStage&lt;U&gt; <span class="title function_">completedStage</span><span class="params">(U value)</span></span><br></pre></td></tr></table></figure>
+<p>上面的工厂方法返回一个新的<code>CompletionStage</code>，该新的<code>CompletionStage</code>用提供的值之前完成 ，并且仅与接口<code>CompletionStage</code>中可用的那些方法兼容。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java9/" rel="tag"># java9</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/19/fun/20221119-install-azerothcore-mod/" rel="prev" title="AzerothCore 安装Mod">
+      <i class="fa fa-chevron-left"></i> AzerothCore 安装Mod
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/22/note/20221122-git-remove-all-history/" rel="next" title="删除git远程仓库所有提交记录">
+      删除git远程仓库所有提交记录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Java-%E6%A8%A1%E5%9D%97%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">Java 模块化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jshell"><span class="nav-number">2.</span> <span class="nav-text">jshell</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8BAPI"><span class="nav-number">3.</span> <span class="nav-text">进程API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E5%B0%8F%E8%AF%AD%E6%B3%95%E7%9A%84%E5%8F%98%E6%9B%B4"><span class="nav-number">4.</span> <span class="nav-text">一些小语法的变更</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Try-With-Resources"><span class="nav-number">4.1.</span> <span class="nav-text">Try-With-Resources</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A3%B1%E5%BD%A2%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">4.2.</span> <span class="nav-text">棱形运算符&lt;&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E7%A7%81%E6%9C%89%E6%96%B9%E6%B3%95"><span class="nav-number">4.3.</span> <span class="nav-text">接口私有方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#String-%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E5%8F%98%E6%9B%B4"><span class="nav-number">5.</span> <span class="nav-text">String 存储结构变更</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%86%E5%90%88%E5%A2%9E%E5%BC%BA"><span class="nav-number">6.</span> <span class="nav-text">集合增强</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stream-API-%E5%A2%9E%E5%BC%BA"><span class="nav-number">7.</span> <span class="nav-text">Stream API 增强</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#takeWhile"><span class="nav-number">7.1.</span> <span class="nav-text">takeWhile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dropWhile"><span class="nav-number">7.2.</span> <span class="nav-text">dropWhile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ofNullable"><span class="nav-number">7.3.</span> <span class="nav-text">ofNullable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iterate-%E6%96%B9%E6%B3%95"><span class="nav-number">7.4.</span> <span class="nav-text">iterate 方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deprecated"><span class="nav-number">8.</span> <span class="nav-text">@Deprecated</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%B9%E8%BF%9BOptional%E7%B1%BB"><span class="nav-number">9.</span> <span class="nav-text">改进Optional类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#stream"><span class="nav-number">9.1.</span> <span class="nav-text">stream()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E5%88%86%E8%BE%A8%E7%8E%87%E5%9B%BE%E5%83%8F-API"><span class="nav-number">10.</span> <span class="nav-text">多分辨率图像 API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-2-Client-Incubator"><span class="nav-number">11.</span> <span class="nav-text">HTTP&#x2F;2 Client (Incubator)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CompletableFuture-API"><span class="nav-number">12.</span> <span class="nav-text">CompletableFuture API</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E8%B6%85%E6%97%B6%E5%92%8C%E5%BB%B6%E8%BF%9F"><span class="nav-number">12.1.</span> <span class="nav-text">支持超时和延迟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B9%E8%BF%9B%E4%BA%86%E5%AF%B9%E5%AD%90%E7%B1%BB%E7%9A%84%E6%94%AF%E6%8C%81"><span class="nav-number">12.2.</span> <span class="nav-text">改进了对子类的支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95"><span class="nav-number">12.3.</span> <span class="nav-text">新工厂方法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="近期AIGC比较火热，看下是否能帮助业务做一些提效降本的事情。首先尝试一下 Stable Diffusion。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Stable Diffusion 初探">
+<meta property="og:url" content="https://forgives.github.io/2023/02/27/note/20230227-stable-diffusion/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="近期AIGC比较火热，看下是否能帮助业务做一些提效降本的事情。首先尝试一下 Stable Diffusion。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-02-27T03:38:17.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.387Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="sd">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2023/02/27/note/20230227-stable-diffusion/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Stable Diffusion 初探 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/02/27/note/20230227-stable-diffusion/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Stable Diffusion 初探
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-02-27 11:38:17" itemprop="dateCreated datePublished" datetime="2023-02-27T11:38:17+08:00">2023-02-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AIGC/" itemprop="url" rel="index"><span itemprop="name">AIGC</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>近期AIGC比较火热，看下是否能帮助业务做一些提效降本的事情。首先尝试一下 <code>Stable Diffusion</code>。</p>
+<span id="more"></span>
+
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>安装<code>python3.10+</code>版本，测试<code>python3.11</code>不支持。</p>
+<p>clone <a target="_blank" rel="noopener" href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">stable-diffusion-webui</a> 到本地。</p>
+<p>下载对应模型，这里下载默认模型 Stable Diffusion 1.5 (<a target="_blank" rel="noopener" href="https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.ckpt">v1-5-pruned-emaonly.ckpt</a>),<br>模型放入 <code>stable-diffusion-webui/models/Stable-diffusion</code> 目录下。</p>
+<p>配置一下<code>webui-user.sh</code> 设置一下指定的python执行文件以及对应的虚拟环境目录</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># python3 executable</span><br><span class="line">python_cmd=&quot;/usr/local/bin/python3.10&quot;</span><br><span class="line"></span><br><span class="line"># git executable</span><br><span class="line">#export GIT=&quot;git&quot;</span><br><span class="line"></span><br><span class="line"># python3 venv without trailing slash (defaults to $&#123;install_dir&#125;/$&#123;clone_dir&#125;/venv)</span><br><span class="line">venv_dir=&quot;venv&quot;</span><br></pre></td></tr></table></figure>
+<p>直接执行 <code>webui.sh</code> 即可，中途会下载很多依赖，最好全局科学上网，否则会很慢。</p>
+<p>最终显示</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Textual inversion embeddings loaded(0):</span><br><span class="line">Model loaded in 25.0s (calculate hash: 3.0s, load weights from disk: 2.0s, create model: 14.3s, apply weights to model: 2.5s, apply half(): 2.3s, move model to device: 0.7s, load textual inversion embeddings: 0.2s).</span><br><span class="line">Running on local URL:  http://127.0.0.1:7860</span><br></pre></td></tr></table></figure>
+<p>表示已经启动成功。</p>
+<h2 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h2><p>request.urlopen(url) 报错：<strong>CERTIFICATE_VERIFY_FAILED</strong></p>
+<p>修改 <code>stable-diffusion-webui/modules/ui_extensions.py</code> (参考异常栈) ， 修改成如下代码，不校验证书。【<a target="_blank" rel="noopener" href="https://www.jb51.net/article/194807.htm">参考</a>】</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">import ssl</span><br><span class="line">......</span><br><span class="line">    context = ssl._create_unverified_context()</span><br><span class="line">    import urllib.request</span><br><span class="line">    with urllib.request.urlopen(url,context=context) as response:</span><br><span class="line">        text = response.read()</span><br></pre></td></tr></table></figure>
+
+<h2 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h2><h3 id="Torch"><a href="#Torch" class="headerlink" title="Torch"></a>Torch</h3><p><a target="_blank" rel="noopener" href="http://torch.ch/">Torch</a> 是一个支持机器深度学习的科学计算框架，优先使用GPU。</p>
+<p><a target="_blank" rel="noopener" href="https://pytorch.org/">PyTorch</a> PyTorch是一个开源的<code>Python</code>机器学习库，基于<code>Torch</code>，用于自然语言处理等应用程序。<br>PyTorch的前身是Torch，其底层和Torch框架一样，但是使用Python重新写了很多内容，不仅更加灵活，支持动态图，而且提供了Python接口。<br>它是由Facebook人工智能研究院（FAIR）推出的一个Python深度学习框架，不仅能够实现强大的GPU加速，同时还支持动态神经网络。</p>
+<h3 id="cuda"><a href="#cuda" class="headerlink" title="cuda"></a>cuda</h3><p><a target="_blank" rel="noopener" href="https://www.nvidia.cn/geforce/technologies/cuda/">CUDA</a>（Compute Unified Device Architecture）是 <code>NVIDIA</code> 发明的一种并行计算平台和编程模型。它通过利用图形处理器 (<code>GPU</code>) 的处理能力，可大幅提升计算性能。</p>
+<p>cuda版本 与 先看驱动版本对应关系: <a target="_blank" rel="noopener" href="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cuda-major-component-versions">https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/index.html#cuda-major-component-versions</a><br>安装教程 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/349729620">配置显卡cuda与配置pytorch</a><br><a target="_blank" rel="noopener" href="https://developer.nvidia.com/cuda-toolkit-archive">cuda下载</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.nvidia.com/rdp/cudnn-archive">cuDNN</a> 是NVIDIA 推出的用于深度神经网络的GPU加速库，他强调性能，易用性和低内存开销。<a target="_blank" rel="noopener" href="https://developer.nvidia.com/rdp/cudnn-download">cudnn下载</a><br>安装教程 <a target="_blank" rel="noopener" href="https://blog.csdn.net/Jin1Yang/article/details/124754015">Cuda和Cudnn详细安装教程</a><br>参考 <a target="_blank" rel="noopener" href="https://blog.csdn.net/u014380165/article/details/77340765">GPU，CUDA，cuDNN的理解</a></p>
+<h3 id="xformers"><a href="#xformers" class="headerlink" title="xformers"></a>xformers</h3><p><a target="_blank" rel="noopener" href="https://github.com/facebookresearch/xformers">xformers</a> 优化加速图片生成。</p>
+<h3 id="kohya-ss"><a href="#kohya-ss" class="headerlink" title="kohya_ss"></a>kohya_ss</h3><p><a target="_blank" rel="noopener" href="https://github.com/bmaltais/kohya_ss">kohya_ss</a> This repository provides a Windows-focused Gradio GUI for Kohya’s Stable Diffusion trainers. The GUI allows you to set the training parameters and generate and run the required CLI commands to train the model.<br>模型训练的图形程序。</p>
+<p>安装</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/bmaltais/kohya_ss.git</span><br><span class="line">cd kohya_ss</span><br><span class="line"></span><br><span class="line">python -m venv venv</span><br><span class="line">.\venv\Scripts\activate</span><br><span class="line"></span><br><span class="line">pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116</span><br><span class="line">pip install --use-pep517 --upgrade -r requirements.txt</span><br><span class="line">pip install -U -I --no-deps https://github.com/C43H66N12O12S2/stable-diffusion-webui/releases/download/f/xformers-0.0.14.dev0-cp310-cp310-win_amd64.whl</span><br><span class="line"></span><br><span class="line">cp .\bitsandbytes_windows\*.dll .\venv\Lib\site-packages\bitsandbytes\</span><br><span class="line">cp .\bitsandbytes_windows\cextension.py .\venv\Lib\site-packages\bitsandbytes\cextension.py</span><br><span class="line">cp .\bitsandbytes_windows\main.py .\venv\Lib\site-packages\bitsandbytes\cuda_setup\main.py</span><br><span class="line"></span><br><span class="line">accelerate config</span><br></pre></td></tr></table></figure>
+
+<h3 id="dreambooth"><a href="#dreambooth" class="headerlink" title="dreambooth"></a>dreambooth</h3><p><a target="_blank" rel="noopener" href="https://huggingface.co/docs/diffusers/training/dreambooth">dreambooth</a> is a method to personalize text-to-image models like stable diffusion given just a few (3~5) images of a subject.<br>少量图片的训练方法。</p>
+<h3 id="Gradio"><a href="#Gradio" class="headerlink" title="Gradio"></a>Gradio</h3><p><a target="_blank" rel="noopener" href="https://github.com/gradio-app/gradio">gradio</a> 开源的 <code>Python</code> 框架，用于快速搭建机器学习与数据科学的web应用。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">stable-diffusion-webui</a></p>
+<p><a target="_blank" rel="noopener" href="https://civitai.com/">civitai</a></p>
+<p><a target="_blank" rel="noopener" href="https://civitai.com/models/3666/protogen-x34-photorealism-official-release">Protogen x3.4</a></p>
+<p><a target="_blank" rel="noopener" href="https://huggingface.co/lllyasviel/ControlNet">ControlNet</a><br><a target="_blank" rel="noopener" href="https://github.com/lllyasviel/ControlNet">ControlNet GitHUb</a></p>
+<p><a target="_blank" rel="noopener" href="https://huggingface.co/docs/diffusers/quicktour">Diffusers 文档</a></p>
+<p><a target="_blank" rel="noopener" href="https://huggingface.co/blog/dreambooth">dreambooth 说明</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/sd/" rel="tag"># sd</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/22/java/20230222-g1-gc/" rel="prev" title="G1垃圾回收器">
+      <i class="fa fa-chevron-left"></i> G1垃圾回收器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/28/algo/5-longest-palindromic-substring/" rel="next" title="Longest Palindromic Substring">
+      Longest Palindromic Substring <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">1.</span> <span class="nav-text">环境准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95"><span class="nav-number">2.</span> <span class="nav-text">问题记录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AF%E8%AF%AD"><span class="nav-number">3.</span> <span class="nav-text">术语</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Torch"><span class="nav-number">3.1.</span> <span class="nav-text">Torch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cuda"><span class="nav-number">3.2.</span> <span class="nav-text">cuda</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#xformers"><span class="nav-number">3.3.</span> <span class="nav-text">xformers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kohya-ss"><span class="nav-number">3.4.</span> <span class="nav-text">kohya_ss</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dreambooth"><span class="nav-number">3.5.</span> <span class="nav-text">dreambooth</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gradio"><span class="nav-number">3.6.</span> <span class="nav-text">Gradio</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

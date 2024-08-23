@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="vanilla-js-dom 的使用教程 :) https:&#x2F;&#x2F;github.com&#x2F;Haeresis&#x2F;vanilla-js-dom&#x2F;blob&#x2F;master&#x2F;README.md github地址：https:&#x2F;&#x2F;github.com&#x2F;Haeresis&#x2F;vanilla-js-dom Vanilla JS其实你什么框架都不需要！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="原生js替代JQuery">
+<meta property="og:url" content="https://forgives.github.io/2019/02/26/web/just-use-javascript/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="vanilla-js-dom 的使用教程 :) https:&#x2F;&#x2F;github.com&#x2F;Haeresis&#x2F;vanilla-js-dom&#x2F;blob&#x2F;master&#x2F;README.md github地址：https:&#x2F;&#x2F;github.com&#x2F;Haeresis&#x2F;vanilla-js-dom Vanilla JS其实你什么框架都不需要！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-02-26T07:16:10.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.393Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="js">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2019/02/26/web/just-use-javascript/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>原生js替代JQuery | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2019/02/26/web/just-use-javascript/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          原生js替代JQuery
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-02-26 15:16:10" itemprop="dateCreated datePublished" datetime="2019-02-26T15:16:10+08:00">2019-02-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web/" itemprop="url" rel="index"><span itemprop="name">web</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>vanilla-js-dom 的使用教程 :)</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Haeresis/vanilla-js-dom/blob/master/README.md">https://github.com/Haeresis/vanilla-js-dom/blob/master/README.md</a></p>
+<p>github地址：<br><a target="_blank" rel="noopener" href="https://github.com/Haeresis/vanilla-js-dom">https://github.com/Haeresis/vanilla-js-dom</a></p>
+<h1 id="Vanilla-JS"><a href="#Vanilla-JS" class="headerlink" title="Vanilla JS"></a>Vanilla JS</h1><p><strong>其实你什么框架都不需要！</strong></p>
+<span id="more"></span>
+
+<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>Vanilla JS is a fast, lightweight, cross-platform tool for building incredible, powerful JavaScript applications.</p>
+<h3 id="Use-in-Development"><a href="#Use-in-Development" class="headerlink" title="Use in Development"></a>Use in Development</h3><p>Just put the following code:</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- &lt;script src=&quot;path/to/vanilla.js&quot;&gt;&lt;/script&gt; --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Use-in-Production"><a href="#Use-in-Production" class="headerlink" title="Use in Production"></a>Use in Production</h3><p>The much faster method:</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<h2 id="Speed-Comparison"><a href="#Speed-Comparison" class="headerlink" title="Speed Comparison"></a>Speed Comparison</h2><p>When Vanilla JS perform 100 operations, others do:</p>
+<h3 id="Retrieve-DOM-element-by-ID"><a href="#Retrieve-DOM-element-by-ID" class="headerlink" title="Retrieve DOM element by ID"></a>Retrieve DOM element by ID</h3><table>
+<thead>
+<tr>
+<th></th>
+<th align="left">Code</th>
+<th align="right">100 ops Vanilla JS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vanilla JS</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/RWeqaB">document.getElementById(‘vanilla’);</a></td>
+<td align="right">100</td>
+</tr>
+<tr>
+<td>Dojo</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/yYQjxp">dojo.byId(‘dojo’);</a></td>
+<td align="right">92</td>
+</tr>
+<tr>
+<td>Prototype JS</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/yYQjEP">$(‘prototype’);</a></td>
+<td align="right">57</td>
+</tr>
+<tr>
+<td>jQuery</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/EVOLLe">$(‘#jquery’);</a></td>
+<td align="right">42</td>
+</tr>
+<tr>
+<td>MooTools</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/gaQzQr">document.id(‘mootools’);</a></td>
+<td align="right">24</td>
+</tr>
+</tbody></table>
+<h3 id="Retrieve-10-DOM-elements-by-tag-name"><a href="#Retrieve-10-DOM-elements-by-tag-name" class="headerlink" title="Retrieve 10 DOM elements by tag name"></a>Retrieve 10 DOM elements by tag name</h3><table>
+<thead>
+<tr>
+<th></th>
+<th align="left">Code</th>
+<th align="right">100 ops Vanilla JS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vanilla JS</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/BoGVzd">document.getElementsByTagName(‘div’);</a></td>
+<td align="right">100</td>
+</tr>
+<tr>
+<td>Prototype JS</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/LpXrOG">Prototype.Selector.select(‘div’, document);</a></td>
+<td align="right">25</td>
+</tr>
+<tr>
+<td>jQuery</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/BoGVmJ">$(‘div’);</a></td>
+<td align="right">21</td>
+</tr>
+<tr>
+<td>Dojo</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/dYQKJX">dojo.query(‘div’);</a></td>
+<td align="right">3</td>
+</tr>
+<tr>
+<td>MooTools</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/qOQKxO">Slick.search(document, ‘div’, new Elements);</a></td>
+<td align="right">2</td>
+</tr>
+</tbody></table>
+<h3 id="Vanilla-JS-vs-jQuery"><a href="#Vanilla-JS-vs-jQuery" class="headerlink" title="Vanilla JS vs jQuery"></a>Vanilla JS vs jQuery</h3><h4 id="Retrieve-10-DOM-elements-by-class-name"><a href="#Retrieve-10-DOM-elements-by-class-name" class="headerlink" title="Retrieve 10 DOM elements by class name"></a>Retrieve 10 DOM elements by class name</h4><table>
+<thead>
+<tr>
+<th></th>
+<th align="left">Code</th>
+<th align="right">100 ops Vanilla JS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vanilla JS</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/ZbmRMN">document.getElementsByClassName(‘vanilla’);</a></td>
+<td align="right">100</td>
+</tr>
+<tr>
+<td>jQuery</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/jbQKeQ">$(‘.jquery’);</a></td>
+<td align="right">25</td>
+</tr>
+</tbody></table>
+<h4 id="Retrieve-DOM-element-with-inner-span-selector"><a href="#Retrieve-DOM-element-with-inner-span-selector" class="headerlink" title="Retrieve DOM element with &lt;#id&gt; .inner span selector"></a>Retrieve DOM element with <code>&lt;#id&gt; .inner span</code> selector</h4><table>
+<thead>
+<tr>
+<th></th>
+<th align="left">Code</th>
+<th align="right">100 ops Vanilla JS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vanilla JS</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/PPxaVQ">document.querySelector(‘#vanilla .inner span’);</a></td>
+<td align="right">100</td>
+</tr>
+<tr>
+<td>jQuery</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/YyRvgQ">$(‘#jquery .inner span’);</a></td>
+<td align="right">17</td>
+</tr>
+</tbody></table>
+<h4 id="Retrieve-10-DOM-elements-with-inner-span-selector"><a href="#Retrieve-10-DOM-elements-with-inner-span-selector" class="headerlink" title="Retrieve 10 DOM elements with &lt;.className&gt; .inner span selector"></a>Retrieve 10 DOM elements with <code>&lt;.className&gt; .inner span</code> selector</h4><table>
+<thead>
+<tr>
+<th></th>
+<th align="left">Code</th>
+<th align="right">100 ops Vanilla JS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vanilla JS</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/gaQKJv">document.querySelectorAll(‘.vanilla .inner span’);</a></td>
+<td align="right">100</td>
+</tr>
+<tr>
+<td>jQuery</td>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/ojQyrZ">$(‘.jquery .inner span’);</a></td>
+<td align="right">51</td>
+</tr>
+</tbody></table>
+<h3 id="Vanilla-JS-Selector-Performances"><a href="#Vanilla-JS-Selector-Performances" class="headerlink" title="Vanilla JS Selector Performances"></a>Vanilla JS Selector Performances</h3><p>All tests are based on <code>&lt;section id=&quot;vanilla&quot; class=&quot;vanilla&quot;&gt;&lt;article class=&quot;inner&quot;&gt;&lt;div class=&quot;target&quot; id=&quot;target&quot;&gt;&lt;/div&gt;&lt;/article&gt;&lt;/section&gt;</code> HTML.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Select node <code>&lt;div class=&quot;target&quot; id=&quot;target&quot;&gt;&lt;/div&gt;</code></th>
+<th align="right">100 ops Vanilla JS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/PPxdWo">document.getElementsByTagName(‘div’);</a></td>
+<td align="right">100</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/xwQaEz">document.getElementById(‘target’);</a></td>
+<td align="right">99</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/epQLBG">document.getElementsByClassName(‘target’);</a></td>
+<td align="right">96</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/qOQMRJ">document.querySelector(‘.vanilla .inner div’);</a></td>
+<td align="right">68</td>
+</tr>
+<tr>
+<td align="left"><a target="_blank" rel="noopener" href="http://codepen.io/Haeresis/pen/epQLve">document.querySelectorAll(‘.vanilla .inner div’);</a></td>
+<td align="right">35</td>
+</tr>
+</tbody></table>
+<h2 id="From-jQuery-to-Vanilla-JS"><a href="#From-jQuery-to-Vanilla-JS" class="headerlink" title="From jQuery to Vanilla JS"></a>From jQuery to Vanilla JS</h2><p><strong>Legend</strong></p>
+<p>Understand each type of DOM Object:</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;example&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">span</span>&gt;</span>(Text into) Html Element<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- Comment Element --&gt;</span></span><br><span class="line">  Text Element</span><br><span class="line">  <span class="tag">&lt;<span class="name">span</span>&gt;</span>(Text into) Html Element<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>querySelector(&#39;.example&#39;)</code> return a <code>HTMLElement</code>.</li>
+<li><code>querySelector(&#39;.example&#39;).children</code> return a <code>HTMLCollection</code>, each collection’s item is a <code>HTMLElement</code>, two <code>[span, span]</code> here.</li>
+<li><code>querySelector(&#39;.example&#39;).childNodes</code> return a <code>NodeList</code>, each collection’s item is a <code>Node</code>, seven <code>[text, span, text, comment, text, span, text]</code> here.</li>
+<li><code>querySelector(&#39;.example&#39;).childNodes[0]</code> return a <code>Text</code> (<code>Node</code>) of <code>typeNode</code> 3, as a text. (<code>...nodeList[3]</code> is <code>typeNode</code> 8 as a <code>Comment</code> (<code>Node</code> too)).</li>
+</ul>
+<h3 id="Node-Selector"><a href="#Node-Selector" class="headerlink" title=".Node #Selector"></a>.Node #Selector</h3><h4 id="id"><a href="#id" class="headerlink" title="#id"></a>#id</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlElement = $(<span class="string">&#x27;#id&#x27;</span>)[<span class="number">0</span>];</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlElement = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&#x27;id&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="classname-id-tagname"><a href="#classname-id-tagname" class="headerlink" title=".classname #id tagname"></a>.classname #id tagname</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlElement = $(<span class="string">&#x27;#id .classname tagname&#x27;</span>)[<span class="number">0</span>];</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&#x27;#id .classname tagname&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="classname-id-tagname-1"><a href="#classname-id-tagname-1" class="headerlink" title="[.classname #id tagname]"></a>[.classname #id tagname]</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">&#x27;#id .classname tagname&#x27;</span>).<span class="title function_">each</span>(<span class="keyword">function</span> (<span class="params">i, htmlElement</span>) &#123;</span><br><span class="line">    htmlElement;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> nodeList = <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(<span class="string">&#x27;#id .classname tagname&#x27;</span>); <span class="comment">// Not Live (Snapshot)</span></span><br><span class="line">[].<span class="property">forEach</span>.<span class="title function_">call</span>(nodeList, <span class="keyword">function</span> (<span class="params">node</span>) &#123;</span><br><span class="line">    node;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="classname"><a href="#classname" class="headerlink" title="[.classname]"></a>[.classname]</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">&#x27;.classname&#x27;</span>).<span class="title function_">each</span>(<span class="keyword">function</span> (<span class="params">i, htmlElement</span>) &#123;</span><br><span class="line">    htmlElement;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlCollection = <span class="variable language_">document</span>.<span class="title function_">getElementsByClassName</span>(<span class="string">&#x27;classname&#x27;</span>); <span class="comment">// Live</span></span><br><span class="line"><span class="comment">// var nodeList = document.querySelectorAll(&#x27;.classname&#x27;); // Not Live (Snapshot)</span></span><br><span class="line">[].<span class="property">forEach</span>.<span class="title function_">call</span>(htmlCollection, <span class="keyword">function</span> (<span class="params">htmlElement</span>) &#123;</span><br><span class="line">    htmlElement;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="name"><a href="#name" class="headerlink" title="[name]"></a>[name]</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">&#x27;[name=&quot;name&quot;]&#x27;</span>).<span class="title function_">each</span>(<span class="keyword">function</span> (<span class="params">i, htmlElement</span>) &#123;</span><br><span class="line">    htmlElement;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> nodeList = <span class="variable language_">document</span>.<span class="title function_">getElementsByName</span>(<span class="string">&#x27;name&#x27;</span>); <span class="comment">// Live</span></span><br><span class="line"><span class="comment">// var nodeList = document.querySelectorAll(&#x27;[name=name]&#x27;); // Not Live (Snapshot)</span></span><br><span class="line">[].<span class="property">forEach</span>.<span class="title function_">call</span>(nodeList, <span class="keyword">function</span> (<span class="params">node</span>) &#123;</span><br><span class="line">    node;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="tagname"><a href="#tagname" class="headerlink" title="[tagname]"></a>[tagname]</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">&#x27;tagname&#x27;</span>).<span class="title function_">each</span>(<span class="keyword">function</span> (<span class="params">i, htmlElement</span>) &#123;</span><br><span class="line">    htmlElement;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlCollection = <span class="variable language_">document</span>.<span class="title function_">getElementsByTagName</span>(<span class="string">&#x27;tagname&#x27;</span>); <span class="comment">// Live</span></span><br><span class="line"><span class="comment">// var nodeList = document.querySelectorAll(&#x27;tagname&#x27;); // Not Live (Snapshot)</span></span><br><span class="line">[].<span class="property">forEach</span>.<span class="title function_">call</span>(htmlCollection, <span class="keyword">function</span> (<span class="params">htmlElement</span>) &#123;</span><br><span class="line">    htmlElement;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Reverted-Loop"><a href="#Reverted-Loop" class="headerlink" title="Reverted Loop"></a>Reverted Loop</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$($(<span class="string">&#x27;.className&#x27;</span>).<span class="title function_">get</span>().<span class="title function_">reverse</span>()).<span class="title function_">each</span>(<span class="keyword">function</span> (<span class="params">i, htmlElement</span>) &#123;</span><br><span class="line">    htmlElement;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlCollection = <span class="variable language_">document</span>.<span class="title function_">getElementsByClassName</span>(<span class="string">&#x27;className&#x27;</span>), <span class="comment">// Live</span></span><br><span class="line">    i = htmlCollection.<span class="property">length</span>;</span><br><span class="line"><span class="keyword">while</span> (htmlElement = htmlCollection[--i]) &#123;</span><br><span class="line">    htmlElement;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="AJAX"><a href="#AJAX" class="headerlink" title="AJAX"></a>AJAX</h3><h4 id="GET"><a href="#GET" class="headerlink" title="GET"></a>GET</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">ajax</span>(&#123;</span><br><span class="line">  <span class="attr">type</span>: <span class="string">&#x27;GET&#x27;</span>,</span><br><span class="line">  <span class="attr">url</span>: &lt;url&gt;,</span><br><span class="line">  <span class="attr">data</span>: &lt;data&gt;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">fetch</span>(&lt;url&gt;, &#123;</span><br><span class="line">  <span class="attr">method</span>: <span class="string">&#x27;GET&#x27;</span>,</span><br><span class="line">  <span class="attr">body</span>: &lt;data&gt;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">var get = new XMLHttpRequest();</span></span><br><span class="line"><span class="comment">get.open(&#x27;GET&#x27;, &lt;url&gt;, true);</span></span><br><span class="line"><span class="comment">get.setRequestHeader(&#x27;Content-Type&#x27;, &#x27;application/x-www-form-urlencoded; charset=UTF-8&#x27;);</span></span><br><span class="line"><span class="comment">get.send(&lt;data&gt;);</span></span><br><span class="line"><span class="comment">*/</span>  </span><br></pre></td></tr></table></figure>
+
+<h4 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">checkStatus</span>(<span class="params">response</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (response.<span class="property">status</span> &gt;= <span class="number">200</span> &amp;&amp; response.<span class="property">status</span> &lt; <span class="number">300</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> response;</span><br><span class="line">  &#125; </span><br><span class="line">  </span><br><span class="line">  <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;There was a connection error of some sort.&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">fetch</span>(&lt;url&gt;)</span><br><span class="line">    .<span class="title function_">then</span>(checkStatus)</span><br><span class="line">    .<span class="title function_">then</span>(<span class="function"><span class="params">response</span> =&gt;</span> response.<span class="title function_">json</span>())</span><br><span class="line">    .<span class="title function_">catch</span>(<span class="function"><span class="params">error</span> =&gt;</span> error);</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">function getJSON(url, next) &#123;</span></span><br><span class="line"><span class="comment">    $.getJSON(url, function (data) &#123;</span></span><br><span class="line"><span class="comment">      next(null, data);</span></span><br><span class="line"><span class="comment">    &#125;).error(function () &#123;</span></span><br><span class="line"><span class="comment">      next(new Error(&#x27;There was a connection error of some sort.&#x27;));</span></span><br><span class="line"><span class="comment">    &#125;);</span></span><br><span class="line"><span class="comment">&#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">getJSON(&lt;url&gt;, function (err, data) &#123;</span></span><br><span class="line"><span class="comment">    if (err) &#123;</span></span><br><span class="line"><span class="comment">      return err;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    data;</span></span><br><span class="line"><span class="comment">&#125;); </span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">getJSON</span>(<span class="params">url, next</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> request = <span class="keyword">new</span> <span class="title class_">XMLHttpRequest</span>();</span><br><span class="line">    request.<span class="title function_">open</span>(<span class="string">&#x27;GET&#x27;</span>, url, <span class="literal">true</span>);</span><br><span class="line">    request.<span class="title function_">send</span>();</span><br><span class="line"></span><br><span class="line">    request.<span class="title function_">addEventListener</span>(<span class="string">&#x27;load&#x27;</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (request.<span class="property">status</span> &lt; <span class="number">200</span> &amp;&amp; request.<span class="property">status</span> &gt;= <span class="number">400</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">next</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;We reached our target server, but it returned an error.&#x27;</span>));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="title function_">next</span>(<span class="literal">null</span>, <span class="title class_">JSON</span>.<span class="title function_">parse</span>(request.<span class="property">responseText</span>));</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    request.<span class="title function_">addEventListener</span>(<span class="string">&#x27;error&#x27;</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        <span class="title function_">next</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;There was a connection error of some sort.&#x27;</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">getJSON</span>(&lt;url&gt;, <span class="keyword">function</span> (<span class="params">err, data</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">      <span class="keyword">return</span> err;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    data;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="POST"><a href="#POST" class="headerlink" title="POST"></a>POST</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">ajax</span>(&#123;</span><br><span class="line">  <span class="attr">type</span>: <span class="string">&#x27;POST&#x27;</span>,</span><br><span class="line">  <span class="attr">url</span>: &lt;url&gt;,</span><br><span class="line">  <span class="attr">data</span>: &lt;data&gt;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">fetch</span>(&lt;url&gt;, &#123;</span><br><span class="line">  <span class="attr">method</span>: <span class="string">&#x27;POST&#x27;</span>,</span><br><span class="line">  <span class="attr">body</span>: &lt;data&gt;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment">// IE fallback</span></span><br><span class="line"><span class="comment">var post = new XMLHttpRequest();</span></span><br><span class="line"><span class="comment">post.open(&#x27;POST&#x27;, &lt;url&gt;, true);</span></span><br><span class="line"><span class="comment">post.setRequestHeader(&#x27;Content-Type&#x27;, &#x27;application/x-www-form-urlencoded; charset=UTF-8&#x27;);</span></span><br><span class="line"><span class="comment">post.send(&lt;data&gt;); </span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Request-Response"><a href="#Request-Response" class="headerlink" title="Request &#x2F; Response"></a>Request &#x2F; Response</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">checkStatus</span>(<span class="params">response</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (response.<span class="property">status</span> &gt;= <span class="number">200</span> &amp;&amp; response.<span class="property">status</span> &lt; <span class="number">300</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> response;</span><br><span class="line">  &#125; </span><br><span class="line">  </span><br><span class="line">  <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;There was a connection error of some sort.&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="title function_">fetch</span>(&lt;url&gt;)</span><br><span class="line">  .<span class="title function_">then</span>(checkStatus)</span><br><span class="line">  .<span class="title function_">then</span>(<span class="function"><span class="params">response</span> =&gt;</span> response)</span><br><span class="line">  .<span class="title function_">catch</span>(<span class="function"><span class="params">error</span> =&gt;</span> error); </span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">function request(url, next) &#123;</span></span><br><span class="line"><span class="comment">    $.ajax(&#123;</span></span><br><span class="line"><span class="comment">        type: &#x27;GET&#x27;,</span></span><br><span class="line"><span class="comment">        url: url,</span></span><br><span class="line"><span class="comment">        success: function(response) &#123;</span></span><br><span class="line"><span class="comment">          next(null, response);</span></span><br><span class="line"><span class="comment">        &#125;,</span></span><br><span class="line"><span class="comment">        error: function() &#123;</span></span><br><span class="line"><span class="comment">          next(new Error(&#x27;There was a connection error of some sort.&#x27;));</span></span><br><span class="line"><span class="comment">        &#125;</span></span><br><span class="line"><span class="comment">    &#125;);</span></span><br><span class="line"><span class="comment">&#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">request(&lt;url&gt;, function (err, response) &#123;</span></span><br><span class="line"><span class="comment">    if (err) &#123;</span></span><br><span class="line"><span class="comment">      return err;</span></span><br><span class="line"><span class="comment">    &#125;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    response;</span></span><br><span class="line"><span class="comment">&#125;);</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">request</span>(<span class="params">url, next</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> request = <span class="keyword">new</span> <span class="title class_">XMLHttpRequest</span>();</span><br><span class="line">    request.<span class="title function_">open</span>(<span class="string">&#x27;GET&#x27;</span>, url, <span class="literal">true</span>);</span><br><span class="line">    request.<span class="title function_">send</span>();</span><br><span class="line"></span><br><span class="line">    request.<span class="title function_">addEventListener</span>(<span class="string">&#x27;load&#x27;</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (request.<span class="property">status</span> &lt; <span class="number">200</span> &amp;&amp; request.<span class="property">status</span> &gt;= <span class="number">400</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">next</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;We reached our target server, but it returned an error.&#x27;</span>));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="title function_">next</span>(<span class="literal">null</span>, request.<span class="property">responseText</span>);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    request.<span class="title function_">addEventListener</span>(<span class="string">&#x27;error&#x27;</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">next</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;There was a connection error of some sort.&#x27;</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">request</span>(&lt;url&gt;, <span class="keyword">function</span> (<span class="params">err, response</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">      <span class="keyword">return</span> err;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    response;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="ATTRIBUTS"><a href="#ATTRIBUTS" class="headerlink" title="ATTRIBUTS"></a>ATTRIBUTS</h3><h4 id="Add-Class"><a href="#Add-Class" class="headerlink" title="Add Class"></a>Add Class</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">addClass</span>(&lt;className&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">classList</span>.<span class="title function_">add</span>(&lt;className&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Get-Attribute"><a href="#Get-Attribute" class="headerlink" title="Get Attribute"></a>Get Attribute</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">attr</span>(&lt;attributeName&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">getAttribute</span>(&lt;attributeName&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Get-Data"><a href="#Get-Data" class="headerlink" title="Get Data"></a>Get Data</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">data</span>(&lt;dataName&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">getAttribute</span>(<span class="string">&#x27;data-&#x27;</span> + &lt;dataName&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Get-Value"><a href="#Get-Value" class="headerlink" title="Get Value"></a>Get Value</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">val</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">value</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Has-Class"><a href="#Has-Class" class="headerlink" title="Has Class"></a>Has Class</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">hasClass</span>(&lt;className&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">classList</span>.<span class="title function_">contains</span>(&lt;className&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Remove-Attribute"><a href="#Remove-Attribute" class="headerlink" title="Remove Attribute"></a>Remove Attribute</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">removeAttr</span>(&lt;attributeName&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">removeAttribute</span>(&lt;attributeName&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Remove-Class"><a href="#Remove-Class" class="headerlink" title="Remove Class"></a>Remove Class</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">removeClass</span>(&lt;className&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">classList</span>.<span class="title function_">remove</span>(&lt;className&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Remove-Data"><a href="#Remove-Data" class="headerlink" title="Remove Data"></a>Remove Data</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">removeData</span>(&lt;dataName&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">removeAttribute</span>(<span class="string">&#x27;data-&#x27;</span> + &lt;dataName&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-Attribute"><a href="#Set-Attribute" class="headerlink" title="Set Attribute"></a>Set Attribute</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">attr</span>(&lt;attributeName&gt;, &lt;value&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">setAttribute</span>(&lt;attributeName&gt;, &lt;value&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-Data"><a href="#Set-Data" class="headerlink" title="Set Data"></a>Set Data</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">data</span>(&lt;dataName&gt;, &lt;value&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">setAttribute</span>(<span class="string">&#x27;data-&#x27;</span> + &lt;dataName&gt;, &lt;value&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-Value"><a href="#Set-Value" class="headerlink" title="Set Value"></a>Set Value</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">val</span>(&lt;value&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">value</span> = &lt;value&gt;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Toggle-Class"><a href="#Toggle-Class" class="headerlink" title="Toggle Class"></a>Toggle Class</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">toggleClass</span>(&lt;className&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">classList</span>.<span class="title function_">toggle</span>(&lt;className&gt;);</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="EFFECTS"><a href="#EFFECTS" class="headerlink" title="EFFECTS"></a>EFFECTS</h3><h4 id="Animation"><a href="#Animation" class="headerlink" title="Animation"></a>Animation</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fadeIn</span>(<span class="params">$htmlElement, speed, next</span>) &#123;</span><br><span class="line">    $htmlElement.<span class="title function_">css</span>(<span class="string">&#x27;opacity&#x27;</span>, <span class="string">&#x27;0&#x27;</span>).<span class="title function_">animate</span>(&#123; <span class="attr">opacity</span>: <span class="number">1</span> &#125;, speed, next);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">fadeIn</span>($(&lt;htmlElement&gt;), <span class="number">2000</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">  $(<span class="variable language_">this</span>).<span class="title function_">css</span>(<span class="string">&#x27;opacity&#x27;</span>, <span class="string">&#x27;&#x27;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fadeIn</span>(<span class="params">htmlElement, speed, next</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> last = +<span class="keyword">new</span> <span class="title class_">Date</span>(),</span><br><span class="line">        tick = <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">            htmlElement.<span class="property">style</span>.<span class="property">opacity</span> = +htmlElement.<span class="property">style</span>.<span class="property">opacity</span> + (<span class="keyword">new</span> <span class="title class_">Date</span>() - last) / speed;</span><br><span class="line"></span><br><span class="line">            last = +<span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (+htmlElement.<span class="property">style</span>.<span class="property">opacity</span> &lt; <span class="number">1</span>) &#123;</span><br><span class="line">                <span class="title function_">requestAnimationFrame</span>(tick);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (next) &#123;</span><br><span class="line">                next.<span class="title function_">call</span>(htmlElement);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">    htmlElement.<span class="property">style</span>.<span class="property">opacity</span> = <span class="number">0</span>;</span><br><span class="line">    <span class="title function_">tick</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">fadeIn</span>(&lt;htmlElement&gt;, <span class="number">2000</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">style</span>.<span class="property">opacity</span> = <span class="string">&#x27;&#x27;</span>;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Hide"><a href="#Hide" class="headerlink" title="Hide"></a>Hide</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">hide</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">style</span>.<span class="property">display</span> = <span class="string">&#x27;none&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Show"><a href="#Show" class="headerlink" title="Show"></a>Show</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">show</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">style</span>.<span class="property">display</span> = <span class="string">&#x27;&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="EVENTS"><a href="#EVENTS" class="headerlink" title="EVENTS"></a>EVENTS</h3><h4 id="Hover"><a href="#Hover" class="headerlink" title="Hover"></a>Hover</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">hover</span>(&lt;eventHandlerMouseIn&gt;, &lt;eventHandlerMouseOut&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">addEventListener</span>(<span class="string">&#x27;mouseenter&#x27;</span>, &lt;eventHandlerMouseIn&gt;);</span><br><span class="line">&lt;htmlElement&gt;.<span class="title function_">addEventListener</span>(<span class="string">&#x27;mouseleave&#x27;</span>, &lt;eventHandlerMouseOut&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Load"><a href="#Load" class="headerlink" title="Load"></a>Load</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">load</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// I am full loaded.</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">addEventListener</span>(<span class="string">&#x27;load&#x27;</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// I am full loaded.</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Off"><a href="#Off" class="headerlink" title="Off"></a>Off</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">off</span>(&lt;eventName&gt;, &lt;eventHandler&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">removeEventListener</span>(&lt;eventName&gt;, &lt;eventHandler&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="On"><a href="#On" class="headerlink" title="On"></a>On</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">on</span>(&lt;eventName&gt;, &lt;eventHandler&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">addEventListener</span>(&lt;eventName&gt;, &lt;eventHandler&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="One"><a href="#One" class="headerlink" title="One"></a>One</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">one</span>(&lt;eventName&gt;, &lt;eventHandler&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">addEventListener</span>(&lt;eventName&gt;,&lt;eventHandler&gt;,&#123;<span class="attr">once</span>: <span class="literal">true</span>&#125;);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">&lt;htmlElement&gt;.addEventListener(&lt;eventName&gt;, function callee(event) &#123;</span></span><br><span class="line"><span class="comment">    event.target.removeEventListener(e.type, callee);</span></span><br><span class="line"><span class="comment">&#125;);</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Ready"><a href="#Ready" class="headerlink" title="Ready"></a>Ready</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="variable language_">document</span>).<span class="title function_">ready</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// I am ready to be manipulate.</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">document</span>.<span class="title function_">addEventListener</span>(<span class="string">&#x27;DOMContentLoaded&#x27;</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// I am ready to be manipulate.</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Trigger"><a href="#Trigger" class="headerlink" title="Trigger"></a>Trigger</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> event = jQuery.<span class="title class_">Event</span>(<span class="string">&#x27;click&#x27;</span>);</span><br><span class="line">event.<span class="property">test</span> = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">click</span>(<span class="keyword">function</span> (<span class="params">event</span>) &#123;</span><br><span class="line">    event.<span class="property">test</span>; <span class="comment">// undefined by click, true by trigger.</span></span><br><span class="line">&#125;);</span><br><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">trigger</span>(event);</span><br><span class="line"><span class="comment">// $(&lt;htmlElement&gt;).trigger(&#x27;click&#x27;); // Shortcut without test property.</span></span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> event = <span class="keyword">new</span> <span class="title class_">Event</span>(<span class="string">&#x27;click&#x27;</span>);</span><br><span class="line">event.<span class="property">test</span> = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">&lt;htmlElement&gt;.<span class="title function_">addEventListener</span>(<span class="string">&#x27;click&#x27;</span>, <span class="keyword">function</span> (<span class="params">event</span>) &#123;</span><br><span class="line">    event.<span class="property">test</span>; <span class="comment">// undefined by click, true by trigger.</span></span><br><span class="line">&#125;);</span><br><span class="line">&lt;htmlElement&gt;.<span class="title function_">dispatchEvent</span>(event);</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="FILTERS"><a href="#FILTERS" class="headerlink" title="FILTERS"></a>FILTERS</h3><h4 id="Filter"><a href="#Filter" class="headerlink" title="Filter"></a>Filter</h4><p>From jQuery</p>
+<p>filterCondition</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;selector&gt;).<span class="title function_">filter</span>(<span class="keyword">function</span> (<span class="params">i, htmlElement</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> &lt;filterCondition&gt;;</span><br><span class="line">&#125;).<span class="title function_">each</span>(<span class="keyword">function</span> (<span class="params">i, htmlElement</span>) &#123;</span><br><span class="line">    htmlElement;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> nodeList = <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(&lt;selector&gt;);</span><br><span class="line"></span><br><span class="line">nodeList = [].<span class="property">filter</span>.<span class="title function_">call</span>(nodeList, <span class="keyword">function</span> (<span class="params">node</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> &lt;filterCondition&gt;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">[].<span class="property">forEach</span>.<span class="title function_">call</span>(nodeList, <span class="keyword">function</span> (<span class="params">node</span>) &#123;</span><br><span class="line">    node;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="First"><a href="#First" class="headerlink" title="First"></a>First</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;selector&gt;).<span class="title function_">first</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlCollection&gt;.<span class="title function_">item</span>(<span class="number">0</span>);</span><br><span class="line"><span class="comment">// &lt;htmlCollection&gt;[0];</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Has"><a href="#Has" class="headerlink" title="Has"></a>Has</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;selector&gt;).<span class="title function_">has</span>(&lt;matchesChildSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> nodeList = <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(&lt;selector&gt;);</span><br><span class="line">[].<span class="property">filter</span>.<span class="title function_">call</span>(nodeList, <span class="keyword">function</span> (<span class="params">node</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> node.<span class="title function_">querySelector</span>(&lt;matchesChildSelector&gt;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Is"><a href="#Is" class="headerlink" title="Is"></a>Is</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;selector&gt;).<span class="title function_">is</span>(&lt;matchesSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> nodeList = <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(&lt;selector&gt;);</span><br><span class="line">[].<span class="property">some</span>.<span class="title function_">call</span>(nodeList, <span class="keyword">function</span> (<span class="params">node</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> node.<span class="title function_">matches</span>(&lt;matchesSelector&gt;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Item"><a href="#Item" class="headerlink" title="Item"></a>Item</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;selector&gt;).<span class="title function_">eq</span>(&lt;index&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlCollection&gt;.<span class="title function_">item</span>(&lt;index&gt;);</span><br><span class="line"><span class="comment">// &lt;htmlCollection&gt;[&lt;index&gt;];</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Last"><a href="#Last" class="headerlink" title="Last"></a>Last</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;selector&gt;).<span class="title function_">last</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlCollection&gt;.<span class="title function_">item</span>(&lt;htmlCollection&gt;.<span class="property">length</span> - <span class="number">1</span>);</span><br><span class="line"><span class="comment">// &lt;htmlCollection&gt;[&lt;htmlCollection&gt;.length - 1];</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Not"><a href="#Not" class="headerlink" title="Not"></a>Not</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;selector&gt;).<span class="title function_">not</span>(&lt;matchesSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> nodeList = <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(&lt;selector&gt;);</span><br><span class="line">[].<span class="property">filter</span>.<span class="title function_">call</span>(nodeList, <span class="keyword">function</span> (<span class="params">node</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> !node.<span class="title function_">matches</span>(&lt;matchesSelector&gt;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Slice"><a href="#Slice" class="headerlink" title="Slice"></a>Slice</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;selector&gt;).<span class="title function_">slice</span>(&lt;startIndex&gt;, &lt;endIndex&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> nodeList = <span class="variable language_">document</span>.<span class="title function_">querySelectorAll</span>(&lt;selector&gt;);</span><br><span class="line">[].<span class="property">slice</span>.<span class="title function_">call</span>(nodeList, &lt;startIndex&gt;, &lt;endIndex&gt;);</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="MANIPULATION"><a href="#MANIPULATION" class="headerlink" title="MANIPULATION"></a>MANIPULATION</h3><h4 id="Append"><a href="#Append" class="headerlink" title="Append"></a>Append</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">append</span>($(&lt;appendHtmlElement&gt;));</span><br><span class="line"><span class="comment">// $(&lt;htmlElement&gt;).append(&lt;appendHtmlElement&gt;);</span></span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">appendChild</span>(&lt;appendHtmlElement&gt;);</span><br><span class="line"><span class="comment">// &lt;htmlElement&gt;.insertAdjacentHTML(&#x27;beforeEnd&#x27;, &lt;htmlString&gt;);</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Clone"><a href="#Clone" class="headerlink" title="Clone"></a>Clone</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">clone</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">cloneNode</span>(<span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Compare"><a href="#Compare" class="headerlink" title="Compare"></a>Compare</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> $a = $(&lt;selectorToFirstHtmlElement&gt;).<span class="title function_">find</span>(&lt;selectorToSecondHtmlElement&gt;);</span><br><span class="line">    $b = $(&lt;selectorToSecondHtmlElement&gt;);</span><br><span class="line"></span><br><span class="line">$a.<span class="title function_">is</span>($b);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> temp = <span class="variable language_">document</span>.<span class="title function_">getElementsByTagName</span>(&lt;selectorToFirstHtmlElement&gt;)[<span class="number">0</span>],</span><br><span class="line">    a = temp.<span class="title function_">getElementsByTagName</span>(&lt;selectorToSecondHtmlElement&gt;)[<span class="number">0</span>],</span><br><span class="line">    b = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(&lt;selectorToSecondHtmlElement&gt;);</span><br><span class="line"></span><br><span class="line">(a === b);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Contains"><a href="#Contains" class="headerlink" title="Contains"></a>Contains</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">contains</span>($(&lt;htmlElement&gt;), $(&lt;childHtmlElement&gt;));</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(&lt;htmlElement&gt; !== &lt;childHtmlElement&gt;) &amp;&amp; &lt;htmlElement&gt;.<span class="title function_">contains</span>(&lt;childHtmlElement&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Create"><a href="#Create" class="headerlink" title="Create"></a>Create</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">&#x27;&lt;&#x27;</span> + &lt;tagString&gt; + <span class="string">&#x27;&gt;&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">document</span>.<span class="title function_">createElement</span>(&lt;tagString&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Empty"><a href="#Empty" class="headerlink" title="Empty"></a>Empty</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">empty</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">innerHTML</span> = <span class="string">&#x27;&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Get-HTML"><a href="#Get-HTML" class="headerlink" title="Get HTML"></a>Get HTML</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">html</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">innerHTML</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Get-Node-HTML"><a href="#Get-Node-HTML" class="headerlink" title="Get Node HTML"></a>Get Node HTML</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">&#x27;&lt;div&gt;&#x27;</span>).<span class="title function_">append</span>($(&lt;htmlElement&gt;).<span class="title function_">clone</span>()).<span class="title function_">html</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">outerHTML</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Get-Text"><a href="#Get-Text" class="headerlink" title="Get Text"></a>Get Text</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">text</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">textContent</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Index-From-Parent"><a href="#Index-From-Parent" class="headerlink" title="Index From Parent"></a>Index From Parent</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">index</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[].<span class="property">slice</span>.<span class="title function_">call</span>(&lt;htmlElement&gt;.<span class="property">parentNode</span>.<span class="property">children</span>).<span class="title function_">indexOf</span>(&lt;htmlElement&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Insert-After"><a href="#Insert-After" class="headerlink" title="Insert After"></a>Insert After</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">after</span>($(&lt;afterHtmlElement&gt;));</span><br><span class="line"><span class="comment">// $(&lt;htmlElement&gt;).after(&lt;htmlString&gt;);</span></span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">parentNode</span>.<span class="title function_">insertBefore</span>(&lt;afterHtmlElement&gt;, &lt;htmlElement&gt;.<span class="property">nextSibling</span>);</span><br><span class="line"><span class="comment">// &lt;htmlElement&gt;.insertAdjacentHTML(&#x27;afterend&#x27;, &lt;htmlString&gt;);</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Insert-Before"><a href="#Insert-Before" class="headerlink" title="Insert Before"></a>Insert Before</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">before</span>($(&lt;beforeHtmlElement&gt;));</span><br><span class="line"><span class="comment">// $(&lt;htmlElement&gt;).before(&lt;htmlString&gt;);</span></span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">parentNode</span>.<span class="title function_">insertBefore</span>(&lt;beforeHtmlElement&gt;, &lt;htmlElement&gt;);</span><br><span class="line"><span class="comment">// &lt;htmlElement&gt;.insertAdjacentHTML(&#x27;beforebegin&#x27;, &lt;htmlString&gt;);</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Prepend"><a href="#Prepend" class="headerlink" title="Prepend"></a>Prepend</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">prepend</span>($(&lt;prependHtmlElement&gt;));</span><br><span class="line"><span class="comment">// $(&lt;htmlElement&gt;).prepend(&lt;htmlString&gt;);</span></span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">insertBefore</span>(&lt;prependHtmlElement&gt;, &lt;htmlElement&gt;.<span class="property">firstChild</span>);</span><br><span class="line"><span class="comment">// &lt;htmlElement&gt;.insertAdjacentHTML(&#x27;afterBegin&#x27;, &lt;htmlString&gt;);</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Remove"><a href="#Remove" class="headerlink" title="Remove"></a>Remove</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">remove</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">parentNode</span>.<span class="title function_">removeChild</span>(&lt;htmlElement&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Remove-Children"><a href="#Remove-Children" class="headerlink" title="Remove Children"></a>Remove Children</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">empty</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (&lt;htmlElement&gt;.<span class="property">firstChild</span>) &#123;</span><br><span class="line">    &lt;htmlElement&gt;.<span class="title function_">removeChild</span>(&lt;htmlElement&gt;.<span class="property">firstChild</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// &lt;htmlElement&gt;.innerHTML = &#x27;&#x27;;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Replace"><a href="#Replace" class="headerlink" title="Replace"></a>Replace</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">replaceWith</span>($(&lt;newHtmlElement&gt;));</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">parentNode</span>.<span class="title function_">replaceChild</span>(&lt;newHtmlElement&gt;, &lt;htmlElement&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-HTML"><a href="#Set-HTML" class="headerlink" title="Set HTML"></a>Set HTML</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">html</span>(&lt;htmlString&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">innerHTML</span> = &lt;htmlString&gt;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-Node-HTML"><a href="#Set-Node-HTML" class="headerlink" title="Set Node HTML"></a>Set Node HTML</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">replaceWith</span>(&lt;htmlString&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">outerHTML</span> = &lt;htmlString&gt;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-Text"><a href="#Set-Text" class="headerlink" title="Set Text"></a>Set Text</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">text</span>(&lt;string&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">textContent</span> = &lt;string&gt;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Unwrap"><a href="#Unwrap" class="headerlink" title="Unwrap"></a>Unwrap</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">unwrap</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (&lt;htmlElement&gt;.<span class="property">firstChild</span>) &#123;</span><br><span class="line">    &lt;unwrapHtmlElement&gt;.<span class="title function_">insertBefore</span>(&lt;htmlElement&gt;.<span class="property">firstChild</span>, &lt;htmlElement&gt;);</span><br><span class="line">&#125;</span><br><span class="line">&lt;unwrapHtmlElement&gt;.<span class="title function_">removeChild</span>(&lt;htmlElement&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Wrap"><a href="#Wrap" class="headerlink" title="Wrap"></a>Wrap</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">wrap</span>($(&lt;wrapHtmlElement&gt;));</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">parentNode</span>.<span class="title function_">insertBefore</span>(&lt;wrapHtmlElement&gt;, &lt;htmlElement&gt;);</span><br><span class="line">&lt;wrapHtmlElement&gt;.<span class="title function_">appendChild</span>(&lt;htmlElement&gt;);</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="TRAVERSING"><a href="#TRAVERSING" class="headerlink" title="TRAVERSING"></a>TRAVERSING</h3><h4 id="All-Next"><a href="#All-Next" class="headerlink" title="All Next"></a>All Next</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">nextAll</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> nextAll = <span class="literal">false</span>;</span><br><span class="line">nextAll = [].<span class="property">filter</span>.<span class="title function_">call</span>(&lt;htmlElement&gt;.<span class="property">parentNode</span>.<span class="property">children</span>, <span class="keyword">function</span> (<span class="params">htmlElement</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> (htmlElement.<span class="property">previousElementSibling</span> === &lt;htmlElement&gt;) ? nextAll = <span class="literal">true</span> : nextAll;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="All-Parents"><a href="#All-Parents" class="headerlink" title="All Parents"></a>All Parents</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> parents = $(&lt;htmlElement&gt;).<span class="title function_">parents</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlElement = &lt;htmlElement&gt;,</span><br><span class="line">    parents = [];</span><br><span class="line"><span class="keyword">while</span> (htmlElement = htmlElement.<span class="property">parentNode</span>) &#123;</span><br><span class="line">    parents.<span class="title function_">push</span>(htmlElement);</span><br><span class="line">&#125;</span><br><span class="line">parents;</span><br></pre></td></tr></table></figure>
+
+<h4 id="All-Previous"><a href="#All-Previous" class="headerlink" title="All Previous"></a>All Previous</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">prevAll</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> prevAll = <span class="literal">true</span>;</span><br><span class="line">prevAll = [].<span class="property">filter</span>.<span class="title function_">call</span>(&lt;htmlElement&gt;.<span class="property">parentNode</span>.<span class="property">children</span>, <span class="keyword">function</span> (<span class="params">htmlElement</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> (htmlElement === &lt;htmlElement&gt;) ? prevAll = <span class="literal">false</span> : prevAll;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Children"><a href="#Children" class="headerlink" title="Children"></a>Children</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">children</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">children</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Closest-Parent"><a href="#Closest-Parent" class="headerlink" title="Closest Parent"></a>Closest Parent</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">closest</span>(&lt;parentSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">closest</span>(&lt;parentSelector&gt;);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* // IE fallback</span></span><br><span class="line"><span class="comment">var htmlElement = &lt;htmlElement&gt;,</span></span><br><span class="line"><span class="comment">    parents = [];</span></span><br><span class="line"><span class="comment">while (htmlElement = htmlElement.parentNode) &#123;</span></span><br><span class="line"><span class="comment">    (htmlElement.matches &amp;&amp; htmlElement.matches(&lt;parentSelector&gt;)) ? parents.push(htmlElement) : &#x27;&#x27;;</span></span><br><span class="line"><span class="comment">&#125;</span></span><br><span class="line"><span class="comment">parents[0]; */</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Find-Children"><a href="#Find-Children" class="headerlink" title="Find Children"></a>Find Children</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">find</span>(&lt;childrenSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">querySelectorAll</span>(&lt;childrenSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="First-Child"><a href="#First-Child" class="headerlink" title="First Child"></a>First Child</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">children</span>().<span class="title function_">first</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">firstChild</span>();</span><br></pre></td></tr></table></figure>
+
+<h4 id="Last-Child"><a href="#Last-Child" class="headerlink" title="Last Child"></a>Last Child</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">children</span>().<span class="title function_">last</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">lastChild</span>();</span><br></pre></td></tr></table></figure>
+
+<h4 id="Matches-Selector"><a href="#Matches-Selector" class="headerlink" title="Matches Selector"></a>Matches Selector</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">is</span>(&lt;selector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="title function_">matches</span>(&lt;selector&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Next"><a href="#Next" class="headerlink" title="Next"></a>Next</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">next</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">nextElementSibling</span>; <span class="comment">// HTMLElement</span></span><br><span class="line"><span class="comment">// &lt;htmlElement&gt;.nextSibling; // Node</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Next-Until"><a href="#Next-Until" class="headerlink" title="Next Until"></a>Next Until</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">nextUntil</span>(&lt;nextSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlElement = &lt;htmlElement&gt;,</span><br><span class="line">    nextUntil = [],</span><br><span class="line">    until = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">while</span> (htmlElement = htmlElement.<span class="property">nextElementSibling</span>) &#123;</span><br><span class="line">    (until &amp;&amp; htmlElement &amp;&amp; !htmlElement.<span class="title function_">matches</span>(&lt;nextSelector&gt;)) ? nextUntil.<span class="title function_">push</span>(htmlElement) : until = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line">nextUntil;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Parent"><a href="#Parent" class="headerlink" title="Parent"></a>Parent</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">parent</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">parentNode</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Parents"><a href="#Parents" class="headerlink" title="Parents"></a>Parents</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> parents = $(&lt;htmlElement&gt;).<span class="title function_">parents</span>(&lt;parentSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlElement = &lt;htmlElement&gt;,</span><br><span class="line">    parents = [];</span><br><span class="line"><span class="keyword">while</span> (htmlElement = htmlElement.<span class="property">parentNode</span>.<span class="title function_">closest</span>(&lt;parentSelector&gt;)) &#123;</span><br><span class="line">    parents.<span class="title function_">push</span>(htmlElement);</span><br><span class="line">&#125;</span><br><span class="line">parents;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* // IE fallback</span></span><br><span class="line"><span class="comment">var htmlElement = &lt;htmlElement&gt;,</span></span><br><span class="line"><span class="comment">    parents = [];</span></span><br><span class="line"><span class="comment">while (htmlElement = htmlElement.parentNode) &#123;</span></span><br><span class="line"><span class="comment">    (htmlElement.matches &amp;&amp; htmlElement.matches(&lt;parentSelector&gt;)) ? parents.push(htmlElement) : &#x27;&#x27;;</span></span><br><span class="line"><span class="comment">&#125;</span></span><br><span class="line"><span class="comment">parents; */</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Parents-Until"><a href="#Parents-Until" class="headerlink" title="Parents Until"></a>Parents Until</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> parents = $(&lt;htmlElement&gt;).<span class="title function_">parentsUntil</span>(&lt;parentSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlElement = &lt;htmlElement&gt;,</span><br><span class="line">    parentsUntil = [],</span><br><span class="line">    until = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">while</span> (htmlElement = htmlElement.<span class="property">parentNode</span>.<span class="title function_">closest</span>(&lt;parentSelector&gt;)) &#123;</span><br><span class="line">    (until) ? parents.<span class="title function_">push</span>(htmlElement) : until = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line">parentsUntil;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* // IE fallback</span></span><br><span class="line"><span class="comment">var htmlElement = &lt;htmlElement&gt;,</span></span><br><span class="line"><span class="comment">    parentsUntil = [],</span></span><br><span class="line"><span class="comment">    until = true;</span></span><br><span class="line"><span class="comment">while (htmlElement = htmlElement.parentNode) &#123;</span></span><br><span class="line"><span class="comment">    (until &amp;&amp; htmlElement.matches &amp;&amp; !htmlElement.matches(&lt;parentSelector&gt;)) ? parents.push(htmlElement) : until = false;</span></span><br><span class="line"><span class="comment">&#125;</span></span><br><span class="line"><span class="comment">parentsUntil; */</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Previous"><a href="#Previous" class="headerlink" title="Previous"></a>Previous</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">prev</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">previousElementSibling</span>; <span class="comment">// HTMLElement</span></span><br><span class="line"><span class="comment">// &lt;htmlElement&gt;.previousSibling // Node;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Previous-Until"><a href="#Previous-Until" class="headerlink" title="Previous Until"></a>Previous Until</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">prevUntil</span>(&lt;previousSelector&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> htmlElement = &lt;htmlElement&gt;,</span><br><span class="line">    previousUntil = [],</span><br><span class="line">    until = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">while</span> (htmlElement = htmlElement.<span class="property">previousElementSibling</span>) &#123;</span><br><span class="line">    (until &amp;&amp; htmlElement &amp;&amp; !htmlElement.<span class="title function_">matches</span>(&lt;previousSelector&gt;)) ? previousUntil.<span class="title function_">push</span>(htmlElement) : until = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line">previousUntil;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Siblings"><a href="#Siblings" class="headerlink" title="Siblings"></a>Siblings</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">siblings</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[].<span class="property">filter</span>.<span class="title function_">call</span>(&lt;htmlElement&gt;.<span class="property">parentNode</span>.<span class="property">children</span>, <span class="keyword">function</span> (<span class="params">htmlElement</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> htmlElement !== &lt;htmlElement&gt;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="STYLES"><a href="#STYLES" class="headerlink" title="STYLES"></a>STYLES</h3><h4 id="Get-Style"><a href="#Get-Style" class="headerlink" title="Get Style"></a>Get Style</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">css</span>(&lt;property&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">getComputedStyle</span>(&lt;htmlElement&gt;)[&lt;property&gt;];</span><br></pre></td></tr></table></figure>
+
+<h4 id="Get-Scroll-Left"><a href="#Get-Scroll-Left" class="headerlink" title="Get Scroll Left"></a>Get Scroll Left</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">scrollLeft</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">scrollLeft</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Get-Scroll-Top"><a href="#Get-Scroll-Top" class="headerlink" title="Get Scroll Top"></a>Get Scroll Top</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">scrollTop</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">scrollTop</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Inner-Height"><a href="#Inner-Height" class="headerlink" title="Inner Height"></a>Inner Height</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">innerHeight</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">clientHeight</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Inner-Width"><a href="#Inner-Width" class="headerlink" title="Inner Width"></a>Inner Width</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">innerWidth</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">clientWidth</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Offset-from-Document"><a href="#Offset-from-Document" class="headerlink" title="Offset from Document"></a>Offset from Document</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">offset</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> rect = &lt;htmlElement&gt;.<span class="title function_">getBoundingClientRect</span>(<span class="params"></span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">top</span>: rect.<span class="property">top</span> + <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">scrollTop</span>,</span><br><span class="line">    <span class="attr">left</span>: rect.<span class="property">left</span> + <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">scrollLeft</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Offset-from-Parent"><a href="#Offset-from-Parent" class="headerlink" title="Offset from Parent"></a>Offset from Parent</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">position</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">left</span>: &lt;htmlElement&gt;.<span class="property">offsetLeft</span>,</span><br><span class="line">    <span class="attr">top</span>: &lt;htmlElement&gt;.<span class="property">offsetTop</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Offset-from-Viewport"><a href="#Offset-from-Viewport" class="headerlink" title="Offset from Viewport"></a>Offset from Viewport</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">offset</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> rect = &lt;htmlElement&gt;.<span class="title function_">getBoundingClientRect</span>(<span class="params"></span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">top</span>: rect.<span class="property">top</span> + <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">scrollTop</span>,</span><br><span class="line">    <span class="attr">left</span>: rect.<span class="property">left</span> + <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">scrollLeft</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Outer-Height"><a href="#Outer-Height" class="headerlink" title="Outer Height"></a>Outer Height</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">outerHeight</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">offsetHeight</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Outer-Width"><a href="#Outer-Width" class="headerlink" title="Outer Width"></a>Outer Width</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">outerWidth</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">offsetWidth</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Parent-Not-Static"><a href="#Parent-Not-Static" class="headerlink" title="Parent Not Static"></a>Parent Not Static</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">offsetParent</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(&lt;htmlElement&gt;.<span class="property">offsetParent</span> || &lt;htmlElement&gt;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-Style"><a href="#Set-Style" class="headerlink" title="Set Style"></a>Set Style</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">css</span>(&lt;property&gt;, &lt;value&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">style</span>.&lt;property&gt; = &lt;value&gt;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-Scroll-Left"><a href="#Set-Scroll-Left" class="headerlink" title="Set Scroll Left"></a>Set Scroll Left</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">scrollLeft</span>(&lt;distance&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">scrollLeft</span> = &lt;distance&gt;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-Scroll-Top"><a href="#Set-Scroll-Top" class="headerlink" title="Set Scroll Top"></a>Set Scroll Top</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(&lt;htmlElement&gt;).<span class="title function_">scrollTop</span>(&lt;distance&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;htmlElement&gt;.<span class="property">scrollTop</span> = &lt;distance&gt;;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="UTILS"><a href="#UTILS" class="headerlink" title="UTILS"></a>UTILS</h3><h4 id="Array-Each"><a href="#Array-Each" class="headerlink" title="Array Each"></a>Array Each</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">each</span>(&lt;array&gt;, <span class="keyword">function</span> (<span class="params">i, item</span>) &#123;</span><br><span class="line">    (item === &lt;array&gt;[i]); <span class="comment">// true</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;array&gt;.<span class="title function_">forEach</span>(<span class="keyword">function</span> (<span class="params">item, i</span>) &#123;</span><br><span class="line">    (item === &lt;array&gt;[i]); <span class="comment">// true</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Change-Futur-Context"><a href="#Change-Futur-Context" class="headerlink" title="Change Futur Context"></a>Change Futur Context</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">proxy</span>(&lt;fn&gt;, &lt;context&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;fn&gt;.<span class="title function_">bind</span>(&lt;context&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Extend"><a href="#Extend" class="headerlink" title="Extend"></a>Extend</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;object&gt; = $.<span class="title function_">extend</span>(&lt;extendingObject&gt;, &lt;object&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;object&gt; = <span class="title class_">Object</span>.<span class="title function_">assign</span>(&lt;object&gt;, &lt;extendingObject&gt;);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* // IE fallback (not deep)</span></span><br><span class="line"><span class="comment">Object.keys(&lt;object&gt;).forEach(function (key) &#123;</span></span><br><span class="line"><span class="comment">    &lt;object&gt;[key] = (&lt;extendingObject&gt;[key]) ? &lt;extendingObject&gt;[key] : &lt;object&gt;[key];</span></span><br><span class="line"><span class="comment">&#125;);</span></span><br><span class="line"><span class="comment">&lt;object&gt;; */</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Index-Of"><a href="#Index-Of" class="headerlink" title="Index Of"></a>Index Of</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">inArray</span>(&lt;item&gt;, &lt;array&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;array&gt;.<span class="title function_">indexOf</span>(&lt;item&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Is-Array"><a href="#Is-Array" class="headerlink" title="Is Array"></a>Is Array</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">isArray</span>(&lt;array&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Array</span>.<span class="title function_">isArray</span>(&lt;array&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">map</span>(&lt;array&gt;, <span class="keyword">function</span> (<span class="params">item, i</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> &lt;operations&gt;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;array&gt;.<span class="title function_">map</span>(<span class="keyword">function</span> (<span class="params">item, i</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> &lt;operations&gt;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Now"><a href="#Now" class="headerlink" title="Now"></a>Now</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">now</span>();</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Date</span>.<span class="title function_">now</span>();</span><br></pre></td></tr></table></figure>
+
+<h4 id="Parse-HTML"><a href="#Parse-HTML" class="headerlink" title="Parse HTML"></a>Parse HTML</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">parseHTML</span>(&lt;htmlString&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">parseHTML</span>(<span class="params">htmlString</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> body = <span class="variable language_">document</span>.<span class="property">implementation</span>.<span class="title function_">createHTMLDocument</span>().<span class="property">body</span>;</span><br><span class="line">    body.<span class="property">innerHTML</span> = htmlString;</span><br><span class="line">    <span class="keyword">return</span> body.<span class="property">childNodes</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">parseHTML</span>(&lt;htmlString&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Parse-JSON"><a href="#Parse-JSON" class="headerlink" title="Parse JSON"></a>Parse JSON</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">parseJSON</span>(&lt;jsonString&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">JSON</span>.<span class="title function_">parse</span>(&lt;jsonString&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Parse-XML"><a href="#Parse-XML" class="headerlink" title="Parse XML"></a>Parse XML</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">parseXML</span>(&lt;xmlString&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">parseXML</span>(<span class="params">xmlString</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">new</span> <span class="title class_">DOMParser</span>()).<span class="title function_">parseFromString</span>(xmlString, <span class="string">&#x27;text/xml&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">parseXML</span>(&lt;xmlString&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Serialize-Array"><a href="#Serialize-Array" class="headerlink" title="Serialize Array"></a>Serialize Array</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">serializeArray</span>(&lt;form&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">serializeArray</span>(<span class="params">form</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> field, length, output = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> form === <span class="string">&#x27;object&#x27;</span> &amp;&amp; form.<span class="property">nodeName</span> === <span class="string">&#x27;FORM&#x27;</span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> length = form.<span class="property">elements</span>.<span class="property">length</span>;</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; length; i++) &#123;</span><br><span class="line">            field = form.<span class="property">elements</span>[i];</span><br><span class="line">            <span class="keyword">if</span> (field.<span class="property">name</span> &amp;&amp; !field.<span class="property">disabled</span> &amp;&amp; field.<span class="property">type</span> !== <span class="string">&#x27;file&#x27;</span> &amp;&amp; field.<span class="property">type</span> != <span class="string">&#x27;reset&#x27;</span> &amp;&amp; field.<span class="property">type</span> != <span class="string">&#x27;submit&#x27;</span> &amp;&amp; field.<span class="property">type</span> != <span class="string">&#x27;button&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (field.<span class="property">type</span> === <span class="string">&#x27;select-multiple&#x27;</span>) &#123;</span><br><span class="line">                    length = form.<span class="property">elements</span>[i].<span class="property">options</span>.<span class="property">length</span>;</span><br><span class="line">                    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; length; j++) &#123;</span><br><span class="line">                        <span class="keyword">if</span>(field.<span class="property">options</span>[j].<span class="property">selected</span>)</span><br><span class="line">                            output[output.<span class="property">length</span>] = &#123; <span class="attr">name</span>: field.<span class="property">name</span>, <span class="attr">value</span>: field.<span class="property">options</span>[j].<span class="property">value</span> &#125;;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((field.<span class="property">type</span> !== <span class="string">&#x27;checkbox&#x27;</span> &amp;&amp; field.<span class="property">type</span> !== <span class="string">&#x27;radio&#x27;</span>) || field.<span class="property">checked</span>) &#123;</span><br><span class="line">                    output[output.<span class="property">length</span>] = &#123; <span class="attr">name</span>: field.<span class="property">name</span>, <span class="attr">value</span>: field.<span class="property">value</span> &#125;;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> output;</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">serializeArray</span>(&lt;form&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Serialize-String"><a href="#Serialize-String" class="headerlink" title="Serialize String"></a>Serialize String</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">serialize</span>(&lt;form&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">serialize</span>(<span class="params">form</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> field, length, output = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> form === <span class="string">&#x27;object&#x27;</span> &amp;&amp; form.<span class="property">nodeName</span> === <span class="string">&#x27;FORM&#x27;</span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> length = form.<span class="property">elements</span>.<span class="property">length</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; length; i++) &#123;</span><br><span class="line">            field = form.<span class="property">elements</span>[i];</span><br><span class="line">            <span class="keyword">if</span> (field.<span class="property">name</span> &amp;&amp; !field.<span class="property">disabled</span> &amp;&amp; field.<span class="property">type</span> !== <span class="string">&#x27;file&#x27;</span> &amp;&amp; field.<span class="property">type</span> !== <span class="string">&#x27;reset&#x27;</span> &amp;&amp; field.<span class="property">type</span> !== <span class="string">&#x27;submit&#x27;</span> &amp;&amp; field.<span class="property">type</span> !== <span class="string">&#x27;button&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (field.<span class="property">type</span> === <span class="string">&#x27;select-multiple&#x27;</span>) &#123;</span><br><span class="line">                    length = form.<span class="property">elements</span>[i].<span class="property">options</span>.<span class="property">length</span>;</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">var</span> j=<span class="number">0</span>; j &lt; length; j++) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (field.<span class="property">options</span>[j].<span class="property">selected</span>) &#123;</span><br><span class="line">                            output[output.<span class="property">length</span>] = <span class="built_in">encodeURIComponent</span>(field.<span class="property">name</span>) + <span class="string">&#x27;=&#x27;</span> + <span class="built_in">encodeURIComponent</span>(field.<span class="property">options</span>[j].<span class="property">value</span>);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((field.<span class="property">type</span> !== <span class="string">&#x27;checkbox&#x27;</span> &amp;&amp; field.<span class="property">type</span> !== <span class="string">&#x27;radio&#x27;</span>) || field.<span class="property">checked</span>) &#123;</span><br><span class="line">                    output[output.<span class="property">length</span>] = <span class="built_in">encodeURIComponent</span>(field.<span class="property">name</span>) + <span class="string">&#x27;=&#x27;</span> + <span class="built_in">encodeURIComponent</span>(field.<span class="property">value</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> output.<span class="title function_">join</span>(<span class="string">&#x27;&amp;&#x27;</span>).<span class="title function_">replace</span>(<span class="regexp">/%20/g</span>, <span class="string">&#x27;+&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">serialize</span>(&lt;form&gt;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Trim"><a href="#Trim" class="headerlink" title="Trim"></a>Trim</h4><p>From jQuery</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="title function_">trim</span>(&lt;string&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>to Vanilla JS</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;string&gt;.<span class="title function_">trim</span>();</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/js/" rel="tag"># js</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/02/01/java/spring-boot2-lesson/" rel="prev" title="SpringBoot 2.x 视频教程笔记">
+      <i class="fa fa-chevron-left"></i> SpringBoot 2.x 视频教程笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/06/26/fun/books-to-read-list-1/" rel="next" title="书单">
+      书单 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Vanilla-JS"><span class="nav-number">1.</span> <span class="nav-text">Vanilla JS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.1.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Use-in-Development"><span class="nav-number">1.1.1.</span> <span class="nav-text">Use in Development</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Use-in-Production"><span class="nav-number">1.1.2.</span> <span class="nav-text">Use in Production</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Speed-Comparison"><span class="nav-number">1.2.</span> <span class="nav-text">Speed Comparison</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Retrieve-DOM-element-by-ID"><span class="nav-number">1.2.1.</span> <span class="nav-text">Retrieve DOM element by ID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Retrieve-10-DOM-elements-by-tag-name"><span class="nav-number">1.2.2.</span> <span class="nav-text">Retrieve 10 DOM elements by tag name</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Vanilla-JS-vs-jQuery"><span class="nav-number">1.2.3.</span> <span class="nav-text">Vanilla JS vs jQuery</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Retrieve-10-DOM-elements-by-class-name"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">Retrieve 10 DOM elements by class name</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Retrieve-DOM-element-with-inner-span-selector"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">Retrieve DOM element with &lt;#id&gt; .inner span selector</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Retrieve-10-DOM-elements-with-inner-span-selector"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">Retrieve 10 DOM elements with &lt;.className&gt; .inner span selector</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Vanilla-JS-Selector-Performances"><span class="nav-number">1.2.4.</span> <span class="nav-text">Vanilla JS Selector Performances</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#From-jQuery-to-Vanilla-JS"><span class="nav-number">1.3.</span> <span class="nav-text">From jQuery to Vanilla JS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Node-Selector"><span class="nav-number">1.3.1.</span> <span class="nav-text">.Node #Selector</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#id"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">#id</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#classname-id-tagname"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">.classname #id tagname</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#classname-id-tagname-1"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">[.classname #id tagname]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#classname"><span class="nav-number">1.3.1.4.</span> <span class="nav-text">[.classname]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#name"><span class="nav-number">1.3.1.5.</span> <span class="nav-text">[name]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tagname"><span class="nav-number">1.3.1.6.</span> <span class="nav-text">[tagname]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reverted-Loop"><span class="nav-number">1.3.1.7.</span> <span class="nav-text">Reverted Loop</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AJAX"><span class="nav-number">1.3.2.</span> <span class="nav-text">AJAX</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#GET"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">GET</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JSON"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">JSON</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#POST"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">POST</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Request-Response"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">Request &#x2F; Response</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ATTRIBUTS"><span class="nav-number">1.3.3.</span> <span class="nav-text">ATTRIBUTS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Add-Class"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">Add Class</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Get-Attribute"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">Get Attribute</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Get-Data"><span class="nav-number">1.3.3.3.</span> <span class="nav-text">Get Data</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Get-Value"><span class="nav-number">1.3.3.4.</span> <span class="nav-text">Get Value</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Has-Class"><span class="nav-number">1.3.3.5.</span> <span class="nav-text">Has Class</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remove-Attribute"><span class="nav-number">1.3.3.6.</span> <span class="nav-text">Remove Attribute</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remove-Class"><span class="nav-number">1.3.3.7.</span> <span class="nav-text">Remove Class</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remove-Data"><span class="nav-number">1.3.3.8.</span> <span class="nav-text">Remove Data</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-Attribute"><span class="nav-number">1.3.3.9.</span> <span class="nav-text">Set Attribute</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-Data"><span class="nav-number">1.3.3.10.</span> <span class="nav-text">Set Data</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-Value"><span class="nav-number">1.3.3.11.</span> <span class="nav-text">Set Value</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Toggle-Class"><span class="nav-number">1.3.3.12.</span> <span class="nav-text">Toggle Class</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EFFECTS"><span class="nav-number">1.3.4.</span> <span class="nav-text">EFFECTS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Animation"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">Animation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hide"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">Hide</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Show"><span class="nav-number">1.3.4.3.</span> <span class="nav-text">Show</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EVENTS"><span class="nav-number">1.3.5.</span> <span class="nav-text">EVENTS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Hover"><span class="nav-number">1.3.5.1.</span> <span class="nav-text">Hover</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Load"><span class="nav-number">1.3.5.2.</span> <span class="nav-text">Load</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Off"><span class="nav-number">1.3.5.3.</span> <span class="nav-text">Off</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#On"><span class="nav-number">1.3.5.4.</span> <span class="nav-text">On</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#One"><span class="nav-number">1.3.5.5.</span> <span class="nav-text">One</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ready"><span class="nav-number">1.3.5.6.</span> <span class="nav-text">Ready</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Trigger"><span class="nav-number">1.3.5.7.</span> <span class="nav-text">Trigger</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FILTERS"><span class="nav-number">1.3.6.</span> <span class="nav-text">FILTERS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Filter"><span class="nav-number">1.3.6.1.</span> <span class="nav-text">Filter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#First"><span class="nav-number">1.3.6.2.</span> <span class="nav-text">First</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Has"><span class="nav-number">1.3.6.3.</span> <span class="nav-text">Has</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Is"><span class="nav-number">1.3.6.4.</span> <span class="nav-text">Is</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Item"><span class="nav-number">1.3.6.5.</span> <span class="nav-text">Item</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Last"><span class="nav-number">1.3.6.6.</span> <span class="nav-text">Last</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Not"><span class="nav-number">1.3.6.7.</span> <span class="nav-text">Not</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Slice"><span class="nav-number">1.3.6.8.</span> <span class="nav-text">Slice</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MANIPULATION"><span class="nav-number">1.3.7.</span> <span class="nav-text">MANIPULATION</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Append"><span class="nav-number">1.3.7.1.</span> <span class="nav-text">Append</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Clone"><span class="nav-number">1.3.7.2.</span> <span class="nav-text">Clone</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Compare"><span class="nav-number">1.3.7.3.</span> <span class="nav-text">Compare</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Contains"><span class="nav-number">1.3.7.4.</span> <span class="nav-text">Contains</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Create"><span class="nav-number">1.3.7.5.</span> <span class="nav-text">Create</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Empty"><span class="nav-number">1.3.7.6.</span> <span class="nav-text">Empty</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Get-HTML"><span class="nav-number">1.3.7.7.</span> <span class="nav-text">Get HTML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Get-Node-HTML"><span class="nav-number">1.3.7.8.</span> <span class="nav-text">Get Node HTML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Get-Text"><span class="nav-number">1.3.7.9.</span> <span class="nav-text">Get Text</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Index-From-Parent"><span class="nav-number">1.3.7.10.</span> <span class="nav-text">Index From Parent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Insert-After"><span class="nav-number">1.3.7.11.</span> <span class="nav-text">Insert After</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Insert-Before"><span class="nav-number">1.3.7.12.</span> <span class="nav-text">Insert Before</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Prepend"><span class="nav-number">1.3.7.13.</span> <span class="nav-text">Prepend</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remove"><span class="nav-number">1.3.7.14.</span> <span class="nav-text">Remove</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Remove-Children"><span class="nav-number">1.3.7.15.</span> <span class="nav-text">Remove Children</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Replace"><span class="nav-number">1.3.7.16.</span> <span class="nav-text">Replace</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-HTML"><span class="nav-number">1.3.7.17.</span> <span class="nav-text">Set HTML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-Node-HTML"><span class="nav-number">1.3.7.18.</span> <span class="nav-text">Set Node HTML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-Text"><span class="nav-number">1.3.7.19.</span> <span class="nav-text">Set Text</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Unwrap"><span class="nav-number">1.3.7.20.</span> <span class="nav-text">Unwrap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Wrap"><span class="nav-number">1.3.7.21.</span> <span class="nav-text">Wrap</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TRAVERSING"><span class="nav-number">1.3.8.</span> <span class="nav-text">TRAVERSING</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#All-Next"><span class="nav-number">1.3.8.1.</span> <span class="nav-text">All Next</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#All-Parents"><span class="nav-number">1.3.8.2.</span> <span class="nav-text">All Parents</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#All-Previous"><span class="nav-number">1.3.8.3.</span> <span class="nav-text">All Previous</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Children"><span class="nav-number">1.3.8.4.</span> <span class="nav-text">Children</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Closest-Parent"><span class="nav-number">1.3.8.5.</span> <span class="nav-text">Closest Parent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Find-Children"><span class="nav-number">1.3.8.6.</span> <span class="nav-text">Find Children</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#First-Child"><span class="nav-number">1.3.8.7.</span> <span class="nav-text">First Child</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Last-Child"><span class="nav-number">1.3.8.8.</span> <span class="nav-text">Last Child</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Matches-Selector"><span class="nav-number">1.3.8.9.</span> <span class="nav-text">Matches Selector</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Next"><span class="nav-number">1.3.8.10.</span> <span class="nav-text">Next</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Next-Until"><span class="nav-number">1.3.8.11.</span> <span class="nav-text">Next Until</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parent"><span class="nav-number">1.3.8.12.</span> <span class="nav-text">Parent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parents"><span class="nav-number">1.3.8.13.</span> <span class="nav-text">Parents</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parents-Until"><span class="nav-number">1.3.8.14.</span> <span class="nav-text">Parents Until</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Previous"><span class="nav-number">1.3.8.15.</span> <span class="nav-text">Previous</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Previous-Until"><span class="nav-number">1.3.8.16.</span> <span class="nav-text">Previous Until</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Siblings"><span class="nav-number">1.3.8.17.</span> <span class="nav-text">Siblings</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#STYLES"><span class="nav-number">1.3.9.</span> <span class="nav-text">STYLES</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Get-Style"><span class="nav-number">1.3.9.1.</span> <span class="nav-text">Get Style</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Get-Scroll-Left"><span class="nav-number">1.3.9.2.</span> <span class="nav-text">Get Scroll Left</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Get-Scroll-Top"><span class="nav-number">1.3.9.3.</span> <span class="nav-text">Get Scroll Top</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Inner-Height"><span class="nav-number">1.3.9.4.</span> <span class="nav-text">Inner Height</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Inner-Width"><span class="nav-number">1.3.9.5.</span> <span class="nav-text">Inner Width</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Offset-from-Document"><span class="nav-number">1.3.9.6.</span> <span class="nav-text">Offset from Document</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Offset-from-Parent"><span class="nav-number">1.3.9.7.</span> <span class="nav-text">Offset from Parent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Offset-from-Viewport"><span class="nav-number">1.3.9.8.</span> <span class="nav-text">Offset from Viewport</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Outer-Height"><span class="nav-number">1.3.9.9.</span> <span class="nav-text">Outer Height</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Outer-Width"><span class="nav-number">1.3.9.10.</span> <span class="nav-text">Outer Width</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parent-Not-Static"><span class="nav-number">1.3.9.11.</span> <span class="nav-text">Parent Not Static</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-Style"><span class="nav-number">1.3.9.12.</span> <span class="nav-text">Set Style</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-Scroll-Left"><span class="nav-number">1.3.9.13.</span> <span class="nav-text">Set Scroll Left</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-Scroll-Top"><span class="nav-number">1.3.9.14.</span> <span class="nav-text">Set Scroll Top</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UTILS"><span class="nav-number">1.3.10.</span> <span class="nav-text">UTILS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Array-Each"><span class="nav-number">1.3.10.1.</span> <span class="nav-text">Array Each</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Change-Futur-Context"><span class="nav-number">1.3.10.2.</span> <span class="nav-text">Change Futur Context</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Extend"><span class="nav-number">1.3.10.3.</span> <span class="nav-text">Extend</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Index-Of"><span class="nav-number">1.3.10.4.</span> <span class="nav-text">Index Of</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Is-Array"><span class="nav-number">1.3.10.5.</span> <span class="nav-text">Is Array</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Map"><span class="nav-number">1.3.10.6.</span> <span class="nav-text">Map</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Now"><span class="nav-number">1.3.10.7.</span> <span class="nav-text">Now</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parse-HTML"><span class="nav-number">1.3.10.8.</span> <span class="nav-text">Parse HTML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parse-JSON"><span class="nav-number">1.3.10.9.</span> <span class="nav-text">Parse JSON</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Parse-XML"><span class="nav-number">1.3.10.10.</span> <span class="nav-text">Parse XML</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Serialize-Array"><span class="nav-number">1.3.10.11.</span> <span class="nav-text">Serialize Array</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Serialize-String"><span class="nav-number">1.3.10.12.</span> <span class="nav-text">Serialize String</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Trim"><span class="nav-number">1.3.10.13.</span> <span class="nav-text">Trim</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

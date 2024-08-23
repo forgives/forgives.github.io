@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="为了实现以消费者为中心的精细化运营，需要数据指导市场营销应该怎么有的放矢。比如：要实现增长目标，最重要的决策因子有哪些，市场费用就可以重点往这些因素上投入；经过计算距离这个GMV，还有多少人群缺口，费用就应该着重放在这些人群的运营上。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用户增长&#x2F;运营模型总结">
+<meta property="og:url" content="https://forgives.github.io/2020/08/25/note/user-growth-model/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="为了实现以消费者为中心的精细化运营，需要数据指导市场营销应该怎么有的放矢。比如：要实现增长目标，最重要的决策因子有哪些，市场费用就可以重点往这些因素上投入；经过计算距离这个GMV，还有多少人群缺口，费用就应该着重放在这些人群的运营上。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1x.f6YeL2gK0jSZPhXXahvXXa-1404-498.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1ASf8YhD1gK0jSZFsXXbldVXa-937-516.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1a1AhYXT7gK0jSZFpXXaTkpXa-519-272.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1ImL5YXY7gK0jSZKzXXaikpXa-1942-688.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1vr4pYEY1gK0jSZFCXXcwqXXa-720-620.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB10gr7YoH1gK0jSZSyXXXtlpXa-554-337.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1xO.aYkY2gK0jSZFgXXc5OFXa-588-352.png">
+<meta property="article:published_time" content="2020-08-25T03:29:17.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.391Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="userGrowth">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/tfs/TB1x.f6YeL2gK0jSZPhXXahvXXa-1404-498.png">
+
+<link rel="canonical" href="https://forgives.github.io/2020/08/25/note/user-growth-model/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>用户增长/运营模型总结 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2020/08/25/note/user-growth-model/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用户增长/运营模型总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-25 11:29:17" itemprop="dateCreated datePublished" datetime="2020-08-25T11:29:17+08:00">2020-08-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%94%A8%E5%A2%9E/" itemprop="url" rel="index"><span itemprop="name">用增</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>为了实现以消费者为中心的精细化运营，需要数据指导市场营销应该怎么有的放矢。比如：要实现增长目标，最重要的决策因子有哪些，市场费用就可以重点往这些因素上投入；经过计算距离这个GMV，还有多少人群缺口，费用就应该着重放在这些人群的运营上。</p>
+<span id="more"></span>
+<h1 id="用户全生命周期增长AARRR模型"><a href="#用户全生命周期增长AARRR模型" class="headerlink" title="用户全生命周期增长AARRR模型"></a>用户全生命周期增长AARRR模型</h1><p>AARRR漏斗模型是Dave McClure 在2007提出的客户生命周期模型，解释了实现用户增长的5个指标，分别是：</p>
+<ul>
+<li>Acquisition（获取）</li>
+<li>Activation（激活）</li>
+<li>Retention（留存）</li>
+<li>Revenue（收入）</li>
+<li>Referral（自传播）<br>因其掠夺式的增长方式也被称为海盗模型，可以帮助我们更好地理解获客和维护客户的原理。</li>
+</ul>
+<p><img src="https://img.alicdn.com/tfs/TB1x.f6YeL2gK0jSZPhXXahvXXa-1404-498.png" alt="AARRR"><br><img src="https://img.alicdn.com/tfs/TB1ASf8YhD1gK0jSZFsXXbldVXa-937-516.png" alt="海盗指标-AARRR模型"></p>
+<h2 id="获取"><a href="#获取" class="headerlink" title="获取"></a>获取</h2><p>增长的第一环节在于流量的获取——并不是说流量越多代表转化越高，流量质量更重要。<strong>流量获取的关键在于引导精准流量，流量在精不在多。</strong></p>
+<h2 id="激活"><a href="#激活" class="headerlink" title="激活"></a>激活</h2><p>如何让用户体会到产品的核心价值，并产生重复使用产品的动力，这是产品激活环节中亟需解决的问题。<br>《上瘾》书中提到上瘾的四要素是：触发、行动、奖励、投资；触发用户激活是上瘾的第一步。</p>
+<h2 id="留存"><a href="#留存" class="headerlink" title="留存"></a>留存</h2><p>弹窗&#x2F;推送，内容推荐是提升用户留存常用的手段；像今日头条每天来自推送的流量高达60%，用户留存率和活跃度都极高。</p>
+<h2 id="变现"><a href="#变现" class="headerlink" title="变现"></a>变现</h2><p>用<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/894052f1b1fd">HMW</a>思维，可思考出无限种新方式。</p>
+<h2 id="推荐"><a href="#推荐" class="headerlink" title="推荐"></a>推荐</h2><p>用户成为新的传播起点才能获得更大的增长力量，病毒系数K是产生病毒传播和裂变的关键因素。<br>推荐复利循环流程是：用户使用产品→推荐给好友→好友使用产品→推荐给其他好友→如此循环往复。推荐的钩子在于依靠内容上的共鸣、情绪、创意策划、玩法等实现刷屏，常见的方式有口碑传播、传染式传播、爆发式传播、裂变活动等。</p>
+<h2 id="北极星指标和Aha时刻"><a href="#北极星指标和Aha时刻" class="headerlink" title="北极星指标和Aha时刻"></a>北极星指标和Aha时刻</h2><p>“North Star Metric” 北极星指标，又叫做“OMTM” One metric that matters, 唯一重要的指标。之所以叫北极星指标，是因为这个指标一旦确立，就像北极星一样，高高闪耀在天空中，指引着全公司上上下下，向着同一个方向迈进。<br>北极星指标就是黑客增长需要着力解决的首要指标。</p>
+<p>啊哈(AHA)时刻就是产品使用户眼前一亮的时刻，是用户真正发现产品核心价值的时刻。<br><img src="https://img.alicdn.com/tfs/TB1a1AhYXT7gK0jSZFpXXaTkpXa-519-272.png" alt="增长黑客"></p>
+<h2 id="淘宝MAU拆解"><a href="#淘宝MAU拆解" class="headerlink" title="淘宝MAU拆解"></a>淘宝MAU拆解</h2><ul>
+<li>A1：新登（近30天新登会员）</li>
+<li>A2：流失召回会员（近30天流失召回会员，流失召回每天单独统计，逻辑为上次访问间隔在30天）</li>
+<li>A3：低活（排除A1和A2，近30天活跃天数为1~18天）<ul>
+<li>A3-1：低活会员（排除A1和A2，近30天活跃天数为1~9天）</li>
+<li>A3-2：低活会员（排除A1和A2，近30天活跃天数为10-14天）</li>
+<li>A3-3：低活会员（排除A1和A2，近30天活跃天数为15~18天）</li>
+</ul>
+</li>
+<li>A4：中活（排除A1和A2，近30天活跃天数为19~26天）</li>
+<li>A5：高活（排除A1和A2，近30天活跃天数为27~30天）</li>
+</ul>
+<h2 id="用户生命周期运营"><a href="#用户生命周期运营" class="headerlink" title="用户生命周期运营"></a>用户生命周期运营</h2><ul>
+<li>拉新：潜在用户—&gt;A1新登</li>
+<li>促活：A3低活—&gt;A4中活—&gt;A5高活</li>
+<li>召回：流失人群（月度流失、季度流失、年度流失）—&gt;A2召回</li>
+</ul>
+<p><img src="https://img.alicdn.com/tfs/TB1ImL5YXY7gK0jSZKzXXaikpXa-1942-688.png" alt="淘宝用户生命周期"></p>
+<h1 id="更好的增长黑客模型RARRA"><a href="#更好的增长黑客模型RARRA" class="headerlink" title="更好的增长黑客模型RARRA"></a>更好的增长黑客模型RARRA</h1><p>RARRA模型是托马斯·佩蒂特Thomas Petit和贾博·帕普Gabor Papp对于海盗指标-AARRR模型的优化。RARRA模型突出了用户留存的重要性。获客不再是增长的王道。因为AARRR专注于获客(Acquisition)，McClure是在2007年获客成本还比较低廉的时候编写的，而现在广告&#x2F;社交渠道的流量价格已经很高，获客的成本与日俱增，市场情况和2007年已经完全不同。现在黑客增长的真正关键在于用户留存，而不是获客。</p>
+<ul>
+<li><p>用户留存Retention：为用户提供价值，让用户回访。</p>
+</li>
+<li><p>用户激活Activation：确保新用户在首次启动时看到你的产品价值。</p>
+</li>
+<li><p>用户推荐Referral：让用户分享、讨论你的产品。</p>
+</li>
+<li><p>商业变现Revenue：一个好的商业模式是可以赚钱的。</p>
+</li>
+<li><p>用户拉新Acquisition：鼓励老用户带来新用户。<br><img src="https://img.alicdn.com/tfs/TB1vr4pYEY1gK0jSZFCXXcwqXXa-720-620.png" alt="RARRA"></p>
+<p>  RARRA通过最重要的指标来关注增长：用户留存</p>
+</li>
+</ul>
+<p>正如Brian Balfour所说：真正反映整体真实增长情况的指标都应该被首先重视。而留存率是反映用户真正价值的指标——因为用户会真实的每天来使用你的产品。当我们优先考虑用户留存时，我们正在构建一个真正的永久的用户群。</p>
+<h2 id="如何使用RARRA创建增长战略"><a href="#如何使用RARRA创建增长战略" class="headerlink" title="如何使用RARRA创建增长战略"></a>如何使用RARRA创建增长战略</h2><p>正如我们所提到的，提高用户留存是产品增长的基础。</p>
+<p>1、评估产品当中当前留存率情况和主要用户流失节点。<br>通过证明你的产品价值并培养用户的习惯。最重要的是：你需要倾听用户日常遇到的常见问题，快速修复错误并不断优化你的产品。</p>
+<p>2、加快用户激活<br>你做产品不只是为了让人下载它——你更希望他们使用！有效的用户引导Onboarding，可以帮助用户花更少的时间搞清楚如何使用你的产品。简单的演练和可视化提示，帮助用户尽快体验产品价值和优势。注意用户引导Onboarding要保持简单：不要覆盖每一个功能，也不要通过解释缩放或滚动手势等明显元素来惹恼用户。</p>
+<p>3、建立有效的推荐系统<br>根据尼尔森进行的一项研究：92％的人信任朋友推荐。你可以通过激励手段，让已经留存下来的忠诚用户将你的产品推荐给周边的用户，你可以快速扩展你的用户群并为潜在用户同样提供激励措施。用户推荐的每次获客成本通常比其他渠道的获客成本要低得多，推荐用户的留存率通常也会更高。通过提供现金返还或折扣券&#x2F;优惠券等推荐奖励机制，是一种让用户参与和吸引新用户的有效方式。</p>
+<p>4、提高用户的终身价值Lifetime value<br>客户的留存时间越长，他们对你的业务的价值就越大。它们提供稳定、可预测的收入增长——这意味着你可以花更多钱获取更多的新用户。<br>以下是一些改善客户终身价值Lifetime Value的方法：<br>1）发送阶段性成就和进度的电子邮件<br>电子邮件营销很重要，这是让用户重新访问你产品的一种方法，你可以一周或者一月发一次。总结一周或者一月的进度或成就，或计算他们由于使用了你的产品节省了多少钱。<br>2）识别追加销售和交叉销售机会<br>向上营销(Up Marketing)：根据既有客户过去的消费喜好，提供更高价值或者其他用以加强其原有功能或者用途的产品或服务。<br>交叉营销(Cross Marketing)：从客户的购买行为中发现客户的多种需求，向其推销相关的产品或服务，创造追加销售机会。<br>3）询问用户反馈<br>了解用户的需求可以帮助你确定路线图的优先顺序，从而专注于实际促进用户留存和业务增长的方面。这对于改善用户体验以及了解用户向其他人推荐产品，意义重大。<br>了解你拥有多少忠诚的客户，以及他们是谁，这对于保持低流失率以及通过应用商店评级，推荐和口口传播扩大你的用户群紧密相关。</p>
+<p>5、优化获客渠道<br>通过群组分析找出哪些获客渠道的效果最适合你的产品。<br>这里需要注意：我没有说找出哪些渠道带来了最新用户。相反，要更加关注漏斗，找出哪些渠道带来了最忠诚的用户。</p>
+<p><strong>一旦你证明你可以留住用户，你就可以加大营销力度，在渠道顶部添加新用户 ，并开始以指数方式为你的产品进行黑客增长。</strong></p>
+<p>扩展阅读<br><a target="_blank" rel="noopener" href="http://www.woshipm.com/pd/1705404.html">用户激活：围绕用户体验的Onboarding设计大法</a><br>onboarding是新用户引导流程，是刺激用户激活的增长手段之一。它的目的是带领用户快速认识产品、感受到产品的核心价值，从而产生留下来的欲望，因此设计符合用户体验的onborading非常重要。</p>
+<h1 id="AIPL模型"><a href="#AIPL模型" class="headerlink" title="AIPL模型"></a>AIPL模型</h1><p>首次实现品牌人群资产定量化、链路化运营。<br>品牌人群资产很重要，但是“人群资产”是一个很难量化统计的概念。阿里就推出了一个可以把品牌在阿里系的人群资产定量化运营的模型，这也是支撑它全域营销概念落地的关键一环，这个模型叫做：A-I-P-L。</p>
+<ul>
+<li>A（Awareness），品牌认知人群。包括被品牌广告触达和品类词搜索的人；</li>
+<li>I（Interest），品牌兴趣人群。包括广告点击、浏览品牌&#x2F;店铺主页、参与品牌互动、浏览产品详情页、品牌词搜索、领取试用、订阅&#x2F;关注&#x2F;入会、加购收藏的人；</li>
+<li>P（Purchase），品牌购买人群，指购买过品牌商品的人；</li>
+<li>L（Loyalty），品牌忠诚人群，包括复购、评论、分享的人。</li>
+</ul>
+<p>品牌所有AIPL资产数据都可以被存在数据银行（Data Bank）中，靠的是用户在阿里体系那个共通的身份（UNI-ID）。</p>
+<p>淘系的aipl模型定义<br><img src="https://img.alicdn.com/tfs/TB10gr7YoH1gK0jSZSyXXXtlpXa-554-337.png" alt="aipl"></p>
+<p>B系的aipl模型定义<br><img src="https://img.alicdn.com/tfs/TB1xO.aYkY2gK0jSZFgXXc5OFXa-588-352.png" alt="aipl"></p>
+<p>此模型对精细化运营的重要作用: <strong>让品牌人群资产链路化运营。</strong><br>简而言之就是，对于所处链路中不同位置的人群，品牌采用对应的沟通内容和渠道，最终的目的累积人群资产，并实现链路高效流转：让“A人群“尽快转化成”I人群“，以此类推，试想一下你的品牌拥有数不完的“L“人群，你应该再也不用愁生意做不好了吧。</p>
+<p>步骤</p>
+<ol>
+<li>明确品牌当前的“A-I-P-L“人群资产存在的问题。</li>
+<li>针对链路中具体问题采用对用的解决策略。</li>
+</ol>
+<p>比如A人群量太少（增加品牌投放），I人群到P人群的流转率太低等（细化标签人群做营销策略）。</p>
+<h3 id="扩展阅读"><a href="#扩展阅读" class="headerlink" title="扩展阅读"></a>扩展阅读</h3><p>今日头条云图，利用品牌人群资产为营销赋能<br><a target="_blank" rel="noopener" href="http://vr.sina.com.cn/news/hz/2018-06-05/doc-ihcqccin6449135.shtml">http://vr.sina.com.cn/news/hz/2018-06-05/doc-ihcqccin6449135.shtml</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/userGrowth/" rel="tag"># userGrowth</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/23/note/intelligent-reach/" rel="prev" title="用户触达">
+      <i class="fa fa-chevron-left"></i> 用户触达
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/12/note/user-growth-platform/" rel="next" title="用户增长平台建设">
+      用户增长平台建设 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%85%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%A2%9E%E9%95%BFAARRR%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">用户全生命周期增长AARRR模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96"><span class="nav-number">1.1.</span> <span class="nav-text">获取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BF%80%E6%B4%BB"><span class="nav-number">1.2.</span> <span class="nav-text">激活</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%95%99%E5%AD%98"><span class="nav-number">1.3.</span> <span class="nav-text">留存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E7%8E%B0"><span class="nav-number">1.4.</span> <span class="nav-text">变现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90"><span class="nav-number">1.5.</span> <span class="nav-text">推荐</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%97%E6%9E%81%E6%98%9F%E6%8C%87%E6%A0%87%E5%92%8CAha%E6%97%B6%E5%88%BB"><span class="nav-number">1.6.</span> <span class="nav-text">北极星指标和Aha时刻</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%98%E5%AE%9DMAU%E6%8B%86%E8%A7%A3"><span class="nav-number">1.7.</span> <span class="nav-text">淘宝MAU拆解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E8%BF%90%E8%90%A5"><span class="nav-number">1.8.</span> <span class="nav-text">用户生命周期运营</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9B%B4%E5%A5%BD%E7%9A%84%E5%A2%9E%E9%95%BF%E9%BB%91%E5%AE%A2%E6%A8%A1%E5%9E%8BRARRA"><span class="nav-number">2.</span> <span class="nav-text">更好的增长黑客模型RARRA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8RARRA%E5%88%9B%E5%BB%BA%E5%A2%9E%E9%95%BF%E6%88%98%E7%95%A5"><span class="nav-number">2.1.</span> <span class="nav-text">如何使用RARRA创建增长战略</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AIPL%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">AIPL模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A9%E5%B1%95%E9%98%85%E8%AF%BB"><span class="nav-number">3.0.1.</span> <span class="nav-text">扩展阅读</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

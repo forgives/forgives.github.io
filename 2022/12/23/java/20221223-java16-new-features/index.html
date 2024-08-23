@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="jdk 16 主要的新特性参考:  openjdk JDK 16 baeldung New Features in Java 16">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 16 新特性">
+<meta property="og:url" content="https://forgives.github.io/2022/12/23/java/20221223-java16-new-features/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="jdk 16 主要的新特性参考:  openjdk JDK 16 baeldung New Features in Java 16">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-12-23T02:19:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.378Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="java16">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/12/23/java/20221223-java16-new-features/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 16 新特性 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/12/23/java/20221223-java16-new-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 16 新特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-23 10:19:00" itemprop="dateCreated datePublished" datetime="2022-12-23T10:19:00+08:00">2022-12-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>jdk 16 主要的新特性参考: </p>
+<p>openjdk <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/16/">JDK 16</a></p>
+<p>baeldung <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-16-new-features">New Features in Java 16</a></p>
+<span id="more"></span>  
+
+<h2 id="JDK-16-的新特性"><a href="#JDK-16-的新特性" class="headerlink" title="JDK 16 的新特性"></a>JDK 16 的新特性</h2><p>Java 16 于<em>2021 年 3 月 16</em>发布，包含新特性：</p>
+<ul>
+<li>338:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/338">Vector API (Incubator)</a></li>
+<li>347:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/347">Enable C++14 Language Features</a></li>
+<li>357:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/357">Migrate from Mercurial to Git</a></li>
+<li>369:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/369">Migrate to GitHub</a></li>
+<li>376:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/376">ZGC: Concurrent Thread-Stack Processing</a></li>
+<li>380:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/380">Unix-Domain Socket Channels</a></li>
+<li>386:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/386">Alpine Linux Port</a></li>
+<li>387:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/387">Elastic Metaspace</a></li>
+<li>388:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/388">Windows&#x2F;AArch64 Port</a></li>
+<li>389:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/389">Foreign Linker API (Incubator)</a></li>
+<li>390:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/390">Warnings for Value-Based Classes</a></li>
+<li>392:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/392">Packaging Tool</a></li>
+<li>393:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/393">Foreign-Memory Access API (Third Incubator)</a></li>
+<li>394:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/394">Pattern Matching for instanceof</a></li>
+<li>395:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/395">Records</a></li>
+<li>396:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/396">Strongly Encapsulate JDK Internals by Default</a></li>
+<li>397:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/397">Sealed Classes (Second Preview)</a></li>
+</ul>
+<h2 id="开发者特性"><a href="#开发者特性" class="headerlink" title="开发者特性"></a>开发者特性</h2><h3 id="增加了-Stream-toList-方法-JDK-8180352"><a href="#增加了-Stream-toList-方法-JDK-8180352" class="headerlink" title="增加了 Stream.toList 方法 (JDK-8180352)"></a>增加了 Stream.toList 方法 (<a target="_blank" rel="noopener" href="https://bugs.openjdk.org/browse/JDK-8180352">JDK-8180352</a>)</h3><p>旨在精简写法，<code>Collectors.toList</code> 和 <code>Collectors.toSet</code>非常高频的使用，现在提供了更简洁的写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; integersAsString = Arrays.asList(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;2&quot;</span>, <span class="string">&quot;3&quot;</span>);</span><br><span class="line">List&lt;Integer&gt; ints = integersAsString.stream().map(Integer::parseInt).collect(Collectors.toList());</span><br><span class="line">List&lt;Integer&gt; intsEquivalent = integersAsString.stream().map(Integer::parseInt).toList();</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Vector-API-Incubator-JEP-338"><a href="#Vector-API-Incubator-JEP-338" class="headerlink" title="Vector API Incubator (JEP-338)"></a>Vector API Incubator (<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/338">JEP-338</a>)</h2><p>矢量API 是在java 16开始孵化的，旨在提供一套更高效的矢量计算方法。</p>
+<p>比如计算两个数组相乘：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] a = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line"><span class="type">int</span>[] b = &#123;<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">var</span> <span class="variable">c</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">int</span>[a.length];</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; a.length; i++) &#123;</span><br><span class="line">    c[i] = a[i] * b[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这种标量计算循环次数通常取决于数组大小，我们看下基于矢量的计算：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] a = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br><span class="line"><span class="type">int</span>[] b = &#123;<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">var</span> <span class="variable">vectorA</span> <span class="operator">=</span> IntVector.fromArray(IntVector.SPECIES_128, a, <span class="number">0</span>);</span><br><span class="line"><span class="type">var</span> <span class="variable">vectorB</span> <span class="operator">=</span> IntVector.fromArray(IntVector.SPECIES_128, b, <span class="number">0</span>);</span><br><span class="line"><span class="type">var</span> <span class="variable">vectorC</span> <span class="operator">=</span> vectorA.mul(vectorB);</span><br><span class="line">vectorC.intoArray(c, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p>上面代码首先利用静态方法<code>IntVector.fromArray</code>通过两个数据源数组创建了两个<code>IntVectors</code>。<br>第一个参数是矢量的大小，后面的参数分别是数组以及数组的偏移量。这边设置了矢量的大小为 128bit，因为java中int占4字节(4<em>8</em>4)。<br>在特定的架构中，编译器可以优化字节码，让循环从4次降低为1次，这种优化可以为机器学习与密码学带来好处。</p>
+<p>目前此特性还在孵化中，后续可能会有变化。</p>
+<h2 id="Enable-C-14-Language-Features"><a href="#Enable-C-14-Language-Features" class="headerlink" title="Enable C++14 Language Features"></a>Enable C++14 Language Features</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/347">JEP 347</a> 允许 在 JDK 的 C++ 源码中使用 C++ 14 的语言特性，并且给出了哪些特性可以在 HotSpot 代码中使用的具体说明。<br>和java开发者关系不大。</p>
+<h2 id="Migrate-from-Mercurial-to-Git"><a href="#Migrate-from-Mercurial-to-Git" class="headerlink" title="Migrate from Mercurial to Git"></a>Migrate from Mercurial to Git</h2><p>在此之前，OpenJDK 源代码是使用版本管理工具 Mercurial 进行管理的，你也可以在 <a target="_blank" rel="noopener" href="http://hg.openjdk.java.net/">http://hg.openjdk.java.net/</a> 查看 OpenJDK 的源代码历史版本。</p>
+<p>但是现在迁移到了 GIt ，主要原因如下：</p>
+<ul>
+<li>Mercurial 生成的版本控制元数据过大。</li>
+<li>Mercurial 相关的开发工具比较少，而 Git 几乎在所有的主流 IDE 中已经无缝集成。</li>
+<li>Mercurial 相关的服务比较少，无论是自建托管，还是服务托管。</li>
+</ul>
+<p>为了优雅的迁移到 Git，OpenJDK 做了如下操作。</p>
+<ul>
+<li>将所有的单存储库 OpenJDK 项目从 Mercurial 迁移到 Git。</li>
+<li>保留所有的版本控制历史，也包括 Tag。</li>
+<li>根据 Git 的最佳实践重新格式化提交的消息。</li>
+<li>创建了一个工具用来在 Mercurial 和 Git 哈希之间进行转换。</li>
+</ul>
+<p>github 地址 <a target="_blank" rel="noopener" href="https://github.com/openjdk/">https://github.com/openjdk/</a></p>
+<h2 id="ZGC-Concurrent-Thread-Stack-Processing"><a href="#ZGC-Concurrent-Thread-Stack-Processing" class="headerlink" title="ZGC: Concurrent Thread-Stack Processing"></a>ZGC: Concurrent Thread-Stack Processing</h2><p>这次改动让 ZGC 线程堆栈处理从 <em>Safepoints</em> 移动到并发阶段。</p>
+<h2 id="Unix-Domain-Socket-Channels"><a href="#Unix-Domain-Socket-Channels" class="headerlink" title="Unix-Domain Socket Channels"></a>Unix-Domain Socket Channels</h2><p>添加 UnixDomainSocketAddress.java 类用于支持 Unix 域套接字通道。<br>添加 Unix-domain socket 到 SocketChannel 和 ServerSocketChannel API 中。<br>添加枚举信息 java.net.StandardProtocolFamily.UNIX。</p>
+<h2 id="Alpine-Linux-Port"><a href="#Alpine-Linux-Port" class="headerlink" title="Alpine Linux Port"></a>Alpine Linux Port</h2><p><strong>Apine Linux</strong> 是一个独立的、非商业的 Linux 发行版，它十分的小，一个容器需要不超过 8MB 的空间，最小安装到磁盘只需要大约 130MB 存储空间，并且十分的简单，同时兼顾了安全性。</p>
+<p>此提案将 JDK 移植到了 Apline Linux，由于 Apline Linux 是基于 musl lib 的轻量级 Linux 发行版，因此其他 x64 和 AArch64 架构上使用 musl lib 的 Linux 发行版也适用。</p>
+<h2 id="Elastic-Metaspace"><a href="#Elastic-Metaspace" class="headerlink" title="Elastic Metaspace"></a>Elastic Metaspace</h2><p>自从引入了 Metaspace 以来，根据反馈，Metaspace 经常占用过多的堆外内存，从而导致内存浪费，现在可以更及时地将未使用的 HotSpot class-metaspace 内存返还给操作系统，从而减少 Metaspace 的占用空间，并优化了 Metaspace 代码以降低后续的维护成本。</p>
+<h2 id="Windows-AArch64-Port"><a href="#Windows-AArch64-Port" class="headerlink" title="Windows&#x2F;AArch64 Port"></a>Windows&#x2F;AArch64 Port</h2><p>将 JDK 移植到 Windows&#x2F;AArch64 架构上，Windows&#x2F;AArch64 已经是终端用户市场的热门需求。</p>
+<h2 id="Foreign-Linker-API-Incubator"><a href="#Foreign-Linker-API-Incubator" class="headerlink" title="Foreign Linker API (Incubator)"></a>Foreign Linker API (Incubator)</h2><p>这项提案让 Java 代码可以调用由其他语言（比如 C ，C++）编写的编译后的机器代码，替换了之前的 JNI 形式。</p>
+<p>不过这还是一个孵化中的功能，运行时需要添加 –add-modules jdk.incubator.foreign 参数来编译和运行 Java 代码。</p>
+<p>下面是一个调用 C 语言函数方法，然后输出运行结果的例子。</p>
+<p>1.编写一个 C 函数打印一个 “hello world”:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line"></span><br><span class="line">void printHello()&#123;</span><br><span class="line">	printf(&quot;hello www.wdbyte.com\n&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>2.将上面的代码编译，然后输出到共享库 hello.so</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ gcc -c -fPIC hello.c</span><br><span class="line">$ gcc -shared -o hello.so hello.o</span><br><span class="line">$ ll</span><br><span class="line">total 128</span><br><span class="line">-rw-r--r--  1 darcy  staff    76B 10 28 19:46 hello.c</span><br><span class="line">-rw-r--r--  1 darcy  staff   776B 10 28 19:46 hello.o</span><br><span class="line">-rwxr-xr-x  1 darcy  staff    48K 10 28 19:47 hello.so</span><br></pre></td></tr></table></figure>
+<p>3.编写一个 Java 代码，调用 hello.so 的 printHello 方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> jdk.incubator.foreign.CLinker;</span><br><span class="line"><span class="keyword">import</span> jdk.incubator.foreign.FunctionDescriptor;</span><br><span class="line"><span class="keyword">import</span> jdk.incubator.foreign.LibraryLookup;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.invoke.MethodHandle;</span><br><span class="line"><span class="keyword">import</span> java.lang.invoke.MethodType;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Path;</span><br><span class="line"><span class="keyword">import</span> java.util.Optional;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JEP389</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line"></span><br><span class="line">      <span class="type">Path</span> <span class="variable">path</span> <span class="operator">=</span> Path.of(<span class="string">&quot;/Users/forg/git/java-core/java-16/src/org/forg/hello.so&quot;</span>);</span><br><span class="line"></span><br><span class="line">      <span class="type">LibraryLookup</span> <span class="variable">libraryLookup</span> <span class="operator">=</span> LibraryLookup.ofPath(path);</span><br><span class="line"></span><br><span class="line">      Optional&lt;LibraryLookup.Symbol&gt; optionalSymbol = libraryLookup.lookup(<span class="string">&quot;printHello&quot;</span>);</span><br><span class="line">      <span class="keyword">if</span> (optionalSymbol.isPresent()) &#123;</span><br><span class="line"></span><br><span class="line">          LibraryLookup.<span class="type">Symbol</span> <span class="variable">symbol</span> <span class="operator">=</span> optionalSymbol.get();</span><br><span class="line"></span><br><span class="line">          <span class="type">FunctionDescriptor</span> <span class="variable">functionDescriptor</span> <span class="operator">=</span> FunctionDescriptor.ofVoid();</span><br><span class="line"></span><br><span class="line">          <span class="type">MethodType</span> <span class="variable">methodType</span> <span class="operator">=</span> MethodType.methodType(Void.TYPE);</span><br><span class="line"></span><br><span class="line">          <span class="type">MethodHandle</span> <span class="variable">methodHandle</span> <span class="operator">=</span> CLinker.getInstance().downcallHandle(</span><br><span class="line">                  symbol.address(),</span><br><span class="line">                  methodType,</span><br><span class="line">                  functionDescriptor);</span><br><span class="line">          methodHandle.invokeExact();</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>4.Java 代码编译:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ javac --add-modules jdk.incubator.foreign JEP389.java</span><br><span class="line">警告: 使用 incubating 模块: jdk.incubator.foreign</span><br><span class="line">1 个警告</span><br></pre></td></tr></table></figure>
+
+<p>5.Java 代码执行:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ java --add-modules  jdk.incubator.foreign -Dforeign.restricted=permit JEP389.java</span><br><span class="line">WARNING: Using incubator modules: jdk.incubator.foreign</span><br><span class="line">警告: 使用 incubating 模块: jdk.incubator.foreign</span><br><span class="line">1 个警告</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+
+<h2 id="Warnings-for-Value-Based-Classes"><a href="#Warnings-for-Value-Based-Classes" class="headerlink" title="Warnings for Value-Based Classes"></a>Warnings for Value-Based Classes</h2><p>添加了一个注解，用于标识当前是是基于值的类，比如 Java 8 引入的预防空指针的 Optional 类，现在已经添加了注解标识。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@jdk</span>.internal.ValueBased</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Optional</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Packaging-Tool"><a href="#Packaging-Tool" class="headerlink" title="Packaging Tool"></a>Packaging Tool</h2><p>在 Java 14 中，<em>JEP 343</em> 引入了打包工具，命令是 <strong>jpackage</strong>，在 Java 14 新功能文章里也做了介绍：</p>
+<p>使用 <code>jpackage</code> 命令可以把 JAR 包打包成不同操作系统支持的软件格式:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jpackage --name myapp --input lib --main-jar main.jar --main-class myapp.Main</span><br></pre></td></tr></table></figure>
+
+<p>常见平台格式如下：</p>
+<ul>
+<li>Linux: <code>deb</code> and <code>rpm</code></li>
+<li>macOS: <code>pkg</code> and <code>dmg</code></li>
+<li>Windows: <code>msi</code> and <code>exe</code></li>
+</ul>
+<p>要注意的是，<code>jpackage</code> 不支持交叉编译，也就是说在 windows 平台上是<strong>不能</strong>打包成 macOS 或者 Linux 系统的软件格式的。</p>
+<p>在 Java 15 中，继续孵化，现在在 Java 16 中，终于成为了正式功能。</p>
+<p>下面是一个例子，把一个简单的 Java Swing 程序打包成当前操作系统支持的软件格式，然后安装到当前电脑。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.swing.*;</span><br><span class="line"><span class="keyword">import</span> java.awt.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JEP392</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">JFrame</span> <span class="variable">frame</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JFrame</span>(<span class="string">&quot;Hello World Java Swing&quot;</span>);</span><br><span class="line">        frame.setMinimumSize(<span class="keyword">new</span> <span class="title class_">Dimension</span>(<span class="number">800</span>, <span class="number">600</span>));</span><br><span class="line">        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span><br><span class="line">        <span class="type">JLabel</span> <span class="variable">lblText</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JLabel</span>(<span class="string">&quot;Hello World!&quot;</span>, SwingConstants.CENTER);</span><br><span class="line">        frame.getContentPane().add(lblText);</span><br><span class="line">        frame.pack();</span><br><span class="line">        frame.setVisible(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译后，创建一个 JAR 文件</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ javac JEP392.java</span><br><span class="line">$ java JEP392.java</span><br><span class="line">$ jar cvf JEP392.jar JEP392.class</span><br></pre></td></tr></table></figure>
+
+<p>将生成的 JEP392.jar 打包到符合当前平台的软件包中:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ ~/develop/jdk-16.0.1.jdk/Contents/Home/bin/jpackage -i . -n JEP392 --main-jar hello.jar --main-class JEP392</span><br><span class="line">$ ll</span><br><span class="line">-rw-r--r--@ 1 darcy  staff    50M 10 28 20:34 JEP392-1.0.dmg</span><br><span class="line">-rw-r--r--  1 darcy  staff   864B 10 28 20:22 JEP392.class</span><br><span class="line">-rw-r--r--  1 darcy  staff   1.0K 10 28 20:30 JEP392.jar</span><br><span class="line">-rw-r--r--  1 darcy  staff   588B 10 28 20:22 JEP392.java</span><br></pre></td></tr></table></figure>
+<p>ll 后显示的 JEP392-1.0.dmg（用的 <code>MacOS</code> ，所以格式是 <code>dmg</code>）就是打包后的结果。</p>
+<p>双击这个文件后可以像 mac 软件一样安装。其他平台类似。</p>
+<p>不同的系统安装位置不同：</p>
+<ul>
+<li>Linux： <code>/opt</code></li>
+<li>MacOS ： <code>/Applications</code></li>
+<li>Windows: <code>C:\Program Files\</code></li>
+</ul>
+<h2 id="Foreign-Memory-Access-API-Third-Incubator"><a href="#Foreign-Memory-Access-API-Third-Incubator" class="headerlink" title="Foreign-Memory Access API (Third Incubator)"></a>Foreign-Memory Access API (Third Incubator)</h2><p>此提案旨在引入新的 API 以允许 Java 程序安全有效的访问 Java 堆之外的内存。相关提案早在 Java 14 的时候就已经提出了，在 Java 15 中重新孵化，现在在 Java 16 中再次孵化。</p>
+<p>此提案的目标如下：</p>
+<ul>
+<li>通用：单个 API 应该能够对各种外部内存（如本机内存、持久内存、堆内存等）进行操作。</li>
+<li>安全：无论操作何种内存，API 都不应该破坏 JVM 的安全性。</li>
+<li>控制：可以自由的选择如何释放内存（显式、隐式等）。</li>
+<li>可用：如果需要访问外部内存，API 应该是 sun.misc.Unsafe.</li>
+</ul>
+<h2 id="Pattern-Matching-for-instanceof"><a href="#Pattern-Matching-for-instanceof" class="headerlink" title="Pattern Matching for instanceof"></a>Pattern Matching for instanceof</h2><p>改进 instanceof 在 Java 14 中已经提出，在 Java 15 中继续预览，而现在，在 Java 16 中成为正式功能。</p>
+<p>在之前，使用 instanceof 需要如下操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="string">&quot;TEST&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">t</span> <span class="operator">=</span> (String) obj;</span><br><span class="line">    <span class="comment">// do some logic...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="string">&quot;TEST&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String t) &#123;</span><br><span class="line">    <span class="comment">// do some logic</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Records"><a href="#Records" class="headerlink" title="Records"></a>Records</h2><p>Record 成为 Java 16 的正式功能。java 14其实已经介绍过了，这个功能在 Java 15 中进行二次预览，在 Java 16 中正式发布。</p>
+<p>record 是一种全新的类型，它本质上是一个 <code>final</code> 类，同时所有的属性都是 <code>final</code> 修饰，它会自动编译出 <code>public get</code> <code>hashcode</code> <code>equals</code> <code>toString</code> 等方法，减少了代码编写量。</p>
+<h2 id="Strongly-Encapsulate-JDK-Internals-by-Default"><a href="#Strongly-Encapsulate-JDK-Internals-by-Default" class="headerlink" title="Strongly Encapsulate JDK Internals by Default"></a>Strongly Encapsulate JDK Internals by Default</h2><p>Java 9 <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/261#Relaxed-strong-encapsulation">JEP 261</a> 引入了 <code>--illegal-access</code> 控制内部 API 访问和 JDK 打包的选项。</p>
+<p>此 JEP 将 <code>--illegal-access</code> 选项的默认模式从允许更改为拒绝。通过此更改，JDK 的内部包和 API（<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/260#Description">关键内部 API</a> 除外）将不再默认打开。</p>
+<p>该 JEP 的动机是阻止第三方库、框架和工具使用 JDK 的内部 API 和包，增加了安全性。</p>
+<h2 id="Sealed-Classes-Second-Preview"><a href="#Sealed-Classes-Second-Preview" class="headerlink" title="Sealed Classes (Second Preview)"></a>Sealed Classes (Second Preview)</h2><p>java 15介绍过了，二次预览。</p>
+<p>简述：</p>
+<blockquote>
+<p>我们都知道，在 Java 中如果想让一个类不能被继承和修改，这时我们应该使用 <code>final</code> 关键字对类进行修饰。不过这种要么可以继承，要么不能继承的机制不够灵活，有些时候我们可能想让某个类可以被某些类型继承，但是又不能随意继承，是做不到的。Java 15 尝试解决这个问题，引入了 <code>sealed</code> 类，被 <code>sealed</code> 修饰的类可以指定子类。这样这个类就只能被指定的类继承。<br>而且 <code>sealed</code> 修饰的类的机制具有传递性，它的子类必须使用指定的关键字进行修饰，且只能是 <code>final</code>、<code>sealed</code>、<code>non-sealed</code> 三者之一。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java16/" rel="tag"># java16</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/21/java/20221221-java15-new-features/" rel="prev" title="Java 15 新特性">
+      <i class="fa fa-chevron-left"></i> Java 15 新特性
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/27/java/20221227-java17-new-features/" rel="next" title="Java 17 新特性">
+      Java 17 新特性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK-16-%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">JDK 16 的新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E8%80%85%E7%89%B9%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">开发者特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E4%BA%86-Stream-toList-%E6%96%B9%E6%B3%95-JDK-8180352"><span class="nav-number">2.1.</span> <span class="nav-text">增加了 Stream.toList 方法 (JDK-8180352)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Vector-API-Incubator-JEP-338"><span class="nav-number">3.</span> <span class="nav-text">Vector API Incubator (JEP-338)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Enable-C-14-Language-Features"><span class="nav-number">4.</span> <span class="nav-text">Enable C++14 Language Features</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Migrate-from-Mercurial-to-Git"><span class="nav-number">5.</span> <span class="nav-text">Migrate from Mercurial to Git</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZGC-Concurrent-Thread-Stack-Processing"><span class="nav-number">6.</span> <span class="nav-text">ZGC: Concurrent Thread-Stack Processing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Unix-Domain-Socket-Channels"><span class="nav-number">7.</span> <span class="nav-text">Unix-Domain Socket Channels</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Alpine-Linux-Port"><span class="nav-number">8.</span> <span class="nav-text">Alpine Linux Port</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Elastic-Metaspace"><span class="nav-number">9.</span> <span class="nav-text">Elastic Metaspace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Windows-AArch64-Port"><span class="nav-number">10.</span> <span class="nav-text">Windows&#x2F;AArch64 Port</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Foreign-Linker-API-Incubator"><span class="nav-number">11.</span> <span class="nav-text">Foreign Linker API (Incubator)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Warnings-for-Value-Based-Classes"><span class="nav-number">12.</span> <span class="nav-text">Warnings for Value-Based Classes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Packaging-Tool"><span class="nav-number">13.</span> <span class="nav-text">Packaging Tool</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Foreign-Memory-Access-API-Third-Incubator"><span class="nav-number">14.</span> <span class="nav-text">Foreign-Memory Access API (Third Incubator)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pattern-Matching-for-instanceof"><span class="nav-number">15.</span> <span class="nav-text">Pattern Matching for instanceof</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Records"><span class="nav-number">16.</span> <span class="nav-text">Records</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Strongly-Encapsulate-JDK-Internals-by-Default"><span class="nav-number">17.</span> <span class="nav-text">Strongly Encapsulate JDK Internals by Default</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sealed-Classes-Second-Preview"><span class="nav-number">18.</span> <span class="nav-text">Sealed Classes (Second Preview)</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

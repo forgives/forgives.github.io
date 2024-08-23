@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="jdk 10 主要的新特性参考:openjdk JDK 10 baeldung New Features in Java 10">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 10新特性">
+<meta property="og:url" content="https://forgives.github.io/2022/11/24/java/20221124-java10-new-features/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="jdk 10 主要的新特性参考:openjdk JDK 10 baeldung New Features in Java 10">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-24T08:51:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.377Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="java10">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/11/24/java/20221124-java10-new-features/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 10新特性 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/11/24/java/20221124-java10-new-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 10新特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-24 16:51:00" itemprop="dateCreated datePublished" datetime="2022-11-24T16:51:00+08:00">2022-11-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>jdk 10 主要的新特性参考:<br>openjdk <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/10/">JDK 10</a></p>
+<p>baeldung <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-10-overview">New Features in Java 10</a></p>
+<span id="more"></span>  
+
+<h2 id="JDK-10-的新特性"><a href="#JDK-10-的新特性" class="headerlink" title="JDK 10 的新特性"></a>JDK 10 的新特性</h2><ul>
+<li>286: Local-Variable Type Inference （局部变量类型推断）</li>
+<li>296: Consolidate the JDK Forest into a Single Repository （JDK库的合并）</li>
+<li>304: Garbage-Collector Interface （统一的垃圾回收接口）</li>
+<li>307: Parallel Full GC for G1 （G1并行Full GC）</li>
+<li>310: Application Class-Data Sharing （应用程序类数据共享）</li>
+<li>312: Thread-Local Handshakes （ThreadLocal握手交互）</li>
+<li>313: Remove the Native-Header Generation Tool (javah) （移除JDK中附带的javah工具）</li>
+<li>314: Additional Unicode Language-Tag Extensions （附加的Unicode语言标记扩展）</li>
+<li>316: Heap Allocation on Alternative Memory Devices</li>
+<li>317: Experimental Java-Based JIT Compiler （实验性的基于 Java 的 JIT 编译器）</li>
+<li>319: Root Certificates （根证书）</li>
+<li>322: Time-Based Release Versioning （基于时间的发布版本）</li>
+</ul>
+<p>下面针对比较<strong>重要的</strong>特性做说明。</p>
+<h2 id="局部变量类型推断-var"><a href="#局部变量类型推断-var" class="headerlink" title="局部变量类型推断(var)"></a>局部变量类型推断(var)</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/286">JEP 286</a></p>
+<p><a target="_blank" rel="noopener" href="https://openjdk.org/projects/amber/guides/lvti-style-guide">Local Variable Type Inference Style Guidelines</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-10-local-variable-type-inference">Java 10 LocalVariable Type-Inference</a></p>
+<p>Java 10 采用了一个叫做 <code>var</code> 的<strong>保留类型</strong>来实现局部变量推断。要特别注意的是，为了兼容旧版本，<code>var</code> 不是关键字，而是一个保留类型，也就意味着你仍然可以像这样用 var 为你的变量和函数命名：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">var</span> <span class="operator">=</span> <span class="number">10</span>;  </span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">exp:</span><br><span class="line">```java  </span><br><span class="line"><span class="type">var</span> <span class="variable">id</span> <span class="operator">=</span> <span class="number">0</span>;  </span><br><span class="line"><span class="type">var</span> <span class="variable">codefx</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(<span class="string">&quot;https://mp.weixin.qq.com/&quot;</span>);  </span><br><span class="line"><span class="type">var</span> <span class="variable">list</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();  </span><br><span class="line"><span class="type">var</span> <span class="variable">list</span> <span class="operator">=</span> List.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);  </span><br><span class="line"><span class="type">var</span> <span class="variable">map</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, String&gt;();  </span><br><span class="line"><span class="type">var</span> <span class="variable">p</span> <span class="operator">=</span> Paths.of(<span class="string">&quot;src/test/java/Java9FeaturesTest.java&quot;</span>);  </span><br><span class="line"><span class="type">var</span> <span class="variable">numbers</span> <span class="operator">=</span> List.of(<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>);  </span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> n : list) System.out.print(n+ <span class="string">&quot; &quot;</span>);  </span><br><span class="line"><span class="keyword">try</span> (<span class="type">var</span> <span class="variable">is</span> <span class="operator">=</span> Files.newInputStream(p)) &#123;&#125;   <span class="comment">// type of &#x27;is&#x27; is InputStream  </span></span><br></pre></td></tr></table></figure>
+
+<p>请注意，var 的作用仅仅是推断变量类型，变量仍然是<strong>静态类型</strong>的，与 JS 中的 var 作用完全不同。下面这段代码无法通过编译：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">var</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">10</span>;  </span><br><span class="line">i = <span class="string">&quot;20&quot;</span>; <span class="comment">// error: incompatible types  </span></span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">使用 <span class="keyword">var</span> 声明的变量时必须要在声明的同时初始化，所以下面这段代码是无法编译的：</span><br><span class="line">```java  </span><br><span class="line"><span class="keyword">var</span> a; <span class="comment">// error: &#x27;var&#x27; on variable without initializer  </span></span><br><span class="line">a = <span class="number">10</span>;  </span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">同时，<span class="keyword">var</span> 也不能用于**局部变量**声明以外的地方（唯一的例外是 `Java <span class="number">11</span>` 允许在 [lambda 表达式的形式参数中使用 <span class="keyword">var</span> 语法](http:<span class="comment">//openjdk.java.net/jeps/323)）：</span></span><br><span class="line">```java  </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span> &#123;</span><br><span class="line">  <span class="type">var</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">10</span>;  <span class="comment">// error: &#x27;var&#x27; is not allowed here</span></span><br><span class="line">  <span class="keyword">var</span> <span class="title function_">f1</span><span class="params">()</span> &#123;   <span class="comment">// error: &#x27;var&#x27; is not allowed here</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">10</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">f2</span><span class="params">(<span class="keyword">var</span> str)</span> &#123;  <span class="comment">// error: &#x27;var&#x27; is not allowed here</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> (<span class="keyword">var</span> e) &#123; <span class="comment">// error: &#x27;var&#x27; is not allowed here</span></span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(str);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>var 还能用来声明一些不可指示类型（<code>Non-denotable types</code>）的变量：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">var</span> <span class="variable">obj</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>() &#123;  <span class="comment">// type of &#x27;obj&#x27; is A anonymous class types  </span></span><br><span class="line">  <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">10</span>;  </span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">f</span><span class="params">()</span> &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line">  </span><br><span class="line"><span class="type">var</span> <span class="variable">list</span> <span class="operator">=</span> (List&lt;String&gt; &amp; AutoCloseable) <span class="literal">null</span>; <span class="comment">// type of &#x27;list&#x27; is List&lt;String&gt; &amp; AutoCloseable  </span></span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">不过直接用 <span class="literal">null</span> 初始化 <span class="keyword">var</span> 声明的变量是不合法：</span><br><span class="line">```java  </span><br><span class="line"><span class="type">var</span> <span class="variable">a</span> <span class="operator">=</span> <span class="literal">null</span>; <span class="comment">// error: variable initializer is &#x27;null&#x27;  </span></span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">以上还是**类型是否明确**的区别。</span><br><span class="line"></span><br><span class="line">还有一点也要注意，_菱形推断_ 的时候推断出的类型可能在意料之外：</span><br><span class="line">```java</span><br><span class="line"><span class="type">var</span> <span class="variable">l</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(); <span class="comment">// type of &#x27;l&#x27; is ArrayList&lt;Object&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="var用于声明不可指类型的变量特性的妙用"><a href="#var用于声明不可指类型的变量特性的妙用" class="headerlink" title="var用于声明不可指类型的变量特性的妙用"></a>var用于声明不可指类型的变量特性的妙用</h3><p>Java 8 的 lambda 表达式不能够捕获可变变量，也就是说下面这个代码是错误的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">List.of(<span class="string">&quot;ice1000&quot;</span>, <span class="string">&quot;Glavo&quot;</span>)</span><br><span class="line">    .forEach(e -&gt; count += <span class="number">1</span>); <span class="comment">//error</span></span><br><span class="line">System.out.println(count);</span><br></pre></td></tr></table></figure>
+
+<p>之前想要绕过这个限制，我们可以用单元素的数组实现。而在 Java 10 中我们又多了一种选择：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">var</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>() &#123;</span><br><span class="line">  <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">List.of(<span class="string">&quot;ice1000&quot;</span>, <span class="string">&quot;Glavo&quot;</span>)</span><br><span class="line">    .forEach(e -&gt; context.count += <span class="number">1</span>);</span><br><span class="line">System.out.println(context.count);</span><br></pre></td></tr></table></figure>
+
+<p>var 还能够帮助我们实现嵌套函数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">factorial</span><span class="params">(<span class="type">int</span> i)</span> &#123;</span><br><span class="line">  <span class="type">var</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>() &#123;</span><br><span class="line">    <span class="type">int</span> <span class="title function_">fact</span><span class="params">(<span class="type">int</span> i, <span class="type">int</span> accumulator)</span> &#123;</span><br><span class="line">         <span class="keyword">if</span> (i &lt;= <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">return</span> accumulator;</span><br><span class="line">         <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">return</span> fact(i - <span class="number">1</span>, i * accumulator);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="keyword">return</span> context.fact(i, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="语言特性"><a href="#语言特性" class="headerlink" title="语言特性"></a>语言特性</h2><h3 id="集合增强"><a href="#集合增强" class="headerlink" title="集合增强"></a>集合增强</h3><p><code>List</code>，<code>Set</code>，<code>Map</code> 提供了静态方法<code>copyOf()</code>返回入参集合的一个不可变拷贝。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">static &lt;E&gt; List&lt;E&gt; copyOf(Collection&lt;? extends E&gt; coll) &#123;</span><br><span class="line">    return ImmutableCollections.listCopy(coll);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用 <code>copyOf()</code> 创建的集合为不可变集合，不能进行添加、删除、替换、 排序等操作，不然会报 <code>java.lang.UnsupportedOperationException</code> 异常。</p>
+<p>并且，<code>java.util.stream.Collectors</code> 中新增了静态方法，用于将流中的元素收集为不可变的集合。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var list = new ArrayList&lt;&gt;();</span><br><span class="line">list.stream().collect(Collectors.toUnmodifiableList());</span><br><span class="line">list.stream().collect(Collectors.toUnmodifiableSet());</span><br></pre></td></tr></table></figure>
+
+<h3 id="Optional-增强"><a href="#Optional-增强" class="headerlink" title="Optional 增强"></a>Optional 增强</h3><p><code>Optional</code> 新增了<code>orElseThrow()</code>方法来在没有值时抛出指定的异常。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Optional.ofNullable(cache.getIfPresent(key))</span><br><span class="line">        .orElseThrow(() -&gt; new PrestoException(NOT_FOUND, &quot;Missing entry found for key: &quot; + key));</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Garbage-Collector-Interface"><a href="#Garbage-Collector-Interface" class="headerlink" title="Garbage-Collector Interface"></a>Garbage-Collector Interface</h2><p>垃圾收集器接口。</p>
+<p>在 hotspot&#x2F;gc 代码实现方面，引入一个干净的垃圾收集器接口，改进不同垃圾收集器源代码的隔离性。这样添加新的或者删除旧的 GC，都会更容易。</p>
+<h2 id="Parallel-Full-GC-for-G1"><a href="#Parallel-Full-GC-for-G1" class="headerlink" title="Parallel Full GC for G1"></a>Parallel Full GC for G1</h2><p>为了降低G1垃圾回收器最坏情况下的延迟，使Full GC的 <code>mark-sweep-compact</code> 算法并行执行。执行的线程可以通过<code>-XX:ParallelGCThreads</code> 设置，同时也受到 Young 和 Mixed 回收器线程的影响。 <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/307">JEP 307: Parallel Full GC for G1</a></p>
+<blockquote>
+<p>The G1 garbage collector is the default one since JDK 9. However, the full GC for G1 used a single threaded mark-sweep-compact algorithm.</p>
+</blockquote>
+<blockquote>
+<p>This has been <strong>changed to the parallel mark-sweep-compact algorithm</strong> in Java 10 effectively reducing the stop-the-world time during full GC.</p>
+</blockquote>
+<h2 id="Application-Class-Data-Sharing"><a href="#Application-Class-Data-Sharing" class="headerlink" title="Application Class-Data Sharing"></a>Application Class-Data Sharing</h2><p>Java 之前( JDK 5 )就引入了类数据共享机制，Class data sharing (CDS) ，以减少 Java 程序的启动时间，降低内存占用。简单来说，Java 安装程序会把 rt.jar 中的核心类提前转化成内部表示，转储到一个共享的文件中（shared archive）。多个 Java 进程（或者说 JVM 实例）可以共享这部分数据。之前只允许 <code>bootstrap class loader</code> ， jdk 10也允许<code>app class loader</code> 和<code>自定义 classloader</code>共享<code>archived classes</code>。</p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-10-performance-improvements">java-10-performance-improvements</a></p>
+<h2 id="Remove-the-Native-Header-Generation-Tool"><a href="#Remove-the-Native-Header-Generation-Tool" class="headerlink" title="Remove the Native-Header Generation Tool"></a>Remove the Native-Header Generation Tool</h2><p>从 JDK 8 开始，javah 的功能已经集成到了 javac 中。所以，javah 可以删掉了。</p>
+<h2 id="Additional-Unicode-Language-Tag-Extensions"><a href="#Additional-Unicode-Language-Tag-Extensions" class="headerlink" title="Additional Unicode Language-Tag Extensions"></a>Additional Unicode Language-Tag Extensions</h2><blockquote>
+<p>Enhance <code>java.util.Locale</code> and related APIs to implement additional Unicode extensions of BCP 47 language tags.</p>
+</blockquote>
+<h2 id="Experimental-Java-Based-JIT-Compiler"><a href="#Experimental-Java-Based-JIT-Compiler" class="headerlink" title="Experimental Java-Based JIT Compiler"></a>Experimental Java-Based JIT Compiler</h2><p>Graal 是一个基于 Java 语言编写的 JIT 编译器，是 JDK 9 中引入的实验性 Ahead-of-Time (AOT) 编译器的基础。</p>
+<p>Oracle 的 HotSpot VM 便附带两个用 C++ 实现的 JIT compiler：C1 及 C2。在Java 10 (Linux&#x2F;x64, macOS&#x2F;x64) 中，默认情况下HotSpot 仍使用C2，但通过向java 命令添加<br><code>-XX:+UnlockExperimentalVMOptions -XX:+UseJVMCICompiler</code><br>参数便可将 C2 替换成 Graal。</p>
+<h3 id="PS-JIT"><a href="#PS-JIT" class="headerlink" title="PS. JIT"></a>PS. JIT</h3><p>JIT（just in time 即时编译器），当虚拟机发现某个方法或代码块运行特别频繁时，就会把这些代码认定为 Hot Spot Code 热点代码，为了提高热点代码的执行效率，在运行时，虚拟机将会把这些代码编译成与本地平台相关的机器码，并进行各层次的优化。</p>
+<p>即使开启了JIT，也少不了代码编译和字节码解释的过程。JIT处理的是热点代码（<strong>hotspot code</strong>）。热点代码就是频繁执行的代码块，比如循环里面的代码。JIT有一套逻辑判断是否热点代码。</p>
+<p>既然JIT处理后的是机器能够快速执行的代码，为啥还要解释执行呢，干嘛不把全部代码编译成机器代码呢？这是由于<strong>编译本地代码比较费时间</strong>，而且编译后还要进行进一步的优化导致耗时更久；而解释器是能够立即解释字节码文件的，毕竟我们的应用放到服务器上的时候就已经是字节码文件了，解释器可以拿来直接用。而且<strong>解释器执行的时候占用的内存更小</strong>，在内存受限的场景难以使用编译器（比如手机上）。编译器会概率性地选择多数时候都能提升运行效率的手段进行优化，如果“优化”后发现还不如不优化（甚至执行有问题）就得“逆优化”，回退到解释执行状态。</p>
+<p>我们可以通过最简单的查看Java版本的命令查看Java是否使用了编译器：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> &gt; java -version</span><br><span class="line"></span><br><span class="line">java version &quot;1.8.0_191&quot;</span><br><span class="line">Java(TM) SE Runtime Environment (build 1.8.0_191-b12)</span><br><span class="line">Java HotSpot(TM) 64-Bit Server VM (build 25.191-b12, mixed mode)</span><br></pre></td></tr></table></figure>
+
+<p>最后输出的<code>mixed mode</code>代表是混合模式，也就是先解释执行，并逐步将热点代码代替为机器代码。不使用编译器的模式叫<code>interpreted mode</code>；优先使用编译器的模式叫<code>compiled mode</code>，<code>compiled mode</code>会优先采用编译方式执行程序，如果编译执行有问题就回退到解释执行。</p>
+<h2 id="Root-Certificates"><a href="#Root-Certificates" class="headerlink" title="Root Certificates"></a>Root Certificates</h2><p>在 JDK 中提供一组默认的根证书。</p>
+<blockquote>
+<p>Open-source the root certificates in Oracle’s Java SE Root CA program in order to make OpenJDK builds more attractive to developers, and to reduce the differences between those builds and Oracle JDK builds.</p>
+</blockquote>
+<h2 id="Time-Based-Release-Versioning"><a href="#Time-Based-Release-Versioning" class="headerlink" title="Time-Based Release Versioning"></a>Time-Based Release Versioning</h2><p>基于时间的版本字符串。修改 Java SE 平台和 JDK 版本字符串机制。</p>
+<ol>
+<li><strong>A new Java release every six months.</strong> The March 2018 release is JDK 10, the September 2018 release is JDK 11, and so forth. These are called feature releases and are expected to contain at least one or two significant features</li>
+<li><strong>Support for the feature release will last only for six months</strong>, i.e., until next feature release</li>
+<li><strong>Long-term support release will be marked as LTS. Support for such release will be for three years</strong></li>
+<li>Java 11 will be an LTS release</li>
+</ol>
+<p><strong><em>java -version</em> will now contain the GA date</strong>, making it easier to identify how old the release is:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ java -version </span><br><span class="line">openjdk 17.0.2 2022-01-18 LTS</span><br><span class="line">OpenJDK Runtime Environment Zulu17.32+13-CA (build 17.0.2+8-LTS)</span><br><span class="line">OpenJDK 64-Bit Server VM Zulu17.32+13-CA (build 17.0.2+8-LTS, mixed mode, sharing)</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://javaguide.cn/java/new-features/java10.html">Java 10 新特性概览</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-10-local-variable-type-inference">Java 10 LocalVariable Type-Inference</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/34911982">Java 10 新特性之局部变量类型推断</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java10/" rel="tag"># java10</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/22/note/20221122-git-remove-all-history/" rel="prev" title="删除git远程仓库所有提交记录">
+      <i class="fa fa-chevron-left"></i> 删除git远程仓库所有提交记录
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/29/db/20221129-mysql-binlog/" rel="next" title="mysql binlog">
+      mysql binlog <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK-10-%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">JDK 10 的新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B1%80%E9%83%A8%E5%8F%98%E9%87%8F%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%AD-var"><span class="nav-number">2.</span> <span class="nav-text">局部变量类型推断(var)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#var%E7%94%A8%E4%BA%8E%E5%A3%B0%E6%98%8E%E4%B8%8D%E5%8F%AF%E6%8C%87%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%8F%98%E9%87%8F%E7%89%B9%E6%80%A7%E7%9A%84%E5%A6%99%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">var用于声明不可指类型的变量特性的妙用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">语言特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E5%90%88%E5%A2%9E%E5%BC%BA"><span class="nav-number">3.1.</span> <span class="nav-text">集合增强</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Optional-%E5%A2%9E%E5%BC%BA"><span class="nav-number">3.2.</span> <span class="nav-text">Optional 增强</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Garbage-Collector-Interface"><span class="nav-number">4.</span> <span class="nav-text">Garbage-Collector Interface</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parallel-Full-GC-for-G1"><span class="nav-number">5.</span> <span class="nav-text">Parallel Full GC for G1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Application-Class-Data-Sharing"><span class="nav-number">6.</span> <span class="nav-text">Application Class-Data Sharing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Remove-the-Native-Header-Generation-Tool"><span class="nav-number">7.</span> <span class="nav-text">Remove the Native-Header Generation Tool</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Additional-Unicode-Language-Tag-Extensions"><span class="nav-number">8.</span> <span class="nav-text">Additional Unicode Language-Tag Extensions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Experimental-Java-Based-JIT-Compiler"><span class="nav-number">9.</span> <span class="nav-text">Experimental Java-Based JIT Compiler</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PS-JIT"><span class="nav-number">9.1.</span> <span class="nav-text">PS. JIT</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Root-Certificates"><span class="nav-number">10.</span> <span class="nav-text">Root Certificates</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Time-Based-Release-Versioning"><span class="nav-number">11.</span> <span class="nav-text">Time-Based Release Versioning</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">12.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

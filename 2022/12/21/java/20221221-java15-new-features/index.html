@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="jdk 15 主要的新特性参考:  openjdk JDK 15 baeldung New Features in Java 15">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 15 新特性">
+<meta property="og:url" content="https://forgives.github.io/2022/12/21/java/20221221-java15-new-features/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="jdk 15 主要的新特性参考:  openjdk JDK 15 baeldung New Features in Java 15">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-12-21T03:53:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.378Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="java15">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/12/21/java/20221221-java15-new-features/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 15 新特性 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/12/21/java/20221221-java15-new-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 15 新特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-21 11:53:00" itemprop="dateCreated datePublished" datetime="2022-12-21T11:53:00+08:00">2022-12-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>jdk 15 主要的新特性参考: </p>
+<p>openjdk <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/15/">JDK 15</a></p>
+<p>baeldung <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-15-new">New Features in Java 15</a></p>
+<span id="more"></span>  
+
+<h2 id="JDK-15-的新特性"><a href="#JDK-15-的新特性" class="headerlink" title="JDK 15 的新特性"></a>JDK 15 的新特性</h2><p>Java 15 于<em>2020年9月15日</em>发布，包含新特性：</p>
+<ul>
+<li>339:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/339">Edwards-Curve Digital Signature Algorithm (EdDSA)</a></li>
+<li>360:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/360">Sealed Classes (Preview)</a></li>
+<li>371:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/371">Hidden Classes</a></li>
+<li>372:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/372">Remove the Nashorn JavaScript Engine</a></li>
+<li>373:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/373">Reimplement the Legacy DatagramSocket API</a></li>
+<li>374:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/374">Disable and Deprecate Biased Locking</a></li>
+<li>375:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/375">Pattern Matching for instanceof (Second Preview)</a></li>
+<li>377:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/377">ZGC: A Scalable Low-Latency Garbage Collector</a></li>
+<li>378:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/378">Text Blocks</a></li>
+<li>379:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/379">Shenandoah: A Low-Pause-Time Garbage Collector</a></li>
+<li>381:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/381">Remove the Solaris and SPARC Ports</a></li>
+<li>383:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/383">Foreign-Memory Access API (Second Incubator)</a></li>
+<li>384:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/384">Records (Second Preview)</a></li>
+<li>385:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/385">Deprecate RMI Activation for Removal</a></li>
+</ul>
+<h2 id="Edwards-Curve-Digital-Signature-Algorithm-EdDSA"><a href="#Edwards-Curve-Digital-Signature-Algorithm-EdDSA" class="headerlink" title="Edwards-Curve Digital Signature Algorithm (EdDSA)"></a>Edwards-Curve Digital Signature Algorithm (EdDSA)</h2><p>Java 15 中增加了一个新的密码学算法，爱德华曲线算法（EdDSA）签名算法。它是由 Schnorr 算法发展而来，在 RFC8032 中被定义实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testEdDSA</span><span class="params">()</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        <span class="type">KeyPairGenerator</span> <span class="variable">kpg</span> <span class="operator">=</span> KeyPairGenerator.getInstance(<span class="string">&quot;Ed25519&quot;</span>);</span><br><span class="line">        <span class="type">KeyPair</span> <span class="variable">kp</span> <span class="operator">=</span> kpg.generateKeyPair();</span><br><span class="line">        <span class="type">byte</span>[] msg = <span class="string">&quot;hello forgkan&quot;</span>.getBytes(StandardCharsets.UTF_8);</span><br><span class="line">        <span class="type">Signature</span> <span class="variable">sig</span> <span class="operator">=</span> Signature.getInstance(<span class="string">&quot;Ed25519&quot;</span>);</span><br><span class="line">        sig.initSign(kp.getPrivate());</span><br><span class="line">        sig.update(msg);</span><br><span class="line">        <span class="type">byte</span>[] s = sig.sign();</span><br><span class="line">        System.out.println(Base64.getEncoder().encodeToString(s));</span><br><span class="line"></span><br><span class="line">    &#125;<span class="keyword">catch</span>(Exception e)&#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/HHS8ROwwZ/QkXslMhvPgtn2Gnolb6oPpMLIXrdjOCfYYRHdvZGbS0o1+Jy5lK6JbRNhsnba1eCYNuE25FQ8Dw==</span><br></pre></td></tr></table></figure>
+
+<h2 id="Sealed-Classes-Preview"><a href="#Sealed-Classes-Preview" class="headerlink" title="Sealed Classes (Preview)"></a>Sealed Classes (Preview)</h2><p>密封类(<strong>预览特性</strong>)。当前java没有对继承提供细粒度的控制，一个类只能被继承或者使用<code>final</code>关键字不允许被继承，无法灵活的设定被哪些指定的类继承，Java 15尝试解决这个问题，引入了 <code>sealed</code> 类，被 <code>sealed</code> 修饰的类可以指定子类。<br>这样这个类就只能被指定的类继承。而且 <code>sealed</code> 修饰的类的机制具有传递性，它的子类必须使用指定的关键字进行修饰，且只能是 <code>final</code>、<code>sealed</code>、<code>non-sealed</code> 三者之一。</p>
+<p>密封类涉及两个新关键字 <code>sealed</code> 和 <code>permits</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">sealed</span> <span class="keyword">class</span> <span class="title class_">Person</span></span><br><span class="line">    <span class="keyword">permits</span> Employee, Manager &#123;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>定一个Person的类，且指名这个类只能被 Employee 和 Manager 继承：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Employee</span> <span class="keyword">extends</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">non-sealed</span> <span class="keyword">class</span> <span class="title class_">Manager</span> <span class="keyword">extends</span> <span class="title class_">Person</span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这种通过密封类的有限继承的好处：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (person <span class="keyword">instanceof</span> Employee) &#123;</span><br><span class="line">    <span class="keyword">return</span> ((Employee) person).getEmployeeId();</span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (person <span class="keyword">instanceof</span> Manager) &#123;</span><br><span class="line">    <span class="keyword">return</span> ((Manager) person).getSupervisorId();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译器可以清楚的知道所有的子类是否被if覆盖。在以前这是难以实现的。</p>
+<h2 id="Hidden-Classes-JEP-371"><a href="#Hidden-Classes-JEP-371" class="headerlink" title="Hidden Classes(JEP 371)"></a>Hidden Classes(<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/371">JEP 371</a>)</h2><p>隐藏类的目的是允许在运行时创建不可发现的类（也不能被反射发现），而且类的生命周期是有限的，所以此种类可以被高效的加载和卸载，可以减少内存使用。 虽然当前也可以通过<code>Unsafe API</code>来创建匿名类实现隐藏类这种效果，但毕竟是不安全的，隐藏类可没有这些限制。<br>这个特性对于大多开发者来说其实没啥好处，主要是给动态字节码、GVM开发的人用的，不做详细介绍了。</p>
+<h2 id="Remove-the-Nashorn-JavaScript-Engine-JEP-372"><a href="#Remove-the-Nashorn-JavaScript-Engine-JEP-372" class="headerlink" title="Remove the Nashorn JavaScript Engine(JEP 372)"></a>Remove the Nashorn JavaScript Engine(<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/372">JEP 372</a>)</h2><p><code>Nashorn JavaScript</code> 引擎在 Java 8 中被引入，在 Java 11 中被标记为废弃。由于 ECMAScript 语言发展很快，维护 <code>Nashorn JavaScript</code> 的成本过于高昂，在 Java 15 中被彻底删除。</p>
+<h2 id="Reimplement-the-Legacy-DatagramSocket-API"><a href="#Reimplement-the-Legacy-DatagramSocket-API" class="headerlink" title="Reimplement the Legacy DatagramSocket API"></a>Reimplement the Legacy DatagramSocket API</h2><p>Java 13 中重新实现了旧的 Socket API，在介绍 Java 13 时还有一部分做了这方面的介绍。<br>现在，Java 15 重新实现了遗留的 <code>DatagramSocket</code>。</p>
+<h2 id="Disable-and-Deprecate-Biased-Locking"><a href="#Disable-and-Deprecate-Biased-Locking" class="headerlink" title="Disable and Deprecate Biased Locking"></a>Disable and Deprecate Biased Locking</h2><p>Java 15中 禁用和废弃偏向锁。<br>在之前，JVM 在处理同步操作，如使用 synchronized 同步时，有一套锁的升级机制，其中有一个锁机制就是偏向锁。然而通过目前的 Java 开发环境来看，使用这些被 <code>synchronized</code> 同步的类的机会并不多，如开发者更喜欢使用 <code>HashMap</code> 或者 <code>ArrayList</code> 而非 <code>HashTable</code> 和 <code>Vector</code>。<br>当初使用偏向锁是为了提高性能，如今看来性能提升的程度和使用次数都不多。而偏向锁的引入增加了 JVM 的复杂性。</p>
+<p>所以现在偏向锁被默认禁用，在不久的将来将会彻底删除，对于 Java 15，我们仍然可以使用 <code>-XX:+UseBiasedLocking</code> 启用偏向锁定，但它会提示这是一个已弃用的 API。</p>
+<h2 id="Pattern-Matching-for-instanceof-Second-Preview"><a href="#Pattern-Matching-for-instanceof-Second-Preview" class="headerlink" title="Pattern Matching for instanceof (Second Preview)"></a>Pattern Matching for instanceof (Second Preview)</h2><p>instanceof 的模式匹配，二次预览。java 14的时候已经预览版本了，这次只是为了获取更多的反馈继续发布的二次预览版本，没有什么变动。<br>这个特性在 java 16中会成为正式特性。</p>
+<h2 id="ZGC-A-Scalable-Low-Latency-Garbage-Collector"><a href="#ZGC-A-Scalable-Low-Latency-Garbage-Collector" class="headerlink" title="ZGC: A Scalable Low-Latency Garbage Collector"></a>ZGC: A Scalable Low-Latency Garbage Collector</h2><p>ZGC 垃圾收集器在 Java 11 中被引入，但是因为收集器的复杂性，当初决定逐渐引入。然后不断的听取用户的反馈建议修复问题。而现在，已经很久没有收到用户的问题反馈了，ZGC 是时候投入正式使用阶段了。所以在 Java 15 中 ZGC 正式发布，可以使用下面的参数启用 ZGC。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ java -XX:+UseZGC className</span><br></pre></td></tr></table></figure>
+<p>注意当前默认的垃圾回收器依然是G1。</p>
+<h2 id="Text-Blocks-JEP-378"><a href="#Text-Blocks-JEP-378" class="headerlink" title="Text Blocks(JEP 378)"></a>Text Blocks(<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/378">JEP 378</a>)</h2><p>文本块在 <em>Java 12 JEP 326</em> 中引入，在 <em>Java 13 JEP 355</em> 中开始预览，在 <em>Java 14 JEP 368</em> 中文本块第二次预览，终于在 Java 15 中成为正式特性了。<br>以前讲过了，和以前没有啥新的变化。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">content</span> <span class="operator">=</span> <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        &#123;</span></span><br><span class="line"><span class="string">            &quot;name&quot;: &quot;forgkan&quot;,\</span></span><br><span class="line"><span class="string">            &quot;age&quot;: 18,</span></span><br><span class="line"><span class="string">            &quot;now&quot;: &quot;2022-12-31\s19:15:01&quot;,</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">         &quot;&quot;&quot;</span>;</span><br><span class="line">System.out.println(content);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Shenandoah-A-Low-Pause-Time-Garbage-Collector"><a href="#Shenandoah-A-Low-Pause-Time-Garbage-Collector" class="headerlink" title="Shenandoah: A Low-Pause-Time Garbage Collector"></a>Shenandoah: A Low-Pause-Time Garbage Collector</h2><p>Shenandoah 垃圾收集器在 Java 12 中开始引入，Java 15 中成为了正式功能的一部分，可以使用下面的参数启用 Shenandoah 垃圾收集器。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -XX:+UseShenandoahGC</span><br></pre></td></tr></table></figure>
+
+<p>但是 openJDK 15 中<strong>默认没有</strong> Shenandoah 收集器，想要使用此功能可以下载 <a target="_blank" rel="noopener" href="https://adoptopenjdk.net/">AdoptOpenJDK</a> 。</p>
+<p>为什么 openJDK 中没有 Shenandoah 垃圾收集器？</p>
+<blockquote>
+<p>Shenandoah 是一个高性能、低暂停时间的垃圾收集器，它是 Red Hat 主导的项目。当 Red Hat 第一次提议将 Shenandoah 贡献给 OpenJDK 时，Oracle 明确表示不想支持它，OpenJDK 作为一个免费软件，不想支持 Red Hat 的 Shenandoah 完全没有问题。<br>最后 Red Hat 选择和 Oracle 合作设计一个真正干净的可插拔垃圾收集器接口，允许任何人轻松选择垃圾收集器以包含在他们的构建中。最终 Shenandoah 进入了 JDK 12，但是没有构建进 OpenJDK。</p>
+</blockquote>
+<h2 id="Remove-the-Solaris-and-SPARC-Ports"><a href="#Remove-the-Solaris-and-SPARC-Ports" class="headerlink" title="Remove the Solaris and SPARC Ports"></a>Remove the Solaris and SPARC Ports</h2><p>删除一些对 Solaris 端口的支持。无关紧要。</p>
+<h2 id="Foreign-Memory-Access-API-Second-Incubator"><a href="#Foreign-Memory-Access-API-Second-Incubator" class="headerlink" title="Foreign-Memory Access API (Second Incubator)"></a>Foreign-Memory Access API (Second Incubator)</h2><p>继续孵化，没啥好说的。</p>
+<h2 id="Records-JEP-384"><a href="#Records-JEP-384" class="headerlink" title="Records (JEP 384)"></a>Records (<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/384">JEP 384</a>)</h2><p>二次预览版本，Java 15 中对 Record 进行了增强。使它可以支持密封类型、Record 注解以及相关的反射 API 等。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">sealed</span> <span class="keyword">interface</span> <span class="title class_">DataBase</span> <span class="keyword">permits</span> DataBaseSelect, DataBaseUpdate &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">record</span> <span class="title class_">DataBaseSelect</span><span class="params">(@Deprecated String table, String sql)</span> <span class="keyword">implements</span> <span class="title class_">DataBase</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="keyword">record</span> <span class="title class_">DataBaseUpdate</span><span class="params">()</span> <span class="keyword">implements</span> <span class="title class_">DataBase</span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>record也允许我们重载一些默认的行为，比如在典型的构造函数里面加上校验：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">record</span> <span class="title class_">Person</span><span class="params">(String name,<span class="type">int</span> age)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Person&#123;</span><br><span class="line">        <span class="keyword">if</span>(age &lt; <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;invalid age&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Person</span><span class="params">(String name)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>(name,<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意下写法，Person默认构造函数没有参数。</p>
+<h2 id="Deprecate-RMI-Activation-for-Removal"><a href="#Deprecate-RMI-Activation-for-Removal" class="headerlink" title="Deprecate RMI Activation for Removal"></a>Deprecate RMI Activation for Removal</h2><p>只是废弃 RMI 激活机制，不影响 RMI 其他功能。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/15/">JDK 15</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-15-new">What’s New in Java 15</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.wdbyte.com/java/java-15/">Java 15 新功能介绍</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java15/" rel="tag"># java15</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/19/java/20221219-java14-new-features/" rel="prev" title="Java 14 新特性">
+      <i class="fa fa-chevron-left"></i> Java 14 新特性
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/23/java/20221223-java16-new-features/" rel="next" title="Java 16 新特性">
+      Java 16 新特性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK-15-%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">JDK 15 的新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Edwards-Curve-Digital-Signature-Algorithm-EdDSA"><span class="nav-number">2.</span> <span class="nav-text">Edwards-Curve Digital Signature Algorithm (EdDSA)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sealed-Classes-Preview"><span class="nav-number">3.</span> <span class="nav-text">Sealed Classes (Preview)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hidden-Classes-JEP-371"><span class="nav-number">4.</span> <span class="nav-text">Hidden Classes(JEP 371)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Remove-the-Nashorn-JavaScript-Engine-JEP-372"><span class="nav-number">5.</span> <span class="nav-text">Remove the Nashorn JavaScript Engine(JEP 372)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reimplement-the-Legacy-DatagramSocket-API"><span class="nav-number">6.</span> <span class="nav-text">Reimplement the Legacy DatagramSocket API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Disable-and-Deprecate-Biased-Locking"><span class="nav-number">7.</span> <span class="nav-text">Disable and Deprecate Biased Locking</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pattern-Matching-for-instanceof-Second-Preview"><span class="nav-number">8.</span> <span class="nav-text">Pattern Matching for instanceof (Second Preview)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ZGC-A-Scalable-Low-Latency-Garbage-Collector"><span class="nav-number">9.</span> <span class="nav-text">ZGC: A Scalable Low-Latency Garbage Collector</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Text-Blocks-JEP-378"><span class="nav-number">10.</span> <span class="nav-text">Text Blocks(JEP 378)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shenandoah-A-Low-Pause-Time-Garbage-Collector"><span class="nav-number">11.</span> <span class="nav-text">Shenandoah: A Low-Pause-Time Garbage Collector</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Remove-the-Solaris-and-SPARC-Ports"><span class="nav-number">12.</span> <span class="nav-text">Remove the Solaris and SPARC Ports</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Foreign-Memory-Access-API-Second-Incubator"><span class="nav-number">13.</span> <span class="nav-text">Foreign-Memory Access API (Second Incubator)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Records-JEP-384"><span class="nav-number">14.</span> <span class="nav-text">Records (JEP 384)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deprecate-RMI-Activation-for-Removal"><span class="nav-number">15.</span> <span class="nav-text">Deprecate RMI Activation for Removal</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">16.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

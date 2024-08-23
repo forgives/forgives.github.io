@@ -1,0 +1,9 @@
+# Yuzu && Citra
+
+JUST FOR FUN :)
+
+https://github.com/aidanmcb1/Yuzu
+
+https://github.com/aidanmcb1/Citra
+
+New Project: https://suyu.dev/

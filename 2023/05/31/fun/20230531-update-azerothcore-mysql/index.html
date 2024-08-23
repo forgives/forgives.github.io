@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="MySQL 8.0.33版本出来已经有一段时间了，AzerothCore可以升个级了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="升级AzerothCore的MySQL版本">
+<meta property="og:url" content="https://forgives.github.io/2023/05/31/fun/20230531-update-azerothcore-mysql/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="MySQL 8.0.33版本出来已经有一段时间了，AzerothCore可以升个级了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://forgives.github.io/res/20230531214100.png">
+<meta property="article:published_time" content="2023-05-31T13:20:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.374Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="wow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://forgives.github.io/res/20230531214100.png">
+
+<link rel="canonical" href="https://forgives.github.io/2023/05/31/fun/20230531-update-azerothcore-mysql/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>升级AzerothCore的MySQL版本 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/05/31/fun/20230531-update-azerothcore-mysql/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          升级AzerothCore的MySQL版本
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-05-31 21:20:00" itemprop="dateCreated datePublished" datetime="2023-05-31T21:20:00+08:00">2023-05-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B8%B8%E6%88%8F/" itemprop="url" rel="index"><span itemprop="name">游戏</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><code>MySQL 8.0.33</code>版本出来已经有一段时间了，AzerothCore可以升个级了。</p>
+<span id="more"></span>
+
+<h2 id="迁移数据"><a href="#迁移数据" class="headerlink" title="迁移数据"></a>迁移数据</h2><p>首先还是先备份一下当前版本的数据，主要是三个库 <code>acore_world</code> &#x2F; <code>acore_characters</code> &#x2F; <code>acore_auth</code> 。<br>这里直接用 <code>mysqldump</code> 做导出备份即可 </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\bin\mysqldump.exe --single-transaction --set-gtid-purged=OFF --add-locks=false --skip-tz-utc -uroot -proot -P3306 --databases acore_world acore_auth acore_characters &gt; f:/tmp/acore_all_20230531.sql</span><br></pre></td></tr></table></figure>
+<p>生成 <code>acore_all_20230531.sql</code>文件后，关闭老版本的MySQL服务，启动新版本的MySQL服务（启动的时候关闭binlog: mysqld 配置最后一行加上 <code>skip-log-bin</code> ）。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">...</span><br><span class="line">skip-log-bin</span><br></pre></td></tr></table></figure>
+
+<p>启动后连接数据库，创建对应的三个库： 直接执行源码中的 <code>\azerothcore-wotlk\data\sql\create\create_mysql.sql</code> 文件即可。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">USER</span> IF <span class="keyword">EXISTS</span> <span class="string">&#x27;acore&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;acore&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;acore&#x27;</span> <span class="keyword">WITH</span> MAX_QUERIES_PER_HOUR <span class="number">0</span> MAX_CONNECTIONS_PER_HOUR <span class="number">0</span> MAX_UPDATES_PER_HOUR <span class="number">0</span>;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> <span class="operator">*</span> . <span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;acore&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> <span class="keyword">WITH</span> <span class="keyword">GRANT</span> OPTION;</span><br><span class="line"><span class="keyword">CREATE</span> DATABASE `acore_world` <span class="keyword">DEFAULT</span> <span class="type">CHARACTER</span> <span class="keyword">SET</span> UTF8MB4 <span class="keyword">COLLATE</span> utf8mb4_general_ci;</span><br><span class="line"><span class="keyword">CREATE</span> DATABASE `acore_characters` <span class="keyword">DEFAULT</span> <span class="type">CHARACTER</span> <span class="keyword">SET</span> UTF8MB4 <span class="keyword">COLLATE</span> utf8mb4_general_ci;</span><br><span class="line"><span class="keyword">CREATE</span> DATABASE `acore_auth` <span class="keyword">DEFAULT</span> <span class="type">CHARACTER</span> <span class="keyword">SET</span> UTF8MB4 <span class="keyword">COLLATE</span> utf8mb4_general_ci;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> `acore_world` . <span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;acore&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> <span class="keyword">WITH</span> <span class="keyword">GRANT</span> OPTION;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> `acore_characters` . <span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;acore&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> <span class="keyword">WITH</span> <span class="keyword">GRANT</span> OPTION;</span><br><span class="line"><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> `acore_auth` . <span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;acore&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> <span class="keyword">WITH</span> <span class="keyword">GRANT</span> OPTION;</span><br></pre></td></tr></table></figure>
+
+<p>创建完之后导入备份文件，注意指定字符集 <code>utf8mb4</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\bin\mysql.exe --default-character-set=utf8mb4 -uroot -p -P3306 &lt; f:/tmp/acore_all_20230531.sql</span><br></pre></td></tr></table></figure>
+
+<p>这样数据库就已经迁移好了。</p>
+<h2 id="重新编译"><a href="#重新编译" class="headerlink" title="重新编译"></a>重新编译</h2><p>切换了MySQL版本，所以最好是把编译使用的lib也一起更新一下。打开 <code>CMake</code>, 搜索<code>mysql</code></p>
+<p><img src="/res/20230531214100.png" alt="20230531214100.png"></p>
+<p>这里换成新版本的MySQL目录，重新 Configure &amp; Generate</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Running cmake hook: AFTER_SRC_LOAD</span><br><span class="line">No hooks registered for AFTER_SRC_LOAD</span><br><span class="line">Configuring done</span><br><span class="line">Generating done</span><br></pre></td></tr></table></figure>
+
+<p>点击<code>open projects</code> 打开VS Studio , 右击 <code>ALL_BUILD</code> -》 重新生成。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">26&gt;------ 已启动全部重新生成: 项目: ALL_BUILD, 配置: Release x64 ------</span><br><span class="line">26&gt;Building Custom Rule E:/games/wow-study/AzerothCore_SRC/azerothcore-wotlk/CMakeLists.txt</span><br><span class="line">========== “全部重新生成”: 26 成功，0 失败，0已跳过 ==========</span><br><span class="line">========= 重新生成 开始于 9:47 PM，并花费了 04:07.536 分钟 ==========</span><br></pre></td></tr></table></figure>
+<p>编译成功。最后别忘了把新版本的<code>libmysql.dll</code> 拷贝到 <code>worldserver.exe</code> 目录。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+              <a href="/tags/wow/" rel="tag"># wow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/05/25/note/20230525-nginx-https/" rel="prev" title="nginx 配置Https">
+      <i class="fa fa-chevron-left"></i> nginx 配置Https
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/06/05/db/202230606-mvcc/" rel="next" title="MySQL MVCC 实现原理">
+      MySQL MVCC 实现原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%81%E7%A7%BB%E6%95%B0%E6%8D%AE"><span class="nav-number">1.</span> <span class="nav-text">迁移数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E7%BC%96%E8%AF%91"><span class="nav-number">2.</span> <span class="nav-text">重新编译</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

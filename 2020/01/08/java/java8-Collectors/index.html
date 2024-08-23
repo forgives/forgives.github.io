@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Collectors 是 Java 8 加入的操作类，位于 java.util.stream 包下。它会根据不同的策略将元素收集归纳起来，比如最简单常用的是将元素装入Map、Set、List 等可变容器中。特别对于 Java 8 Stream Api 来说非常有用。它提供了collect() 方法来对 Stream 流进行终结操作派生出基于各种策略的结果集。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Collectors 操作">
+<meta property="og:url" content="https://forgives.github.io/2020/01/08/java/java8-Collectors/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="Collectors 是 Java 8 加入的操作类，位于 java.util.stream 包下。它会根据不同的策略将元素收集归纳起来，比如最简单常用的是将元素装入Map、Set、List 等可变容器中。特别对于 Java 8 Stream Api 来说非常有用。它提供了collect() 方法来对 Stream 流进行终结操作派生出基于各种策略的结果集。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-01-08T02:48:10.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.383Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="j2ee">
+<meta property="article:tag" content="stream">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2020/01/08/java/java8-Collectors/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Collectors 操作 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2020/01/08/java/java8-Collectors/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Collectors 操作
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-08 10:48:10" itemprop="dateCreated datePublished" datetime="2020-01-08T10:48:10+08:00">2020-01-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Collectors 是 Java 8 加入的操作类，位于 <code>java.util.stream</code> 包下。它会根据不同的策略将元素收集归纳起来，比如最简单常用的是将元素装入Map、Set、List 等可变容器中。特别对于 <a target="_blank" rel="noopener" href="https://www.felord.cn/java8streamapi.html">Java 8 Stream Api</a> 来说非常有用。它提供了collect() 方法来对 Stream 流进行终结操作派生出基于各种策略的结果集。</p>
+<span id="more"></span>
+
+<p>Collectors 提供了一系列的静态方法供我们使用，通常情况我们静态导入即可使用。接下来我们来看看都提供了哪些方法。示例的list如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; servers = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">servers.add(<span class="string">&quot;Felordcn&quot;</span>);</span><br><span class="line">servers.add(<span class="string">&quot;Tomcat&quot;</span>);</span><br><span class="line">servers.add(<span class="string">&quot;Jetty&quot;</span>);</span><br><span class="line">servers.add(<span class="string">&quot;Undertow&quot;</span>);</span><br><span class="line">servers.add(<span class="string">&quot;Resin&quot;</span>);</span><br><span class="line">servers.add(<span class="string">&quot;Tomcat&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="类型归纳"><a href="#类型归纳" class="headerlink" title="类型归纳"></a>类型归纳</h2><p>这是一个系列，作用是将元素分别归纳进可变容器 List、Map、Set、Collection 或者ConcurrentMap 。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Collectors.toList();</span><br><span class="line">Collectors.toMap();</span><br><span class="line">Collectors.toSet();</span><br><span class="line">Collectors.toCollection();</span><br><span class="line">Collectors.toConcurrentMap();</span><br></pre></td></tr></table></figure>
+
+<p>例子如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//类型归纳</span></span><br><span class="line">List&lt;String&gt; newList = servers.stream().distinct().collect(Collectors.toList());</span><br><span class="line">Set&lt;String&gt; newSet = servers.stream().collect(Collectors.toSet());</span><br><span class="line">Map&lt;String, Integer&gt; newMap = servers.stream().collect(Collectors.toMap(e -&gt; e, String::length,(a,b)-&gt;b));</span><br><span class="line"></span><br><span class="line">LinkedList&lt;String&gt; newLinkedList = servers.stream().distinct().collect(Collectors.toCollection(LinkedList::<span class="keyword">new</span>));</span><br><span class="line"></span><br><span class="line">ConcurrentMap&lt;String, Integer&gt; newConcurrentMap = servers.stream().collect(</span><br><span class="line">    Collectors.toConcurrentMap(e -&gt; e, String::length, (a, b) -&gt; b));</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">&quot;newList = &quot;</span> + JSON.toJSONString(newList) + <span class="string">&quot;\n&quot;</span></span><br><span class="line">    + <span class="string">&quot;newSet = &quot;</span> + JSON.toJSONString(newSet) + <span class="string">&quot;\n&quot;</span></span><br><span class="line">    + <span class="string">&quot;newMap = &quot;</span> + JSON.toJSONString(newMap) + <span class="string">&quot;\n&quot;</span></span><br><span class="line">    + <span class="string">&quot;newLinkedList = &quot;</span> + JSON.toJSONString(newLinkedList) + <span class="string">&quot;\n&quot;</span></span><br><span class="line">    + <span class="string">&quot;newConcurrentMap = &quot;</span> + JSON.toJSONString(newConcurrentMap) + <span class="string">&quot;\n&quot;</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">newList = [&quot;Felordcn&quot;,&quot;Tomcat&quot;,&quot;Jetty&quot;,&quot;Undertow&quot;,&quot;Resin&quot;]</span><br><span class="line">newSet = [&quot;Tomcat&quot;,&quot;Resin&quot;,&quot;Felordcn&quot;,&quot;Jetty&quot;,&quot;Undertow&quot;]</span><br><span class="line">newMap = &#123;&quot;Tomcat&quot;:6,&quot;Resin&quot;:5,&quot;Felordcn&quot;:8,&quot;Jetty&quot;:5,&quot;Undertow&quot;:8&#125;</span><br><span class="line">newLinkedList = [&quot;Felordcn&quot;,&quot;Tomcat&quot;,&quot;Jetty&quot;,&quot;Undertow&quot;,&quot;Resin&quot;]</span><br><span class="line">newConcurrentMap = &#123;&quot;Tomcat&quot;:6,&quot;Resin&quot;:5,&quot;Felordcn&quot;:8,&quot;Jetty&quot;:5,&quot;Undertow&quot;:8&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="joining"><a href="#joining" class="headerlink" title="joining"></a>joining</h2><p>将元素以某种规则连接起来。该方法有三种重载 <code>joining()</code> ,<code>joining(CharSequence delimiter)</code> 和 <code>joining(CharSequence delimiter,CharSequence prefix,CharSequence suffix)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//   输出 FelordcnTomcatJettyUndertowResin</span></span><br><span class="line">servers.stream().collect(Collectors.joining());</span><br><span class="line"></span><br><span class="line"><span class="comment">//   输出 Felordcn,Tomcat,Jetty,Undertow,Resin</span></span><br><span class="line">servers.stream().collect(Collectors.joining(<span class="string">&quot;,&quot;</span> ));</span><br><span class="line"></span><br><span class="line"><span class="comment">//   输出 [Felordcn,Tomcat,Jetty,Undertow,Resin]</span></span><br><span class="line">servers.stream().collect(Collectors.joining(<span class="string">&quot;,&quot;</span>, <span class="string">&quot;[&quot;</span>, <span class="string">&quot;]&quot;</span>)); </span><br></pre></td></tr></table></figure>
+<p>用的比较多的是读取 HttpServletRequest 中的 body ：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HttpServletRequest.getReader().lines().collect(Collectors.joining());</span><br></pre></td></tr></table></figure>
+
+<h2 id="collectingAndThen"><a href="#collectingAndThen" class="headerlink" title="collectingAndThen"></a>collectingAndThen</h2><p>该方法先执行了一个归纳操作，然后再对归纳的结果进行 Function 函数处理输出一个新的结果。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 比如我们将servers joining 然后转成大写，结果为： FELORDCN,TOMCAT,JETTY,UNDERTOW,RESIN   </span></span><br><span class="line">servers.stream.collect(Collectors.collectingAndThen(Collectors.joining(<span class="string">&quot;,&quot;</span>), String::toUpperCase));</span><br></pre></td></tr></table></figure>
+
+<h2 id="groupingBy"><a href="#groupingBy" class="headerlink" title="groupingBy"></a>groupingBy</h2><p>按照条件对元素进行分组，和 SQL 中的 group by 用法有异曲同工之妙，通常也建议使用 Java 进行分组处理以减轻数据库压力。groupingBy 也有三个重载方法 我们将 servers 按照长度进行分组:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 按照字符串长度进行分组    符合条件的元素将组成一个 List 映射到以条件长度为key 的 Map&lt;Integer, List&lt;String&gt;&gt; 中</span></span><br><span class="line">servers.stream.collect(Collectors.groupingBy(String::length))</span><br></pre></td></tr></table></figure>
+<p>默认group后都是放入一个list中的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T, K&gt; Collector&lt;T, ?, Map&lt;K, List&lt;T&gt;&gt;&gt;</span><br><span class="line">groupingBy(Function&lt;? <span class="built_in">super</span> T, ? <span class="keyword">extends</span> <span class="title class_">K</span>&gt; classifier) &#123;</span><br><span class="line">    <span class="keyword">return</span> groupingBy(classifier, toList());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果不想Value是list可以使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Map&lt;Integer, Set&lt;String&gt;&gt;</span></span><br><span class="line">servers.stream.collect(Collectors.groupingBy(String::length, Collectors.toSet()))</span><br></pre></td></tr></table></figure>
+<p>同(定义了Map)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Supplier&lt;Map&lt;Integer,Set&lt;String&gt;&gt;&gt; mapSupplier = HashMap::<span class="keyword">new</span>;</span><br><span class="line"> Map&lt;Integer,Set&lt;String&gt;&gt; collect = servers.stream.collect(Collectors.groupingBy(String::length, mapSupplier, Collectors.toSet()));</span><br></pre></td></tr></table></figure>
+<p>如果需要线程同步可以使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Supplier&lt;Map&lt;Integer, Set&lt;String&gt;&gt;&gt; mapSupplier = () -&gt; Collections.synchronizedMap(<span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;());</span><br><span class="line">Map&lt;Integer, Set&lt;String&gt;&gt; collect = servers.stream.collect(Collectors.groupingBy(String::length, mapSupplier, Collectors.toSet()));</span><br></pre></td></tr></table></figure>
+<p> 或者使用Collectors 的另一个方法 <code>groupingByConcurrent</code> 给我们提供了解决方案。用法和 groupingBy 差不多。</p>
+<h2 id="partitioningBy"><a href="#partitioningBy" class="headerlink" title="partitioningBy"></a>partitioningBy</h2><p><code>Collectors.partitioningBy()</code>该方法会将流中符合断言的、不符合断言的元素分别归纳到两个 key 分别为 true 和 false 的 Map 中，我们可以归类得到符合和不符合的元素集。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt;</span><br><span class="line">    Collector&lt;T, ?, Map&lt;Boolean, List&lt;T&gt;&gt;&gt; partitioningBy(Predicate&lt;? <span class="built_in">super</span> T&gt; predicate) &#123;</span><br><span class="line">        <span class="keyword">return</span> partitioningBy(predicate, toList());</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出函数的参数一个Predicate接口，那么这个接口的返回值是boolean类型的，也只能是boolean类型，然后他的返回值是Map的key是boolean类型，也就是这个函数的返回值只能将数据分为两组也就是ture和false两组数据。<br>使用如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Boolean, List&lt;String&gt;&gt; f = servers.stream().collect(Collectors.partitioningBy(s -&gt; !s.startsWith(<span class="string">&quot;F&quot;</span>)));</span><br><span class="line">       </span><br><span class="line"> List&lt;String&gt; trues = f.get(Boolean.TRUE);</span><br><span class="line"> System.out.println(<span class="string">&quot;不以 F 开头的：  &quot;</span> + trues);</span><br><span class="line"></span><br><span class="line"> List&lt;String&gt; falses = f.get(Boolean.FALSE);</span><br><span class="line"> System.out.println(<span class="string">&quot;以 F 开头的：  &quot;</span> + falses);</span><br></pre></td></tr></table></figure>
+
+<h2 id="counting"><a href="#counting" class="headerlink" title="counting"></a>counting</h2><p>该方法归纳元素的的数量。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//count = 6</span></span><br><span class="line"><span class="type">Long</span> <span class="variable">count</span> <span class="operator">=</span> servers.stream().collect(Collectors.counting());</span><br><span class="line">System.out.println(<span class="string">&quot;count = &quot;</span> + count);</span><br></pre></td></tr></table></figure>
+
+<h2 id="maxBy-minBy"><a href="#maxBy-minBy" class="headerlink" title="maxBy&#x2F;minBy"></a>maxBy&#x2F;minBy</h2><p>这两个方法分别提供了查找大小元素的操作，它们基于比较器接口 Comparator 来比较 ，返回的是一个 Optional 对象。 我们来获取 servers 中最小长度的元素:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// Jetty  </span></span><br><span class="line">Optional&lt;String&gt; min = servers.stream().collect(Collectors.minBy(Comparator.comparingInt(String::length)));</span><br></pre></td></tr></table></figure>
+<p>这里其实 Resin 长度也是最小，这里遵循了 <strong>“先入为主”</strong> 的原则 。当然 Stream.min() 可以很方便的获取最小长度的元素。maxBy 同样的道理。</p>
+<h2 id="summingInt-Double-Long"><a href="#summingInt-Double-Long" class="headerlink" title="summingInt&#x2F;Double&#x2F;Long"></a>summingInt&#x2F;Double&#x2F;Long</h2><p>用来做累加计算。计算元素某个属性的总和，类似 Mysql 的 sum 函数，比如计算各个项目的盈利总和、计算本月的全部工资总和等等。我们这里就计算一下 servers 中字符串的长度之和: </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 总长度 38</span></span><br><span class="line">servers.stream().collect(Collectors.summingInt(s -&gt; s.length()));</span><br></pre></td></tr></table></figure>
+
+<h2 id="summarizingInt-Double-Long"><a href="#summarizingInt-Double-Long" class="headerlink" title="summarizingInt&#x2F;Double&#x2F;Long"></a>summarizingInt&#x2F;Double&#x2F;Long</h2><p> summarizingInt、summarizingDouble、summarizingLong 这三个方法通过对元素某个属性的提取，会返回对元素该属性的统计数据对象，分别对应 <code>IntSummaryStatistics</code>、<code>DoubleSummaryStatistics</code>、<code>LongSummaryStatistics</code>。我们对 servers 中元素的长度进行统计：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">DoubleSummaryStatistics</span> <span class="variable">doubleSummaryStatistics</span> <span class="operator">=</span> servers.stream().collect(Collectors.summarizingDouble(String::length));</span><br><span class="line"> <span class="comment">// &#123;count=5, sum=32.000000, min=5.000000, average=6.400000, max=8.000000&#125;</span></span><br><span class="line"> System.out.println(<span class="string">&quot;doubleSummaryStatistics.toString() = &quot;</span> + doubleSummaryStatistics.toString());</span><br></pre></td></tr></table></figure>
+<p>结果 DoubleSummaryStatistics 中包含了 总数，总和，最小值，最大值，平均值 五个指标。</p>
+<h2 id="mapping"><a href="#mapping" class="headerlink" title="mapping"></a>mapping</h2><p>该方法是先对元素使用 Function 进行再加工操作，然后用另一个Collector 归纳。比如我们先去掉 servers 中元素的首字母，然后将它们装入 List 。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// [elordcn, omcat, etty, ndertow, esin]</span></span><br><span class="line">servers.stream().collect(Collectors.mapping(s -&gt; s.substring(<span class="number">1</span>), Collectors.toList()));</span><br></pre></td></tr></table></figure>
+<p>有点类似 Stream 先进行了 map 操作再进行 collect ：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">servers.stream().map(s -&gt; s.substring(<span class="number">1</span>)).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+
+<h2 id="reducing"><a href="#reducing" class="headerlink" title="reducing"></a>reducing</h2><p>了解reducing必须了解其参数 <code>BinaryOperator&lt;T&gt;</code> ,这是一个函数式接口，是给两个相同类型的量，返回一个跟这两个量相同类型的一个结果，伪表达式为 <code>(T,T) -&gt; T</code>。默认给了两个实现 <code>maxBy</code> 和 <code>minBy</code>，根据比较器来比较大小并分别返回最大值或者最小值。当然你可以灵活定制。然后 reducing 就很好理解了，元素两两之间进行比较根据策略淘汰一个，随着轮次的进行元素个数就是 reduce 的。那这个有什么用处呢？ Java 官方给了一个例子：统计每个城市个子最高的人。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Comparator&lt;Person&gt; byHeight = Comparator.comparing(Person::getHeight);</span><br><span class="line">Map&lt;String, Optional&lt;Person&gt;&gt; tallestByCity = people.stream()</span><br><span class="line">                    .collect(Collectors.groupingBy(Person::getCity, Collectors.reducing(BinaryOperator.maxBy(byHeight))));</span><br></pre></td></tr></table></figure>
+<p>上面是根据 Height 属性找最高的 Person ，而且如果这个属性没有初始化值或者没有数据，很有可能拿不到结果所以给出的是 <code>Optional&lt;Person&gt;</code>。 如果我们给出了 identity 作一个基准值，那么我们首先会跟这个基准值进行 <code>BinaryOperator</code> 操作。 比如我们给出高于 2 米 的人作为 identity。 我们就可以统计每个城市不低于 2 米 而且最高的那个人，当然如果该城市没有人高于 2 米则返回基准值identity ：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Comparator&lt;Person&gt; byHeight = Comparator.comparing(Person::getHeight);</span><br><span class="line">Person identity= <span class="keyword">new</span> <span class="title class_">Person</span>();</span><br><span class="line">        identity.setHeight(<span class="number">2.</span>);</span><br><span class="line">        identity.setName(<span class="string">&quot;identity&quot;</span>);</span><br><span class="line">Map&lt;String, Person&gt; collect = persons.stream()</span><br><span class="line">                .collect(Collectors.groupingBy(Person::getCity, Collectors.reducing(identity, BinaryOperator.maxBy(byHeight))));</span><br></pre></td></tr></table></figure>
+<p>这时候就确定一定会返回一个 Person 了，最起码会是基准值identity 不再是 Optional 。<br>还有些情况，我们想在 reducing 的时候把 Person 的身高先四舍五入一下。这就需要我们做一个映射处理。定义一个 Function&lt;? super T, ? extends U&gt; mapper 来干这个活。那么上面的逻辑就可以变更为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Comparator&lt;Person&gt; byHeight = Comparator.comparing(Person::getHeight);</span><br><span class="line"><span class="type">Person</span> <span class="variable">identity</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Person</span>();</span><br><span class="line">identity.setHeight(<span class="number">2.0D</span>);</span><br><span class="line">identity.setName(<span class="string">&quot;identity&quot;</span>);</span><br><span class="line"><span class="comment">// 定义映射 处理 四舍五入</span></span><br><span class="line">Function&lt;Person, Person&gt; mapper = ps -&gt; &#123;</span><br><span class="line">    <span class="type">Double</span> <span class="variable">height</span> <span class="operator">=</span> ps.getHeight();</span><br><span class="line"></span><br><span class="line">    <span class="type">BigDecimal</span> <span class="variable">decimal</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BigDecimal</span>(height);</span><br><span class="line">    <span class="type">Double</span> <span class="variable">d</span> <span class="operator">=</span> decimal.setScale(<span class="number">1</span>, BigDecimal.ROUND_HALF_UP).doubleValue();</span><br><span class="line">    ps.setHeight(d);</span><br><span class="line">    <span class="keyword">return</span> ps;</span><br><span class="line">&#125;;</span><br><span class="line">Map&lt;String, Person&gt; collect = persons.stream()</span><br><span class="line">        .collect(Collectors.groupingBy(Person::getCity, Collectors.reducing(identity, mapper, BinaryOperator.maxBy(byHeight))));</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/j2ee/" rel="tag"># j2ee</a>
+              <a href="/tags/stream/" rel="tag"># stream</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/12/25/note/gitee-auto-pages/" rel="prev" title="gitee pages服务自动部署分析">
+      <i class="fa fa-chevron-left"></i> gitee pages服务自动部署分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/10/note/oss/" rel="next" title="对象存储 OSS">
+      对象存储 OSS <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E5%BD%92%E7%BA%B3"><span class="nav-number">1.</span> <span class="nav-text">类型归纳</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#joining"><span class="nav-number">2.</span> <span class="nav-text">joining</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#collectingAndThen"><span class="nav-number">3.</span> <span class="nav-text">collectingAndThen</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#groupingBy"><span class="nav-number">4.</span> <span class="nav-text">groupingBy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#partitioningBy"><span class="nav-number">5.</span> <span class="nav-text">partitioningBy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#counting"><span class="nav-number">6.</span> <span class="nav-text">counting</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#maxBy-minBy"><span class="nav-number">7.</span> <span class="nav-text">maxBy&#x2F;minBy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#summingInt-Double-Long"><span class="nav-number">8.</span> <span class="nav-text">summingInt&#x2F;Double&#x2F;Long</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#summarizingInt-Double-Long"><span class="nav-number">9.</span> <span class="nav-text">summarizingInt&#x2F;Double&#x2F;Long</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mapping"><span class="nav-number">10.</span> <span class="nav-text">mapping</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reducing"><span class="nav-number">11.</span> <span class="nav-text">reducing</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

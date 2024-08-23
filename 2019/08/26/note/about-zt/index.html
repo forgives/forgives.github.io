@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="什么是中台，什么不是中台。所有的中台都是业务中台。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="什么是中台">
+<meta property="og:url" content="https://forgives.github.io/2019/08/26/note/about-zt/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="什么是中台，什么不是中台。所有的中台都是业务中台。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-08-26T09:55:47.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.388Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="中台">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2019/08/26/note/about-zt/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>什么是中台 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2019/08/26/note/about-zt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          什么是中台
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-08-26 17:55:47" itemprop="dateCreated datePublished" datetime="2019-08-26T17:55:47+08:00">2019-08-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%80%9D%E8%80%83/" itemprop="url" rel="index"><span itemprop="name">思考</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>什么是中台，什么不是中台。所有的中台都是业务中台。</p>
+<span id="more"></span>
+
+<p>中台的概念一热，很多似是而非的东西都在往中台的概念上凑，一下子出现很多中台，如业务中台、数据中台、技术中台、算法中台、移动中台等等。特别是很多原来称作平台的，现在也都摇身一变成了中台，赶时髦。一个概念太过宽泛是不利的，如果随随便便都是中台，必然导致很多所谓的中台项目失败，导致中台无用论。所以有必要对中台的概念做一个比较准确的定义。</p>
+<h2 id="什么是中台"><a href="#什么是中台" class="headerlink" title="什么是中台"></a>什么是中台</h2><p>要定义中台，重要的是要能比较明确的区分中台和平台。中台和平台都是某种共性能力，区分两者的重点一是看是否具备业务属性，二是看是否是一种组织。<strong>中台是支持多个前台业务且具备业务属性的共性能力组织，平台是支持多个前台或中台业务且不具备业务属性的共性能力</strong>。</p>
+<p>为什么要强调中台必须具备业务属性？可以来看一个例子。我们可以分析什么叫数据中台。如果一个企业把所有业务的数据都存储在Oracle里，我们能说这个Oracle数据库是数据中台吗？显然大家都会说不是（否则中台不是几十年的老古董了？）。那么现在很多企业换成了Hadoop，所有业务数据都在一个Hadoop集群里，能说是数据中台吗？显然也不是，这个Hadoop无非跟原来的Oracle一样存了一堆数据而已。有人说这是因为这个Hadoop集群只是一个系统，<strong>中台必须是一个组织</strong> 。那么我们再加上建设和维护这个Hadoop集群的团队，整个加起来就是中台了吗？<br>仍然不是，因为这个团队是不需要为业务负责的，<strong>不具备业务属性</strong>。而现在大家比较公认的数据中台，指的是确保OneID、OneData得以实现的组织，使得数据不再是各前端业务独立管理，而是通过统一的团队在数据标识、指标、数据仓库等方面实现了跨业务的整合。之所以这样大家会认为是名符其实的数据中台，是因为指标一定是面向业务的，数据仓库的建设一定也包含了一些业务逻辑。所以那个大大的Hadoop并不是数据中台，而是大数据平台。</p>
+<p>我们还可以看到是中台还是平台与所在的业务环境相关。同样的能力对A业务来说可能具备业务属性从而是中台，但对B业务来说没有业务属性从而是平台。比如说IDC建设和运维对AWS来说可谓至关重要的业务中台，而对绝大多数企业来说只能说是平台。PaaS平台对SaaS厂商来说是业务中台，但对绝大多数企业来说也只能说是平台。所以，不具备业务属性的能力，即便是共性的，即便有一个专职的部门在做，即便对业务非常重要，也不能称之为中台，而还是应该称之为平台。否则就会出现很多与业务八杆子打不着的各种中台，混淆视听。因此，应该说所有中台都是业务中台，没有别的类型的中台。数据中台、搜索中台、内容中台、零售中台等等，都是特定形式的业务中台，也还是业务中台。</p>
+<p>中台的定义还要求以下两点：</p>
+<ol>
+<li>中台是一种共性能力组织，支持了多个业务。</li>
+<li>中台支持的是多个前台业务。</li>
+</ol>
+<p>第一点不用多说，只支持一个业务的能力至少暂时不能称为中台（当然可以有进一步建设为中台的规划或可能性）。之所以强调第二点是因为有太多的公司的业务不是靠前台打下来的，而是靠财务后台做账做出来的。理论上可以有，但我们应该支持这样增强做账能力的中台吗？对于那些专业提供做账服务的公司，还真需要这样的中台，但这时做账就是它的前台业务了。</p>
+<p>中台的定义并没有限定中台的建设层次。中台可以在很多个层次上建设，并不是说必须是企业或集团级别的。BU和BG层面建设中台往往更常见，也通常很有意义。即便更小的层面比方几十人的小部门，中台也很有价值。比如一个小团队也可以做电商业务，这时如果有一套好用的电商中台那就帮了大忙了，而事实上业界也有很多公司在提供这样的能力（淘品牌可以说用的就是阿里提供的中台）。</p>
+<h2 id="典型的中台有哪些"><a href="#典型的中台有哪些" class="headerlink" title="典型的中台有哪些"></a>典型的中台有哪些</h2><p>除了常说的业务中台，我们还经常听到数据中台、用户中台、搜索中台、推荐中台、内容中台、技术中台、算法中台、移动中台、研发中台等等一系列的XX中台的说法，但这些中台未必都是真正的中台。</p>
+<p>前面已经说过，广义上讲业务中台包含了所有中台，不同的XX中台都是业务中台的细分方向，反映的是该中台在业务领域或者技术上的某些特征。但大家受阿里的影响，往往只用业务中台来指称在线业务中台。基于这个假定，当前典型的真正的中台大致只有以下几个：</p>
+<ol>
+<li>（狭义的）业务中台：一般指在线业务为典型特征的中台。在OLDI（Online Data-Intensive）时代，越来越多的企业的核心业务都是在线业务，因此把在线业务中台简称为业务中台。但对那些不是以在线业务为主的企业，它需要的业务中台可能就不是在线业务中台了，而是数据中台或别的什么中台。</li>
+<li>数据中台：一般指以数据采集、数据集成、数据治理，指标体系和数据仓库统一建设等数据管理活动为典型特征的中台。同样，在OLDI时代，数据中台越来越重要。狭义的业务中台也就是在线业务中台负责OLDI中的OL（Online），数据中台负责OLDI中的DI（Data-Intensive）。</li>
+<li>用户中台：用户中台可以认为是一种特殊的数据中台，一般以用户ID统一、全域用户画像建设、全域会员体系建设等为典型特征。用户中台很通用，比更广义的数据中台往往更常见。很多企业没能力建设更全面的数据中台，但建设了会员中心等用户中台。</li>
+<li>内容中台：内容中台往往也可以认为是一种特殊的数据中台，一般以内容的采买、内容爬取、内容的加工处理、内容安全保障等为典型特征。</li>
+<li>搜索推荐中台：这两个中台比较像，因为搜索和推荐的技术比较相似。这两个中台一般是为推荐和搜索系统提供一套相对标准的工作流程，同时支持流程各环节的可定制能力，从而支持多个前端推荐搜索业务的快速开发。</li>
+</ol>
+<p>当然还有很多其他根据业务需要建设的中台，比方说对美团&#x2F;饿了吗来说，本地配送体系可以建设为中台，前提是这个体系不仅用于送餐。在电商行业，往往渠道运营用单独的系统和团队来支持各个BU（一般按品类分），也可以说是中台。</p>
+<h2 id="技术-算法-移动-研发中台当前基本不存在"><a href="#技术-算法-移动-研发中台当前基本不存在" class="headerlink" title="技术&#x2F;算法&#x2F;移动&#x2F;研发中台当前基本不存在"></a>技术&#x2F;算法&#x2F;移动&#x2F;研发中台当前基本不存在</h2><p>一般来说，没有技术中台，这是因为以技术为典型特征，又具备业务属性的中台太难找了，没有一个很好的案例。可以看看业界所谓的阿里的技术中台，包含了从IaaS到中间件等一系列在线业务技术，但能称这些为中台吗？可以把里面每个模块都拿出来分析，保证你找不到一个跟业务相关的字眼。所以这些并不是中台。<br>再看业界所谓的阿里移动中台，其实来源于阿里关于移动研发平台EMAS的分享。人家阿里其实自称的是一个研发平台而不是中台。还有业界把阿里的研发平台—云效平台—称为研发中台，这也是一种误读。<br>其实阿里自己也只说业务中台和数据中台。其他的中台都是某些咨询公司或不明真相的群众牵强附会造出来的。</p>
+<p>并不是说不能有技术中台，而是没必要特别的称作技术中台而非业务中台。对于提供技术服务的企业，它的业务前台就是技术前台，它的业务中台就是技术中台。比方说SaaS厂商的中台往往是个PaaS，这时这个PaaS可以称之为技术中台，但也是这个产商的业务中台。同样的一个PaaS，对于大多数别的企业，就变成只是支撑业务但本身没有业务属性的技术平台了。所以，为了避免混淆，导致把平台说成中台，不如坚持认为不存在技术中台。</p>
+<p>同样的道理，移动中台似乎只对做移动应用开发业务（比如说很多外包产商）的企业来说才是中台，但对这些企业来说移动中台也就是它的业务中台，所以也宁可不搞出一个移动中台这样的新名词为好。</p>
+<p>那么，什么才是研发中台？华为有专职的研发部负责支持所有前端业务的研发，让听得见炮火的人指挥战斗，可能是名副其实的研发中台，但云效肯定不是。据我所知云效团队主要是做云效这个产品，并不负责中台业务系统的研发。不过，既然可能最有资格说是研发中台的华为也没出来趟中台概念的浑水，我们着什么急呢。</p>
+<p>总之一句话，当前并没有好的技术 &#x2F; 算法 &#x2F; 移动 &#x2F; 研发中台，那些出来宣传这些中台的要么是自己搞不清中台概念，糊涂，要么就是骗子。不过没有这些中台说明整个行业在这方面的积累还不够，是一种不足，希望过几年有真正的这些中台出来。</p>
+<h2 id="PS"><a href="#PS" class="headerlink" title="PS"></a>PS</h2><p>转自： <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/MM2Ya1-xujRkoC9P5bp_ew">https://mp.weixin.qq.com/s/MM2Ya1-xujRkoC9P5bp_ew</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%B8%AD%E5%8F%B0/" rel="tag"># 中台</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/08/16/note/java-books/" rel="prev" title="Java好书推荐">
+      <i class="fa fa-chevron-left"></i> Java好书推荐
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/09/17/note/cognitive-surplus/" rel="next" title="认知盈余">
+      认知盈余 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%AD%E5%8F%B0"><span class="nav-number">1.</span> <span class="nav-text">什么是中台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B8%E5%9E%8B%E7%9A%84%E4%B8%AD%E5%8F%B0%E6%9C%89%E5%93%AA%E4%BA%9B"><span class="nav-number">2.</span> <span class="nav-text">典型的中台有哪些</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF-%E7%AE%97%E6%B3%95-%E7%A7%BB%E5%8A%A8-%E7%A0%94%E5%8F%91%E4%B8%AD%E5%8F%B0%E5%BD%93%E5%89%8D%E5%9F%BA%E6%9C%AC%E4%B8%8D%E5%AD%98%E5%9C%A8"><span class="nav-number">3.</span> <span class="nav-text">技术&#x2F;算法&#x2F;移动&#x2F;研发中台当前基本不存在</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PS"><span class="nav-number">4.</span> <span class="nav-text">PS</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

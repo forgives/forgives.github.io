@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="中台定义“中台”没有标准的定义，每个人都有自己的理解、推荐郭东白博士对中台的解释，简单易懂:  定义中台我认为可以有两个角度，一个是从中台本身的价值和出发点来：中台是在多个部门之间共享的开发资源所提供的业务能力、数据能力和计算能力的集合；另一个定义是从中台的相对定位来：前台是面向终端用户的一组业务能力，业务中台是对前台应用的抽象，提供多个前台业务之间的共享业务逻辑、数据和计算能力。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="中台">
+<meta property="og:url" content="https://forgives.github.io/2021/02/07/note/zhongtai/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="中台定义“中台”没有标准的定义，每个人都有自己的理解、推荐郭东白博士对中台的解释，简单易懂:  定义中台我认为可以有两个角度，一个是从中台本身的价值和出发点来：中台是在多个部门之间共享的开发资源所提供的业务能力、数据能力和计算能力的集合；另一个定义是从中台的相对定位来：前台是面向终端用户的一组业务能力，业务中台是对前台应用的抽象，提供多个前台业务之间的共享业务逻辑、数据和计算能力。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i4/O1CN01vpV7FV25uRDEaIIwy_!!6000000007586-2-tps-1684-784.png">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i2/O1CN01SWZmTM1GxbXt30KeA_!!6000000000689-2-tps-272-302.png">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i1/O1CN01MVIZfB2695t5hBUpE_!!6000000007618-2-tps-933-489.png">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i3/O1CN019W6KAK1PZAxuCeChq_!!6000000001854-2-tps-992-348.png">
+<meta property="article:published_time" content="2021-02-07T02:42:13.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.392Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="中台">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/imgextra/i4/O1CN01vpV7FV25uRDEaIIwy_!!6000000007586-2-tps-1684-784.png">
+
+<link rel="canonical" href="https://forgives.github.io/2021/02/07/note/zhongtai/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>中台 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2021/02/07/note/zhongtai/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          中台
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-02-07 10:42:13" itemprop="dateCreated datePublished" datetime="2021-02-07T10:42:13+08:00">2021-02-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%80%9D%E8%80%83/" itemprop="url" rel="index"><span itemprop="name">思考</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="中台定义"><a href="#中台定义" class="headerlink" title="中台定义"></a>中台定义</h2><p>“中台”没有标准的定义，每个人都有自己的理解、推荐郭东白博士对中台的解释，简单易懂:</p>
+<blockquote>
+<p>定义中台我认为可以有两个角度，一个是从中台本身的价值和出发点来：<br>中台是在多个部门之间共享的开发资源所提供的业务能力、数据能力和计算能力的集合；<br>另一个定义是从中台的相对定位来：前台是面向终端用户的一组业务能力，业务中台是对前台应用的抽象，提供多个前台业务之间的共享业务逻辑、数据和计算能力。</p>
+</blockquote>
+<span id="more"></span>
+<p>这里提到了中台的重要特征：“共享的业务逻辑，数据与计算能力”。中台也不是万能的，它仅仅适合在高确定性和高通用性的场景下创造增量价值。</p>
+<h2 id="平台与中台"><a href="#平台与中台" class="headerlink" title="平台与中台"></a>平台与中台</h2><p>业务平台的概念非常泛，更是没有自己的明确边界。一般而言，只要一个业务涉及到多方支撑，就称为“平台”了。<br>中后台部门支撑业务通常有三种模式：服务模式，中台模式，平台模式。下图对三种方式进行一个比较:<br><img src="https://img.alicdn.com/imgextra/i4/O1CN01vpV7FV25uRDEaIIwy_!!6000000007586-2-tps-1684-784.png"></p>
+<p>不同模式下业务与底层能力的紧密程度而言，从服务模式-&gt; 中台模式 -&gt; 平台模式，业务与底层能力的耦合是越来越紧密</p>
+<ul>
+<li><p>服务模式：服务方与被服务方式松耦合的，一般而言服务方不与具体的业务场景强耦合。例如OCR识别能力，可以应用到前台的商品推荐，也可应用到风险识别场景。</p>
+</li>
+<li><p>中台模式：前台业务与中台存在交集关系，也就是说业务强依赖了中台的能力，同时业务有自己其他的能力。从系统架构而言，中台能力是业务整体逻辑的一部分，同时前台业务会有自己独立的应用。</p>
+</li>
+<li><p>平台模式：通常在平台模式下支撑业务，平台是一个独立的产品，业务”包含”在平台里，业务没有自己独立的应用。平台模式的一个难点在于定义平台的边界：哪些功能应该平台实现？哪些功能该平台以外的系统实现。以我以前做过的审核平台为例，审核用到的信息需要做补全，补全能力到底应该平台实现？还是调用审核前由上游系统补全。</p>
+</li>
+</ul>
+<h2 id="平台模式的困境"><a href="#平台模式的困境" class="headerlink" title="平台模式的困境"></a>平台模式的困境</h2><p>今天平台服务模式面临很大的困境：</p>
+<ul>
+<li>业务通用能力与个性化的矛盾。通用的定义是什么？只有一个业务的个性化需求，当前平台能力不满足，是开放扩展接口？还是让业务自己解决? 这些问题都是日常研发中经常发生争论的地方</li>
+<li>业务交付效率和平台稳定性的挑战. 随着平台支撑业务的增加，对平台底层能力的更新，越来越难以评估影响面（也就是软件复杂性哲学里的”unkown unkowns”），业务交付时效逐步下降。</li>
+</ul>
+<p>早期建设审核平台采用通用的平台化架构思路：</p>
+<ul>
+<li>前台组件化: 布局组件(瀑布流模式，table模式等), 信息展示类组件（文本组件，图片组件，超链组件，高亮组件等), 动作类组件(审核，打标等)</li>
+<li>服务能力配置化: 任务管理(创建，分发，流转)，质量检查，问题定位等都可以通过配置自由选择</li>
+</ul>
+<p>早期这种模式带来了业务效率的提升，尤其相似场景的快速复用。随着业务场景的越来越复杂：商品审核同时需要对字段打标；相似的风险，业务希望做聚类，重复信息不展示等；不同组件间如何支持联动，提升审核效率。 个性化需求不断的提出，系统的配置化难度越来越大；同时底层能力的升级也越来越困难，往往造成非预期的业务影响。</p>
+<p>实际上业务甜蜜期非常短暂，系统很快进入了“困境”:</p>
+<ul>
+<li><p>业务困境<br>使用门槛高。 系统配置五花八门，都是原子能力配置。即便是最简单的业务场景要使用审核系统，也要尝试去理解背后的整个产品能力，从中挑选少数几个符合自己需要的。</p>
+</li>
+<li><p>技术困境:<br>协议管理和维护： 随着复杂度上升，早期的配置协议不能支持新业务诉求，这时候需要升级协议。老协议到新协议版本的迁移，多个协议版本的维护等， 耗费了大量的技术资源，还容易造成业务影响<br>业务响应效率下降：系统越复杂，对系统的修改越难以评估。这时候的改动也会需要耗费大量时间.</p>
+</li>
+</ul>
+<h2 id="平台模式下系统”困境”原因分析"><a href="#平台模式下系统”困境”原因分析" class="headerlink" title="平台模式下系统”困境”原因分析"></a>平台模式下系统”困境”原因分析</h2><p>业务系统是基于业务分类进行归属划分的，多个需求方之间有的共性多，有的是差异大。例如前面的审核系统，商品审核需要大部分个性化诉求(审核与打标并存，聚类差异化展示等），在其他业务场景很少使用。<br><img src="https://img.alicdn.com/imgextra/i2/O1CN01SWZmTM1GxbXt30KeA_!!6000000000689-2-tps-272-302.png"></p>
+<p>下图的左边描述是符合这样特征的问题空间， 平台和中台分别有两种不同的思路来解决:<br><img src="https://img.alicdn.com/imgextra/i1/O1CN01MVIZfB2695t5hBUpE_!!6000000007618-2-tps-933-489.png"></p>
+<h3 id="平台思路"><a href="#平台思路" class="headerlink" title="平台思路"></a>平台思路</h3><p>传统的平台方案，试图寻找一个大一统解决方案解决问题域的所有情况。配置化驱动就是这种思路下的代表，系统的底层是原子能力，通过对原子能力的编排来实现业务个性化。能力编排可以使用代码，配置或流程引擎等。<br>不同业务的共性，差异都要在系统设计中考虑，维度太多，导致系统的复杂度急速上升. 这也是平台型系统快速进入困境，响应变慢的原因.</p>
+<h3 id="中台思路"><a href="#中台思路" class="headerlink" title="中台思路"></a>中台思路</h3><p>中台思路尝试对问题域进行划分，相似度最大的业务划分到一类进行考虑，在这个有效的问题空间寻找最优解。在中台思维下，复用性不再是单一的维度，而是不同”层”的复用，从下往上，复用的粒度越来越大，越来越有价值。<br><img src="https://img.alicdn.com/imgextra/i3/O1CN019W6KAK1PZAxuCeChq_!!6000000001854-2-tps-992-348.png"></p>
+<h2 id="中台总结"><a href="#中台总结" class="headerlink" title="中台总结"></a>中台总结</h2><p>中台所代表的企业架构向平台型演进的过程，本质上就是企业在发展过程中，随着对于市场信息认知不断提升，在不确定性中寻找确定性，持续在跨业务线探索通⽤最佳实践（Best Practice），并以中台层承载，并最终⽤于⽀撑和实现企业对于业务发展的快速响应、复制与增强的过程。- Thoghtworks 首席咨询师王健 <a target="_blank" rel="noopener" href="https://insights.thoughtworks.cn/zhongtai-first-principle/?spm=ata.13261165.0.0.20221555IYswrM">中台的第一性原理</a><br>阿白博士讲”共享业务逻辑”，王健讲”通用最佳实践”, 本质是相同的：中台是企业中可复用业务模式的一种承载形式。学习中台思维，就是要从业务中寻找共性&amp;确定性，通过业务空间进行分而治之，寻找可复用的业务模式。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://insights.thoughtworks.cn/what-is-zhongtai-definition/">https://insights.thoughtworks.cn/what-is-zhongtai-definition/</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%B8%AD%E5%8F%B0/" rel="tag"># 中台</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/14/note/about-thinking/" rel="prev" title="关于思考">
+      <i class="fa fa-chevron-left"></i> 关于思考
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/07/note/zhihu-about-alibaba/" rel="next" title="关于阿里的思考">
+      关于阿里的思考 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E5%8F%B0%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">中台定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B3%E5%8F%B0%E4%B8%8E%E4%B8%AD%E5%8F%B0"><span class="nav-number">2.</span> <span class="nav-text">平台与中台</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B3%E5%8F%B0%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%9B%B0%E5%A2%83"><span class="nav-number">3.</span> <span class="nav-text">平台模式的困境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B3%E5%8F%B0%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%B3%BB%E7%BB%9F%E2%80%9D%E5%9B%B0%E5%A2%83%E2%80%9D%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">平台模式下系统”困境”原因分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E5%8F%B0%E6%80%9D%E8%B7%AF"><span class="nav-number">4.1.</span> <span class="nav-text">平台思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E5%8F%B0%E6%80%9D%E8%B7%AF"><span class="nav-number">4.2.</span> <span class="nav-text">中台思路</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E5%8F%B0%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">中台总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

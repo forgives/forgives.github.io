@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="审计字段即记录数据的创建人、创建时间、修改人、修改时间的字段、体现在每一张数据库表中。为了减少代码量需要设置一套通用的方法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Oracle 业务表自制审计字段使用">
+<meta property="og:url" content="https://forgives.github.io/2014/01/18/db/oracle-audit-field/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="审计字段即记录数据的创建人、创建时间、修改人、修改时间的字段、体现在每一张数据库表中。为了减少代码量需要设置一套通用的方法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2014-01-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.372Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="oracle">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2014/01/18/db/oracle-audit-field/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Oracle 业务表自制审计字段使用 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2014/01/18/db/oracle-audit-field/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Oracle 业务表自制审计字段使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2014-01-18 00:00:00" itemprop="dateCreated datePublished" datetime="2014-01-18T00:00:00+08:00">2014-01-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DB/" itemprop="url" rel="index"><span itemprop="name">DB</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>审计字段即记录数据的创建人、创建时间、修改人、修改时间的字段、体现在每一张数据库表中。为了减少代码量需要设置一套通用的方法。</p>
+<span id="more"></span>
+
+<p>思路：登录用户存入session，访问数据库的时候拦截器获取链接先设入数据库session，随后进行业务逻辑，每个表设置trigger，每次更新时获取session中的用户名称，设置入审计字段。</p>
+<p>1、用户信息Web到App的传递。</p>
+<blockquote>
+<p>思路：拦截分发器，每次分发请求的时候在ServiceRequest中设置用户信息传递到App。</p>
+</blockquote>
+<p>首先设置页面拦截，获取session中的用户信息放入用户线程上下文。</p>
+<p>web-context.xml</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;bean id=&quot;sessionInterceptor&quot; class=&quot;com.palic.egis.common.web.util.SessionInterceptor&quot;&gt;</span><br><span class="line">        &lt;description&gt;AuthorizationController用来检查用户是否login&lt;/description&gt;</span><br><span class="line">        &lt;property name=&quot;worktableAssociatedFilter&quot;&gt;</span><br><span class="line">			&lt;list&gt;</span><br><span class="line">				&lt;value&gt;/index.screen&lt;/value&gt;</span><br><span class="line">			&lt;/list&gt;</span><br><span class="line">		&lt;/property&gt;</span><br><span class="line">    &lt;/bean&gt; </span><br><span class="line">    &lt;bean id=&quot;defaultHandlerMapping&quot; class=&quot;com.paic.pafa.app.web.servlet.handler.BeanNameUrlHandlerMapping&quot;&gt;</span><br><span class="line">        &lt;description&gt;</span><br><span class="line">           	 当一个HTTP请求进来的时候，interceptors先拦截请求，进行预先处理。</span><br><span class="line">        &lt;/description&gt;</span><br><span class="line">        &lt;property name=&quot;interceptors&quot;&gt;</span><br><span class="line">            &lt;list&gt;</span><br><span class="line">                &lt;ref local=&quot;sessionInterceptor&quot;/&gt;</span><br><span class="line">              &lt;/list&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>common-context.xml</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;!--=====================================================================--&gt;</span><br><span class="line">	&lt;!-- 线程context的配置 --&gt;</span><br><span class="line">	&lt;!--=====================================================================--&gt;</span><br><span class="line">	&lt;bean id=&quot;userThreadContext&quot;</span><br><span class="line">          class=&quot;com.paic.pafa.core.service.PafaThreadContext&quot;&gt;</span><br><span class="line">        &lt;description&gt;线程的Context&lt;/description&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>SessionInterceptor.java  拦截器实现</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 用于检查Session里是有用户登录信息的拦截器。Interceptor的功能类似于Servlet的Filter。</span><br><span class="line"> * 当一个HTTP请求进来的时候，interceptors先拦截请求，进行预先处理。</span><br><span class="line"> * </span><br><span class="line"> * @author Leo Liao, 2005-4-14, created</span><br><span class="line"> * @version $Revision$Date$</span><br><span class="line"> * @see com.palic.egis.support.privilege.web.controller.LoginController</span><br><span class="line"> */</span><br><span class="line">public class SessionInterceptor extends HandlerInterceptorAdapter &#123;</span><br><span class="line">	// 用于获取用户信息的LoginController</span><br><span class="line">	private Controller	authorizationController;</span><br><span class="line"></span><br><span class="line">	// 目前SessionAdmin有待完善，请暂时不要使用</span><br><span class="line">	// private SessionAdmin sessionAdmin;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 检查session里是不是有用户信息</span><br><span class="line">	 * </span><br><span class="line">	 * @see com.palic.egis.support.privilege.web.controller.LoginController</span><br><span class="line">	 */</span><br><span class="line">	private boolean checkSession(HttpServletRequest request) &#123;</span><br><span class="line">		HttpSession session = request.getSession();</span><br><span class="line">		if (session != null &amp;&amp; session.getAttribute(&quot;currentUser&quot;) != null) &#123;</span><br><span class="line">			return true;</span><br><span class="line">		&#125;</span><br><span class="line">		return false;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public final boolean preHandle(HttpServletRequest request,</span><br><span class="line">			HttpServletResponse response, Object handler)</span><br><span class="line">			throws PafaWebException &#123;</span><br><span class="line">		try &#123;</span><br><span class="line">			if (!checkSession(request)) &#123;</span><br><span class="line">				authorizationController.handleRequest(request, response);</span><br><span class="line">				if (!checkSession(request)) &#123;</span><br><span class="line">					throw new PafaWebException(&quot;appdemo.error.session.invalid&quot;);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			// begin 设置当前用户到线程上下文</span><br><span class="line">			HttpSession session = request.getSession();</span><br><span class="line">			String uid = (String) session.getAttribute(&quot;currentUser&quot;);</span><br><span class="line"></span><br><span class="line">			PafaThreadContext tc = (PafaThreadContext) PafaAppCommonContexton</span><br><span class="line">					.getInstance()</span><br><span class="line">					.getBean(SystemObjectName.USER_THREAD_CONTEXT);</span><br><span class="line"></span><br><span class="line">			tc.putTxnID(PafaCoreContexton.getInstance().getIDGenerator()</span><br><span class="line">					.getID());</span><br><span class="line">			tc.putUserID(uid);</span><br><span class="line"></span><br><span class="line">			// end</span><br><span class="line"></span><br><span class="line">		&#125; catch (PafaWebException ex) &#123;</span><br><span class="line">			// throw new PafaWebException(&quot;appdemo.error.session.invalid&quot;, ex);</span><br><span class="line">			request.getSession().setAttribute(&quot;loginError&quot;,</span><br><span class="line">					ex.getInitialCause().getMessage());</span><br><span class="line">		&#125; catch (Exception ex) &#123;</span><br><span class="line">			// throw new PafaWebException(&quot;appdemo.error.session.invalid&quot;, ex);</span><br><span class="line">			request.getSession().setAttribute(&quot;loginError&quot;, ex.getMessage());</span><br><span class="line">		&#125;</span><br><span class="line">		return true;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	/**</span><br><span class="line">	 * 清除threadContext中设置的用户信息</span><br><span class="line">	 */</span><br><span class="line">	public final void afterCompletion(HttpServletRequest httpservletrequest,</span><br><span class="line">			HttpServletResponse httpservletresponse, Object obj,</span><br><span class="line">			Exception exception) throws Exception &#123;</span><br><span class="line">		PafaThreadContext tc = (PafaThreadContext) PafaAppCommonContexton</span><br><span class="line">				.getInstance().getBean(SystemObjectName.USER_THREAD_CONTEXT);</span><br><span class="line">		tc.clear();</span><br><span class="line"></span><br><span class="line">		super.afterCompletion(httpservletrequest, httpservletresponse, obj,</span><br><span class="line">				exception);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>common-context.xml    分发器配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- Real pafaAC --&gt;</span><br><span class="line">	&lt;bean id=&quot;pafaACTarget&quot;</span><br><span class="line">		class=&quot;com.paic.pafa.app.lwc.service.remoting.access.ejb.SmartRemoteStatelessSessionProxyFactoryBean&quot;&gt;</span><br><span class="line">		&lt;property name=&quot;jndiName&quot;&gt;</span><br><span class="line">			&lt;value&gt;ejb/egis/PafaAC&lt;/value&gt;</span><br><span class="line">		&lt;/property&gt;</span><br><span class="line">		&lt;property name=&quot;businessInterface&quot;&gt;</span><br><span class="line">			&lt;value&gt;</span><br><span class="line">				com.paic.pafa.app.biz.ac.ApplicationController</span><br><span class="line">			&lt;/value&gt;</span><br><span class="line">		&lt;/property&gt;</span><br><span class="line">		&lt;property name=&quot;jndiTemplate&quot;&gt;</span><br><span class="line">			&lt;ref local=&quot;pafaACJndi&quot; /&gt;</span><br><span class="line">		&lt;/property&gt;</span><br><span class="line">	&lt;/bean&gt;</span><br><span class="line">	&lt;!-- pafaAC Proxy --&gt;</span><br><span class="line">	&lt;bean id=&quot;pafaAC&quot;</span><br><span class="line">        class=&quot;com.paic.pafa.app.lwc.core.aop.framework.ProxyFactoryBean&quot;&gt;</span><br><span class="line">    	&lt;property name=&quot;target&quot;&gt;</span><br><span class="line">            &lt;ref local=&quot;pafaACTarget&quot;/&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">    	</span><br><span class="line">    	&lt;property name=&quot;proxyInterfaces&quot;&gt;</span><br><span class="line">            &lt;value&gt;com.paic.pafa.app.biz.ac.ApplicationController&lt;/value&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">    	&lt;property name=&quot;interceptorNames&quot;&gt;</span><br><span class="line">    		&lt;list&gt;</span><br><span class="line">    		    &lt;value&gt;dispatchServiceAdvisor&lt;/value&gt;</span><br><span class="line">    		&lt;/list&gt;</span><br><span class="line">    	&lt;/property&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br><span class="line">    &lt;bean id=&quot;dispatchServiceAdvisor&quot;</span><br><span class="line">        class=&quot;com.paic.pafa.app.lwc.core.aop.support.NameMatchMethodPointcutAdvisor&quot;&gt;</span><br><span class="line">        &lt;property name=&quot;mappedName&quot;&gt;</span><br><span class="line">            &lt;value&gt;handleRequest&lt;/value&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">        &lt;property name=&quot;advice&quot;&gt;</span><br><span class="line">            &lt;ref bean=&quot;dispatchServiceInterceptor&quot;/&gt;</span><br><span class="line">        &lt;/property&gt;    </span><br><span class="line">    &lt;/bean&gt;</span><br><span class="line">    &lt;bean id=&quot;dispatchServiceInterceptor&quot;</span><br><span class="line">        class=&quot;com.palic.egis.common.web.util.ThreadContextInterceptor&quot;&gt;</span><br><span class="line">        &lt;property name=&quot;threadContext&quot;&gt;</span><br><span class="line">        	&lt;ref bean=&quot;userThreadContext&quot;/&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+<p>ThreadContextInterceptor.java</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">public class ThreadContextInterceptor implements MethodInterceptor &#123;</span><br><span class="line"></span><br><span class="line">	private PafaThreadContext threadContext = null;</span><br><span class="line">	</span><br><span class="line">	public PafaThreadContext getThreadContext() &#123;</span><br><span class="line">		return threadContext;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public void setThreadContext(PafaThreadContext threadContext) &#123;</span><br><span class="line">		this.threadContext = threadContext;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	public Object invoke(MethodInvocation method) throws Throwable &#123;</span><br><span class="line">		</span><br><span class="line">		Object[] args = method.getArguments();</span><br><span class="line">		</span><br><span class="line">		</span><br><span class="line">		ServiceRequest sr = (ServiceRequest) args[0];</span><br><span class="line">		if (sr != null) &#123;</span><br><span class="line"></span><br><span class="line">			SessionDTO dto = sr.getSessionDTO();</span><br><span class="line">			</span><br><span class="line">			if(dto.getUserId() == null)&#123;</span><br><span class="line">				dto.setUserId(threadContext.getUserID());				 </span><br><span class="line">			&#125;</span><br><span class="line">			</span><br><span class="line">			if (dto.getTxnId() == null) &#123;</span><br><span class="line">				dto.setTxnId(threadContext.getTxnID());</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		return method.proceed();</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、APP层传入数据库</p>
+<blockquote>
+<p>思路：拦截数据源，先设置数据库session在执行业务逻辑</p>
+</blockquote>
+<p>biz-context.xml</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">&lt;bean id=&quot;dsFactory&quot;</span><br><span class="line">        class=&quot;com.paic.pafa.app.lwc.service.persistence.datasource.DataSourceFactoryBean&quot; &gt;</span><br><span class="line">        &lt;property name=&quot;defaultDSKey&quot;&gt;</span><br><span class="line">            &lt;description&gt;缺省的数据源，必须指定为下面map中的entry key之一&lt;/description&gt;</span><br><span class="line">            &lt;value&gt;GBSDS&lt;/value&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">        &lt;property name=&quot;dataSources&quot;&gt;</span><br><span class="line">            &lt;description&gt;可以在map属性里面添加多个数据源&lt;/description&gt;</span><br><span class="line">            &lt;map&gt;</span><br><span class="line">                &lt;entry key=&quot;GBSDS&quot;&gt;</span><br><span class="line">                    &lt;ref local=&quot;defaultDS&quot;/&gt;</span><br><span class="line">                &lt;/entry&gt;</span><br><span class="line">                &lt;entry key=&quot;GBSDS_XA&quot;&gt;</span><br><span class="line">                    &lt;ref local=&quot;gbsDS_XA&quot;/&gt;</span><br><span class="line">                &lt;/entry&gt;</span><br><span class="line">            &lt;/map&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br><span class="line"></span><br><span class="line">    &lt;bean id=&quot;defaultDS&quot;</span><br><span class="line">		class=&quot;com.paic.pafa.app.lwc.core.aop.framework.ProxyFactoryBean&quot;&gt;</span><br><span class="line">		&lt;property name=&quot;target&quot;&gt;</span><br><span class="line">			&lt;ref local=&quot;defaultDSTarget&quot; /&gt;</span><br><span class="line">		&lt;/property&gt;</span><br><span class="line">		&lt;property name=&quot;proxyInterfaces&quot;&gt;</span><br><span class="line">			&lt;value&gt;javax.sql.DataSource&lt;/value&gt;</span><br><span class="line">		&lt;/property&gt;</span><br><span class="line">		&lt;property name=&quot;interceptorNames&quot;&gt;</span><br><span class="line">			&lt;list&gt;</span><br><span class="line">				&lt;value&gt;dbConnectionAdvisor&lt;/value&gt;</span><br><span class="line">			&lt;/list&gt;</span><br><span class="line">		&lt;/property&gt;</span><br><span class="line">	&lt;/bean&gt;     </span><br><span class="line">    &lt;bean id=&quot;dbConnectionAdvisor&quot;</span><br><span class="line">        class=&quot;com.paic.pafa.app.lwc.core.aop.support.NameMatchMethodPointcutAdvisor&quot;&gt;</span><br><span class="line">        &lt;property name=&quot;mappedName&quot;&gt;</span><br><span class="line">            &lt;value&gt;getConnection&lt;/value&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">        &lt;property name=&quot;advice&quot;&gt;</span><br><span class="line">            &lt;ref bean=&quot;dbConnectionInterceptor&quot;/&gt;</span><br><span class="line">        &lt;/property&gt;    </span><br><span class="line">    &lt;/bean&gt;</span><br><span class="line">    </span><br><span class="line">    &lt;bean id=&quot;dbConnectionInterceptor&quot;</span><br><span class="line">        class=&quot;com.palic.egis.common.util.SetLcuInterceptor&quot;&gt;</span><br><span class="line">    &lt;/bean&gt;    </span><br><span class="line">    </span><br><span class="line">   &lt;bean id=&quot;defaultDSTarget&quot;</span><br><span class="line">        class=&quot;com.paic.pafa.app.lwc.core.naming.JndiObjectFactoryBean&quot;&gt;</span><br><span class="line">        &lt;property name=&quot;jndiName&quot;&gt;</span><br><span class="line">            &lt;value&gt;$&#123;defaultDS&#125;&lt;/value&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">        &lt;property name=&quot;jndiTemplate&quot;&gt;</span><br><span class="line">            &lt;ref local=&quot;jndiTemplate&quot;/&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">    &lt;/bean&gt;    </span><br><span class="line">    </span><br><span class="line">    &lt;bean id=&quot;gbsDS_XA&quot;</span><br><span class="line">        class=&quot;com.paic.pafa.app.lwc.core.naming.JndiObjectFactoryBean&quot;&gt;</span><br><span class="line">        &lt;property name=&quot;jndiName&quot;&gt;</span><br><span class="line">            &lt;value&gt;$&#123;GBSDS_XA&#125;&lt;/value&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">        &lt;property name=&quot;jndiTemplate&quot;&gt;</span><br><span class="line">            &lt;ref local=&quot;jndiTemplate&quot;/&gt;</span><br><span class="line">        &lt;/property&gt;</span><br><span class="line">    &lt;/bean&gt;</span><br></pre></td></tr></table></figure>
+
+<p>SetLcuInterceptor.java</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">public class SetLcuInterceptor implements MethodInterceptor &#123;</span><br><span class="line"></span><br><span class="line">	public Object invoke(MethodInvocation mi) throws Throwable &#123;</span><br><span class="line">		</span><br><span class="line">		String userId = PafaCoreContexton.getInstance().getThreadContext().getUserID();</span><br><span class="line"></span><br><span class="line">		Connection conn = (Connection) mi.proceed();</span><br><span class="line">		</span><br><span class="line">		if (userId != null &amp;&amp; !userId.startsWith(&quot;V_&quot;) &amp;&amp; !userId.equalsIgnoreCase(&quot;GMONIUSER&quot;)) &#123;		</span><br><span class="line">			</span><br><span class="line">			try &#123;</span><br><span class="line">				PreparedStatement stat = null;</span><br><span class="line">				</span><br><span class="line">					// 设置LCU</span><br><span class="line">					try &#123;</span><br><span class="line">						stat = conn.prepareStatement(&quot;&#123;call pub_sys_package.set_attributes(?)&#125;&quot;);</span><br><span class="line">	</span><br><span class="line">						stat.setString(1, userId);					</span><br><span class="line">						stat.execute();</span><br><span class="line">	</span><br><span class="line">					&#125; catch (Throwable e) &#123;</span><br><span class="line">						throw e;</span><br><span class="line">					&#125; finally &#123;</span><br><span class="line">						if (stat != null) &#123;</span><br><span class="line">							stat.close();</span><br><span class="line">						&#125;</span><br><span class="line">					&#125;	</span><br><span class="line">			&#125; catch (Throwable e) &#123;</span><br><span class="line">				DevLog.error(&quot;SetLcuInterceptor Error:&quot; + e.getMessage());	</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		return conn;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>pub_sys_package</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br></pre></td><td class="code"><pre><span class="line">CREATE OR REPLACE PACKAGE BODY pub_sys_package IS</span><br><span class="line"></span><br><span class="line">--get user的两种访问1/pro</span><br><span class="line">  PROCEDURE get_user_p(p_user OUT VARCHAR2) IS  </span><br><span class="line">  BEGIN</span><br><span class="line">    p_user := get_user;</span><br><span class="line">  END get_user_p;</span><br><span class="line">  </span><br><span class="line">--get user的两种访问2/fun</span><br><span class="line">  FUNCTION get_user RETURN VARCHAR2 IS</span><br><span class="line">    v_user VARCHAR2(100);</span><br><span class="line">  </span><br><span class="line">    CURSOR cur_empno IS</span><br><span class="line">      SELECT user_empno</span><br><span class="line">        FROM gbs_user</span><br><span class="line">        --根据登录名称查询</span><br><span class="line">       WHERE user_name = USER;</span><br><span class="line">  </span><br><span class="line">  BEGIN</span><br><span class="line">  </span><br><span class="line">    SELECT sys_context(&#x27;user_policy_context&#x27;, &#x27;uid&#x27;)</span><br><span class="line">      INTO v_user</span><br><span class="line">      FROM dual;</span><br><span class="line">  </span><br><span class="line">    IF v_user IS NULL THEN</span><br><span class="line">      OPEN cur_empno;</span><br><span class="line">      FETCH cur_empno</span><br><span class="line">        INTO v_user;</span><br><span class="line">      CLOSE cur_empno;</span><br><span class="line">    END IF;</span><br><span class="line">  </span><br><span class="line">    IF v_user IS NULL THEN</span><br><span class="line">      v_user := USER;    </span><br><span class="line">    END IF;</span><br><span class="line">  </span><br><span class="line">    RETURN v_user;</span><br><span class="line">  END get_user;</span><br><span class="line"></span><br><span class="line">  --***********************************************</span><br><span class="line">  -- 功能说明：</span><br><span class="line">  --   在获得Connection时调用，用于将用户信息设置到数据库的context中</span><br><span class="line">  -- 参数说明：</span><br><span class="line">  --   uid     用户标志</span><br><span class="line">  -- 调用函数：</span><br><span class="line">  --   无</span><br><span class="line">  --***********************************************</span><br><span class="line">  PROCEDURE set_attributes(uid VARCHAR2) IS</span><br><span class="line">    regionlist VARCHAR2(100) := NULL;</span><br><span class="line">  </span><br><span class="line">  BEGIN</span><br><span class="line">    dbms_session.set_context(&#x27;user_policy_context&#x27;, &#x27;logon&#x27;, &#x27;true&#x27;);</span><br><span class="line">    dbms_session.set_context(&#x27;user_policy_context&#x27;, &#x27;uid&#x27;, uid);</span><br><span class="line">  END set_attributes;</span><br><span class="line"></span><br><span class="line">  --***********************************************</span><br><span class="line">  -- 功能说明：</span><br><span class="line">  --   在获得Connection时调用，用于将用户信息设置到数据库的context中。egis-pos专用</span><br><span class="line">  --   在lcu长度不够的时代，保全利用该过程传入full_uid，记录在另外的字段中</span><br><span class="line">  -- 参数说明：</span><br><span class="line">  --   uid     用户标志</span><br><span class="line">  -- 调用函数：</span><br><span class="line">  --   无</span><br><span class="line">  --***********************************************</span><br><span class="line">  PROCEDURE set_attributes(uid VARCHAR2, full_uid VARCHAR2) IS</span><br><span class="line">    regionlist VARCHAR2(100) := NULL;</span><br><span class="line">  BEGIN</span><br><span class="line">    dbms_session.set_context(&#x27;user_policy_context&#x27;, &#x27;logon&#x27;, &#x27;true&#x27;);</span><br><span class="line">    dbms_session.set_context(&#x27;user_policy_context&#x27;, &#x27;uid&#x27;, uid);</span><br><span class="line">    dbms_session.set_context(&#x27;user_policy_context&#x27;, &#x27;full_uid&#x27;, full_uid);</span><br><span class="line">  END set_attributes;</span><br><span class="line"></span><br><span class="line">  --***********************************************</span><br><span class="line">  -- 功能说明：</span><br><span class="line">  --   数据库集中：将从UM中获取的region信息set到context中</span><br><span class="line">  -- 参数说明：</span><br><span class="line">  --   uid            用户名</span><br><span class="line">  --   access_region  可访问的region列表，以,分隔</span><br><span class="line">  -- 调用函数：</span><br><span class="line">  --   无</span><br><span class="line">  --***********************************************</span><br><span class="line">  PROCEDURE set_access_attributes(uid VARCHAR2, access_region VARCHAR2) IS</span><br><span class="line">  BEGIN</span><br><span class="line">    dbms_session.set_context(&#x27;user_policy_context&#x27;, &#x27;logon&#x27;, &#x27;true&#x27;);</span><br><span class="line">    dbms_session.set_context(&#x27;user_policy_context&#x27;, &#x27;uid&#x27;, uid);</span><br><span class="line">    dbms_session.set_context(&#x27;user_policy_context&#x27;,</span><br><span class="line">                             &#x27;access_region&#x27;,</span><br><span class="line">                             access_region);</span><br><span class="line">  END set_access_attributes;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  FUNCTION get_fcu(infcu IN VARCHAR2) RETURN VARCHAR2 IS</span><br><span class="line">    v_fcu VARCHAR2(100);  </span><br><span class="line">    v_user_empno VARCHAR2(100);</span><br><span class="line">  </span><br><span class="line">  BEGIN</span><br><span class="line">  </span><br><span class="line">    v_user_empno := pub_sys_package.get_user;</span><br><span class="line">  </span><br><span class="line">    IF v_user_empno = &#x27;SOLIX&#x27; THEN</span><br><span class="line">      --如果是归档用户，则使用原有记录的数据 </span><br><span class="line">      v_fcu := infcu;     </span><br><span class="line">    ELSE    </span><br><span class="line">      v_fcu := v_user_empno;    </span><br><span class="line">    END IF;</span><br><span class="line">  </span><br><span class="line">    RETURN v_fcu;</span><br><span class="line">  END;</span><br><span class="line"></span><br><span class="line">  FUNCTION get_fcd(infcd IN VARCHAR2) RETURN DATE IS</span><br><span class="line">    v_fcd DATE;    </span><br><span class="line">    v_user_empno VARCHAR2(100);  </span><br><span class="line">  </span><br><span class="line">  BEGIN</span><br><span class="line">  </span><br><span class="line">    v_user_empno := pub_sys_package.get_user;  </span><br><span class="line">    IF v_user_empno = &#x27;SOLIX&#x27; THEN</span><br><span class="line">    --如果是归档用户，则使用原有记录的数据</span><br><span class="line">      v_fcd := infcd;     </span><br><span class="line">    ELSE    </span><br><span class="line">      v_fcd := SYSDATE;    </span><br><span class="line">    END IF;</span><br><span class="line">  </span><br><span class="line">    RETURN v_fcd;</span><br><span class="line">  END;</span><br><span class="line"></span><br><span class="line">  FUNCTION get_lcu(inlcu IN VARCHAR2) RETURN VARCHAR2 IS</span><br><span class="line">    v_lcu VARCHAR2(100);</span><br><span class="line">  BEGIN</span><br><span class="line">    </span><br><span class="line">    v_lcu := pub_sys_package.get_user;</span><br><span class="line">    IF v_lcu IS NULL THEN</span><br><span class="line">      v_lcu := inlcu;</span><br><span class="line">    end IF;</span><br><span class="line">    </span><br><span class="line">    RETURN v_lcu;</span><br><span class="line">  END;</span><br><span class="line"></span><br><span class="line">  FUNCTION get_lcd(inlcd IN VARCHAR2) RETURN DATE IS</span><br><span class="line">    v_lcd DATE;</span><br><span class="line">  BEGIN    </span><br><span class="line">    v_lcd := SYSDATE;</span><br><span class="line">    RETURN v_lcd;</span><br><span class="line">  END;</span><br><span class="line"></span><br><span class="line">END pub_sys_package;</span><br></pre></td></tr></table></figure>
+
+<p>数据库表中trigger实例：</p>
+<p>插入</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">create or replace trigger TR_I_table_name</span><br><span class="line">before insert on table_name</span><br><span class="line">for each row</span><br><span class="line">declare</span><br><span class="line">    --通用变量定义</span><br><span class="line">    v_trigger_user varchar2(100);</span><br><span class="line">    v_trigger_date date;</span><br><span class="line">    v_sqlcode varchar2(6);</span><br><span class="line">    v_sqlerrm varchar2(200);</span><br><span class="line">    v_error_comment varchar2(300);</span><br><span class="line"></span><br><span class="line">    --针对审计字段更新功能定义的游标和变量</span><br><span class="line">    cursor c_switch(cp_switch gbs_tr_switch.switch_for%type) is</span><br><span class="line">        select status from gbs_tr_switch</span><br><span class="line">        where trigger_name=&#x27;TR_I_table_name&#x27; and switch_for =cp_switch;</span><br><span class="line">    v_status gbs_tr_switch.status%type;</span><br><span class="line"></span><br><span class="line">begin</span><br><span class="line">    v_error_comment:=&#x27;before get user&#x27;;</span><br><span class="line">    v_trigger_user :=pub_sys_package.get_user;</span><br><span class="line">    v_trigger_date :=sysdate;</span><br><span class="line"></span><br><span class="line">    --需求来源：表中记录的审计字段信息更新</span><br><span class="line">    --功能描述：用于保证审计信息的完整性</span><br><span class="line">    v_error_comment:=&#x27;before GBS_insert_4_audit_column&#x27;;</span><br><span class="line">    open c_switch(&#x27;table_name_in&#x27;);</span><br><span class="line">    fetch c_switch into v_status;</span><br><span class="line">    if c_switch%found and v_status =&#x27;1&#x27; then</span><br><span class="line">         :new.created_by:=v_trigger_user;</span><br><span class="line">         :new.created_date:=v_trigger_date;</span><br><span class="line">         :new.updated_by:=v_trigger_user;</span><br><span class="line">         :new.updated_date:=v_trigger_date;</span><br><span class="line">    end if;</span><br><span class="line">    close c_switch;</span><br><span class="line"></span><br><span class="line">    --需球来源：XXXX</span><br><span class="line">    --功能描述：XXXX</span><br><span class="line"></span><br><span class="line">    --错误处理</span><br><span class="line">    --触发器执行有误，将出错信息插入到gbs_tr_error_log表</span><br><span class="line">    exception</span><br><span class="line">    when others then</span><br><span class="line">    v_sqlcode :=sqlcode;</span><br><span class="line">    v_sqlerrm :=substr(sqlerrm,1,200);</span><br><span class="line">    insert into  gbs_tr_error_log</span><br><span class="line">   (</span><br><span class="line">        error_no ,         --系统错误代码</span><br><span class="line">        error_message ,    --系统错误信息</span><br><span class="line">        trigger_name ,     --出错的trigger</span><br><span class="line">        trigger_user ,     --出错的用户</span><br><span class="line">        trigger_date ,     --出错的时间</span><br><span class="line">        error_comment      --出错详细信息</span><br><span class="line">    )</span><br><span class="line">    values</span><br><span class="line">   (</span><br><span class="line">        v_sqlcode,</span><br><span class="line">        v_sqlerrm,</span><br><span class="line">        &#x27;TR_I_table_name&#x27;,</span><br><span class="line">        v_trigger_user,</span><br><span class="line">        v_trigger_date,</span><br><span class="line">        v_error_comment</span><br><span class="line">   );</span><br><span class="line">end;</span><br></pre></td></tr></table></figure>
+
+<p>更新</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">CREATE OR REPLACE TRIGGER tr_u_table_name</span><br><span class="line">  BEFORE UPDATE ON table_name</span><br><span class="line">  FOR EACH ROW</span><br><span class="line">DECLARE</span><br><span class="line">  --通用变量定义</span><br><span class="line">  v_trigger_user  VARCHAR2(100);</span><br><span class="line">  v_trigger_date  DATE;</span><br><span class="line">  v_sqlcode       VARCHAR2(6);</span><br><span class="line">  v_sqlerrm       VARCHAR2(200);</span><br><span class="line">  v_error_comment VARCHAR2(300);</span><br><span class="line"></span><br><span class="line">  --针对审计字段更新功能定义的游标和变量</span><br><span class="line">  CURSOR c_switch(cp_switch gbs_tr_switch.switch_for%TYPE) IS</span><br><span class="line">    SELECT status</span><br><span class="line">      FROM gbs_tr_switch</span><br><span class="line">     WHERE trigger_name = &#x27;tr_u_table_name&#x27;</span><br><span class="line">       AND switch_for = cp_switch;</span><br><span class="line">  v_status gbs_tr_switch.status%TYPE;</span><br><span class="line"></span><br><span class="line">BEGIN</span><br><span class="line">  v_error_comment := &#x27;before get user&#x27;;</span><br><span class="line">  v_trigger_user  := pub_sys_package.get_user;</span><br><span class="line">  v_trigger_date  := SYSDATE;</span><br><span class="line"></span><br><span class="line">  --需求来源：表中记录的审计字段信息更新</span><br><span class="line">  --功能描述：用于保证审计信息的完整性</span><br><span class="line">  v_error_comment := &#x27;before GBS_update_2_audit_column&#x27;;</span><br><span class="line">  OPEN c_switch(&#x27;table_name_up&#x27;);</span><br><span class="line">  FETCH c_switch</span><br><span class="line">    INTO v_status;</span><br><span class="line">  IF c_switch%FOUND</span><br><span class="line">     AND v_status = &#x27;1&#x27; THEN</span><br><span class="line">    :new.updated_by   := v_trigger_user;</span><br><span class="line">    :new.updated_date := v_trigger_date;</span><br><span class="line">  END IF;</span><br><span class="line">  CLOSE c_switch;</span><br><span class="line"></span><br><span class="line">EXCEPTION</span><br><span class="line">  WHEN OTHERS THEN</span><br><span class="line">    v_sqlcode := SQLCODE;</span><br><span class="line">    v_sqlerrm := substr(SQLERRM, 1, 200);</span><br><span class="line">    INSERT INTO tr_error_log</span><br><span class="line">      (error_no, --系统错误代码</span><br><span class="line">       error_message, --系统错误信息</span><br><span class="line">       trigger_name, --出错的trigger</span><br><span class="line">       trigger_user, --出错的用户</span><br><span class="line">       trigger_date, --出错的时间</span><br><span class="line">       error_comment --出错详细信息</span><br><span class="line">       )</span><br><span class="line">    VALUES</span><br><span class="line">      (v_sqlcode,</span><br><span class="line">       v_sqlerrm,</span><br><span class="line">       &#x27;tr_u_table_name&#x27;,</span><br><span class="line">       v_trigger_user,</span><br><span class="line">       v_trigger_date,</span><br><span class="line">       v_error_comment);</span><br><span class="line">END;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/oracle/" rel="tag"># oracle</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/01/18/java/java-ConcurrentModificationException/" rel="prev" title="JDK1.4 的ConcurrentModificationException异常">
+      <i class="fa fa-chevron-left"></i> JDK1.4 的ConcurrentModificationException异常
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2014/04/01/java/java-autoboxing-test/" rel="next" title="JAVA自动装箱实例">
+      JAVA自动装箱实例 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

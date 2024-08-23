@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="dae, means goose, is a high-performance transparent proxy solution.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ubuntu 22.04 install dae">
+<meta property="og:url" content="https://forgives.github.io/2024/04/21/linux/20240421-ubuntu-install-dae/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="dae, means goose, is a high-performance transparent proxy solution.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-04-21T11:55:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.386Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="network">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="proxy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2024/04/21/linux/20240421-ubuntu-install-dae/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ubuntu 22.04 install dae | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2024/04/21/linux/20240421-ubuntu-install-dae/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ubuntu 22.04 install dae
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-04-21 19:55:00" itemprop="dateCreated datePublished" datetime="2024-04-21T19:55:00+08:00">2024-04-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><a target="_blank" rel="noopener" href="https://github.com/daeuniverse/dae"><strong><em>dae</em></strong></a>, means goose, is a high-performance transparent proxy solution.</p>
+<span id="more"></span>
+<h1 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h1><h2 id="确定内核版本"><a href="#确定内核版本" class="headerlink" title="确定内核版本"></a>确定内核版本</h2><p>内核版本需要在5.8或以上</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uname -r</span><br></pre></td></tr></table></figure>
+
+<h2 id="启用ip转发"><a href="#启用ip转发" class="headerlink" title="启用ip转发"></a>启用ip转发</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/sysctl.conf</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.ip_forward=1</span><br><span class="line">net.ipv6.conf.all.forwarding=1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl -p</span><br></pre></td></tr></table></figure>
+
+<h1 id="手动安装"><a href="#手动安装" class="headerlink" title="手动安装"></a>手动安装</h1><h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p><a target="_blank" rel="noopener" href="https://github.com/daeuniverse/dae/releases">https://github.com/daeuniverse/dae/releases</a></p>
+<blockquote>
+<p>当前最新版本为<a target="_blank" rel="noopener" href="https://github.com/daeuniverse/dae/releases/tag/v0.6.0rc2">v0.6.0rc2</a></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 下载amd64</span><br><span class="line">wget https://github.com/daeuniverse/dae/releases/download/v0.6.0rc2/dae-linux-x86_64.zip</span><br><span class="line"></span><br><span class="line"># 下载arm64</span><br><span class="line">wget https://github.com/daeuniverse/dae/releases/download/v0.6.0rc2/dae-linux-x86_64.zip</span><br><span class="line"></span><br><span class="line"># 解压</span><br><span class="line">unzip dae-linux-x86_64.zip</span><br><span class="line"></span><br><span class="line"># 进入到解压目录</span><br><span class="line">cd dae-linux-x86_64</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><ol>
+<li><strong>配置文件</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 创建配置目录</span><br><span class="line">mkdir -p /etc/dae</span><br><span class="line"></span><br><span class="line"># 将案例配置文件移动到配置目录</span><br><span class="line">mv example.dae /etc/dae</span><br><span class="line"></span><br><span class="line"># 创建最小配置文件</span><br><span class="line">cat &lt;&lt;EOF&gt; /etc/dae/config.dae</span><br><span class="line">global&#123;&#125;</span><br><span class="line">routing&#123;&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"># 设置配置文件权限,限制只有配置文件所有者才可以读写。不设置dae无法启动</span><br><span class="line">chmod 0640 /etc/dae/config.dae</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>Geo数据库文件</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 创建数据目录</span><br><span class="line">mkdir -p /usr/local/share/dae/</span><br><span class="line"></span><br><span class="line"># 将geo数据库文件移动到数据目录</span><br><span class="line">mv geoip.dat geosite.dat /usr/local/share/dae/</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><strong>主程序文件</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 添加可执行权限 *文件名不同架构不一样</span><br><span class="line">sudo chmod +x dae-linux-x86_64</span><br><span class="line"></span><br><span class="line"># 将主程序文件安装到用户bin目录</span><br><span class="line">sudo install -Dm755 dae-linux-x86_64 /usr/bin/dae</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><strong>服务文件</strong></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 将服务文件移动到systemd目录</span><br><span class="line">mv dae.service /etc/systemd/system/</span><br><span class="line"></span><br><span class="line"># 刷新配置</span><br><span class="line">sudo systemctl daemon-reload</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h2><p><strong>启动+自启</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl enable dae.service --now</span><br></pre></td></tr></table></figure>
+
+<p><strong>状态</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl status dae.service</span><br></pre></td></tr></table></figure>
+
+<p><strong>重启</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart dae.service</span><br></pre></td></tr></table></figure>
+
+<p><strong>重载配置</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl reload dae.service</span><br></pre></td></tr></table></figure>
+
+<p><strong>日志</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">journalctl -xfu dae.service</span><br></pre></td></tr></table></figure>
+
+<h2 id="一键脚本"><a href="#一键脚本" class="headerlink" title="一键脚本"></a>一键脚本</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">wget -P /tmp/ https://github.com/daeuniverse/dae/releases/download/v0.4.0rc1/dae-linux-x86_64.zip</span><br><span class="line">unzip /tmp/dae-linux-x86_64.zip -d /tmp/dae</span><br><span class="line">cd /tmp/dae</span><br><span class="line">mkdir -p /etc/dae</span><br><span class="line">mv example.dae /etc/dae</span><br><span class="line">cat &lt;&lt;EOF&gt; /etc/dae/config.dae</span><br><span class="line">global&#123;&#125;</span><br><span class="line">routing&#123;&#125;</span><br><span class="line">EOF</span><br><span class="line">chmod 0640 /etc/dae/config.dae</span><br><span class="line">mkdir -p /usr/local/share/dae/</span><br><span class="line">mv geoip.dat geosite.dat /usr/local/share/dae/</span><br><span class="line">sudo chmod +x dae-linux-x86_64</span><br><span class="line">sudo install -Dm755 dae-linux-x86_64 /usr/bin/dae</span><br><span class="line">mv dae.service /etc/systemd/system/</span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl enable dae.service --now</span><br><span class="line">rm -rf /tmp/dae-linux-x86_64.zip</span><br><span class="line">rm -rf /tmp/dae</span><br><span class="line">cd /etc/dae</span><br></pre></td></tr></table></figure>
+
+<h1 id="手动卸载"><a href="#手动卸载" class="headerlink" title="手动卸载"></a>手动卸载</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rm -rf /etc/dae</span><br><span class="line">rm -f /usr/bin/dae</span><br><span class="line">rm -rf /usr/local/share/dae</span><br><span class="line">rm -f /etc/systemd/system/dae.service</span><br></pre></td></tr></table></figure>
+
+<h1 id="官方脚本安装"><a href="#官方脚本安装" class="headerlink" title="官方脚本安装"></a>官方脚本安装</h1><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><blockquote>
+<p><strong>默认配置目录：&#x2F;usr&#x2F;local&#x2F;etc&#x2F;dae&#x2F;</strong></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo sh -c &quot;$(curl -sL https://github.com/daeuniverse/dae-installer/raw/main/installer.sh)&quot; @ install</span><br></pre></td></tr></table></figure>
+
+<h2 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo sh -c &quot;$(curl -sL https://raw.githubusercontent.com/daeuniverse/dae-installer/main/uninstaller.sh)&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="更新Geo数据库"><a href="#更新Geo数据库" class="headerlink" title="更新Geo数据库"></a>更新Geo数据库</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo sh -c &quot;$(curl -sL https://github.com/daeuniverse/dae-installer/raw/main/installer.sh)&quot; @ update-geoip update-geosite</span><br></pre></td></tr></table></figure>
+
+<h1 id="基本示例"><a href="#基本示例" class="headerlink" title="基本示例"></a>基本示例</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"># 全局配置</span><br><span class="line">global &#123;</span><br><span class="line">    # 绑定lan网口提供给内网设备，填自己服务器的网口，多个逗号隔开</span><br><span class="line">    lan_interface: eth0</span><br><span class="line">    wan_interface: auto</span><br><span class="line">    log_level: info</span><br><span class="line">    auto_config_kernel_parameter: true</span><br><span class="line">    dial_mode: domain</span><br><span class="line">    allow_insecure: false</span><br><span class="line">    so_mark_from_dae: 1234</span><br><span class="line"></span><br><span class="line">    # tls配置</span><br><span class="line">    tls_implementation: utls</span><br><span class="line">    utls_imitate: chrome_auto</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 订阅配置</span><br><span class="line">subscription &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 节点配置</span><br><span class="line">node &#123;</span><br><span class="line">    # 节点URI</span><br><span class="line">    vless: &#x27;vless://22e694e4-093d-44bb-8ed2-b0e548c87a2e@idev.example.com:443?type=ws&amp;security=tls&amp;host=idev.example.com&amp;path=%2Fvideo&#x27;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 分组配置，以下采用固定策略，使用第一个节点</span><br><span class="line">group &#123;</span><br><span class="line">    elden_proxy &#123;</span><br><span class="line">        policy: fixed(0)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># dns配置</span><br><span class="line">dns &#123;</span><br><span class="line">  upstream &#123;</span><br><span class="line">    googledns: &#x27;tcp://dns.google.com:53&#x27;</span><br><span class="line">    alidns: &#x27;udp://dns.alidns.com:53&#x27;</span><br><span class="line">  &#125;</span><br><span class="line">  routing &#123;</span><br><span class="line">    request &#123;</span><br><span class="line">      qname(geosite:cn) -&gt; alidns</span><br><span class="line">      fallback: googledns</span><br><span class="line">    &#125;</span><br><span class="line">    response &#123;</span><br><span class="line">        upstream(googledns) -&gt; accept</span><br><span class="line">        fallback: accept</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 路由配置</span><br><span class="line">routing &#123;</span><br><span class="line">    pname(NetworkManager) -&gt; direct</span><br><span class="line">    dip(224.0.0.0/3, &#x27;ff00::/8&#x27;) -&gt; direct</span><br><span class="line">    dip(geoip:private) -&gt; direct</span><br><span class="line"></span><br><span class="line">    ### 以下是自定义规则</span><br><span class="line">  </span><br><span class="line">    ## 规则</span><br><span class="line">    ip(geoip:cn) -&gt; direct</span><br><span class="line">    domain(geosite:cn) -&gt; direct</span><br><span class="line">    domain(geosite:category-ads) -&gt; block</span><br><span class="line"> </span><br><span class="line">  </span><br><span class="line">    # 默认出站分组</span><br><span class="line">    fallback: elden_proxy</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="配置说明"><a href="#配置说明" class="headerlink" title="配置说明"></a>配置说明</h1><h2 id="全局配置"><a href="#全局配置" class="headerlink" title="全局配置"></a>全局配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">global &#123;</span><br><span class="line">    # tproxy监听端口</span><br><span class="line">    tproxy_port: 12345</span><br><span class="line"></span><br><span class="line">    # 设置为true开启可保护tproxy端口不受未经请求的流量的影响</span><br><span class="line">    tproxy_port_protect: true</span><br><span class="line"></span><br><span class="line">    # so_mark标记网络数据包，如果不为零，则从 dae 发送的流量将被设置为 SO_MARK</span><br><span class="line">    so_mark_from_dae: 0</span><br><span class="line"></span><br><span class="line">    # 日志级别: error, warn, info, debug, trace.</span><br><span class="line">    log_level: info</span><br><span class="line"></span><br><span class="line">    # 是否禁止等待网络，在拉取订阅之前</span><br><span class="line">    disable_waiting_network: false</span><br><span class="line"></span><br><span class="line">    ##### 网络接口和内核选项</span><br><span class="line">    # 如果你需要为其他局域网设备提供代理，需要绑定LAN接口，多个网卡&quot;,&quot;分割</span><br><span class="line">    lan_interface: eth0,docker0</span><br><span class="line"></span><br><span class="line">    # 如果你要代理本机流量，需要绑定WAN接口，多个接口&quot;,&quot;分割，也可以使用自动检测&quot;auto&quot;</span><br><span class="line">    wan_interface: auto</span><br><span class="line"></span><br><span class="line">    # 自动配置Linux内核参数。ip_forward和send_redirects</span><br><span class="line">    auto_config_kernel_parameter: true</span><br><span class="line"></span><br><span class="line">    ##### 节点连通性检查</span><br><span class="line">    # 如果你主机有双栈的话，检查链接需要有IPV4和IPV6</span><br><span class="line">    # 第一个是URL，其他可以指定IP</span><br><span class="line">    # 考虑到流量消耗，建议选择anycast IP（CDN）、响应数据少的站点。</span><br><span class="line">    #tcp_check_url: &#x27;http://cp.cloudflare.com&#x27;</span><br><span class="line">    tcp_check_url: &#x27;http://cp.cloudflare.com,1.1.1.1,2606:4700:4700::1111&#x27;</span><br><span class="line"></span><br><span class="line">    # 检查的HTTP请求方法</span><br><span class="line">    tcp_check_http_method: HEAD</span><br><span class="line"></span><br><span class="line">    # 用于检查节点的UDP连接. 如果dns_upstream配置包含 tcp, 同样可以用来检查TCP节点</span><br><span class="line">    # 第一个是URL，其他是IP</span><br><span class="line">    # 如果你主机有双栈的话，IPV4和IPV6都需要指定</span><br><span class="line">    #udp_check_dns: &#x27;dns.google.com:53&#x27;</span><br><span class="line">    udp_check_dns: &#x27;dns.google.com:53,8.8.8.8,2001:4860:4860::8888&#x27;</span><br><span class="line"></span><br><span class="line">    # 检查间隔</span><br><span class="line">    check_interval: 30s</span><br><span class="line"></span><br><span class="line">    # 当节点延迟差多少会切换节点</span><br><span class="line">    check_tolerance: 50ms</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    ##### 连接选项.</span><br><span class="line">    # 拨号模式：ip,domain,domain+,domain++</span><br><span class="line">    dial_mode: domain</span><br><span class="line"></span><br><span class="line">    # 是否允许不安全的TLS证书</span><br><span class="line">    allow_insecure: false</span><br><span class="line"></span><br><span class="line">    # 等待第一次嗅探数据发送的超时时间</span><br><span class="line">    # 如果dial_mode是ip，那么设置为0</span><br><span class="line">    sniffing_timeout: 100ms</span><br><span class="line"></span><br><span class="line">    # tls实现，设置为tls则使用crypto/tls，设置为utls则使用uTLS，可以模仿浏览器的指纹</span><br><span class="line">    tls_implementation: utls</span><br><span class="line"></span><br><span class="line">    # utls要模仿的客户端，仅当utls时生效</span><br><span class="line">    # 参考 https：//github.com/daeuniverse/dae/blob/331fa23c16/component/outbound/transport/tls/utls.go#L17</span><br><span class="line">    utls_imitate: chrome_auto</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="订阅配置"><a href="#订阅配置" class="headerlink" title="订阅配置"></a>订阅配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">subscription &#123;</span><br><span class="line">    # 添加订阅链接.</span><br><span class="line">    my_sub: &#x27;https://www.example.com/subscription/link&#x27;</span><br><span class="line">    # 多个订阅</span><br><span class="line">    another_sub: &#x27;https://example.com/another_sub&#x27;</span><br><span class="line">    # 无标签订阅</span><br><span class="line">    &#x27;https://example.com/no_tag_link&#x27;</span><br><span class="line">    # 本地文件订阅，将内容存放在/etc/dae/relative/path/to/mysub.sub</span><br><span class="line">    &#x27;file://relative/path/to/mysub.sub&#x27;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="节点配置"><a href="#节点配置" class="headerlink" title="节点配置"></a>节点配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">node &#123;</span><br><span class="line">    # 支持 socks5, http, https, ss, ssr, vmess, vless, trojan, tuic, juicity, etc.</span><br><span class="line">    # Full support list: https://github.com/daeuniverse/dae/blob/main/docs/en/proxy-protocols.md</span><br><span class="line">    &#x27;socks5://localhost:1080&#x27;</span><br><span class="line">    mylink: &#x27;ss://LINK&#x27;</span><br><span class="line">    node1: &#x27;vmess://LINK&#x27;</span><br><span class="line">    node2: &#x27;vless://LINK&#x27;</span><br><span class="line">    chains: &#x27;tuic://LINK -&gt; vmess://LINK&#x27;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="分组配置"><a href="#分组配置" class="headerlink" title="分组配置"></a>分组配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"># 出站</span><br><span class="line">group &#123;</span><br><span class="line">    # 组名</span><br><span class="line">    my_group &#123;</span><br><span class="line">        # 没有设置过滤器，代表使用全部节点</span><br><span class="line">  </span><br><span class="line">        # 节点选择策略</span><br><span class="line">  </span><br><span class="line">        # random：随机选择</span><br><span class="line">        #policy: random</span><br><span class="line"></span><br><span class="line">        # fixed：固定选择，以下是固定选择第一个节点</span><br><span class="line">        #policy: fixed(0)</span><br><span class="line"></span><br><span class="line">        # min：最小延迟节点</span><br><span class="line">        #policy: min</span><br><span class="line"></span><br><span class="line">        # 每个连接选择平均延迟最小的节点</span><br><span class="line">        policy: min_moving_avg</span><br><span class="line">    &#125;</span><br><span class="line">    # 组名</span><br><span class="line">    group2 &#123;</span><br><span class="line">        # 将会从全局节点池中过滤节点，包括订阅和手动添加的节点</span><br><span class="line">  </span><br><span class="line">        # subtab是过滤订阅的标签，并且订阅中存在ExpireAt关键字的会被过滤</span><br><span class="line">        #filter: subtag(regex: &#x27;^my_&#x27;, another_sub) &amp;&amp; !name(keyword: &#x27;ExpireAt:&#x27;)</span><br><span class="line"></span><br><span class="line">        # 过滤节点，根据标签</span><br><span class="line">        #filter: name(node1, node2)</span><br><span class="line"></span><br><span class="line">        # 过滤香港节点</span><br><span class="line">        filter: name(HK_node)</span><br><span class="line">        # 过滤美国节点，并添加一个延迟偏差，下面的意思是美国的节点延迟计算会减去500ms</span><br><span class="line">        filter: name(US_node) [add_latency: -500ms]</span><br><span class="line"></span><br><span class="line">        # 对于每个连接，都会从组里面选择最近平均延迟最小的10个节点</span><br><span class="line">        policy: min_avg10</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="DNS配置"><a href="#DNS配置" class="headerlink" title="DNS配置"></a>DNS配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">dns &#123;</span><br><span class="line">    # ip偏好，如果为4，则当域名有ipv4和ipv6记录，则只会响应ipv4</span><br><span class="line">    #ipversion_prefer: 4</span><br><span class="line"></span><br><span class="line">    # 固定域名的ttl，若设置0，代表不缓存DNS查询结果</span><br><span class="line">    fixed_domain_ttl &#123;</span><br><span class="line">        ddns.example.org: 10</span><br><span class="line">        test.example.org: 3600</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    upstream &#123;</span><br><span class="line">        # 格式为 scheme://host:port, 支持 tcp/udp/tcp+udp.</span><br><span class="line">        # 如果是host是域名而且有IPv4和IPv6记录, dae 会通过组策略自动选择，例如最小延迟策略</span><br><span class="line">        # 请确保DNS流量通过dae并由dae转发, 这是域路由必须的</span><br><span class="line">        # 如果 dial_mode 是 &quot;ip&quot;, 则上游DNS应答不应该被污染, 所以不推荐使用国内公共DNS.</span><br><span class="line">        alidns: &#x27;udp://dns.alidns.com:53&#x27;</span><br><span class="line">        googledns: &#x27;tcp+udp://dns.google.com:53&#x27;</span><br><span class="line">    &#125;</span><br><span class="line">    routing &#123;</span><br><span class="line">        # 根据DNS查询的请求，决定使用哪个DNS服务器</span><br><span class="line">        # 规则从上到下匹配</span><br><span class="line">        request &#123;</span><br><span class="line">            # 内置出站:asis,reject</span><br><span class="line">            # 可用的方法qname, qtype</span><br><span class="line">            # 广告拒绝</span><br><span class="line">            qname(geosite:category-ads-all) -&gt; reject</span><br><span class="line">            # 这里的意思是google中是cn的域名使用alidns</span><br><span class="line">            qname(geosite:google@cn) -&gt; alidns</span><br><span class="line">            # 匹配后缀，匹配关键字</span><br><span class="line">            qname(suffix: abc.com, keyword: google) -&gt; googledns</span><br><span class="line">            # 全匹配和正则匹配</span><br><span class="line">            qname(full: ok.com, regex: &#x27;^yes&#x27;) -&gt; googledns</span><br><span class="line">             # DNS 请求类型</span><br><span class="line">             # ipv4和ipv6请求使用alidns</span><br><span class="line">            qtype(a, aaaa) -&gt; alidns</span><br><span class="line">            # cname请求googledns</span><br><span class="line">            qtype(cname) -&gt; googledns</span><br><span class="line">            # 默认DNS服务器</span><br><span class="line">            fallback: alidns</span><br><span class="line">        &#125;</span><br><span class="line">        # 根据DNS查询的响应，决定接受或者使用另外一个DNS服务器重新查询记录</span><br><span class="line">        # 规则从上到下匹配</span><br><span class="line">        response &#123;</span><br><span class="line">            # 内置出站：accept,reject</span><br><span class="line">            # 可用的方法：qname, qtype, upstream, ip.</span><br><span class="line">            # 如果是发送到googledns的请求响应，则接受，可用于避免循环</span><br><span class="line">            upstream(googledns) -&gt; accept</span><br><span class="line">            # 意思是如果请求的域名不是国内网站，但是返回了一个私有的IP，那就是被污染了。重新通过googledns请求</span><br><span class="line">            ip(geoip:private) &amp;&amp; !qname(geosite:cn) -&gt; googledns</span><br><span class="line">            # 以上不匹配，默认</span><br><span class="line">            fallback: accept</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="模版1"><a href="#模版1" class="headerlink" title="模版1"></a>模版1</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"># 中国大陆网站使用alidns，其他使用googledns,若响应的结果出现DNS污染则重新使用googledns查询</span><br><span class="line">dns &#123;</span><br><span class="line">  upstream &#123;</span><br><span class="line">    googledns: &#x27;tcp+udp://dns.google.com:53&#x27;</span><br><span class="line">    alidns: &#x27;udp://dns.alidns.com:53&#x27;</span><br><span class="line">  &#125;</span><br><span class="line">  routing &#123;</span><br><span class="line">    request &#123;</span><br><span class="line">      qname(geosite:cn) -&gt; alidns</span><br><span class="line">      qname(geosite:category-ads-all) -&gt; reject</span><br><span class="line">      fallback: googledns</span><br><span class="line">    &#125;</span><br><span class="line">    response &#123;</span><br><span class="line">        upstream(googledns) -&gt; accept</span><br><span class="line">        ip(geoip:private) &amp;&amp; !qname(geosite:cn) -&gt; googledns</span><br><span class="line">        fallback: accept</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="模版2"><a href="#模版2" class="headerlink" title="模版2"></a>模版2</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># 所有dns查询使用alidns，但如果检测到DNS污染，则重新使用googledns查询</span><br><span class="line">dns &#123;</span><br><span class="line">  upstream &#123;</span><br><span class="line">    googledns: &#x27;tcp+udp://dns.google.com:53&#x27;</span><br><span class="line">    alidns: &#x27;udp://dns.alidns.com:53&#x27;</span><br><span class="line">  &#125;</span><br><span class="line">  routing &#123;</span><br><span class="line">    request &#123;</span><br><span class="line">      qname(geosite:category-ads-all) -&gt; reject</span><br><span class="line">      fallback: alidns</span><br><span class="line">    &#125;</span><br><span class="line">    response &#123;</span><br><span class="line">      upstream(googledns) -&gt; accept</span><br><span class="line">      ip(geoip:private) &amp;&amp; !qname(geosite:cn) -&gt; googledns</span><br><span class="line">      fallback: accept</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="路由配置"><a href="#路由配置" class="headerlink" title="路由配置"></a>路由配置</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br></pre></td><td class="code"><pre><span class="line">routing &#123;</span><br><span class="line">    ### 以下是预设规则</span><br><span class="line"></span><br><span class="line">    # 本地的网络管理器应该直连，以避免在绑定WAN接口的时候出现错误的网络连通性检查结果</span><br><span class="line">    pname(NetworkManager) -&gt; direct</span><br><span class="line"></span><br><span class="line">    # 把它放在前面，可以防止多播应该发送到局域网的数据包被代理转发。</span><br><span class="line">    # &quot;dip&quot; 意思是目的IP.</span><br><span class="line">    dip(224.0.0.0/3, &#x27;ff00::/8&#x27;) -&gt; direct</span><br><span class="line"></span><br><span class="line">    # 该设置允许你直接访问私有地址而不是通过代理，如果你想访问代理主机的私有网络地址，可以修改下面配置</span><br><span class="line">    dip(geoip:private) -&gt; direct</span><br><span class="line"></span><br><span class="line">    ### 以下是自定义规则</span><br><span class="line">  </span><br><span class="line">    # 内置出站：block, direct, must_rules</span><br><span class="line">    # must_rules表示不将DNS流量重定向到dae并继续匹配</span><br><span class="line">    # must_direct和must_my_groupName 表示不会将DNS流量重定向到dae，不会继续匹配</span><br><span class="line">    # 对于单个规则，direct会劫持并处理DNS请求（用于流量分割），而must_direct不会</span><br><span class="line">    # 如果存在DNS请求循环时，must_direct很有用</span><br><span class="line">    #  &quot;must_direct&quot; 可以写成 &quot;direct(must)&quot;.</span><br><span class="line">    # 同样，“must_groupname”也支持不劫持和处理 DNS 流量，</span><br><span class="line">    # 相当于“groupname(must)”。groupname指的是出站分组</span><br><span class="line">    # 如果没有任何规则匹配，默认的出站分组</span><br><span class="line">    fallback: my_group</span><br><span class="line">  </span><br><span class="line">    ## 域名规则</span><br><span class="line">  </span><br><span class="line">    # 后缀匹配</span><br><span class="line">    domain(suffix: v2raya.org) -&gt; my_group</span><br><span class="line">    # 全匹配，两种写法</span><br><span class="line">    # equals to domain(v2raya.org) -&gt; my_group</span><br><span class="line">    domain(full: dns.google.com) -&gt; my_group</span><br><span class="line">    # 关键字匹配</span><br><span class="line">    domain(keyword: facebook) -&gt; my_group</span><br><span class="line">    # 正则匹配</span><br><span class="line">    domain(regex: &#x27;\.goo.*\.com$&#x27;) -&gt; my_group</span><br><span class="line">    # geosite匹配</span><br><span class="line">    domain(geosite:category-ads) -&gt; block</span><br><span class="line">    domain(geosite:cn) -&gt; direct</span><br><span class="line">    # 组合规则</span><br><span class="line">    domain(keyword: google, suffix: www.twitter.com, suffix: v2raya.org) -&gt; my_group</span><br><span class="line">  </span><br><span class="line">    ## 目的IP规则</span><br><span class="line">    # 单个IP匹配</span><br><span class="line">    dip(8.8.8.8) -&gt; direct</span><br><span class="line">    # 单个IP段匹配</span><br><span class="line">    dip(101.97.0.0/16) -&gt; direct</span><br><span class="line">    # geoip匹配</span><br><span class="line">    dip(geoip:private) -&gt; direct</span><br><span class="line">    # 多目的IP规则</span><br><span class="line">    dip(geoip:cn, geoip:private) -&gt; direct</span><br><span class="line">    dip(9.9.9.9, 223.5.5.5) -&gt; direct</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">    ## 源IP规则</span><br><span class="line">    sip(192.168.0.0/24) -&gt; my_group</span><br><span class="line">    sip(192.168.50.0/24) -&gt; direct</span><br><span class="line">    # 多源IP规则</span><br><span class="line">    sip(192.168.0.6, 192.168.0.10, 192.168.0.15) -&gt; direct</span><br><span class="line">  </span><br><span class="line">    # ip规则</span><br><span class="line">    ip(geoip:cn) -&gt; direct</span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">    ## 目的端口规则</span><br><span class="line">    # 单个端口</span><br><span class="line">    dport(80) -&gt; direct</span><br><span class="line">    # 端口范围</span><br><span class="line">    dport(80) -&gt; direct</span><br><span class="line">    # 端口范围</span><br><span class="line">    dport(10080-30000) -&gt; direct</span><br><span class="line">  </span><br><span class="line">    ## 源端口规则</span><br><span class="line">    # 单个端口</span><br><span class="line">    sport(38563) -&gt; direct</span><br><span class="line">    # 端口范围</span><br><span class="line">    sport(10080-30000) -&gt; direct</span><br><span class="line">  </span><br><span class="line">    ## 四层协议规则:</span><br><span class="line">    # tcp</span><br><span class="line">    l4proto(tcp) -&gt; my_group</span><br><span class="line">    # udp</span><br><span class="line">    l4proto(udp) -&gt; direct</span><br><span class="line">  </span><br><span class="line">    ## IP版本规则:</span><br><span class="line">    # IPv4</span><br><span class="line">    ipversion(4) -&gt; block</span><br><span class="line">    # IPv6</span><br><span class="line">    ipversion(6) -&gt; ipv6_group</span><br><span class="line">  </span><br><span class="line">    ## 源MAC规则</span><br><span class="line">    mac(&#x27;02:42:ac:11:00:02&#x27;) -&gt; direct</span><br><span class="line">  </span><br><span class="line">    ## 进程名规则 (当绑定WAN接口是只支持本地进程)</span><br><span class="line">    pname(curl) -&gt; direct</span><br><span class="line">  </span><br><span class="line">    ## DSCP规则 (匹配 DSCP; 对于绕过BT有用). </span><br><span class="line">    # See https://github.com/daeuniverse/dae/discussions/295</span><br><span class="line">    dscp(0x4) -&gt; direct</span><br><span class="line">  </span><br><span class="line">    ## &quot;且&quot;规则</span><br><span class="line">    dip(geoip:cn) &amp;&amp; dport(80) -&gt; direct</span><br><span class="line">    dip(8.8.8.8) &amp;&amp; l4proto(tcp) &amp;&amp; dport(1-1023, 8443) -&gt; my_group</span><br><span class="line">    dip(1.1.1.1) &amp;&amp; sip(10.0.0.1, 172.20.0.0/16) -&gt; direct</span><br><span class="line">  </span><br><span class="line">    ## “非“规则</span><br><span class="line">    # 下面代表，域名不是geosite类型为google-scholar或者category-scholar-!cn或者category-scholar-cn</span><br><span class="line">        !domain(geosite:google-scholar,</span><br><span class="line">        geosite:category-scholar-!cn,</span><br><span class="line">        geosite:category-scholar-cn</span><br><span class="line">    ) -&gt; my_group</span><br><span class="line">  </span><br><span class="line">    ## 更复杂的规则，我觉得少用</span><br><span class="line">        domain(geosite:geolocation-!cn) &amp;&amp;</span><br><span class="line">    !domain(geosite:google-scholar,</span><br><span class="line">            geosite:category-scholar-!cn,</span><br><span class="line">            geosite:category-scholar-cn</span><br><span class="line">        ) -&gt; my_group</span><br><span class="line">  </span><br><span class="line">        ## 自定义 DAT 文件</span><br><span class="line">    domain(ext:&quot;yourdatfile.dat:yourtag&quot;)-&gt;direct</span><br><span class="line">    dip(ext:&quot;yourdatfile.dat:yourtag&quot;)-&gt;direct</span><br><span class="line">  </span><br><span class="line">    ## 设置 fwmark（Firewall Mark）</span><br><span class="line">    # 当您想要将流量重定向到特定接口（例如wireguard）或用于其他高级用途时，标记非常有用</span><br><span class="line">    # 以下是将Disney的流量重定向到wg0接口的过程</span><br><span class="line">    # You need set ip rule and ip table like this:</span><br><span class="line">    # 1. Set all traffic with mark 0x800/0x800 to use route table 1145:</span><br><span class="line">    # &gt;&gt; ip rule add fwmark 0x800/0x800 table 1145</span><br><span class="line">    # &gt;&gt; ip -6 rule add fwmark 0x800/0x800 table 1145</span><br><span class="line">    # 2. Set default route of route table 1145:</span><br><span class="line">    # &gt;&gt; ip route add default dev wg0 scope global table 1145</span><br><span class="line">    # &gt;&gt; ip -6 route add default dev wg0 scope global table 1145</span><br><span class="line">    # Notice that interface wg0, mark 0x800, table 1145 can be set by preferences, but cannot conflict.</span><br><span class="line">    # 3. Set routing rules in dae config file.</span><br><span class="line">    domain(geosite:disney) -&gt; direct(mark: 0x800)</span><br><span class="line">  </span><br><span class="line">    ## Must rules</span><br><span class="line">        # 对于以下规则，DNS请求将会被强制重定向到dae，除了mosdns的请求</span><br><span class="line">        # 不同于must_direct/must_my_group，来自mosdns的流量会继续匹配其他规则</span><br><span class="line">    pname(mosdns) -&gt; must_rules</span><br><span class="line">    ip(geoip:cn) -&gt; direct</span><br><span class="line">    domain(geosite:cn) -&gt; direct</span><br><span class="line">    fallback: my_group</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/network/" rel="tag"># network</a>
+              <a href="/tags/linux/" rel="tag"># linux</a>
+              <a href="/tags/proxy/" rel="tag"># proxy</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/04/13/note/20240413-warp-plus/" rel="prev" title="warp-plus">
+      <i class="fa fa-chevron-left"></i> warp-plus
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/04/29/linux/20240429-ubuntu-install-nextcloud/" rel="next" title="ubuntu 22.04 install NextCloud">
+      ubuntu 22.04 install NextCloud <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">1.</span> <span class="nav-text">环境准备</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9A%E5%86%85%E6%A0%B8%E7%89%88%E6%9C%AC"><span class="nav-number">1.1.</span> <span class="nav-text">确定内核版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E7%94%A8ip%E8%BD%AC%E5%8F%91"><span class="nav-number">1.2.</span> <span class="nav-text">启用ip转发</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">手动安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD"><span class="nav-number">2.1.</span> <span class="nav-text">下载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.3.</span> <span class="nav-text">服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E9%94%AE%E8%84%9A%E6%9C%AC"><span class="nav-number">2.4.</span> <span class="nav-text">一键脚本</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%8D%B8%E8%BD%BD"><span class="nav-number">3.</span> <span class="nav-text">手动卸载</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E8%84%9A%E6%9C%AC%E5%AE%89%E8%A3%85"><span class="nav-number">4.</span> <span class="nav-text">官方脚本安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">4.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%B8%E8%BD%BD"><span class="nav-number">4.2.</span> <span class="nav-text">卸载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0Geo%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">4.3.</span> <span class="nav-text">更新Geo数据库</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%A4%BA%E4%BE%8B"><span class="nav-number">5.</span> <span class="nav-text">基本示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E"><span class="nav-number">6.</span> <span class="nav-text">配置说明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E9%85%8D%E7%BD%AE"><span class="nav-number">6.1.</span> <span class="nav-text">全局配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A2%E9%98%85%E9%85%8D%E7%BD%AE"><span class="nav-number">6.2.</span> <span class="nav-text">订阅配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8A%82%E7%82%B9%E9%85%8D%E7%BD%AE"><span class="nav-number">6.3.</span> <span class="nav-text">节点配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E7%BB%84%E9%85%8D%E7%BD%AE"><span class="nav-number">6.4.</span> <span class="nav-text">分组配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS%E9%85%8D%E7%BD%AE"><span class="nav-number">6.5.</span> <span class="nav-text">DNS配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E7%89%881"><span class="nav-number">6.5.1.</span> <span class="nav-text">模版1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E7%89%882"><span class="nav-number">6.5.2.</span> <span class="nav-text">模版2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E9%85%8D%E7%BD%AE"><span class="nav-number">6.6.</span> <span class="nav-text">路由配置</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

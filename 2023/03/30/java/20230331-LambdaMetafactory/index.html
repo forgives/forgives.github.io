@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="昨天看了 fastjson 作者一篇 《用LambdaMetafactory生成函数映射代替反射提升性能》 的文章，其中主要介绍了 fastjson中如何使用 LambdaMetafactory来生成函数映射代替反射调用。了解了下 LambdaMetafactory 还是比较复杂的，所以调研一下做个记录，后续写框架应该会用到。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LambdaMetafactory 类详解">
+<meta property="og:url" content="https://forgives.github.io/2023/03/30/java/20230331-LambdaMetafactory/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="昨天看了 fastjson 作者一篇 《用LambdaMetafactory生成函数映射代替反射提升性能》 的文章，其中主要介绍了 fastjson中如何使用 LambdaMetafactory来生成函数映射代替反射调用。了解了下 LambdaMetafactory 还是比较复杂的，所以调研一下做个记录，后续写框架应该会用到。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-03-30T01:43:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.379Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="jvm">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2023/03/30/java/20230331-LambdaMetafactory/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>LambdaMetafactory 类详解 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/03/30/java/20230331-LambdaMetafactory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LambdaMetafactory 类详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-03-30 09:43:00" itemprop="dateCreated datePublished" datetime="2023-03-30T09:43:00+08:00">2023-03-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>昨天看了 <code>fastjson</code> 作者一篇 <em>《用LambdaMetafactory生成函数映射代替反射提升性能》</em> 的文章，其中主要介绍了 <code>fastjson</code>中如何使用 <code>LambdaMetafactory</code>来生成函数映射代替反射调用。<br>了解了下 <code>LambdaMetafactory</code> 还是比较复杂的，所以调研一下做个记录，后续写框架应该会用到。</p>
+<span id="more"></span>  
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>为什么使用函数映射，其主要的价值还是在于源文章中的结论：<strong>函数映射在多次调用中的性能远高于反射。这里强调了多次调用，原因是生成方法函数映射的时间消耗是远高于反射获取方法的。</strong><br>平均耗时对比：</p>
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th>Mode</th>
+<th>Cnt</th>
+<th>Score</th>
+<th>Error</th>
+<th>Units</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>genMethod（反射获取方法）</td>
+<td>avgt(平均耗时)</td>
+<td>5</td>
+<td>0.125</td>
+<td>0.015</td>
+<td>us&#x2F;op</td>
+</tr>
+<tr>
+<td>genLambda（生成方法的函数映射）</td>
+<td>avgt</td>
+<td>5</td>
+<td>51.880</td>
+<td>40.04</td>
+<td>us&#x2F;op</td>
+</tr>
+</tbody></table>
+<p>但是生成的函数是可以复用的，将一个固定签名的函数缓存起来，可以省去后续调用再去创建函数。而函数调用的效率是远高于反射调用的（<strong>函数映射调用接近于直接方法调用</strong>）。</p>
+<h2 id="函数映射的生成"><a href="#函数映射的生成" class="headerlink" title="函数映射的生成"></a>函数映射的生成</h2><p>明确了函数映射的价值，下面我们看下如何生成函数映射：生成函数映射需要用到 jdk1.8 新增的类 <code>LambdaMetafactory</code>的<code>metafactory</code>方法。其方法包含六个参数</p>
+<ul>
+<li>MethodHandles.Lookup caller </li>
+<li>String invokedName</li>
+<li>MethodType invokedType</li>
+<li>MethodType samMethodType</li>
+<li>MethodHandle implMethod</li>
+<li>MethodType instantiatedMethodType</li>
+</ul>
+<p>先看下使用的例子，在详细讲下这六个参数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LambdaMetafactoryTest</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">LambdaMetafactoryBean</span> &#123;</span><br><span class="line"></span><br><span class="line">        String name;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">LambdaMetafactoryBean</span><span class="params">()</span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">LambdaMetafactoryBean</span><span class="params">(String name)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.name = name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setName</span><span class="params">(String name)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.name = name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">say</span><span class="params">(String words)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;hi &quot;</span> + name + <span class="string">&quot;, &quot;</span> + words;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">LambdaMetafactoryBean</span> <span class="variable">bean</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">LambdaMetafactoryBean</span>(<span class="string">&quot;lucy&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            MethodHandles.<span class="type">Lookup</span> <span class="variable">lookup</span> <span class="operator">=</span> MethodHandles.lookup();</span><br><span class="line">            <span class="type">MethodHandle</span> <span class="variable">methodHandle</span> <span class="operator">=</span> lookup.findVirtual(LambdaMetafactoryBean.class, <span class="string">&quot;say&quot;</span>, MethodType.methodType(String.class, String.class));</span><br><span class="line"></span><br><span class="line">            <span class="type">CallSite</span> <span class="variable">callSite</span> <span class="operator">=</span> LambdaMetafactory.metafactory(</span><br><span class="line">                    lookup,</span><br><span class="line">                    <span class="string">&quot;apply&quot;</span>,</span><br><span class="line">                    MethodType.methodType(BiFunction.class),</span><br><span class="line">                    MethodType.methodType(Object.class, Object.class, Object.class),</span><br><span class="line">                    methodHandle,</span><br><span class="line">                    methodHandle.type()</span><br><span class="line">            );</span><br><span class="line"></span><br><span class="line">            <span class="type">BiFunction</span> <span class="variable">func</span> <span class="operator">=</span> (BiFunction&lt;LambdaMetafactoryBean, String, String&gt;) callSite.getTarget().invokeExact();</span><br><span class="line">            System.out.println(func.apply(bean, <span class="string">&quot;nice to meet you.&quot;</span>));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hi lucy ,nice to meet you.</span><br></pre></td></tr></table></figure>
+
+<p>讲参数之前，需要先看下<code>MethodType</code> ，<code>MethodHandle</code> 这几个参数类型。</p>
+<h2 id="参数类型"><a href="#参数类型" class="headerlink" title="参数类型"></a>参数类型</h2><h3 id="MethodType"><a href="#MethodType" class="headerlink" title="MethodType"></a>MethodType</h3><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/MethodType.html">MethodType</a> 是java1.7 新增的用于描述方法类型的类。<br>它可以描述方法的返回类型与参数类型。所有的类型都是用其<code>Class</code>表示，使用<code>Void.class</code>代表没有返回类型。<br><code>MethodType</code>的实例只能由其工厂方法创建，工厂方法可能是有缓存的，但并不保证。创建的实例都是不可变的(immutable)。<br>常用方法包含：</p>
+<ul>
+<li><code>methodType()</code>方法：用于创建一个新的MethodType对象，参数为方法的返回类型和参数类型。</li>
+<li><code>changeReturnType()</code>方法：用于改变MethodType对象的返回类型。</li>
+<li><code>changeParameterType()</code>方法：用于改变MethodType对象的参数类型。</li>
+<li><code>insertParameterTypes()</code>方法：用于在MethodType对象中插入一个或多个新的参数类型。</li>
+<li><code>erase()</code>方法：用于返回一个擦除了泛型信息的MethodType对象。</li>
+</ul>
+<p>最重要的还是<code>methodType()</code>方法，可以通过它创建一个<code>MethodType</code>的实例。比如示例中的方法签名：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> String <span class="title function_">say</span><span class="params">(String words)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;hi &quot;</span> + name + <span class="string">&quot;, &quot;</span> + words;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用<code>MethodType</code>描述就是</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MethodType.methodType(String.class, String.class)</span><br></pre></td></tr></table></figure>
+<p>第一个参数代表返类型，后续的参数代表参数类型。</p>
+<p><code>MethodType</code>可以用来创建方法句柄（<code>MethodHandle</code>）对象，这个方法句柄可以在运行时动态地调用一个指定的方法。</p>
+<h3 id="MethodHandle"><a href="#MethodHandle" class="headerlink" title="MethodHandle"></a>MethodHandle</h3><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/MethodHandle.html">MethodHandle</a> 是java1.7 引入的对基础方法、构造函数、字段或类似的低级操作的类型化的、可直接执行的引用。<br>MethodHandle 的实例化是通 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/MethodHandles.Lookup.html">MethodHandles.Lookup</a>的工厂方法创建的。<br>Lookup的工厂方法如下:</p>
+<table>
+<thead>
+<tr>
+<th>lookup expression</th>
+<th>member</th>
+<th>bytecode behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>lookup.findGetter(C.class,”f”,FT.class)</td>
+<td>FT f;</td>
+<td>(T) this.f;</td>
+</tr>
+<tr>
+<td>lookup.findStaticGetter(C.class,”f”,FT.class)</td>
+<td>static FT f;</td>
+<td>(T) C.f;</td>
+</tr>
+<tr>
+<td>lookup.findSetter(C.class,”f”,FT.class)</td>
+<td>FT f;</td>
+<td>this.f &#x3D; x;</td>
+</tr>
+<tr>
+<td>lookup.findStaticSetter(C.class,”f”,FT.class)</td>
+<td>static FT f;</td>
+<td>C.f &#x3D; arg;</td>
+</tr>
+<tr>
+<td>lookup.findVirtual(C.class,”m”,MT)</td>
+<td>T m(A*);</td>
+<td>(T) this.m(arg*);</td>
+</tr>
+<tr>
+<td>lookup.findStatic(C.class,”m”,MT)</td>
+<td>static T m(A*);</td>
+<td>(T) C.m(arg*);</td>
+</tr>
+<tr>
+<td>lookup.findSpecial(C.class,”m”,MT,this.class)</td>
+<td>T m(A*);</td>
+<td>(T) super.m(arg*);</td>
+</tr>
+<tr>
+<td>lookup.findConstructor(C.class,MT)</td>
+<td>C(A*);</td>
+<td>new C(arg*);</td>
+</tr>
+<tr>
+<td>lookup.unreflectGetter(aField)</td>
+<td>(static)? FT f;</td>
+<td>(FT) aField.get(thisOrNull);</td>
+</tr>
+<tr>
+<td>lookup.unreflectSetter(aField)</td>
+<td>(static)? FT f;</td>
+<td>aField.set(thisOrNull, arg);</td>
+</tr>
+<tr>
+<td>lookup.unreflect(aMethod)</td>
+<td>(static)? T m(A*);</td>
+<td>(T) aMethod.invoke(thisOrNull, arg*);</td>
+</tr>
+<tr>
+<td>lookup.unreflectConstructor(aConstructor)</td>
+<td>C(A*);</td>
+<td>(C) aConstructor.newInstance(arg*);</td>
+</tr>
+<tr>
+<td>lookup.unreflect(aMethod)</td>
+<td>(static)? T m(A*);</td>
+<td>(T) aMethod.invoke(thisOrNull, arg*);</td>
+</tr>
+</tbody></table>
+<p>通过这些工厂方法（与 <code>MethodType</code>），可以直接创建 <code>MethodHandle</code> 实例。MethodHandle 的访问控制校验是在 Lookup的时候完成的，所以在调用的时候就不会再进行访问权限检验，这就使得其性能会优于反射调用。<br>（_实际上MethodHandle需要是static final类型的才能大幅提升性能，否则性能提升并不大。_）</p>
+<p>最常用的MethodHandle的调用方法 1）invoke 2）invokeExact 。两个方法不同点在于<code>invokeExact</code>是严格匹配方法类型的，而<code>invoke</code>方法允许更加松散的调用方式，它会尝试在调用的时候进行返回值和参数类型的转换工作。</p>
+<p>综上所述使用 <code>MethodHandle</code>只需要4步</p>
+<ol>
+<li>创建lookup</li>
+<li>创建method type</li>
+<li>找到method handle</li>
+<li>调用方method handle</li>
+</ol>
+<p>例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 测试类</span></span><br><span class="line">BeanA beanA= <span class="keyword">new</span> <span class="title class_">BeanA</span>(<span class="string">&quot;id1&quot;</span>,<span class="string">&quot;aaa&quot;</span>,<span class="string">&quot;vvv&quot;</span>,<span class="number">18</span>);</span><br><span class="line"><span class="comment">// 1 创建lookup</span></span><br><span class="line">MethodHandles.<span class="type">Lookup</span> <span class="variable">lookup</span> <span class="operator">=</span> MethodHandles.lookup();</span><br><span class="line"><span class="comment">// 创建method type</span></span><br><span class="line"><span class="type">MethodType</span> <span class="variable">methodType</span> <span class="operator">=</span> MethodType.methodType(String.class, String.class);</span><br><span class="line"><span class="comment">// 找到method handle</span></span><br><span class="line"><span class="type">MethodHandle</span> <span class="variable">methodHandle</span> <span class="operator">=</span> lookup.findVirtual(BeanA.class, <span class="string">&quot;sayHi&quot;</span>, methodType);</span><br><span class="line"><span class="comment">// 调用方method handle</span></span><br><span class="line"><span class="comment">// Object result = methodHandle.invoke(beanA,&quot;args&quot;);</span></span><br><span class="line"><span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span>(String) methodHandle.invokeExact(beanA,<span class="string">&quot;args&quot;</span>);</span><br><span class="line">System.out.println(result);</span><br></pre></td></tr></table></figure>
+
+<p>更详细的说明参见 <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-method-handles">Method Handles in Java</a></p>
+<h3 id="CallSite"><a href="#CallSite" class="headerlink" title="CallSite"></a>CallSite</h3><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/CallSite.html">CallSite</a> 代表一个方法调用点，是Java1.7引入的的一个新特性，为了支持动态语言的实现而设计的。<br><code>CallSite</code>的主要作用是将方法调用与实际被调用的方法的绑定推迟到运行时。其核心的方法 <code>getTarget()</code>可以获取到指定的<code>MethodHandle</code>。</p>
+<h2 id="参数详解"><a href="#参数详解" class="headerlink" title="参数详解"></a>参数详解</h2><ol>
+<li>MethodHandles.Lookup caller - 具有访问权限的lookup</li>
+<li>String invokedName - 要实现方法的名称，目标方法的名称</li>
+<li>MethodType invokedType - 目标方法的类型</li>
+<li>MethodType samMethodType - 函数接口的类型</li>
+<li>MethodHandle implMethod - 实现目标方法的方法的 MethodHandle</li>
+<li>MethodType instantiatedMethodType - 返回的函数接口的类型</li>
+</ol>
+<p>参数 <code>MethodHandles.Lookup caller</code> 比较好理解，查找目标方法的<code>lookup</code>，参数2,3,4描述了需要生成的函数映射（lambda方法），先说5,6两个参数。<br>5,6两个参数分别是需要映射的源方法的<code>MethodHandle</code>，以及对应的<code>MethodType</code>，上面的例子中方法句柄的描述是<code>MethodHandle(LambdaMetafactoryBean,String)String</code>，MethodType是<code>(LambdaMetafactoryBean,String)String</code><br>含义是返回值类型是 <strong>String</strong>, 参数类型是 <strong>LambdaMetafactoryBean,String</strong>，对应描述的方法是 <code>LambdaMetafactoryBean#say(String words)</code>，可见其第一个参数设置成了方法源类型(Class)。所以对应的 MethodType 才会是<code>(LambdaMetafactoryBean,String)String</code>。<br>5,6参数既然已经描述了需要映射的原方法以及归属的Java类，那么2,3,4描述需要生成的函数映射只要对应上需要映射的原方法即可。按照<code>(LambdaMetafactoryBean,String)String</code>描述目标lambda应该是<code>BiFunction</code>，两个入参一个返回。<br>所以参数2的方法名应该是<code>BiFunction</code>对应的函数方法<code>apply</code> ，目标类型虽然是<code>BiFunction</code>，但参数3是需要MethodType的类型，所以填入<code>MethodType.methodType(BiFunction.class)</code>，参数4描述的是函数接口类型，一个返回两个参数对应的是<code>MethodType.methodType(Object.class, Object.class, Object.class)</code>。</p>
+<p>以上就填满了<code>LambdaMetafactory.metafactory</code>方法了，生成是返回是<code>CallSite</code>类型。通过 <code>CallSite.getTarget()</code>获取到最终的函数映射的 <code>MethodHandle</code>。</p>
+<p>有个点需要额外在提一下，拿到最终需要的 <code>MethodHandle</code>之后我这边是直接调用的 <code>invokeExact</code>方法，且没有加任何参数，返回的也是<code>BiFunction&lt;LambdaMetafactoryBean, String, String&gt;</code>类型，并不是执行后的结果。<br>这里我主要是参考了<code>fastjson2</code>中的实现，<code>fastjson2</code>中大量使用了<code>LambdaMetafactory.metafactory</code>创建了许多映射且通过缓存或者直接赋给 <code>static final</code>类型保存了生成后的映射给后续调用（连这一步的操作都很多地方都放在static块中完成的），如此获得了极大的性能提升。<br>具体代码可以参见 <a target="_blank" rel="noopener" href="https://github.com/alibaba/fastjson2/blob/main/core/src/main/java/com/alibaba/fastjson2/writer/ObjectWriterCreator.java#L1153">fastjson2#ObjectWriterCreator</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/YvAEo9NVZczURx-e_cwX-A">fastjson2为什么这么快？</a></p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzA5MzI3NjE2MA==&mid=2650256051&idx=1&sn=9439f6df950be249c022b172174a864b&chksm=886343dcbf14cacad87644d99f93ce0b585f611ae302f34e40f94ea4b356ff45895890a94aac&scene=27">深入理解Java的Lambda原理</a></p>
+<p><a target="_blank" rel="noopener" href="https://xie.infoq.cn/article/6d30b8221c1a967ec32ac3b9c">详解 Java 方法句柄 MethodHandle</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/LambdaMetafactory.html">LambdaMetafactory</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/invoke/MethodHandles.Lookup.html">MethodHandles.Lookup</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/alibaba/fastjson2/blob/fastcode_demo_20221217/core/src/main/java/com/alibaba/fastjson2/writer/ObjectWriterCreator.java">FASTJSON2中的生成Getter函数映射代码</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-method-handles">Method Handles in Java</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/jvm/" rel="tag"># jvm</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/03/22/note/20230322-idea-http-client/" rel="prev" title="intellij idea 内置 HttpClient 使用">
+      <i class="fa fa-chevron-left"></i> intellij idea 内置 HttpClient 使用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/04/10/db/20230410-mysql-json/" rel="next" title="MySQL JSON 总结">
+      MySQL JSON 总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BD%E6%95%B0%E6%98%A0%E5%B0%84%E7%9A%84%E7%94%9F%E6%88%90"><span class="nav-number">2.</span> <span class="nav-text">函数映射的生成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">参数类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MethodType"><span class="nav-number">3.1.</span> <span class="nav-text">MethodType</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MethodHandle"><span class="nav-number">3.2.</span> <span class="nav-text">MethodHandle</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CallSite"><span class="nav-number">3.3.</span> <span class="nav-text">CallSite</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E8%AF%A6%E8%A7%A3"><span class="nav-number">4.</span> <span class="nav-text">参数详解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

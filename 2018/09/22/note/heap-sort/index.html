@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="假期补补算法:)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="堆排序">
+<meta property="og:url" content="https://forgives.github.io/2018/09/22/note/heap-sort/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="假期补补算法:)">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1A96sbFYqK1RjSZLeXXbXppXa-1278-840.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1xa8VczDpK1RjSZFrXXa78VXa-1318-596.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1e.iccxjaK1RjSZKzXXXVwXXa-1326-594.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1jB00cAzoK1RjSZFlXXai4VXa-1442-654.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1mrJ2cwHqK1RjSZFPXXcwapXa-826-612.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1svV1cCzqK1RjSZFjXXblCFXa-886-592.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1txtZcCzqK1RjSZPcXXbTepXa-1392-572.png">
+<meta property="article:published_time" content="2018-09-22T07:38:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.389Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="algo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/tfs/TB1A96sbFYqK1RjSZLeXXbXppXa-1278-840.png">
+
+<link rel="canonical" href="https://forgives.github.io/2018/09/22/note/heap-sort/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>堆排序 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2018/09/22/note/heap-sort/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          堆排序
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-09-22 15:38:00" itemprop="dateCreated datePublished" datetime="2018-09-22T15:38:00+08:00">2018-09-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>假期补补算法:)</p>
+<span id="more"></span>
+
+<h2 id="堆数据结构"><a href="#堆数据结构" class="headerlink" title="堆数据结构"></a>堆数据结构</h2><p><img src="https://img.alicdn.com/tfs/TB1A96sbFYqK1RjSZLeXXbXppXa-1278-840.png" alt="堆结构图"></p>
+<p>上图表示的是最小堆结构，形式上是一棵完全二叉树，实际存储在内存中的是一个数组，也就是对应下面的数组。树中每一个节点左边红色的值，代表它们在数组中的位置。</p>
+<h3 id="堆中节点的关系"><a href="#堆中节点的关系" class="headerlink" title="堆中节点的关系"></a>堆中节点的关系</h3><p>父节点与当前节点的下标对应关系为：<br>当前节点下标为 i 则父节点的下标为<code>（i - 1）/ 2 = parent</code> ，<br>左孩子节点的下标为：<code>2 * i + 1 = Lchild</code><br>右孩子节点的下标为：<code>2 * i + 2 = Rchild</code></p>
+<h2 id="堆的插入"><a href="#堆的插入" class="headerlink" title="堆的插入"></a>堆的插入</h2><p>小顶堆为例</p>
+<p>① 插人2节点，与其父节点5比较，2比5小交换位置。<br><img src="https://img.alicdn.com/tfs/TB1xa8VczDpK1RjSZFrXXa78VXa-1318-596.png" alt="插入第二元素"><br>②插人3节点，与其父节点2比较，3比2大位置不变。<br><img src="https://img.alicdn.com/tfs/TB1e.iccxjaK1RjSZKzXXXVwXXa-1326-594.png" alt="插入第三元素"><br>③插人4节点，与其父节点5比较，4比5小交换4和5的位置，4继续与其父节点2比较，4比2大不变。<br><img src="https://img.alicdn.com/tfs/TB1jB00cAzoK1RjSZFlXXai4VXa-1442-654.png" alt="插入第四元素"></p>
+<p>上面插入的过程总结一下：每一个插入的节点放在树的最后一个位置，与其父节点比较，如果比父节点小交换位置，继续与其父节点比较直到比父节点大，或者到了顶节点位置停止。 </p>
+<p>代码(不包含第一个元素)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//网上摘录的一段</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">siftUp</span><span class="params">(<span class="type">int</span> k, <span class="type">int</span> arr[])</span> &#123; </span><br><span class="line">    <span class="comment">//插入的新值key,位置k</span></span><br><span class="line">    <span class="type">int</span> key=arr[k];</span><br><span class="line">    <span class="keyword">while</span> (k &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">//获取父节点下标</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">parent</span> <span class="operator">=</span> (k - <span class="number">1</span>) &gt;&gt;&gt; <span class="number">1</span>;</span><br><span class="line">        <span class="comment">//父节点值e</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">e</span> <span class="operator">=</span> arr[parent];</span><br><span class="line">        <span class="comment">//父节点值较小，跳出循环</span></span><br><span class="line">        <span class="keyword">if</span>(arr[parent]&lt;arr[k])           </span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="comment">//否则k节点放入较大值e</span></span><br><span class="line">        arr[k] = e;</span><br><span class="line">        <span class="comment">//父节下标作为新的放入key位置</span></span><br><span class="line">        k = parent;</span><br><span class="line">    &#125;</span><br><span class="line">    arr[k] = key;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//使用Comparator（JDK源码 java.util.PriorityQueue#siftUpUsingComparator ）</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">siftUpUsingComparator</span><span class="params">(<span class="type">int</span> k, E x)</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (k &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">//定位父节点下标</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">parent</span> <span class="operator">=</span> (k - <span class="number">1</span>) &gt;&gt;&gt; <span class="number">1</span>;</span><br><span class="line">        <span class="comment">//获取父节点数据</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">e</span> <span class="operator">=</span> queue[parent];</span><br><span class="line">        <span class="comment">//如果父节点数据较小，退出循环</span></span><br><span class="line">        <span class="keyword">if</span> (comparator.compare(x, (E) e) &gt;= <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="comment">//否则 和父节点交换（大值放入子节点中k位置）</span></span><br><span class="line">        queue[k] = e;</span><br><span class="line">        <span class="comment">//k指向父节点下标，继续循环比较其父节点</span></span><br><span class="line">        k = parent;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//把x插入下标k</span></span><br><span class="line">    queue[k] = x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为插入堆是从底往上的操作因此在api中名称为 siftUp。</p>
+<h2 id="堆的删除"><a href="#堆的删除" class="headerlink" title="堆的删除"></a>堆的删除</h2><p>删除元素后要对堆进行调整：<br><img src="https://img.alicdn.com/tfs/TB1mrJ2cwHqK1RjSZFPXXcwapXa-826-612.png" alt="删除堆顶0"></p>
+<p>堆中每次删除只能删除头节点。也就是数组中的第一个节点。<br><img src="https://img.alicdn.com/tfs/TB1svV1cCzqK1RjSZFjXXblCFXa-886-592.png" alt="删除后的调整"></p>
+<p>将最后一个节点替代头节点然后进行调整。<br><img src="https://img.alicdn.com/tfs/TB1txtZcCzqK1RjSZPcXXbTepXa-1392-572.png" alt="继续向下调整"></p>
+<p>如果左右子节点中的最小节点比当前节点小就与左右节点的最小节点交换。直到当前节点无子节点，或者当前节点比左右节点小时停止交换。<br>参见源码 <code>java.util.PriorityQueue#siftDownUsingComparator</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">siftDownUsingComparator</span><span class="params">(<span class="type">int</span> k, E x)</span> &#123;</span><br><span class="line">    <span class="comment">//获取所有节点数的一半，用以判断是否是有子节点</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">half</span> <span class="operator">=</span> size &gt;&gt;&gt; <span class="number">1</span>;</span><br><span class="line">    <span class="comment">//小于一半还会有子节点</span></span><br><span class="line">    <span class="keyword">while</span> (k &lt; half) &#123;</span><br><span class="line">        <span class="comment">//左孩子节点下标child</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">child</span> <span class="operator">=</span> (k &lt;&lt; <span class="number">1</span>) + <span class="number">1</span>;</span><br><span class="line">        <span class="comment">//左孩子结点值c</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">c</span> <span class="operator">=</span> queue[child];</span><br><span class="line">        <span class="comment">//右孩子结点下标right</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">right</span> <span class="operator">=</span> child + <span class="number">1</span>;</span><br><span class="line">        <span class="comment">//如果有右子节点，且左子结点值小于右子节点值</span></span><br><span class="line">        <span class="comment">//取出最小的子节点下标child,和最小子节点值c</span></span><br><span class="line">        <span class="keyword">if</span> (right &lt; size &amp;&amp;</span><br><span class="line">            comparator.compare((E) c, (E) queue[right]) &gt; <span class="number">0</span>)</span><br><span class="line">            c = queue[child = right];</span><br><span class="line">        <span class="comment">//如果父节点小于等于最小子节点值 跳出循环</span></span><br><span class="line">        <span class="keyword">if</span> (comparator.compare(x, (E) c) &lt;= <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="comment">//否则k位置放入最小子节点值</span></span><br><span class="line">        queue[k] = c;</span><br><span class="line">        <span class="comment">//k下标切换成最小子节点下标child继续向下调整</span></span><br><span class="line">        k = child;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//k下标位置放入新值x</span></span><br><span class="line">    queue[k] = x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="堆排序"><a href="#堆排序" class="headerlink" title="堆排序"></a>堆排序</h2><p>堆排序分为三个过程：</p>
+<ul>
+<li>建堆：对数组建堆可以采用从插入堆的方法，从头结点开始不断的进行插入元素向上调整堆。也可以使用堆化的方法从最后节点的父节点开始往前遍历各个父节点做向下调整堆。</li>
+<li>堆排序：每次取出堆顶元素，并向下调整堆，重复操作直至堆为空。最终按取出顺序的数据就是有序的。</li>
+</ul>
+<p>堆排序代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HeapSort</span> <span class="keyword">implements</span> <span class="title class_">Sorter</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//堆排序函数</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span>[] sort(<span class="type">int</span>[] arr)&#123;</span><br><span class="line">        <span class="comment">//最大下标n</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> arr.length-<span class="number">1</span>;</span><br><span class="line">        <span class="comment">//从最后一个父节点开始往前遍历所有父节点</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=(n-<span class="number">1</span>)/<span class="number">2</span>;i&gt;=<span class="number">0</span>;i--)&#123;</span><br><span class="line">            <span class="comment">//构造大顶堆</span></span><br><span class="line">            <span class="comment">//i为最后一个根节点，n为数组最后一个元素的下标</span></span><br><span class="line">            heapify(arr,i,n);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//从后往前一个个的递减元素个数（因为最大值放入了最后一个）</span></span><br><span class="line">        <span class="comment">//继续堆化</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=n;i&gt;<span class="number">0</span>;i--)&#123;</span><br><span class="line">            <span class="comment">//交换最大值和最后一个元素</span></span><br><span class="line">            swap(arr,i);</span><br><span class="line">            print(arr,<span class="string">&quot;i=&quot;</span>+i);</span><br><span class="line">            <span class="comment">//再构造大顶堆（长度在递减）</span></span><br><span class="line">            heapify(arr,<span class="number">0</span>,i-<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> arr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// p下标， l最大下标</span></span><br><span class="line">    <span class="comment">//大顶堆堆化</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">heapify</span><span class="params">(<span class="type">int</span>[] a,<span class="type">int</span> p,<span class="type">int</span> l)</span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> <span class="variable">e</span> <span class="operator">=</span> a[p];</span><br><span class="line">        <span class="type">int</span> <span class="variable">child</span> <span class="operator">=</span> p*<span class="number">2</span>+<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(child &lt;= l)&#123;</span><br><span class="line">            <span class="keyword">if</span>(child+<span class="number">1</span> &lt;= l &amp;&amp; a[child+<span class="number">1</span>] &gt; a[child])&#123;</span><br><span class="line">                child = child+<span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(e &gt; a[child])&#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            a[p] = a[child];</span><br><span class="line">            p = child;</span><br><span class="line">            child = p*<span class="number">2</span> + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        a[p] = e ;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//定义swap函数</span></span><br><span class="line">    <span class="comment">//功能：将跟元素与最后位置的元素交换</span></span><br><span class="line">    <span class="comment">//注意这里的最后是相对最后，是在变化的</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">swap</span><span class="params">(<span class="type">int</span>[] arr,<span class="type">int</span> i)</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">temp</span> <span class="operator">=</span> arr[<span class="number">0</span>];</span><br><span class="line">        arr[<span class="number">0</span>] = arr[i];</span><br><span class="line">        arr[i] = temp;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">HeapSort</span> <span class="variable">heapSort</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HeapSort</span>();</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> arr[] = <span class="keyword">new</span> <span class="title class_">int</span>[]&#123;<span class="number">9</span>,<span class="number">8</span>,<span class="number">7</span>,<span class="number">6</span>,<span class="number">5</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>&#125;;</span><br><span class="line">        heapSort.sort(arr);</span><br><span class="line">        heapSort.print(arr);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="堆排序特点"><a href="#堆排序特点" class="headerlink" title="堆排序特点"></a>堆排序特点</h2><p>时间复杂度：<code>O(N*logN)</code></p>
+<p>由于建初始堆所需的比较次数较多，所以堆排序不适宜于记录数较少的排序。<br>堆排序是就地排序，辅助空间为O(1).<br>堆排序是不稳定的排序方法。（排序的稳定性是指如果在排序的序列中，存在前后相同的两个元素的话，排序前和排序后他们的相对位置不发生变化）</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>Java堆结构PriorityQueue完全解析<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/u013309870/article/details/71189189">https://blog.csdn.net/u013309870/article/details/71189189</a></p>
+<p>堆排序HeapSort（Java）<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/u013309870/article/details/68578011">https://blog.csdn.net/u013309870/article/details/68578011</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/algo/" rel="tag"># algo</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/09/07/java/get-topk-fromn/" rel="prev" title="获取N个数据中最大的k个数">
+      <i class="fa fa-chevron-left"></i> 获取N个数据中最大的k个数
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/09/22/algo/quick-sort/" rel="next" title="冒泡排序和快速排序">
+      冒泡排序和快速排序 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A0%86%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">堆数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E4%B8%AD%E8%8A%82%E7%82%B9%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.1.</span> <span class="nav-text">堆中节点的关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A0%86%E7%9A%84%E6%8F%92%E5%85%A5"><span class="nav-number">2.</span> <span class="nav-text">堆的插入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A0%86%E7%9A%84%E5%88%A0%E9%99%A4"><span class="nav-number">3.</span> <span class="nav-text">堆的删除</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A0%86%E6%8E%92%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">堆排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A0%86%E6%8E%92%E5%BA%8F%E7%89%B9%E7%82%B9"><span class="nav-number">5.</span> <span class="nav-text">堆排序特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

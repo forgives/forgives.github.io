@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="java 11 是java 8 之后的第一个 long-term support (LTS) 版本。Java10是最后一个免费的Oracle JDK版本，我们可以在没有许可证的情况下进行商业使用。从Java 11开始，Oracle不提供免费的长期支持。Oracle继续提供Open JDK发布，我们可以下载免费使用。Oracle JDK 与 OpenJDK 的区别 jdk 11 主要的新特性参考:o">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 11 新特性">
+<meta property="og:url" content="https://forgives.github.io/2022/11/30/java/20221130-java11-new-features/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="java 11 是java 8 之后的第一个 long-term support (LTS) 版本。Java10是最后一个免费的Oracle JDK版本，我们可以在没有许可证的情况下进行商业使用。从Java 11开始，Oracle不提供免费的长期支持。Oracle继续提供Open JDK发布，我们可以下载免费使用。Oracle JDK 与 OpenJDK 的区别 jdk 11 主要的新特性参考:o">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-30T06:57:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.378Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="java11">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/11/30/java/20221130-java11-new-features/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 11 新特性 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/11/30/java/20221130-java11-new-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 11 新特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-30 14:57:00" itemprop="dateCreated datePublished" datetime="2022-11-30T14:57:00+08:00">2022-11-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>java 11 是java 8 之后的第一个 long-term support (LTS) 版本。Java10是最后一个免费的Oracle JDK版本，我们可以在没有许可证的情况下进行商业使用。<br>从Java 11开始，Oracle不提供免费的长期支持。Oracle继续提供Open JDK发布，我们可以下载免费使用。<a target="_blank" rel="noopener" href="https://www.baeldung.com/oracle-jdk-vs-openjdk">Oracle JDK 与 OpenJDK 的区别</a></p>
+<p>jdk 11 主要的新特性参考:<br>openjdk <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/11/">JDK 11</a></p>
+<p>baeldung <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-11-new-features#overview">New Features in Java 11</a></p>
+<span id="more"></span>  
+
+<h2 id="JDK-11-的新特性"><a href="#JDK-11-的新特性" class="headerlink" title="JDK 11 的新特性"></a>JDK 11 的新特性</h2><ul>
+<li>181: Nest-Based Access Control (基于嵌套的访问控制)</li>
+<li>309: Dynamic Class-File Constants (动态类文件常量)</li>
+<li>315: Improve Aarch64 Intrinsics </li>
+<li>318: Epsilon: A No-Op Garbage Collector (Epsilon 垃圾回收器，又被称为 No-Op(无操作)回收器)</li>
+<li>320: Remove the Java EE and CORBA Modules (移除 JavaEE 和 CORBA 模块， JavaFx 模块也被移除了)</li>
+<li>321: HTTP Client (Standard) (新的HTTP Client (java 9 孵化))</li>
+<li>323: Local-Variable Syntax for Lambda Parameters (Lambda 参数的局部变量语法)</li>
+<li>324: Key Agreement with Curve25519 and Curve448 </li>
+<li>327: Unicode 10</li>
+<li>328: Flight Recorder (飞行记录仪特性)</li>
+<li>329: ChaCha20 and Poly1305 Cryptographic Algorithms</li>
+<li>330: Launch Single-File Source-Code Programs (运行单个Java源码文件)</li>
+<li>331: Low-Overhead Heap Profiling (底开销的堆分析方法)</li>
+<li>332: Transport Layer Security (TLS) 1.3 (对 TLS 1.3支持)</li>
+<li>333: ZGC: A Scalable Low-Latency Garbage Collector(Experimental) (ZGC 实验阶段)</li>
+<li>335: Deprecate the Nashorn JavaScript Engine (弃用 Nashorn JavaScript 引擎)</li>
+<li>336: Deprecate the Pack200 Tools and API (弃用 Pack200 工具以及 API)</li>
+</ul>
+<p>下面针对比较<strong>重要</strong>的特性做说明。</p>
+<h2 id="开发者特性"><a href="#开发者特性" class="headerlink" title="开发者特性"></a>开发者特性</h2><h3 id="String类新方法"><a href="#String类新方法" class="headerlink" title="String类新方法"></a>String类新方法</h3><p>Java 11 String 类增加了一个新方法：<code>isBlank</code>, <code>lines</code>, <code>strip</code>, <code>stripLeading</code>, <code>stripTrailing</code>, and <code>repeat</code>.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 判断字符串是否为空白</span></span><br><span class="line"><span class="string">&quot; &quot;</span>.isBlank(); <span class="comment">// true</span></span><br><span class="line"><span class="comment">// 去除首尾空格</span></span><br><span class="line"><span class="string">&quot; Javastack &quot;</span>.strip(); <span class="comment">// &quot;Javastack&quot;</span></span><br><span class="line"><span class="comment">// 去除尾部空格</span></span><br><span class="line"><span class="string">&quot; Javastack &quot;</span>.stripTrailing(); <span class="comment">// &quot; Javastack&quot;</span></span><br><span class="line"><span class="comment">// 去除首部空格</span></span><br><span class="line"><span class="string">&quot; Javastack &quot;</span>.stripLeading(); <span class="comment">// &quot;Javastack &quot;</span></span><br><span class="line"><span class="comment">// 复制字符串</span></span><br><span class="line"><span class="string">&quot;Java&quot;</span>.repeat(<span class="number">3</span>);<span class="comment">// &quot;JavaJavaJava&quot;</span></span><br><span class="line"><span class="comment">// 行数统计</span></span><br><span class="line"><span class="string">&quot;A\nB\nC&quot;</span>.lines().count(); <span class="comment">// 3</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="File类新方法"><a href="#File类新方法" class="headerlink" title="File类新方法"></a>File类新方法</h3><p>新增File类新的的静态方法：<code>readString</code> 和 <code>writeString</code> 使得文件的读写更加容易。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Files.writeString(</span><br><span class="line">    Path.of(<span class="string">&quot;./&quot;</span>, <span class="string">&quot;tmp.txt&quot;</span>), <span class="comment">// 路径</span></span><br><span class="line">    <span class="string">&quot;hello, jdk11 files api&quot;</span>, <span class="comment">// 内容</span></span><br><span class="line">    StandardCharsets.UTF_8);  <span class="comment">// 编码</span></span><br><span class="line"></span><br><span class="line"><span class="type">String</span> <span class="variable">s</span> <span class="operator">=</span> Files.readString(</span><br><span class="line">    Paths.get(<span class="string">&quot;./tmp.txt&quot;</span>), <span class="comment">// 路径</span></span><br><span class="line">    StandardCharsets.UTF_8); <span class="comment">// 编码</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="集合转数组"><a href="#集合转数组" class="headerlink" title="集合转数组"></a>集合转数组</h3><p>java.util.Collection 接口有一个新的默认方法：<code>toArray</code> 。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">default</span> &lt;T&gt; T[] toArray(IntFunction&lt;T[]&gt; generator) &#123;</span><br><span class="line">    <span class="keyword">return</span> toArray(generator.apply(<span class="number">0</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以更简单的创建对应的类型的数组</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">    List&lt;String&gt; sampleList = Arrays.asList(<span class="string">&quot;Java&quot;</span>, <span class="string">&quot;Kotlin&quot;</span>);</span><br><span class="line"><span class="comment">// old method</span></span><br><span class="line">Object[] objectArray = sampleList.toArray();</span><br><span class="line">System.out.println(<span class="string">&quot;toArray() size :&quot;</span> + objectArray.length);</span><br><span class="line"></span><br><span class="line">String[] sampleArray = <span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;1&quot;</span>,<span class="string">&quot;2&quot;</span>,<span class="string">&quot;3&quot;</span>,<span class="string">&quot;4&quot;</span>&#125;;</span><br><span class="line"><span class="comment">// enough space even bigger</span></span><br><span class="line">sampleArray = sampleList.toArray(sampleArray);</span><br><span class="line">System.out.println(<span class="string">&quot;toArray(T[] a) size :&quot;</span> + sampleArray.length + <span class="string">&quot; , content :&quot;</span>);</span><br><span class="line"><span class="keyword">for</span> (String s : sampleArray) &#123;</span><br><span class="line"><span class="comment">// set position 3 to null .</span></span><br><span class="line">    System.out.println(Objects.toString(s));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// new method</span></span><br><span class="line"><span class="comment">// new String [] and not enough space</span></span><br><span class="line"><span class="comment">// sampleList.toArray(String[]::new)</span></span><br><span class="line">String[] sampleStrArray = sampleList.toArray((<span class="keyword">var</span> i)-&gt; <span class="keyword">new</span> <span class="title class_">String</span>[i]);</span><br><span class="line">System.out.println(<span class="string">&quot;toArray(IntFunction&lt;T[]&gt; generator) size :&quot;</span> + sampleStrArray.length + <span class="string">&quot; , content :&quot;</span>);</span><br><span class="line"><span class="keyword">for</span> (String s : sampleStrArray) &#123;</span><br><span class="line">    System.out.println(Objects.toString(s));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">toArray() size :2</span><br><span class="line">toArray(T[] a) size :4 , content :</span><br><span class="line">Java</span><br><span class="line">Kotlin</span><br><span class="line">null // 这个被设置成null了</span><br><span class="line">4</span><br><span class="line">toArray(IntFunction&lt;T[]&gt; generator) size :2 , content :</span><br><span class="line">Java</span><br><span class="line">Kotlin</span><br></pre></td></tr></table></figure>
+
+<h3 id="Not-Predicate-方法"><a href="#Not-Predicate-方法" class="headerlink" title="Not Predicate 方法"></a>Not Predicate 方法</h3><p><code>Predicate</code> 新增了一个静态<code>not</code>方法，用来对一个存在的<code>Predicate</code>取反。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; sampleList = Arrays.asList(<span class="string">&quot;Java&quot;</span>, <span class="string">&quot;\n \n&quot;</span>, <span class="string">&quot;Kotlin&quot;</span>, <span class="string">&quot; &quot;</span>);</span><br><span class="line"><span class="type">List</span> <span class="variable">withoutBlanks</span> <span class="operator">=</span> sampleList.stream()</span><br><span class="line">  .filter(Predicate.not(String::isBlank))</span><br><span class="line">  .collect(Collectors.toList());</span><br><span class="line">assertThat(withoutBlanks).containsExactly(<span class="string">&quot;Java&quot;</span>, <span class="string">&quot;Kotlin&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>not(isBlank)读起来比 isBlank.negate()更优雅，该方法的一大优势是可以像not(String::isBlank)这样用于方法引用。</p>
+<h3 id="Lambda本地变量语法"><a href="#Lambda本地变量语法" class="headerlink" title="Lambda本地变量语法"></a>Lambda本地变量语法</h3><p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-var-lambda-params">本地变量类型推断</a> (<em>java 10 加入的特性</em>)在 java 11 中终于支持 <code>lambda</code>了。<br>并且可以给本地变量添加修饰语，比如添加一个自定义注解。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; sampleList = Arrays.asList(<span class="string">&quot;Java&quot;</span>, <span class="string">&quot;Kotlin&quot;</span>);</span><br><span class="line"><span class="type">String</span> <span class="variable">resultString</span> <span class="operator">=</span> sampleList.stream()</span><br><span class="line">  .map((<span class="meta">@Nonnull</span> <span class="keyword">var</span> x) -&gt; x.toUpperCase())</span><br><span class="line">  .collect(Collectors.joining(<span class="string">&quot;, &quot;</span>));</span><br><span class="line">assertThat(resultString).isEqualTo(<span class="string">&quot;JAVA, KOTLIN&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="HTTP-Client"><a href="#HTTP-Client" class="headerlink" title="HTTP Client"></a>HTTP Client</h3><p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-9-http-client">java 9</a> 中孵化的 <code>HTTP Client</code>终于在 java 11 中成为了<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/321">标准的特性</a>了。</p>
+<p>新的HTTP API 提升了整体性能并且支持了HTTP&#x2F;1.1和 HTTP&#x2F;2。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">HttpClient</span> <span class="variable">httpClient</span> <span class="operator">=</span> HttpClient.newBuilder()</span><br><span class="line">  .version(HttpClient.Version.HTTP_2)</span><br><span class="line">  .connectTimeout(Duration.ofSeconds(<span class="number">20</span>))</span><br><span class="line">  .build();</span><br><span class="line"><span class="type">HttpRequest</span> <span class="variable">httpRequest</span> <span class="operator">=</span> HttpRequest.newBuilder()</span><br><span class="line">  .GET()</span><br><span class="line">  .uri(URI.create(<span class="string">&quot;http://localhost:&quot;</span> + port))</span><br><span class="line">  .build();</span><br><span class="line"><span class="type">HttpResponse</span> <span class="variable">httpResponse</span> <span class="operator">=</span> httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());</span><br><span class="line">assertThat(httpResponse.body()).isEqualTo(<span class="string">&quot;Hello from the server!&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="运行Java文件"><a href="#运行Java文件" class="headerlink" title="运行Java文件"></a>运行Java文件</h3><p>Java 11 不需要用 javac 显示的编译 java 源文件了。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ javac HelloWorld.java</span><br><span class="line">$ java HelloWorld </span><br><span class="line">Hello Java 8!</span><br></pre></td></tr></table></figure>
+<p>现在可以<a target="_blank" rel="noopener" href="https://www.baeldung.com/java-single-file-source-code">直接运行</a> <code>HelloWorld.java</code> 源文件</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ java HelloWorld.java</span><br><span class="line">Hello Java 11!</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Nest-Based-Access-Control"><a href="#Nest-Based-Access-Control" class="headerlink" title="Nest Based Access Control"></a>Nest Based Access Control</h2><p>Java 11 引入了<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/181">nestmates概念</a>以及JVM内的相关访问规则。</p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-nest-based-access-control#1-getnesthost">嵌套</a>是一种访问控制上下文，它允许多个class同属一个逻辑代码块，但是被编译成多个分散的class文件，它们访问彼此的私有成员无需通过编译器添加访问扩展方法。</p>
+<h4 id="桥接"><a href="#桥接" class="headerlink" title="桥接"></a>桥接</h4><p>在java 11 之前的桥接方法 <strong>access$000</strong> :</p>
+<p>Alphabet.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Alphabet</span> &#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> <span class="string">&quot;I&#x27;m Alphabet!&quot;</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">printName</span><span class="params">()</span> &#123;</span><br><span class="line">            System.out.println(name);       <span class="comment">// access Alphabet&#x27;s private member!</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">printName</span><span class="params">()</span> &#123;</span><br><span class="line">            System.out.println(name);       <span class="comment">// access Alphabet&#x27;s private member!</span></span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">B1</span> &#123;</span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">printName</span><span class="params">()</span> &#123;</span><br><span class="line">                System.out.println(name);   <span class="comment">// access Alphabet&#x27;s private member!</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译上述方法会生成四个了类 <code>Alphabet</code> ， <code>Alphabet$A</code> ， <code>Alphabet$B</code>和<code>Alphabet$B$B1</code></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; ls</span><br><span class="line">Alphabet$A.class    Alphabet$B$B1.class Alphabet$B.class    Alphabet.class</span><br></pre></td></tr></table></figure>
+
+<p>使用 <a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/17/docs/specs/man/javap.html">javap</a> 查看下反编译的代码</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">&gt; javap  -p Alphabet.class</span><br><span class="line">Compiled from &quot;Alphabet.java&quot;</span><br><span class="line">public class org.example.Alphabet &#123;</span><br><span class="line">  private java.lang.String name;</span><br><span class="line">  public org.example.Alphabet();</span><br><span class="line">  static java.lang.String access$000(org.example.Alphabet);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt; javap  -c  Alphabet\$B.class</span><br><span class="line">Compiled from &quot;Alphabet.java&quot;</span><br><span class="line">public class org.example.Alphabet$B &#123;</span><br><span class="line">  final org.example.Alphabet this$0;</span><br><span class="line"></span><br><span class="line">  public org.example.Alphabet$B(org.example.Alphabet);</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: aload_1</span><br><span class="line">       2: putfield      #1                  // Field this$0:Lorg/example/Alphabet;</span><br><span class="line">       5: aload_0</span><br><span class="line">       6: invokespecial #2                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       9: return</span><br><span class="line"></span><br><span class="line">  public void printName();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: aload_0</span><br><span class="line">       4: getfield      #1                  // Field this$0:Lorg/example/Alphabet;</span><br><span class="line">       7: invokestatic  #4                  // Method org/example/Alphabet.access$000:(Lorg/example/Alphabet;)Ljava/lang/String;</span><br><span class="line">      10: invokevirtual #5                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">      13: return</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt; javap  -c  Alphabet\$B\$B1.class</span><br><span class="line">Compiled from &quot;Alphabet.java&quot;</span><br><span class="line">public class org.example.Alphabet$B$B1 &#123;</span><br><span class="line">  final org.example.Alphabet$B this$1;</span><br><span class="line"></span><br><span class="line">  public org.example.Alphabet$B$B1(org.example.Alphabet$B);</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: aload_1</span><br><span class="line">       2: putfield      #1                  // Field this$1:Lorg/example/Alphabet$B;</span><br><span class="line">       5: aload_0</span><br><span class="line">       6: invokespecial #2                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       9: return</span><br><span class="line"></span><br><span class="line">  public void printName();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: aload_0</span><br><span class="line">       4: getfield      #1                  // Field this$1:Lorg/example/Alphabet$B;</span><br><span class="line">       7: getfield      #4                  // Field org/example/Alphabet$B.this$0:Lorg/example/Alphabet;</span><br><span class="line">      10: invokestatic  #5                  // Method org/example/Alphabet.access$000:(Lorg/example/Alphabet;)Ljava/lang/String;</span><br><span class="line">      13: invokevirtual #6                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">      16: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到内部类 B 和 B1 都是通过了 Alphabet 类生成的桥接方法 <code>static java.lang.String access$000(org.example.Alphabet)</code> 来访问 Alphabet 的私有成员 name 的。<br>但是这种方式其实是<a target="_blank" rel="noopener" href="https://www.cnblogs.com/keis/archive/2011/03/10/1979760.html">存在安全风险</a>的(禁止外部对自动生成<code>access$100(Outer)</code>方法的调用的检查是在<strong>编译时期</strong>做的)。</p>
+<p>所以在 java 11中， 提供了不用通过桥接的方法直接访问嵌套类的私有成员。</p>
+<p>java 11 重新编译后: </p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">&gt; javap -p Alphabet.class</span><br><span class="line">Compiled from &quot;Alphabet.java&quot;</span><br><span class="line">public class org.example.Alphabet &#123;</span><br><span class="line">  private java.lang.String name;</span><br><span class="line">  public org.example.Alphabet();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&gt; javap -c Alphabet\$B.class</span><br><span class="line">Compiled from &quot;Alphabet.java&quot;</span><br><span class="line">public class org.example.Alphabet$B &#123;</span><br><span class="line">  final org.example.Alphabet this$0;</span><br><span class="line"></span><br><span class="line">  public org.example.Alphabet$B(org.example.Alphabet);</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: aload_1</span><br><span class="line">       2: putfield      #1                  // Field this$0:Lorg/example/Alphabet;</span><br><span class="line">       5: aload_0</span><br><span class="line">       6: invokespecial #7                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       9: return</span><br><span class="line"></span><br><span class="line">  public void printName();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #13                 // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: aload_0</span><br><span class="line">       4: getfield      #1                  // Field this$0:Lorg/example/Alphabet;</span><br><span class="line">       7: getfield      #19                 // Field org/example/Alphabet.name:Ljava/lang/String;</span><br><span class="line">      10: invokevirtual #25                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">      13: return</span><br><span class="line">&#125;</span><br><span class="line">&gt; javap -c Alphabet\$B\$B1.class</span><br><span class="line">Compiled from &quot;Alphabet.java&quot;</span><br><span class="line">public class org.example.Alphabet$B$B1 &#123;</span><br><span class="line">  final org.example.Alphabet$B this$1;</span><br><span class="line"></span><br><span class="line">  public org.example.Alphabet$B$B1(org.example.Alphabet$B);</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: aload_1</span><br><span class="line">       2: putfield      #1                  // Field this$1:Lorg/example/Alphabet$B;</span><br><span class="line">       5: aload_0</span><br><span class="line">       6: invokespecial #7                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       9: return</span><br><span class="line"></span><br><span class="line">  public void printName();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #13                 // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: aload_0</span><br><span class="line">       4: getfield      #1                  // Field this$1:Lorg/example/Alphabet$B;</span><br><span class="line">       7: getfield      #19                 // Field org/example/Alphabet$B.this$0:Lorg/example/Alphabet;</span><br><span class="line">      10: getfield      #25                 // Field org/example/Alphabet.name:Ljava/lang/String;</span><br><span class="line">      13: invokevirtual #31                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">      16: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Alphabet 类并没有生成桥接方法，且内部类 B 与 B1 都是直接访问的 <code>Alphabet.name</code> 。</p>
+<p>同时 java 11 提供了一系列嵌套类的API</p>
+<ul>
+<li>getNestHost()</li>
+<li>getNestMembers()</li>
+<li>isNestmateOf()</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// com.forg.java11.bean.Outer</span></span><br><span class="line">System.out.println(Outer.class.getNestHost().getName());</span><br><span class="line"><span class="comment">// com.forg.java11.bean.Outer</span></span><br><span class="line">System.out.println(Outer.InnerB.class.getNestHost().getName());</span><br><span class="line"><span class="comment">// com.forg.java11.bean.Outer</span></span><br><span class="line">System.out.println(Outer.InnerB.InnerBB.class.getNestHost().getName());</span><br><span class="line"></span><br><span class="line"><span class="comment">// true</span></span><br><span class="line">System.out.println(Outer.InnerB.class.isNestmateOf(Outer.class));</span><br><span class="line"><span class="comment">// true</span></span><br><span class="line">System.out.println(Outer.InnerB.InnerBB.class.isNestmateOf(Outer.class));</span><br><span class="line"></span><br><span class="line"><span class="comment">// com.forg.java11.bean.Outer</span></span><br><span class="line"><span class="comment">// com.forg.java11.bean.Outer$InnerB</span></span><br><span class="line"><span class="comment">// com.forg.java11.bean.Outer$InnerB$InnerBB</span></span><br><span class="line"><span class="comment">// com.forg.java11.bean.Outer$InnerA</span></span><br><span class="line">Arrays.stream(Outer.class.getNestMembers()).map(Class::getName).forEach(</span><br><span class="line">    System.out::println</span><br><span class="line">);</span><br><span class="line"><span class="comment">// the same</span></span><br><span class="line">Arrays.stream(Outer.InnerB.InnerBB.class.getNestMembers()).map(Class::getName).forEach(</span><br><span class="line">    System.out::println</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>JVM访问规则允许<code>nestmates</code>间的私有成员的访问，在之前的Java版本，reflection API 会拒绝了访问并抛出 <code>java.lang.IllegalAccessException</code> 异常，Java11 修复了这个问题 。</p>
+<h2 id="性能提升"><a href="#性能提升" class="headerlink" title="性能提升"></a>性能提升</h2><p>再看一些以性能提升为目的的新特性。</p>
+<h3 id="Dynamic-Class-File-Constants"><a href="#Dynamic-Class-File-Constants" class="headerlink" title="Dynamic Class-File Constants"></a>Dynamic Class-File Constants</h3><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/309">新的常量池格式 CONSTANT_Dynamic</a> 旨在降低消耗与减少中断。</p>
+<h3 id="Improved-Aarch64-Intrinsics"><a href="#Improved-Aarch64-Intrinsics" class="headerlink" title="Improved Aarch64 Intrinsics"></a>Improved Aarch64 Intrinsics</h3><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/315">JEP 315</a></p>
+<p>Java 11 optimizes the existing string and array intrinsics on ARM64 or AArch64 processors. Additionally, new intrinsics are implemented for sin, cos, and log methods of java.lang.Math.</p>
+<h3 id="A-No-Op-Garbage-Collector"><a href="#A-No-Op-Garbage-Collector" class="headerlink" title="A No-Op Garbage Collector"></a>A No-Op Garbage Collector</h3><p>Java 11 新增了一个叫做 <a target="_blank" rel="noopener" href="https://openjdk.org/jeps/318">Epsilon</a> 的垃圾回收器。</p>
+<p>之所以称为No-op无操作是因为它分配内存但不收集任何垃圾。因此，Epsilon可用于模拟内存溢出错误。<br>显然，Epsilon不适应于典型的生产Java应用程序，但有一些具体的场景下是非常有用的：</p>
+<ul>
+<li>性能测试</li>
+<li>内存压力测试</li>
+<li>VM 接口测试</li>
+<li>运行时间极其短的任务</li>
+</ul>
+<p>可以使用 <code>-XX:+UnlockExperimentalVMOptions -XX:+UseEpsilonGC</code> 启动。</p>
+<h3 id="Flight-Recorder"><a href="#Flight-Recorder" class="headerlink" title="Flight Recorder"></a>Flight Recorder</h3><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/328">Java Flight Recorder</a>（JFR）目前在Open JDK中开源，之前一直作为商业特性只在 Oracle JDK 中提供 。<br>JFR是一款分析用具，从运行的Java程序中收集诊断信息和分析数据。</p>
+<p>开启120s的JFR记录，可以用下面的参数：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:StartFlightRecording=duration=120s,settings=profile,filename=java-demo-app.jfr</span><br></pre></td></tr></table></figure>
+
+<p>我们可以在生产环境中使用 JFR ，因为其性能开销通常低于 <strong>1%</strong> 。当记录时间到期之后，就可以得到一个存有记录的JFR文件，但是如果要进行分析或者查看其中的数据，<br>必须使用另一个叫做 <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-flight-recorder-monitoring">JDK Mission Control (JMC)</a> 的工具。</p>
+<h3 id="ZGC"><a href="#ZGC" class="headerlink" title="ZGC"></a>ZGC</h3><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/333">ZGC</a> 是一个全新的垃圾回收器，它旨在</p>
+<ul>
+<li>GC 暂停时间不超过10ms</li>
+<li>适用于非常小(8MB)或者非常大(4TB)的堆内存</li>
+<li>与G1相比，应用吞吐量减少不超过15%</li>
+<li>为未来GC的特性与优化染色指针、读屏障奠定基础</li>
+<li>开始支持 Linux&#x2F;x64 平台</li>
+</ul>
+<p>后续 JDK 15 正式启用。<code>ZGC</code>确实是Java的最前沿的技术，但在当前 <code>G1</code> 都没有普及的时代( 我们现在大多也还是在用 <strong>CMS</strong> )，暂不探讨 <code>ZGC</code>。</p>
+<h2 id="移除的和不推荐使用的模块"><a href="#移除的和不推荐使用的模块" class="headerlink" title="移除的和不推荐使用的模块"></a>移除的和不推荐使用的模块</h2><h3 id="Java-EE-和-CORBA"><a href="#Java-EE-和-CORBA" class="headerlink" title="Java EE 和 CORBA"></a>Java EE 和 CORBA</h3><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/320">JEP 320</a></p>
+<p>标准版本的 Java EE 技术已经在三方中可以获得， Java SE 中不需要在包含它了。<br>Java 9 中就已经把 <code>Java EE</code> and <code>CORBA</code> 置为 <strong>deprecated</strong> 了， Java 11中彻底删除了这些内容：</p>
+<ul>
+<li>Java API for XML-Based Web Services (java.xml.ws)</li>
+<li>Java Architecture for XML Binding (java.xml.bind)</li>
+<li>JavaBeans Activation Framework (java.activation)</li>
+<li>Common Annotations (java.xml.ws.annotation)</li>
+<li>Common Object Request Broker Architecture (java.corba)</li>
+<li>JavaTransaction API (java.transaction)</li>
+</ul>
+<h3 id="JMC-and-JavaFX"><a href="#JMC-and-JavaFX" class="headerlink" title="JMC and JavaFX"></a>JMC and JavaFX</h3><p>JDK中不再包含<a target="_blank" rel="noopener" href="https://www.baeldung.com/java-flight-recorder-monitoring">JMC（JDK Mission Control）</a>，目前可以下载JMC的独立版本。</p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/javafx">JavaFX</a> 模块同上。</p>
+<h3 id="不推荐使用的模块"><a href="#不推荐使用的模块" class="headerlink" title="不推荐使用的模块"></a>不推荐使用的模块</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/335">Nashorn JavaScript engine, including the JJS tool</a></li>
+<li><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/336">Pack200 compression scheme for JAR files</a></li>
+</ul>
+<h2 id="其他改变"><a href="#其他改变" class="headerlink" title="其他改变"></a>其他改变</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/329">New ChaCha20 and ChaCha20-Poly1305 cipher implementations replace the insecure RC4 stream cipher</a></li>
+<li><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/324">Support for cryptographic key agreement with Curve25519 and Curve448 replace the existing ECDH scheme</a></li>
+<li><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/332">Upgraded Transport Layer Security (TLS) to version 1.3 brings security and performance improvements</a></li>
+<li><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/333">Introduced a low latency garbage collector, ZGC, as an experimental feature with low pause times</a></li>
+<li><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/327">Support for Unicode 10 brings more characters, symbols, and emojis</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/java11/" rel="tag"># java11</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/29/note/20221129-baicizhan/" rel="prev" title="百词斩单词SQL">
+      <i class="fa fa-chevron-left"></i> 百词斩单词SQL
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/12/03/fun/20221203-debian11-install-azerothcore-web/" rel="next" title="debian11 安装 WoWSimpleRegistration">
+      debian11 安装 WoWSimpleRegistration <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK-11-%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">JDK 11 的新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E8%80%85%E7%89%B9%E6%80%A7"><span class="nav-number">2.</span> <span class="nav-text">开发者特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#String%E7%B1%BB%E6%96%B0%E6%96%B9%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">String类新方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#File%E7%B1%BB%E6%96%B0%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">File类新方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E5%90%88%E8%BD%AC%E6%95%B0%E7%BB%84"><span class="nav-number">2.3.</span> <span class="nav-text">集合转数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Not-Predicate-%E6%96%B9%E6%B3%95"><span class="nav-number">2.4.</span> <span class="nav-text">Not Predicate 方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Lambda%E6%9C%AC%E5%9C%B0%E5%8F%98%E9%87%8F%E8%AF%AD%E6%B3%95"><span class="nav-number">2.5.</span> <span class="nav-text">Lambda本地变量语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-Client"><span class="nav-number">2.6.</span> <span class="nav-text">HTTP Client</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8CJava%E6%96%87%E4%BB%B6"><span class="nav-number">2.7.</span> <span class="nav-text">运行Java文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nest-Based-Access-Control"><span class="nav-number">3.</span> <span class="nav-text">Nest Based Access Control</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%A5%E6%8E%A5"><span class="nav-number">3.0.1.</span> <span class="nav-text">桥接</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E6%8F%90%E5%8D%87"><span class="nav-number">4.</span> <span class="nav-text">性能提升</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dynamic-Class-File-Constants"><span class="nav-number">4.1.</span> <span class="nav-text">Dynamic Class-File Constants</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Improved-Aarch64-Intrinsics"><span class="nav-number">4.2.</span> <span class="nav-text">Improved Aarch64 Intrinsics</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#A-No-Op-Garbage-Collector"><span class="nav-number">4.3.</span> <span class="nav-text">A No-Op Garbage Collector</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flight-Recorder"><span class="nav-number">4.4.</span> <span class="nav-text">Flight Recorder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ZGC"><span class="nav-number">4.5.</span> <span class="nav-text">ZGC</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A7%BB%E9%99%A4%E7%9A%84%E5%92%8C%E4%B8%8D%E6%8E%A8%E8%8D%90%E4%BD%BF%E7%94%A8%E7%9A%84%E6%A8%A1%E5%9D%97"><span class="nav-number">5.</span> <span class="nav-text">移除的和不推荐使用的模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-EE-%E5%92%8C-CORBA"><span class="nav-number">5.1.</span> <span class="nav-text">Java EE 和 CORBA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JMC-and-JavaFX"><span class="nav-number">5.2.</span> <span class="nav-text">JMC and JavaFX</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E6%8E%A8%E8%8D%90%E4%BD%BF%E7%94%A8%E7%9A%84%E6%A8%A1%E5%9D%97"><span class="nav-number">5.3.</span> <span class="nav-text">不推荐使用的模块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%94%B9%E5%8F%98"><span class="nav-number">6.</span> <span class="nav-text">其他改变</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

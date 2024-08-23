@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="From Java CompletableFuture Tutorial with ExamplesTranslation Java 8 CompletableFuture 教程  Java 8 came up with tons of new features and enhancements like Lambda expressions, Streams, CompletableFuture">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java CompletableFuture Tutorial with Examples">
+<meta property="og:url" content="https://forgives.github.io/2022/11/15/java/20221115-java-completablefuture/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="From Java CompletableFuture Tutorial with ExamplesTranslation Java 8 CompletableFuture 教程  Java 8 came up with tons of new features and enhancements like Lambda expressions, Streams, CompletableFuture">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-15T08:44:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.377Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/11/15/java/20221115-java-completablefuture/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java CompletableFuture Tutorial with Examples | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/11/15/java/20221115-java-completablefuture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java CompletableFuture Tutorial with Examples
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-15 16:44:00" itemprop="dateCreated datePublished" datetime="2022-11-15T16:44:00+08:00">2022-11-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>From <a target="_blank" rel="noopener" href="https://www.callicoder.com/java-8-completablefuture-tutorial/">Java CompletableFuture Tutorial with Examples</a><br>Translation <a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_40719914/article/details/108818121">Java 8 CompletableFuture 教程</a> </p>
+<p>Java 8 came up with tons of new features and enhancements like Lambda expressions, Streams, CompletableFutures etc. In this post I’ll give you a detailed explanation of CompletableFuture and all its methods using simple examples.</p>
+<span id="more"></span>
+
+<h2 id="What’s-a-CompletableFuture"><a href="#What’s-a-CompletableFuture" class="headerlink" title="What’s a CompletableFuture?"></a>What’s a CompletableFuture?</h2><p>CompletableFuture is used for asynchronous programming in Java. Asynchronous programming is a means of writing non-blocking code by running a task on a separate thread than the main application thread and notifying the main thread about its progress, completion or failure.</p>
+<p>This way, your main thread does not block&#x2F;wait for the completion of the task and it can execute other tasks in parallel.</p>
+<p>Having this kind of parallelism greatly improves the performance of your programs.</p>
+<p>Also Read: <a target="_blank" rel="noopener" href="https://www.callicoder.com/java-concurrency-multithreading-basics/">Java Concurrency and Multithreading Basics</a></p>
+<h2 id="Future-vs-CompletableFuture"><a href="#Future-vs-CompletableFuture" class="headerlink" title="Future vs CompletableFuture"></a>Future vs CompletableFuture</h2><p>CompletableFuture is an extension to Java’s Future API which was introduced in Java 5.</p>
+<p>A Future is used as a reference to the result of an asynchronous computation. It provides an isDone() method to check whether the computation is done or not, and a get() method to retrieve the result of the computation when it is done.</p>
+<p>You can learn more about Future from my <a target="_blank" rel="noopener" href="https://www.callicoder.com/java-callable-and-future-tutorial/">Callable and Future Tutorial</a>.</p>
+<p>Future API was a good step towards asynchronous programming in Java but it lacked some important and useful features -</p>
+<h2 id="Limitations-of-Future"><a href="#Limitations-of-Future" class="headerlink" title="Limitations of Future"></a>Limitations of Future</h2><ol>
+<li>It cannot be manually completed :</li>
+</ol>
+<p>Let’s say that you’ve written a function to fetch the latest price of an e-commerce product from a remote API. Since this API call is time-consuming, you’re running it in a separate thread and returning a Future from your function.</p>
+<p>Now, let’s say that If the remote API service is down, then you want to complete the Future manually by the last cached price of the product.</p>
+<p>Can you do this with Future? No!</p>
+<ol start="2">
+<li>You cannot perform further action on a Future’s result without blocking:</li>
+</ol>
+<p>Future does not notify you of its completion. It provides a get() method which blocks until the result is available.</p>
+<p>You don’t have the ability to attach a callback function to the Future and have it get called automatically when the Future’s result is available.</p>
+<ol start="3">
+<li>Multiple Futures cannot be chained together :</li>
+</ol>
+<p>Sometimes you need to execute a long-running computation and when the computation is done, you need to send its result to another long-running computation, and so on.</p>
+<p>You can not create such asynchronous workflow with Futures.</p>
+<ol start="4">
+<li>You can not combine multiple Futures together :</li>
+</ol>
+<p>Let’s say that you have 10 different Futures that you want to run in parallel and then run some function after all of them completes. You can’t do this as well with Future.</p>
+<ol start="5">
+<li>No Exception Handling :</li>
+</ol>
+<p>Future API does not have any exception handling construct.</p>
+<p>Whoa! So many limitations right? Well, That’s why we have CompletableFuture. You can achieve all of the above with CompletableFuture.</p>
+<p>CompletableFuture implements Future and CompletionStage interfaces and provides a huge set of convenience methods for creating, chaining and combining multiple Futures. It also has a very comprehensive exception handling support.</p>
+<h2 id="Creating-a-CompletableFuture"><a href="#Creating-a-CompletableFuture" class="headerlink" title="Creating a CompletableFuture"></a>Creating a CompletableFuture</h2><h3 id="1-The-trivial-example"><a href="#1-The-trivial-example" class="headerlink" title="1. The trivial example"></a>1. The trivial example</h3><p>You can create a CompletableFuture simply by using the following no-arg constructor -</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; completableFuture = new CompletableFuture&lt;String&gt;();</span><br></pre></td></tr></table></figure>
+<p>This is the simplest CompletableFuture that you can have. All the clients who want to get the result of this CompletableFuture can call CompletableFuture.get() method -</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String result = completableFuture.get()</span><br></pre></td></tr></table></figure>
+<p>The <code>get()</code> method blocks until the Future is complete. So, the above call will block forever because the Future is never completed.</p>
+<p>You can use CompletableFuture.complete() method to manually complete a Future -</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">completableFuture.complete(&quot;Future&#x27;s Result&quot;)</span><br></pre></td></tr></table></figure>
+<p>All the clients waiting for this Future will get the specified result. And, Subsequent calls to completableFuture.complete() will be ignored.</p>
+<h3 id="2-Running-asynchronous-computation-using-runAsync"><a href="#2-Running-asynchronous-computation-using-runAsync" class="headerlink" title="2. Running asynchronous computation using runAsync() -"></a>2. Running asynchronous computation using runAsync() -</h3><p>If you want to run some background task asynchronously and don’t want to return anything from the task, then you can use CompletableFuture.runAsync() method. It takes a Runnable object and returns CompletableFuture<Void>.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Run a task specified by a Runnable Object asynchronously.</span></span><br><span class="line">CompletableFuture&lt;Void&gt; future = CompletableFuture.runAsync(<span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// Simulate a long-running Job</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;I&#x27;ll run in a separate thread than the main thread.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Block and wait for the future to complete</span></span><br><span class="line">future.get()</span><br></pre></td></tr></table></figure>
+<p>You can also pass the Runnable object in the form of a lambda expression -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Using Lambda Expression</span></span><br><span class="line">CompletableFuture&lt;Void&gt; future = CompletableFuture.runAsync(() -&gt; &#123;</span><br><span class="line">    <span class="comment">// Simulate a long-running Job</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(<span class="string">&quot;I&#x27;ll run in a separate thread than the main thread.&quot;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>In this post, I’ll use lambda expressions very frequently, and you should use it too if you’re not already using it in your Java code.</p>
+<h3 id="3-Run-a-task-asynchronously-and-return-the-result-using-supplyAsync"><a href="#3-Run-a-task-asynchronously-and-return-the-result-using-supplyAsync" class="headerlink" title="3. Run a task asynchronously and return the result using supplyAsync() -"></a>3. Run a task asynchronously and return the result using supplyAsync() -</h3><p><code>CompletableFuture.runAsync()</code> is useful for tasks that don’t return anything. But what if you want to return some result from your background task?</p>
+<p>Well, <code>CompletableFuture.supplyAsync()</code> is your companion. It takes a Supplier<T> and returns CompletableFuture<T> where T is the type of the value obtained by calling the given supplier -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Run a task specified by a Supplier object asynchronously</span></span><br><span class="line">CompletableFuture&lt;String&gt; future = CompletableFuture.supplyAsync(<span class="keyword">new</span> <span class="title class_">Supplier</span>&lt;String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">get</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Result of the asynchronous computation&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Block and get the result of the Future</span></span><br><span class="line"><span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> future.get();</span><br><span class="line">System.out.println(result);</span><br></pre></td></tr></table></figure>
+
+<p>A Supplier<T> is a simple functional interface which represents a supplier of results. It has a single <code>get()</code> method where you can write your background task and return the result.</p>
+<p>Once again, you can use Java 8’s lambda expression to make the above code more concise -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Using Lambda Expression</span></span><br><span class="line">CompletableFuture&lt;String&gt; future = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Result of the asynchronous computation&quot;</span>;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="A-note-about-Executor-and-Thread-Pool"><a href="#A-note-about-Executor-and-Thread-Pool" class="headerlink" title="A note about Executor and Thread Pool -"></a>A note about Executor and Thread Pool -</h3><p>You might be wondering that - Well, I know that the runAsync() and supplyAsync() methods execute their tasks in a separate thread. But, we never created a thread right?</p>
+<p>Yes! CompletableFuture executes these tasks in a thread obtained from the global <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html#commonPool">ForkJoinPool.commonPool()</a>.</p>
+<p>But hey, you can also create a Thread Pool and pass it to runAsync() and supplyAsync() methods to let them execute their tasks in a thread obtained from your thread pool.</p>
+<p>All the methods in the CompletableFuture API has two variants - One which accepts an Executor as an argument and one which doesn’t -</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// Variations of runAsync() and supplyAsync() methods</span><br><span class="line">static CompletableFuture&lt;Void&gt;	runAsync(Runnable runnable)</span><br><span class="line">static CompletableFuture&lt;Void&gt;	runAsync(Runnable runnable, Executor executor)</span><br><span class="line">static &lt;U&gt; CompletableFuture&lt;U&gt;	supplyAsync(Supplier&lt;U&gt; supplier)</span><br><span class="line">static &lt;U&gt; CompletableFuture&lt;U&gt;	supplyAsync(Supplier&lt;U&gt; supplier, Executor executor)</span><br></pre></td></tr></table></figure>
+<p>Here’s how you can create a thread pool and pass it to one of these methods -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Executor</span> <span class="variable">executor</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line">CompletableFuture&lt;String&gt; future = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Result of the asynchronous computation&quot;</span>;</span><br><span class="line">&#125;, executor);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Transforming-and-acting-on-a-CompletableFuture"><a href="#Transforming-and-acting-on-a-CompletableFuture" class="headerlink" title="Transforming and acting on a CompletableFuture"></a>Transforming and acting on a CompletableFuture</h2><p>The <code>CompletableFuture.get()</code> method is blocking. It waits until the Future is completed and returns the result after its completion.</p>
+<p>But, that’s not what we want right? For building asynchronous systems we should be able to attach a callback to the CompletableFuture which should automatically get called when the Future completes.</p>
+<p>That way, we won’t need to wait for the result, and we can write the logic that needs to be executed after the completion of the Future inside our callback function.</p>
+<p>You can attach a callback to the CompletableFuture using thenApply(), thenAccept() and thenRun() methods -</p>
+<h3 id="1-thenApply"><a href="#1-thenApply" class="headerlink" title="1. thenApply()"></a>1. thenApply()</h3><p>You can use thenApply() method to process and transform the result of a CompletableFuture when it arrives. It takes a Function&lt;T,R&gt; as an argument. Function&lt;T,R&gt; is a simple functional interface representing a function that accepts an argument of type T and produces a result of type R -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Create a CompletableFuture</span></span><br><span class="line">CompletableFuture&lt;String&gt; whatsYourNameFuture = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">   <span class="keyword">try</span> &#123;</span><br><span class="line">       TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">   &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> <span class="string">&quot;Rajeev&quot;</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Attach a callback to the Future using thenApply()</span></span><br><span class="line">CompletableFuture&lt;String&gt; greetingFuture = whatsYourNameFuture.thenApply(name -&gt; &#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="string">&quot;Hello &quot;</span> + name;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Block and get the result of the future.</span></span><br><span class="line">System.out.println(greetingFuture.get()); <span class="comment">// Hello Rajeev</span></span><br></pre></td></tr></table></figure>
+
+<p>You can also write a sequence of transformations on the CompletableFuture by attaching a series of thenApply() callback methods. The result of one thenApply() method is passed to the next in the series -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; welcomeText = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Rajeev&quot;</span>;</span><br><span class="line">&#125;).thenApply(name -&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello &quot;</span> + name;</span><br><span class="line">&#125;).thenApply(greeting -&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> greeting + <span class="string">&quot;, Welcome to the CalliCoder Blog&quot;</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(welcomeText.get());</span><br><span class="line"><span class="comment">// Prints - Hello Rajeev, Welcome to the CalliCoder Blog</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-thenAccept-and-thenRun"><a href="#2-thenAccept-and-thenRun" class="headerlink" title="2. thenAccept() and thenRun()"></a>2. thenAccept() and thenRun()</h3><p>If you don’t want to return anything from your callback function and just want to run some piece of code after the completion of the Future, then you can use thenAccept() and thenRun() methods. These methods are consumers and are often used as the last callback in the callback chain.</p>
+<p><code>CompletableFuture.thenAccept()</code> takes a Consumer<T> and returns CompletableFuture<Void>. It has access to the result of the CompletableFuture on which it is attached.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// thenAccept() example</span></span><br><span class="line">CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">	<span class="keyword">return</span> ProductService.getProductDetail(productId);</span><br><span class="line">&#125;).thenAccept(product -&gt; &#123;</span><br><span class="line">	System.out.println(<span class="string">&quot;Got product detail from remote service &quot;</span> + product.getName())</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>While <code>thenAccept()</code> has access to the result of the CompletableFuture on which it is attached, thenRun() doesn’t even have access to the Future’s result. It takes a Runnable and returns CompletableFuture<Void> -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// thenRun() example</span></span><br><span class="line">CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="comment">// Run some computation</span></span><br><span class="line">&#125;).thenRun(() -&gt; &#123;</span><br><span class="line">    <span class="comment">// Computation Finished.</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>A note about async callback methods -<br>All the callback methods provided by CompletableFuture have two async variants -</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// thenApply() variants</span><br><span class="line">&lt;U&gt; CompletableFuture&lt;U&gt; thenApply(Function&lt;? super T,? extends U&gt; fn)</span><br><span class="line">&lt;U&gt; CompletableFuture&lt;U&gt; thenApplyAsync(Function&lt;? super T,? extends U&gt; fn)</span><br><span class="line">&lt;U&gt; CompletableFuture&lt;U&gt; thenApplyAsync(Function&lt;? super T,? extends U&gt; fn, Executor executor)</span><br></pre></td></tr></table></figure>
+<p>These async callback variations help you further parallelize your computations by executing the callback tasks in a separate thread.</p>
+<p>Consider the following example -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">       TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Some Result&quot;</span></span><br><span class="line">&#125;).thenApply(result -&gt; &#123;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">      Executed in the same thread where the supplyAsync() task is executed</span></span><br><span class="line"><span class="comment">      or in the main thread If the supplyAsync() task completes immediately (Remove sleep() call to verify)</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Processed Result&quot;</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>In the above case, the task inside <code>thenApply()</code> is executed in the same thread where the <code>supplyAsync()</code> task is executed, or in the main thread if the <code>supplyAsync()</code> task completes immediately (try removing sleep() call to verify).</p>
+<p>To have more control over the thread that executes the callback task, you can use async callbacks. If you use thenApplyAsync() callback, then it will be executed in a different thread obtained from ForkJoinPool.commonPool() -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Some Result&quot;</span></span><br><span class="line">&#125;).thenApplyAsync(result -&gt; &#123;</span><br><span class="line">    <span class="comment">// Executed in a different thread from ForkJoinPool.commonPool()</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Processed Result&quot;</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>Moreover, If you pass an Executor to the thenApplyAsync() callback then the task will be executed in a thread obtained from the Executor’s thread pool.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Executor</span> <span class="variable">executor</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">2</span>);</span><br><span class="line">CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Some result&quot;</span></span><br><span class="line">&#125;).thenApplyAsync(result -&gt; &#123;</span><br><span class="line">    <span class="comment">// Executed in a thread obtained from the executor</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Processed Result&quot;</span></span><br><span class="line">&#125;, executor);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Combining-two-CompletableFutures-together"><a href="#Combining-two-CompletableFutures-together" class="headerlink" title="Combining two CompletableFutures together"></a>Combining two CompletableFutures together</h2><h3 id="1-Combine-two-dependent-futures-using-thenCompose"><a href="#1-Combine-two-dependent-futures-using-thenCompose" class="headerlink" title="1. Combine two dependent futures using thenCompose() -"></a>1. Combine two dependent futures using thenCompose() -</h3><p>Let’s say that you want to fetch the details of a user from a remote API service and once the user’s detail is available, you want to fetch his Credit rating from another service.</p>
+<p>Consider the following implementations of getUserDetail() and getCreditRating() methods -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;User&gt; <span class="title function_">getUsersDetail</span><span class="params">(String userId)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">		<span class="keyword">return</span> UserService.getUserDetails(userId);</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">CompletableFuture&lt;Double&gt; <span class="title function_">getCreditRating</span><span class="params">(User user)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">		<span class="keyword">return</span> CreditRatingService.getCreditRating(user);</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Now, Let’s understand what will happen if we use <code>thenApply()</code> to achieve the desired result -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;CompletableFuture&lt;Double&gt;&gt; result = getUserDetail(userId)</span><br><span class="line">.thenApply(user -&gt; getCreditRating(user));</span><br></pre></td></tr></table></figure>
+<p>In earlier examples, the Supplier function passed to thenApply() callback would return a simple value but in this case, it is returning a CompletableFuture. Therefore, the final result in the above case is a nested CompletableFuture.</p>
+<p>If you want the final result to be a top-level Future, use <code>thenCompose()</code> method instead -</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;Double&gt; result = getUserDetail(userId)</span><br><span class="line">.thenCompose(user -&gt; getCreditRating(user));</span><br></pre></td></tr></table></figure>
+<p>So, Rule of thumb here - If your callback function returns a CompletableFuture, and you want a flattened result from the CompletableFuture chain (which in most cases you would), then use thenCompose().</p>
+<h3 id="2-Combine-two-independent-futures-using-thenCombine"><a href="#2-Combine-two-independent-futures-using-thenCombine" class="headerlink" title="2. Combine two independent futures using thenCombine() -"></a>2. Combine two independent futures using thenCombine() -</h3><p>While thenCompose() is used to combine two Futures where one future is dependent on the other, thenCombine() is used when you want two Futures to run independently and do something after both are complete.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(<span class="string">&quot;Retrieving weight.&quot;</span>);</span><br><span class="line">CompletableFuture&lt;Double&gt; weightInKgFuture = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">65.0</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">&quot;Retrieving height.&quot;</span>);</span><br><span class="line">CompletableFuture&lt;Double&gt; heightInCmFuture = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">177.8</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">&quot;Calculating BMI.&quot;</span>);</span><br><span class="line">CompletableFuture&lt;Double&gt; combinedFuture = weightInKgFuture</span><br><span class="line">        .thenCombine(heightInCmFuture, (weightInKg, heightInCm) -&gt; &#123;</span><br><span class="line">    <span class="type">Double</span> <span class="variable">heightInMeter</span> <span class="operator">=</span> heightInCm/<span class="number">100</span>;</span><br><span class="line">    <span class="keyword">return</span> weightInKg/(heightInMeter*heightInMeter);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">&quot;Your BMI is - &quot;</span> + combinedFuture.get());</span><br></pre></td></tr></table></figure>
+<p>The callback function passed to thenCombine() will be called when both the Futures are complete.</p>
+<h2 id="Combining-multiple-CompletableFutures-together"><a href="#Combining-multiple-CompletableFutures-together" class="headerlink" title="Combining multiple CompletableFutures together"></a>Combining multiple CompletableFutures together</h2><p>We used <code>thenCompose()</code> and <code>thenCombine()</code> to combine two CompletableFutures together. Now, what if you want to combine an arbitrary number of CompletableFutures? Well, you can use the following methods to combine any number of CompletableFutures -</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">static CompletableFuture&lt;Void&gt;	 allOf(CompletableFuture&lt;?&gt;... cfs)</span><br><span class="line">static CompletableFuture&lt;Object&gt; anyOf(CompletableFuture&lt;?&gt;... cfs)</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-CompletableFuture-allOf"><a href="#1-CompletableFuture-allOf" class="headerlink" title="1. CompletableFuture.allOf()"></a>1. CompletableFuture.allOf()</h3><p>CompletableFuture.allOf is used in scenarios when you have a List of independent futures that you want to run in parallel and do something after all of them are complete.</p>
+<p>Let’s say that you want to download the contents of 100 different web pages of a website. You can do this operation sequentially but this will take a lot of time. So, you have written a function which takes a web page link, and returns a CompletableFuture, i.e. It downloads the web page’s content asynchronously -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; <span class="title function_">downloadWebPage</span><span class="params">(String pageLink)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">		<span class="comment">// Code to download and return the web page&#x27;s content</span></span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Now, when all the web pages are downloaded, you want to count the number of web pages that contain a keyword - ‘CompletableFuture’. Let’s use CompletableFuture.allOf() to achieve this -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; webPageLinks = Arrays.asList(...)	<span class="comment">// A list of 100 web page links</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Download contents of all the web pages asynchronously</span></span><br><span class="line">List&lt;CompletableFuture&lt;String&gt;&gt; pageContentFutures = webPageLinks.stream()</span><br><span class="line">        .map(webPageLink -&gt; downloadWebPage(webPageLink))</span><br><span class="line">        .collect(Collectors.toList());</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// Create a combined Future using allOf()</span></span><br><span class="line">CompletableFuture&lt;Void&gt; allFutures = CompletableFuture.allOf(</span><br><span class="line">        pageContentFutures.toArray(<span class="keyword">new</span> <span class="title class_">CompletableFuture</span>[pageContentFutures.size()])</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>The problem with CompletableFuture.allOf() is that it returns <code>CompletableFuture&lt;Void&gt;</code>. But we can get the results of all the wrapped CompletableFutures by writing few additional lines of code -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// When all the Futures are completed, call `future.join()` to get their results and collect the results in a list -</span></span><br><span class="line">CompletableFuture&lt;List&lt;String&gt;&gt; allPageContentsFuture = allFutures.thenApply(v -&gt; &#123;</span><br><span class="line">   <span class="keyword">return</span> pageContentFutures.stream()</span><br><span class="line">           .map(pageContentFuture -&gt; pageContentFuture.join())</span><br><span class="line">           .collect(Collectors.toList());</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>Take a moment to understand the above code snippet. Since we’re calling <code>future.join()</code> when all the futures are complete, we’re not blocking anywhere :-)</p>
+<p>The join() method is similar to get(). The only difference is that it throws an unchecked exception if the underlying CompletableFuture completes exceptionally.</p>
+<p>Let’s now count the number of web pages that contain our keyword -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Count the number of web pages having the &quot;CompletableFuture&quot; keyword.</span></span><br><span class="line">CompletableFuture&lt;Long&gt; countFuture = allPageContentsFuture.thenApply(pageContents -&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> pageContents.stream()</span><br><span class="line">            .filter(pageContent -&gt; pageContent.contains(<span class="string">&quot;CompletableFuture&quot;</span>))</span><br><span class="line">            .count();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">&quot;Number of Web Pages having CompletableFuture keyword - &quot;</span> +</span><br><span class="line">        countFuture.get());</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-CompletableFuture-anyOf"><a href="#2-CompletableFuture-anyOf" class="headerlink" title="2. CompletableFuture.anyOf()"></a>2. CompletableFuture.anyOf()</h3><p>CompletableFuture.anyOf() as the name suggests, returns a new CompletableFuture which is completed when any of the given CompletableFutures complete, with the same result.</p>
+<p>Consider the following example -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture&lt;String&gt; future1 = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">2</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Result of Future 1&quot;</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">CompletableFuture&lt;String&gt; future2 = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Result of Future 2&quot;</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">CompletableFuture&lt;String&gt; future3 = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        TimeUnit.SECONDS.sleep(<span class="number">3</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Result of Future 3&quot;</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">CompletableFuture&lt;Object&gt; anyOfFuture = CompletableFuture.anyOf(future1, future2, future3);</span><br><span class="line"></span><br><span class="line">System.out.println(anyOfFuture.get()); <span class="comment">// Result of Future 2</span></span><br></pre></td></tr></table></figure>
+
+<p>In the above example, the anyOfFuture is completed when any of the three CompletableFutures complete. Since future2 has the least amount of sleep time, it will complete first, and the final result will be - Result of Future 2.</p>
+<p><code>CompletableFuture.anyOf()</code> takes a varargs of Futures and returns CompletableFuture<Object>. The problem with <code>CompletableFuture.anyOf()</code> is that if you have CompletableFutures that return results of different types, then you won’t know the type of your final CompletableFuture.</p>
+<h2 id="CompletableFuture-Exception-Handling"><a href="#CompletableFuture-Exception-Handling" class="headerlink" title="CompletableFuture Exception Handling"></a>CompletableFuture Exception Handling</h2><p>We explored How to create CompletableFuture, transform them, and combine multiple CompletableFutures. Now let’s understand what to do when anything goes wrong.</p>
+<p>Let’s first understand how errors are propagated in a callback chain. Consider the following CompletableFuture callback chain -</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">	<span class="comment">// Code which might throw an exception</span></span><br><span class="line">	<span class="keyword">return</span> <span class="string">&quot;Some result&quot;</span>;</span><br><span class="line">&#125;).thenApply(result -&gt; &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">&quot;processed result&quot;</span>;</span><br><span class="line">&#125;).thenApply(result -&gt; &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">&quot;result after further processing&quot;</span>;</span><br><span class="line">&#125;).thenAccept(result -&gt; &#123;</span><br><span class="line">	<span class="comment">// do something with the final result</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>If an error occurs in the original supplyAsync() task, then none of the thenApply() callbacks will be called and future will be resolved with the exception occurred. If an error occurs in first thenApply() callback then 2nd and 3rd callbacks won’t be called and the future will be resolved with the exception occurred, and so on.</p>
+<h3 id="1-Handle-exceptions-using-exceptionally-callback"><a href="#1-Handle-exceptions-using-exceptionally-callback" class="headerlink" title="1. Handle exceptions using exceptionally() callback"></a>1. Handle exceptions using exceptionally() callback</h3><p>The exceptionally() callback gives you a chance to recover from errors generated from the original Future. You can log the exception here and return a default value.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">age</span> <span class="operator">=</span> -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">CompletableFuture&lt;String&gt; maturityFuture = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span>(age &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;Age can not be negative&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(age &gt; <span class="number">18</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Adult&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Child&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).exceptionally(ex -&gt; &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;Oops! We have an exception - &quot;</span> + ex.getMessage());</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Unknown!&quot;</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">&quot;Maturity : &quot;</span> + maturityFuture.get());</span><br></pre></td></tr></table></figure>
+<p>Note that, the error will not be propagated further in the callback chain if you handle it once.</p>
+<h3 id="2-Handle-exceptions-using-the-generic-handle-method"><a href="#2-Handle-exceptions-using-the-generic-handle-method" class="headerlink" title="2. Handle exceptions using the generic handle() method"></a>2. Handle exceptions using the generic handle() method</h3><p>The API also provides a more generic method - <code>handle()</code> to recover from exceptions. It is called whether or not an exception occurs.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">age</span> <span class="operator">=</span> -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">CompletableFuture&lt;String&gt; maturityFuture = CompletableFuture.supplyAsync(() -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span>(age &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;Age can not be negative&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(age &gt; <span class="number">18</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Adult&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Child&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).handle((res, ex) -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span>(ex != <span class="literal">null</span>) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Oops! We have an exception - &quot;</span> + ex.getMessage());</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Unknown!&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">System.out.println(<span class="string">&quot;Maturity : &quot;</span> + maturityFuture.get());</span><br></pre></td></tr></table></figure>
+<p>If an exception occurs, then the res argument will be null, otherwise, the ex argument will be null.</p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>Congratulations folks! In this tutorial, we explored the most useful and important concepts of CompletableFuture API.</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/10/java/20221110-spring-util/" rel="prev" title="Spring 提供的Util工具类">
+      <i class="fa fa-chevron-left"></i> Spring 提供的Util工具类
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/16/java/20221116-project-loom/" rel="next" title="Understanding Java’s Project Loom">
+      Understanding Java’s Project Loom <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#What%E2%80%99s-a-CompletableFuture"><span class="nav-number">1.</span> <span class="nav-text">What’s a CompletableFuture?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Future-vs-CompletableFuture"><span class="nav-number">2.</span> <span class="nav-text">Future vs CompletableFuture</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Limitations-of-Future"><span class="nav-number">3.</span> <span class="nav-text">Limitations of Future</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Creating-a-CompletableFuture"><span class="nav-number">4.</span> <span class="nav-text">Creating a CompletableFuture</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-The-trivial-example"><span class="nav-number">4.1.</span> <span class="nav-text">1. The trivial example</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Running-asynchronous-computation-using-runAsync"><span class="nav-number">4.2.</span> <span class="nav-text">2. Running asynchronous computation using runAsync() -</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Run-a-task-asynchronously-and-return-the-result-using-supplyAsync"><span class="nav-number">4.3.</span> <span class="nav-text">3. Run a task asynchronously and return the result using supplyAsync() -</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#A-note-about-Executor-and-Thread-Pool"><span class="nav-number">4.4.</span> <span class="nav-text">A note about Executor and Thread Pool -</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Transforming-and-acting-on-a-CompletableFuture"><span class="nav-number">5.</span> <span class="nav-text">Transforming and acting on a CompletableFuture</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-thenApply"><span class="nav-number">5.1.</span> <span class="nav-text">1. thenApply()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-thenAccept-and-thenRun"><span class="nav-number">5.2.</span> <span class="nav-text">2. thenAccept() and thenRun()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combining-two-CompletableFutures-together"><span class="nav-number">6.</span> <span class="nav-text">Combining two CompletableFutures together</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Combine-two-dependent-futures-using-thenCompose"><span class="nav-number">6.1.</span> <span class="nav-text">1. Combine two dependent futures using thenCompose() -</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Combine-two-independent-futures-using-thenCombine"><span class="nav-number">6.2.</span> <span class="nav-text">2. Combine two independent futures using thenCombine() -</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combining-multiple-CompletableFutures-together"><span class="nav-number">7.</span> <span class="nav-text">Combining multiple CompletableFutures together</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-CompletableFuture-allOf"><span class="nav-number">7.1.</span> <span class="nav-text">1. CompletableFuture.allOf()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-CompletableFuture-anyOf"><span class="nav-number">7.2.</span> <span class="nav-text">2. CompletableFuture.anyOf()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CompletableFuture-Exception-Handling"><span class="nav-number">8.</span> <span class="nav-text">CompletableFuture Exception Handling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Handle-exceptions-using-exceptionally-callback"><span class="nav-number">8.1.</span> <span class="nav-text">1. Handle exceptions using exceptionally() callback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Handle-exceptions-using-the-generic-handle-method"><span class="nav-number">8.2.</span> <span class="nav-text">2. Handle exceptions using the generic handle() method</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">9.</span> <span class="nav-text">Conclusion</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

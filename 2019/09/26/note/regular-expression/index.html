@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="正则表达式，又称规则表达式。（英语：Regular Expression，在代码中常简写为regex、regexp或RE），计算机科学的一个概念。正则表达式通常被用来检索、替换那些符合某个模式(规则)的文本。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="正则表达式">
+<meta property="og:url" content="https://forgives.github.io/2019/09/26/note/regular-expression/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="正则表达式，又称规则表达式。（英语：Regular Expression，在代码中常简写为regex、regexp或RE），计算机科学的一个概念。正则表达式通常被用来检索、替换那些符合某个模式(规则)的文本。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-09-26T01:56:52.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.391Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="regular">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2019/09/26/note/regular-expression/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>正则表达式 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2019/09/26/note/regular-expression/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          正则表达式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-09-26 09:56:52" itemprop="dateCreated datePublished" datetime="2019-09-26T09:56:52+08:00">2019-09-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%AD%A3%E5%88%99/" itemprop="url" rel="index"><span itemprop="name">正则</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>正则表达式，又称规则表达式。（英语：Regular Expression，在代码中常简写为regex、regexp或RE），计算机科学的一个概念。正则表达式通常被用来检索、替换那些符合某个模式(规则)的文本。</p>
+<span id="more"></span>
+
+<p>给定一个正则表达式和另一个字符串，我们可以达到如下的目的：</p>
+<ul>
+<li>匹配 - 给定的字符串是否符合正则表达式的过滤逻辑</li>
+<li>提取 - 可以通过正则表达式，从字符串中获取我们想要的特定部分</li>
+</ul>
+<h2 id="元字符"><a href="#元字符" class="headerlink" title="元字符"></a>元字符</h2><h3 id="特殊字符"><a href="#特殊字符" class="headerlink" title="特殊字符"></a>特殊字符</h3><h4 id=""><a href="#" class="headerlink" title="^"></a>^</h4><p>匹配输入字符串开始的位置。如果设置了 RegExp 对象的 Multiline 属性，^ 还会与 \n 或 \r 之后的位置匹配。<br>要匹配 ^ 字符本身，请使用 ^。 </p>
+<h4 id="-1"><a href="#-1" class="headerlink" title="$"></a>$</h4><p>匹配输入字符串结尾的位置。如果设置了 RegExp 对象的 Multiline 属性，$ 还会与 \n 或 \r 之前的位置匹配。<br>要匹配 $ 字符本身，请使用 $。</p>
+<h4 id="-2"><a href="#-2" class="headerlink" title="( )"></a>( )</h4><p>标记一个子表达式的开始和结束位置。子表达式可以获取供以后使用。要匹配这些字符，请使用 ( 和 )。</p>
+<h4 id="-3"><a href="#-3" class="headerlink" title="."></a>.</h4><p>匹配除换行符 \n 之外的任何单字符。要匹配 . ，请使用 . 。</p>
+<h4 id="-4"><a href="#-4" class="headerlink" title="*"></a>*</h4><p>匹配前面的子表达式零次或多次。要匹配 * 字符，请使用 *。</p>
+<h4 id="-5"><a href="#-5" class="headerlink" title="+"></a>+</h4><p>匹配前面的子表达式一次或多次。要匹配 + 字符，请使用 +。</p>
+<h4 id="-6"><a href="#-6" class="headerlink" title="?"></a>?</h4><p>匹配前面的子表达式零次或一次，或指明一个非贪婪限定符。要匹配 ? 字符，请使用 ?。</p>
+<h4 id="-7"><a href="#-7" class="headerlink" title="|"></a>|</h4><p>指明两项之间的一个选择。要匹配 |，请使用 |。</p>
+<h4 id="-8"><a href="#-8" class="headerlink" title="\"></a>\</h4><p>将下一个字符标记为或特殊字符、或原义字符、或向后引用、或八进制转义符。例如， ‘n’ 匹配字符 ‘n’。’\n’ 匹配换行符。序列 ‘\‘ 匹配 “&quot;，而 ‘(‘ 则匹配 “(“。</p>
+<h4 id="w"><a href="#w" class="headerlink" title="\w"></a>\w</h4><p>匹配字母，数字，下划线。例如要匹配”a2345BCD__TTz” 正则：”\w+”  这里的”+”字符为一个量词指重复的次数</p>
+<h4 id="d"><a href="#d" class="headerlink" title="\d"></a>\d</h4><p>匹配数字，要匹配一个固定格式的电话号码以0开头前4位后7位，如0737-5686123  正则:^0\d\d\d-\d\d\d\d\d\d\d$ </p>
+<h4 id="n"><a href="#n" class="headerlink" title="\n"></a>\n</h4><p>匹配一个换行符。等价于 \x0a 和 \cJ。</p>
+<h4 id="r"><a href="#r" class="headerlink" title="\r"></a>\r</h4><p>匹配一个回车符。等价于 \x0d 和 \cM。</p>
+<h4 id="s"><a href="#s" class="headerlink" title="\s"></a>\s</h4><p>匹配任何空白字符，包括空格、制表符、换页符等等。等价于 [ \f\n\r\t\v]。注意 Unicode 正则表达式会匹配全角空格符。</p>
+<h4 id="t"><a href="#t" class="headerlink" title="\t"></a>\t</h4><p>匹配一个制表符。等价于 \x09 和 \cI。</p>
+<h4 id="-9"><a href="#-9" class="headerlink" title="[]"></a>[]</h4><p>字符组，匹配包含括号内元素的字符 </p>
+<h4 id="n-1"><a href="#n-1" class="headerlink" title="{n}"></a>{n}</h4><p>n 是一个非负整数。匹配确定的 n 次。例如，’o{2}’ 不能匹配 “Bob” 中的 ‘o’，但是能匹配 “food” 中的两个 o。</p>
+<h4 id="n-2"><a href="#n-2" class="headerlink" title="{n,}"></a>{n,}</h4><p>n 是一个非负整数。至少匹配n 次。例如，’o{2,}’ 不能匹配 “Bob” 中的 ‘o’，但能匹配 “foooood” 中的所有 o。’o{1,}’ 等价于 ‘o+’。’o{0,}’ 则等价于 ‘o*’。</p>
+<h4 id="n-m"><a href="#n-m" class="headerlink" title="{n,m}"></a>{n,m}</h4><p>m 和 n 均为非负整数，其中n &lt;&#x3D; m。最少匹配 n 次且最多匹配 m 次。例如，”o{1,3}” 将匹配 “fooooood” 中的前三个 o。’o{0,1}’ 等价于 ‘o?’。请注意在逗号和两个数之间不能有空格。</p>
+<h3 id="几种反义"><a href="#几种反义" class="headerlink" title="几种反义"></a>几种反义</h3><p>“\W”   匹配任意不是字母，数字，下划线 的字符</p>
+<p>“\S”   匹配任意不是空白符的字符</p>
+<p>“\D”  匹配任意非数字的字符</p>
+<p>“\B”  匹配不是单词开头或结束的位置</p>
+<p>“[^abc]”  匹配除了abc以外的任意字符</p>
+<h3 id="量词"><a href="#量词" class="headerlink" title="量词"></a>量词</h3><p>先解释关于量词所涉及到的重要的三个概念</p>
+<h4 id="贪婪-贪心"><a href="#贪婪-贪心" class="headerlink" title="贪婪(贪心)"></a>贪婪(贪心)</h4><p>如”*”字符 贪婪量词会首先匹配整个字符串，尝试匹配时，它会选定尽可能多的内容，如果失败则回退一个字符，然后再次尝试回退的过程就叫做回溯，它会每次回退一个字符，直到找到匹配的内容或者没有字符可以回退。相比下面两种贪婪量词对资源的消耗是最大的。</p>
+<h4 id="懒惰-勉强"><a href="#懒惰-勉强" class="headerlink" title="懒惰(勉强)"></a>懒惰(勉强)</h4><p>如 “?”  懒惰量词使用另一种方式匹配，它从目标的起始位置开始尝试匹配，每次检查一个字符，并寻找它要匹配的内容，如此循环直到字符结尾处。</p>
+<h4 id="占有"><a href="#占有" class="headerlink" title="占有"></a>占有</h4><p>如”+” 占有量词会覆盖事个目标字符串，然后尝试寻找匹配内容，但它只尝试一次，不会回溯，就好比先抓一把石头，然后从石头中挑出黄金。</p>
+<h4 id="“-”-贪婪"><a href="#“-”-贪婪" class="headerlink" title="“*”(贪婪)"></a>“*”(贪婪)</h4><p>重复零次或更多。<br>例如”aaaaaaaa” 匹配字符串中所有的a  正则： “a*”   会出到所有的字符”a”</p>
+<h4 id="“-”-懒惰"><a href="#“-”-懒惰" class="headerlink" title="“+”(懒惰)"></a>“+”(懒惰)</h4><p>重复一次或更多次。例如”aaaaaaaa” 匹配字符串中所有的a  正则： “a+”  会取到字符中所有的a字符，  “a+”与”a*”不同在于”+”至少是一次而”*” 可以是0次。</p>
+<h4 id="“-”-占有"><a href="#“-”-占有" class="headerlink" title="“?”(占有)"></a>“?”(占有)</h4><p>重复零次或一次。例如”aaaaaaaa” 匹配字符串中的a 正则 ： “a?” 只会匹配一次，也就是结果只是单个字符a</p>
+<h4 id="“-n-”"><a href="#“-n-”" class="headerlink" title="“{n}”"></a>“{n}”</h4><p>重复n次。例如从”aaaaaaaa” 匹配字符串的a 并重复3次 正则：  “a{3}”  结果就是取到3个a字符  “aaa”;</p>
+<h4 id="“-n-m-”"><a href="#“-n-m-”" class="headerlink" title="“{n,m}”"></a>“{n,m}”</h4><p>重复n到m次。例如正则 “a{3,4}” 将a重复匹配3次或者4次 所以供匹配的字符可以是三个”aaa”也可以是四个”aaaa” 正则都可以匹配到。</p>
+<h4 id="“-n-”-1"><a href="#“-n-”-1" class="headerlink" title="“{n,}”"></a>“{n,}”</h4><p>重复n次或更多次。与{n,m}不同之处就在于匹配的次数将没有上限，但至少要重复n次 如 正则”a{3,}” a至少要重复3次</p>
+<h3 id="懒惰限定符"><a href="#懒惰限定符" class="headerlink" title="懒惰限定符"></a>懒惰限定符</h3><h4 id="“-”"><a href="#“-”" class="headerlink" title="“*?”"></a>“*?”</h4><p>重复任意次，但尽可能少重复。<br>如 “acbacb”  正则  “a.*?b” 只会取到第一个”acb” 原本可以全部取到但加了限定符后，只会匹配尽可能少的字符 ，而”acbacb”最少字符的结果就是”acb”。 </p>
+<h4 id="“-”-1"><a href="#“-”-1" class="headerlink" title="“+?”"></a>“+?”</h4><p>重复1次或更多次，但尽可能少重复。与上面一样，只是至少要重复1次。</p>
+<h4 id="“-”-2"><a href="#“-”-2" class="headerlink" title="“??”"></a>“??”</h4><p>重复0次或1次，但尽可能少重复。如 “aaacb” 正则 “a.??b” 只会取到最后的三个字符”acb”。</p>
+<h4 id="“-n-m-”-1"><a href="#“-n-m-”-1" class="headerlink" title="“{n,m}?”"></a>“{n,m}?”</h4><p>重复n到m次，但尽可能少重复。如 “aaaaaaaa”  正则 “a{0,m}” 因为最少是0次所以取到结果为空。</p>
+<h4 id="“-n-”-2"><a href="#“-n-”-2" class="headerlink" title="“{n,}?”"></a>“{n,}?”</h4><p>重复n次以上，但尽可能少重复。如 “aaaaaaa”  正则 “a{1,}” 最少是1次所以取到结果为 “a”。</p>
+<h2 id="分组"><a href="#分组" class="headerlink" title="分组"></a>分组</h2><p>先了解在正则中捕获分组的概念，其实就是一个括号内的内容 如 “(\d)\d” 而”(\d)” 这就是一个捕获分组，可以对捕获分组进行 后向引用 (如果后而有相同的内容则可以直接引用前面定义的捕获组，以简化表达式) 如(\d)\d\1 这里的”\1”就是对”(\d)”的后向引用。</p>
+<p>那捕获分组有什么用呢看个例子就知道了：<br>如  “zery zery” 正则 \b(\w+)\b\s\1\b 所以这里的”\1”所捕获到的字符也是 与(\w+)一样的”zery”，为了让组名更有意义，组名是可以自定义名字的。</p>
+<p>“\b(?<name>\w+)\b\s\k<name>\b” 用”?<name>“就可以自定义组名了而要后向引用组时要记得写成 “\k<name>“;自定义组名后,捕获组中匹配到的值就会保存在定义的组名里。<br>通常分组在替换逻辑中使用 <code>$name</code> 来引用（很多浏览器并不支持），也可以使用 <code>$1</code>来表示匹配的第一个。<br>比如</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">正则</span><br><span class="line">(?&lt;n&gt;\*\s.*)\n\s*\n*(?&lt;m&gt;\w+),?</span><br><span class="line">替换</span><br><span class="line">$2 $1 </span><br></pre></td></tr></table></figure>
+
+<h3 id="常用语法"><a href="#常用语法" class="headerlink" title="常用语法"></a>常用语法</h3><h4 id="“-exp-”"><a href="#“-exp-”" class="headerlink" title="“(exp)”"></a>“(exp)”</h4><p>匹配exp,并捕获文本到自动命名的组里</p>
+<h4 id="“-exp-”-1"><a href="#“-exp-”-1" class="headerlink" title="“(?exp)”"></a>“(?<name>exp)”</h4><p>匹配exp,并捕获文本到名称为name的组里</p>
+<h4 id="“-exp-”-2"><a href="#“-exp-”-2" class="headerlink" title="“(?:exp)”"></a>“(?:exp)”</h4><p>匹配exp,不捕获匹配的文本，也不给此分组分配组号</p>
+<p>以下为零宽断言</p>
+<h4 id="“-exp-”-3"><a href="#“-exp-”-3" class="headerlink" title="“(?&#x3D;exp)”"></a>“(?&#x3D;exp)”</h4><p>匹配exp前面的位置<br>如 “How are you doing” 正则”(?<txt>.+(?&#x3D;ing))” 这里取ing前所有的字符，并定义了一个捕获分组名字为 “txt” 而”txt”这个组里的值为”How are you do”;</p>
+<h4 id="“"><a href="#“" class="headerlink" title="“(?&lt;&#x3D;exp)”"></a>“(?&lt;&#x3D;exp)”</h4><p>匹配exp后面的位置<br>如 “How are you doing” 正则”(?<txt>(?&lt;&#x3D;How).+)” 这里取”How”之后所有的字符，并定义了一个捕获分组名字为 “txt” 而”txt”这个组里的值为” are you doing;。</p>
+<h4 id="“-exp-”-4"><a href="#“-exp-”-4" class="headerlink" title="“(?!exp)”"></a>“(?!exp)”</h4><p>匹配后面跟的不是exp的位置<br>如 “123abc” 正则 “\d{3}(?!\d)”匹配3位数字后非数字的结果。</p>
+<h4 id="“-1"><a href="#“-1" class="headerlink" title="“(?&lt;!exp)”"></a>“(?&lt;!exp)”</h4><p>匹配前面不是exp的位置<br>如 “abc123 “ 正则 “(?&lt;![0-9])123” 匹配”123”前面是非数字的结果也可写成”(?!&lt;\d)123”。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>权威指南<br><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions">https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Regular_Expressions</a></p>
+<p>正则基础教程<br><a target="_blank" rel="noopener" href="https://github.com/ziishaned/learn-regex/blob/master/translations/README-cn.md">https://github.com/ziishaned/learn-regex/blob/master/translations/README-cn.md</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/zery/p/3438845.html">https://www.cnblogs.com/zery/p/3438845.html</a></p>
+<p>正则表达式中?&#x3D;和?:和?!的理解<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/csm0912/article/details/81206848">https://blog.csdn.net/csm0912/article/details/81206848</a></p>
+<p>VSCode正则使用<br><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/visualstudio/ide/using-regular-expressions-in-visual-studio?view=vs-2019#capture-groups-and-replacement-patterns">https://docs.microsoft.com/en-us/visualstudio/ide/using-regular-expressions-in-visual-studio?view=vs-2019#capture-groups-and-replacement-patterns</a></p>
+<p>正则官方教程<br><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_simple_patterns">https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Using_simple_patterns</a></p>
+<p>验证工具<br><a target="_blank" rel="noopener" href="https://regexr.com/">https://regexr.com/</a><br><a target="_blank" rel="noopener" href="https://rubular.com/">https://rubular.com/</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/regular/" rel="tag"># regular</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/09/19/java/kryo-using-reflectasm/" rel="prev" title="ReflectAsm">
+      <i class="fa fa-chevron-left"></i> ReflectAsm
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/11/14/java/arthas/" rel="next" title="arthas 使用教程">
+      arthas 使用教程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%83%E5%AD%97%E7%AC%A6"><span class="nav-number">1.</span> <span class="nav-text">元字符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E5%AD%97%E7%AC%A6"><span class="nav-number">1.1.</span> <span class="nav-text">特殊字符</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">1.1.1.</span> <span class="nav-text">^</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#-1"><span class="nav-number">1.1.2.</span> <span class="nav-text">$</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#-2"><span class="nav-number">1.1.3.</span> <span class="nav-text">( )</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#-3"><span class="nav-number">1.1.4.</span> <span class="nav-text">.</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#-4"><span class="nav-number">1.1.5.</span> <span class="nav-text">*</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#-5"><span class="nav-number">1.1.6.</span> <span class="nav-text">+</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#-6"><span class="nav-number">1.1.7.</span> <span class="nav-text">?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#-7"><span class="nav-number">1.1.8.</span> <span class="nav-text">|</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#-8"><span class="nav-number">1.1.9.</span> <span class="nav-text">\</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#w"><span class="nav-number">1.1.10.</span> <span class="nav-text">\w</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#d"><span class="nav-number">1.1.11.</span> <span class="nav-text">\d</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#n"><span class="nav-number">1.1.12.</span> <span class="nav-text">\n</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#r"><span class="nav-number">1.1.13.</span> <span class="nav-text">\r</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#s"><span class="nav-number">1.1.14.</span> <span class="nav-text">\s</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#t"><span class="nav-number">1.1.15.</span> <span class="nav-text">\t</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#-9"><span class="nav-number">1.1.16.</span> <span class="nav-text">[]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#n-1"><span class="nav-number">1.1.17.</span> <span class="nav-text">{n}</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#n-2"><span class="nav-number">1.1.18.</span> <span class="nav-text">{n,}</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#n-m"><span class="nav-number">1.1.19.</span> <span class="nav-text">{n,m}</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E7%A7%8D%E5%8F%8D%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">几种反义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8F%E8%AF%8D"><span class="nav-number">1.3.</span> <span class="nav-text">量词</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B4%AA%E5%A9%AA-%E8%B4%AA%E5%BF%83"><span class="nav-number">1.3.1.</span> <span class="nav-text">贪婪(贪心)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%87%92%E6%83%B0-%E5%8B%89%E5%BC%BA"><span class="nav-number">1.3.2.</span> <span class="nav-text">懒惰(勉强)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%A0%E6%9C%89"><span class="nav-number">1.3.3.</span> <span class="nav-text">占有</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-%E2%80%9D-%E8%B4%AA%E5%A9%AA"><span class="nav-number">1.3.4.</span> <span class="nav-text">“*”(贪婪)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-%E2%80%9D-%E6%87%92%E6%83%B0"><span class="nav-number">1.3.5.</span> <span class="nav-text">“+”(懒惰)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-%E2%80%9D-%E5%8D%A0%E6%9C%89"><span class="nav-number">1.3.6.</span> <span class="nav-text">“?”(占有)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-n-%E2%80%9D"><span class="nav-number">1.3.7.</span> <span class="nav-text">“{n}”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-n-m-%E2%80%9D"><span class="nav-number">1.3.8.</span> <span class="nav-text">“{n,m}”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-n-%E2%80%9D-1"><span class="nav-number">1.3.9.</span> <span class="nav-text">“{n,}”</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%87%92%E6%83%B0%E9%99%90%E5%AE%9A%E7%AC%A6"><span class="nav-number">1.4.</span> <span class="nav-text">懒惰限定符</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-%E2%80%9D"><span class="nav-number">1.4.1.</span> <span class="nav-text">“*?”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-%E2%80%9D-1"><span class="nav-number">1.4.2.</span> <span class="nav-text">“+?”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-%E2%80%9D-2"><span class="nav-number">1.4.3.</span> <span class="nav-text">“??”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-n-m-%E2%80%9D-1"><span class="nav-number">1.4.4.</span> <span class="nav-text">“{n,m}?”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-n-%E2%80%9D-2"><span class="nav-number">1.4.5.</span> <span class="nav-text">“{n,}?”</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E7%BB%84"><span class="nav-number">2.</span> <span class="nav-text">分组</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E8%AF%AD%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">常用语法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-exp-%E2%80%9D"><span class="nav-number">2.1.1.</span> <span class="nav-text">“(exp)”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-exp-%E2%80%9D-1"><span class="nav-number">2.1.2.</span> <span class="nav-text">“(?exp)”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-exp-%E2%80%9D-2"><span class="nav-number">2.1.3.</span> <span class="nav-text">“(?:exp)”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-exp-%E2%80%9D-3"><span class="nav-number">2.1.4.</span> <span class="nav-text">“(?&#x3D;exp)”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C"><span class="nav-number">2.1.5.</span> <span class="nav-text">“(?&lt;&#x3D;exp)”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-exp-%E2%80%9D-4"><span class="nav-number">2.1.6.</span> <span class="nav-text">“(?!exp)”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9C-1"><span class="nav-number">2.1.7.</span> <span class="nav-text">“(?&lt;!exp)”</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

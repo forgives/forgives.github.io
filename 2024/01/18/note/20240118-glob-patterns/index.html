@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="很多地方的都是使用的glob模式匹配，比如linux的shel, vscode的搜索，git的gitignore文件，npm的package.json等等。 这次因为aone单测排除文件逻辑也改成了glob模式匹配，所以记录一下glob模式匹配的语法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Glob Patterns 笔记">
+<meta property="og:url" content="https://forgives.github.io/2024/01/18/note/20240118-glob-patterns/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="很多地方的都是使用的glob模式匹配，比如linux的shel, vscode的搜索，git的gitignore文件，npm的package.json等等。 这次因为aone单测排除文件逻辑也改成了glob模式匹配，所以记录一下glob模式匹配的语法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-01-18T01:33:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.388Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="regular">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2024/01/18/note/20240118-glob-patterns/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Glob Patterns 笔记 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2024/01/18/note/20240118-glob-patterns/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Glob Patterns 笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-01-18 09:33:00" itemprop="dateCreated datePublished" datetime="2024-01-18T09:33:00+08:00">2024-01-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%AD%A3%E5%88%99/" itemprop="url" rel="index"><span itemprop="name">正则</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>很多地方的都是使用的<code>glob</code>模式匹配，比如<code>linux</code>的<code>shel</code>, <code>vscode</code>的搜索，<code>git</code>的<code>gitignore</code>文件，<code>npm</code>的<code>package.json</code>等等。</p>
+<p>这次因为<code>aone</code>单测排除文件逻辑也改成了<code>glob</code>模式匹配，所以记录一下<code>glob</code>模式匹配的语法。</p>
+<span id="more"></span>
+
+<p>以下是一些常用的glob模式以及它们的含义（<a target="_blank" rel="noopener" href="https://code.visualstudio.com/docs/editor/glob-patterns">参考链接</a>）：</p>
+<ol>
+<li><code>*</code>：匹配零个或多个字符（除了目录分隔符）。例如，<code>*.txt</code>会匹配当前目录中所有以<code>.txt</code>结尾的文件。</li>
+<li><code>?</code>：匹配任意单个字符。例如，<code>?.txt</code>会匹配所有单一字符后跟<code>.txt</code>的文件，如<code>a.txt</code>，但不会匹配<code>aa.txt</code>。<br>3.<code>[...]</code>：匹配方括号内的任意单个字符。可以使用破折号-表示字符范围。例如，<code>[a-c].txt</code>会匹配<code>a.txt</code>、<code>b.txt</code>和<code>c.txt</code>。</li>
+<li><code>[^...]</code> 或 <code>[!...]</code>：匹配不在方括号内的任意单个字符。例如，<code>[^a-c].txt</code>会匹配除了<code>a.txt</code>、<code>b.txt</code>和<code>c.txt</code>之外的任何以<code>.txt</code>结尾的文件。</li>
+<li><code>**</code>：在一些系统中，这个模式用于匹配任意数量的目录和子目录。例如，在<code>Node.js</code>的<code>glob</code>模块中，<code>**/*.txt</code>会匹配当前目录以及所有子目录中的<code>.txt</code>文件。</li>
+<li><code>&#123;&#125;</code>：分组模式，匹配大括号内以逗号分隔的任意模式之一。例如，<code>&#123;*.txt,*.md&#125;</code>会匹配所有扩展名为<code>.txt</code>或<code>.md</code>的文件。</li>
+<li><code>\</code>：转义字符，用于匹配特殊字符。例如，<code>\*</code>会匹配字面的<code>*</code>字符。</li>
+<li><code>/</code>：匹配路径分隔符，即时在<strong>windows</strong>中也是使用<code>/</code>作为路径分隔符。</li>
+</ol>
+<p>下面是一些glob模式的示例和它们的匹配结果：</p>
+<p><code>*.js</code>：匹配当前目录下所有扩展名为<code>.js</code>的文件。</p>
+<p><code>*/*</code>：匹配当前目录下所有子目录中的文件，但不包括子目录的子目录（<strong>不递归</strong>）。</p>
+<p><code>**/*.js</code>：匹配当前目录以及所有子目录中的扩展名为<code>.js</code>的文件（<strong>递归</strong>）。</p>
+<p><code>images/*.png</code>：匹配images子目录下所有扩展名为<code>.png</code>的文件。</p>
+<p><code>*.&#123;png,jpg,jpeg&#125;</code>：匹配当前目录下所有扩展名为<code>.png</code>、<code>.jpg</code>或<code>.jpeg</code>的文件。</p>
+<p><code>data[0-9].txt</code>：匹配文件名为data后跟一个数字，扩展名为<code>.txt</code>的文件（如<code>data1.txt</code>）。</p>
+<p><em>线上测试地址</em>: <a target="_blank" rel="noopener" href="https://globster.xyz/">https://globster.xyz/</a></p>
+<p><strong>综上：glob中值得注意的是 <code>**</code> 与 <code>/</code> 的使用，其他的与常用正则表达式一致。</strong></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/regular/" rel="tag"># regular</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/01/16/java/20240116-jEnv/" rel="prev" title="使用jEnv管理多java版本">
+      <i class="fa fa-chevron-left"></i> 使用jEnv管理多java版本
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/01/18/java/20240118-jpms/" rel="next" title="Java 模块化指南">
+      Java 模块化指南 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="AzerothCore 安装以下模块 mod-anticheat mod-eluna mod-transmog mod-ah-bot官网地址 https:&#x2F;&#x2F;github.com&#x2F;azerothcore">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AzerothCore 安装Mod">
+<meta property="og:url" content="https://forgives.github.io/2022/11/19/fun/20221119-install-azerothcore-mod/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="AzerothCore 安装以下模块 mod-anticheat mod-eluna mod-transmog mod-ah-bot官网地址 https:&#x2F;&#x2F;github.com&#x2F;azerothcore">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-11-19T13:38:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.374Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="fun">
+<meta property="article:tag" content="wow">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2022/11/19/fun/20221119-install-azerothcore-mod/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>AzerothCore 安装Mod | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/11/19/fun/20221119-install-azerothcore-mod/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AzerothCore 安装Mod
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-19 21:38:00" itemprop="dateCreated datePublished" datetime="2022-11-19T21:38:00+08:00">2022-11-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B8%B8%E6%88%8F/" itemprop="url" rel="index"><span itemprop="name">游戏</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>AzerothCore 安装以下模块 <code>mod-anticheat</code> <code>mod-eluna</code> <code>mod-transmog</code> <code>mod-ah-bot</code><br>官网地址 <a target="_blank" rel="noopener" href="https://github.com/azerothcore">https://github.com/azerothcore</a></p>
+<span id="more"></span>
+
+<h2 id="通用安装步骤"><a href="#通用安装步骤" class="headerlink" title="通用安装步骤"></a>通用安装步骤</h2><p>mod 放入<code>modules</code>目录下，重新执行cmake</p>
+<p>分别点击 <code>Configure -&gt; Generate -&gt; Open Project</code></p>
+<p>右击 <code>ALL_BUILD</code> 重新开始编译</p>
+<h2 id="mod-anticheat"><a href="#mod-anticheat" class="headerlink" title="mod-anticheat"></a>mod-anticheat</h2><p>反作弊mod<br><a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-anticheat/wiki">https://github.com/azerothcore/mod-anticheat/wiki</a></p>
+<p>github<br><a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-anticheat">https://github.com/azerothcore/mod-anticheat</a></p>
+<p>gitee<br><a target="_blank" rel="noopener" href="https://gitee.com/forgkan/mod-anticheat">https://gitee.com/forgkan/mod-anticheat</a></p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>azerothcore-wotlk\modules</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">1) Simply place the module under the modules folder of your AzerothCore source folder.</span><br><span class="line"></span><br><span class="line">You can do clone it via git under the azerothcore/modules directory:</span><br><span class="line"></span><br><span class="line">cd path/to/azerothcore/modules</span><br><span class="line"></span><br><span class="line">git clone https://github.com/azerothcore/mod-anticheat.git</span><br><span class="line"></span><br><span class="line">or you can manually download the module, unzip and place it under the azerothcore/modules directory.</span><br><span class="line">2) Re-run cmake and launch a clean build of AzerothCore</span><br><span class="line">3) Execute the included \sql\characters\base\charactersdb_anticheat.sql file on your characters database and excute \sql\world\Acore_strings.sql on your world datase. This creates the necessary tables for this module.</span><br><span class="line"></span><br><span class="line">That&#x27;s it.</span><br><span class="line">(Optional) Edit module configuration</span><br><span class="line"></span><br><span class="line">If you need to change the module configuration, go to your server configuration folder (e.g. etc), copy Anticheat.conf.dist to Anticheat.conf and edit it as you prefer.</span><br></pre></td></tr></table></figure>
+
+<h3 id="数据库变更"><a href="#数据库变更" class="headerlink" title="数据库变更"></a>数据库变更</h3><h4 id="acore-characters"><a href="#acore-characters" class="headerlink" title="acore_characters"></a>acore_characters</h4><p>创建表</p>
+<ul>
+<li><p>players_reports_status<br>当前活动会话的防作弊记录</p>
+</li>
+<li><p>daily_players_reports<br>作弊帐号的长期记录，直到GM使用 <code>.anticheat purge </code></p>
+</li>
+</ul>
+<h4 id="acore-world"><a href="#acore-world" class="headerlink" title="acore_world"></a>acore_world</h4><p>表数据变更</p>
+<ul>
+<li>acore_string</li>
+<li>command</li>
+</ul>
+<h3 id="GM命令"><a href="#GM命令" class="headerlink" title="GM命令"></a>GM命令</h3><p><code>.anticheat</code> global Informs you if anticheat is turned on<br><code>.anticheat player</code> Tells you current auto reports<br><code>.anticheat delete PLAYERNAME</code> Deletes reports on player from anticheat system<br><code>.anticheat purge</code> completely clears the player_daily_reports table<br><code>.anticheat jail</code> Sends Player to gm jail which then shackles them and hearthstone binds them to gm jail.<br><code>.anticheat parole</code> Recommended to be used in gm jail, teles to faction capital and rebinds hearthstone there while clearing their reports and their deserter auras.<br><code>.anticheat warn</code> Sends player warning message that they are being monitored</p>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>单独记录日志文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># Anticheat mod 输出配置</span><br><span class="line">Appender.Anticheat=2,4,15,anticheat.log,a</span><br><span class="line">Logger.anticheat.module=4, Anticheat</span><br></pre></td></tr></table></figure>
+
+<h2 id="mod-eluna"><a href="#mod-eluna" class="headerlink" title="mod-eluna"></a>mod-eluna</h2><p>Eluna Lua Engine © 是嵌入到魔兽世界模拟器中的lua引擎。 Eluna支持MaNGOS，CMaNGOS，TrinityCore和AzerothCore。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-eluna/blob/master/README_CN.md">https://github.com/azerothcore/mod-eluna/blob/master/README_CN.md</a></p>
+<p>github<br><a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-eluna">https://github.com/azerothcore/mod-eluna</a></p>
+<p>gitee<br><a target="_blank" rel="noopener" href="https://gitee.com/forgkan/mod-eluna">https://gitee.com/forgkan/mod-eluna</a></p>
+<h3 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h3><p>modules 目录中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/azerothcore/mod-eluna.git mod-eluna</span><br></pre></td></tr></table></figure>
+<p>重新cmake编译。</p>
+<h2 id="mod-transmog"><a href="#mod-transmog" class="headerlink" title="mod-transmog"></a>mod-transmog</h2><p>幻化模块</p>
+<p>github<br><a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-transmog">https://github.com/azerothcore/mod-transmog</a></p>
+<p>gitee<br><a target="_blank" rel="noopener" href="https://gitee.com/forgkan/mod-transmog">https://gitee.com/forgkan/mod-transmog</a></p>
+<h3 id="安装-2"><a href="#安装-2" class="headerlink" title="安装"></a>安装</h3><p>modules 同上</p>
+<h3 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h3><h4 id="acore-characters-1"><a href="#acore-characters-1" class="headerlink" title="acore_characters"></a>acore_characters</h4><p>创建表</p>
+<ul>
+<li>custom_transmogrification</li>
+<li>custom_transmogrification_sets</li>
+<li>custom_unlocked_appearances</li>
+</ul>
+<h4 id="acore-world-1"><a href="#acore-world-1" class="headerlink" title="acore_world"></a>acore_world</h4><p>text:</p>
+<ul>
+<li>npc_text<br>插入id 601083,601084</li>
+<li>acore_string<br>插入entry 11100~11116</li>
+<li>command<ul>
+<li>transmog</li>
+<li>transmog add</li>
+<li>transmog sync</li>
+<li>transmog add set</li>
+</ul>
+</li>
+</ul>
+<p>npc:</p>
+<ul>
+<li>creature_template<br>新增 npc 190010</li>
+</ul>
+<h3 id="新增NPC"><a href="#新增NPC" class="headerlink" title="新增NPC"></a>新增NPC</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.npc add 190010</span><br></pre></td></tr></table></figure>
+
+<h2 id="mod-ah-bot"><a href="#mod-ah-bot" class="headerlink" title="mod-ah-bot"></a>mod-ah-bot</h2><p>github<br><a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-ah-bot">https://github.com/azerothcore/mod-ah-bot</a></p>
+<p>gitee<br><a target="_blank" rel="noopener" href="https://gitee.com/forgkan/mod-ah-bot">https://gitee.com/forgkan/mod-ah-bot</a></p>
+<h3 id="数据库-1"><a href="#数据库-1" class="headerlink" title="数据库"></a>数据库</h3><h4 id="acore-world-2"><a href="#acore-world-2" class="headerlink" title="acore_world"></a>acore_world</h4><p>新建表</p>
+<ul>
+<li>mod_auctionhousebot</li>
+<li>mod_auctionhousebot_disabled_items</li>
+</ul>
+<h2 id="mod-money-for-kills"><a href="#mod-money-for-kills" class="headerlink" title="mod-money-for-kills"></a>mod-money-for-kills</h2><p>github<br><a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-money-for-kills">https://github.com/azerothcore/mod-money-for-kills</a></p>
+<p>杀死玩家或怪物会根据等级奖励金币。</p>
+<p>这个mod 安装比较简单，直接放入 <code>modules</code> 目录即可，没有SQL。</p>
+<h2 id="mod-weekend-xp"><a href="#mod-weekend-xp" class="headerlink" title="mod-weekend-xp"></a>mod-weekend-xp</h2><p>github<br><a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-weekend-xp">https://github.com/azerothcore/mod-weekend-xp</a></p>
+<p>周末双倍经验MOD。</p>
+<h3 id="数据库-2"><a href="#数据库-2" class="headerlink" title="数据库"></a>数据库</h3><p>只是添加了 <code>acore_world.acore_string</code> 与 <code>acore_world.command</code>表数据。</p>
+<h2 id="mod-item-level-up"><a href="#mod-item-level-up" class="headerlink" title="mod-item-level-up"></a>mod-item-level-up</h2><p>github <a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-item-level-up">https://github.com/azerothcore/mod-item-level-up</a></p>
+<p>创建了一个ID 为 <code>701001</code>的物品，使用物品角色直接升级。</p>
+<h3 id="数据库-3"><a href="#数据库-3" class="headerlink" title="数据库"></a>数据库</h3><p>在 <code>acore_world.item_template</code> 表中增加了一件物品。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `item_template` <span class="keyword">VALUES</span></span><br><span class="line">(<span class="number">701001</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="string">&#x27;Level-Up Token&#x27;</span>, <span class="number">46787</span>, <span class="number">6</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1000</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">18282</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">8000</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="string">&#x27;|cff00FF00Use: Instantly levels your character to the next level.|r&#x27;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">-1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="string">&#x27;LevelItem&#x27;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">-4</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="mod-autobalance"><a href="#mod-autobalance" class="headerlink" title="mod-autobalance"></a>mod-autobalance</h2><p>github <a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-autobalance">https://github.com/azerothcore/mod-autobalance</a></p>
+<p>根据玩家人数动态调整BOSS的血量、魔法、伤害。此MOD也没有脚本。</p>
+<h2 id="mod-random-enchants-master"><a href="#mod-random-enchants-master" class="headerlink" title="mod-random-enchants-master"></a>mod-random-enchants-master</h2><p>github <a target="_blank" rel="noopener" href="https://github.com/Darkon47/mod-random-enchants-master">https://github.com/Darkon47/mod-random-enchants-master</a></p>
+<p>随机附魔</p>
+<h3 id="数据库-4"><a href="#数据库-4" class="headerlink" title="数据库"></a>数据库</h3><p>创建 <code>acore_world.item_enchantment_random_tiers</code> 表，并添加了一系列数据。</p>
+<h3 id="源码修改"><a href="#源码修改" class="headerlink" title="源码修改"></a>源码修改</h3><p>因为新版本的API有所改动，需要修改一下源码，<code>C++</code>语言的，照抄着其他的Mod源码改。<br><a target="_blank" rel="noopener" href="https://gitee.com/forgkan/mod-random-enchants-master/commit/535bd9cc75f34ff77b62d7766806717a55a60c59">https://gitee.com/forgkan/mod-random-enchants-master/commit/535bd9cc75f34ff77b62d7766806717a55a60c59</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/fun/" rel="tag"># fun</a>
+              <a href="/tags/wow/" rel="tag"># wow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/16/java/20221116-project-loom/" rel="prev" title="Understanding Java’s Project Loom">
+      <i class="fa fa-chevron-left"></i> Understanding Java’s Project Loom
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/21/java/20221121-java9-new-features/" rel="next" title="Java 9新特性">
+      Java 9新特性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E7%94%A8%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.</span> <span class="nav-text">通用安装步骤</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mod-anticheat"><span class="nav-number">2.</span> <span class="nav-text">mod-anticheat</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8F%98%E6%9B%B4"><span class="nav-number">2.2.</span> <span class="nav-text">数据库变更</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#acore-characters"><span class="nav-number">2.2.1.</span> <span class="nav-text">acore_characters</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#acore-world"><span class="nav-number">2.2.2.</span> <span class="nav-text">acore_world</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GM%E5%91%BD%E4%BB%A4"><span class="nav-number">2.3.</span> <span class="nav-text">GM命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.4.</span> <span class="nav-text">配置文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mod-eluna"><span class="nav-number">3.</span> <span class="nav-text">mod-eluna</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-1"><span class="nav-number">3.1.</span> <span class="nav-text">安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mod-transmog"><span class="nav-number">4.</span> <span class="nav-text">mod-transmog</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-2"><span class="nav-number">4.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">4.2.</span> <span class="nav-text">数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#acore-characters-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">acore_characters</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#acore-world-1"><span class="nav-number">4.2.2.</span> <span class="nav-text">acore_world</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E5%A2%9ENPC"><span class="nav-number">4.3.</span> <span class="nav-text">新增NPC</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mod-ah-bot"><span class="nav-number">5.</span> <span class="nav-text">mod-ah-bot</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93-1"><span class="nav-number">5.1.</span> <span class="nav-text">数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#acore-world-2"><span class="nav-number">5.1.1.</span> <span class="nav-text">acore_world</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mod-money-for-kills"><span class="nav-number">6.</span> <span class="nav-text">mod-money-for-kills</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mod-weekend-xp"><span class="nav-number">7.</span> <span class="nav-text">mod-weekend-xp</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93-2"><span class="nav-number">7.1.</span> <span class="nav-text">数据库</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mod-item-level-up"><span class="nav-number">8.</span> <span class="nav-text">mod-item-level-up</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93-3"><span class="nav-number">8.1.</span> <span class="nav-text">数据库</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mod-autobalance"><span class="nav-number">9.</span> <span class="nav-text">mod-autobalance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mod-random-enchants-master"><span class="nav-number">10.</span> <span class="nav-text">mod-random-enchants-master</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93-4"><span class="nav-number">10.1.</span> <span class="nav-text">数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E4%BF%AE%E6%94%B9"><span class="nav-number">10.2.</span> <span class="nav-text">源码修改</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

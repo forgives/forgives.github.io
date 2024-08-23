@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="从java8到java17 新特性 Oracle Java SE 的支持：Oracle Java SE Support Roadmap">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从java8到java17">
+<meta property="og:url" content="https://forgives.github.io/2022/11/04/java/20221104-java8-to-java17/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="从java8到java17 新特性 Oracle Java SE 的支持：Oracle Java SE Support Roadmap">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i4/O1CN01yVwghL1WIsJ3LiBFb_!!6000000002766-2-tps-2010-874.png">
+<meta property="article:published_time" content="2022-11-04T07:03:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.377Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="java8">
+<meta property="article:tag" content="java17">
+<meta property="article:tag" content="jdk">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/imgextra/i4/O1CN01yVwghL1WIsJ3LiBFb_!!6000000002766-2-tps-2010-874.png">
+
+<link rel="canonical" href="https://forgives.github.io/2022/11/04/java/20221104-java8-to-java17/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>从java8到java17 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/11/04/java/20221104-java8-to-java17/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          从java8到java17
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-11-04 15:03:00" itemprop="dateCreated datePublished" datetime="2022-11-04T15:03:00+08:00">2022-11-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>从java8到java17 新特性</p>
+<p>Oracle Java SE 的支持：<a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/java-se-support-roadmap.html">Oracle Java SE Support Roadmap</a><br><img src="https://img.alicdn.com/imgextra/i4/O1CN01yVwghL1WIsJ3LiBFb_!!6000000002766-2-tps-2010-874.png" alt="Oracle Java SE Support Roadmap"></p>
+<span id="more"></span>
+<p>内容较多，分几篇描述，Java 版本发布的太快了。半年一次，真的跟不上 :( 。</p>
+<p><a href="/2022/11/21/java/20221121-java9-new-features/">java 9 新特性</a><br><a href="/2022/11/24/java/20221124-java10-new-features/">java 10 新特性</a><br><a href="/2022/11/30/java/20221130-java11-new-features/">java 11 新特性</a><br><a href="/2022/12/10/java/20221210-java12-new-features/">java 12 新特性</a><br><a href="/2022/12/13/java/20221213-java13-new-features/">java 13 新特性</a><br><a href="/2022/12/19/java/20221219-java14-new-features/">java 14 新特性</a><br><a href="/2022/12/21/java/20221221-java15-new-features/">java 15 新特性</a><br><a href="/2022/12/23/java/20221223-java16-new-features/">java 16 新特性</a><br><a href="/2022/12/27/java/20221227-java17-new-features/">java 17 新特性</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>重要的新特性包含</p>
+<h3 id="密封类（sealed-class）"><a href="#密封类（sealed-class）" class="headerlink" title="密封类（sealed class）"></a>密封类（sealed class）</h3><h3 id="增强的空指针异常"><a href="#增强的空指针异常" class="headerlink" title="增强的空指针异常"></a>增强的空指针异常</h3><h3 id="swtich类型匹配"><a href="#swtich类型匹配" class="headerlink" title="swtich类型匹配"></a>swtich类型匹配</h3><h3 id="文本块"><a href="#文本块" class="headerlink" title="文本块"></a>文本块</h3><h3 id="record记录类"><a href="#record记录类" class="headerlink" title="record记录类"></a>record记录类</h3><h3 id="G1-垃圾收集器"><a href="#G1-垃圾收集器" class="headerlink" title="G1 垃圾收集器"></a>G1 垃圾收集器</h3><h3 id="ZGC"><a href="#ZGC" class="headerlink" title="ZGC"></a>ZGC</h3><h3 id="还有一些语法的增强"><a href="#还有一些语法的增强" class="headerlink" title="还有一些语法的增强"></a>还有一些语法的增强</h3><ul>
+<li>支持 List.of()、Set.of()、Map.of()和Map.ofEntries()等工厂方法实例化对象</li>
+<li>Stream API 有一些改进，比如 <code>.collect(Collectors.toList())</code>可以直接 <code>.toList()</code>了，还增加了 <code>Collectors.teeing()</code></li>
+<li><code>HttpClient</code>重写了，支持 HTTP2.0，不用再因为嫌弃 <code>HttpClient</code> 而使用第三方网络框架了，比如OKHTTP</li>
+<li>等等</li>
+</ul>
+<h3 id="ps"><a href="#ps" class="headerlink" title="ps"></a>ps</h3><p>这里推荐一个JDK的下载网站，可以快速下载各个平台各个版本的JDK：<a target="_blank" rel="noopener" href="https://adoptium.net/">https://adoptium.net/</a></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>Java Se 的各个版本下载<br><a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/downloads/archive/">https://www.oracle.com/java/technologies/downloads/archive/</a></p>
+<p>各版本的发布记录<br><a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/javase/jdk-relnotes-index.html">https://www.oracle.com/java/technologies/javase/jdk-relnotes-index.html</a></p>
+<p>jdk8-17的变化<br><a target="_blank" rel="noopener" href="https://ondro.inginea.eu/index.php/new-features-in-java-versions-since-java-8/">https://ondro.inginea.eu/index.php/new-features-in-java-versions-since-java-8/</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/en/java/javase/18/migrate/migrating-jdk-8-later-jdk-releases.html">https://docs.oracle.com/en/java/javase/18/migrate/migrating-jdk-8-later-jdk-releases.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.marcobehler.com/guides/a-guide-to-java-versions-and-features">https://www.marcobehler.com/guides/a-guide-to-java-versions-and-features</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.oxings.com/article/31.html">https://blog.oxings.com/article/31.html</a></p>
+<p>从jdk8升级到jdk17 <a target="_blank" rel="noopener" href="https://blog.csdn.net/a__int__/article/details/127194586">https://blog.csdn.net/a__int__/article/details/127194586</a></p>
+<p>各个版本的 Features</p>
+<ul>
+<li>Java 6 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk6/">https://openjdk.java.net/projects/jdk6/</a></li>
+<li>Java 7 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk7/">https://openjdk.java.net/projects/jdk7/</a></li>
+<li>Java 8 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk8/">https://openjdk.java.net/projects/jdk8/</a></li>
+<li>Java 9 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk9/">https://openjdk.java.net/projects/jdk9/</a></li>
+<li>Java 10 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk/10/">https://openjdk.java.net/projects/jdk/10/</a></li>
+<li>Java 11 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk/11/">https://openjdk.java.net/projects/jdk/11/</a></li>
+<li>Java 12 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk/12/">https://openjdk.java.net/projects/jdk/12/</a></li>
+<li>Java 13 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk/13/">https://openjdk.java.net/projects/jdk/13/</a></li>
+<li>Java 14 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk/14/">https://openjdk.java.net/projects/jdk/14/</a></li>
+<li>Java 15 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk/15/">https://openjdk.java.net/projects/jdk/15/</a></li>
+<li>Java 16 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk/16/">https://openjdk.java.net/projects/jdk/16/</a></li>
+<li>Java 17 Features: <a target="_blank" rel="noopener" href="https://openjdk.java.net/projects/jdk/17/">https://openjdk.java.net/projects/jdk/17/</a></li>
+</ul>
+<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><p>JEP: <code>The JDK Enhancement Proposal</code> JDK增强建议</p>
+<p>JSR: <code>Java Specification Requests</code> Java规范提案</p>
+<p>JCP: <code>Java Community Process</code> Java社区标准过程 ， a method of handling software requests</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java8/" rel="tag"># java8</a>
+              <a href="/tags/java17/" rel="tag"># java17</a>
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/11/02/note/20221102-learn-rust/" rel="prev" title="Rust学习资料">
+      <i class="fa fa-chevron-left"></i> Rust学习资料
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/10/java/20221110-spring-util/" rel="next" title="Spring 提供的Util工具类">
+      Spring 提供的Util工具类 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%86%E5%B0%81%E7%B1%BB%EF%BC%88sealed-class%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">密封类（sealed class）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A2%9E%E5%BC%BA%E7%9A%84%E7%A9%BA%E6%8C%87%E9%92%88%E5%BC%82%E5%B8%B8"><span class="nav-number">1.2.</span> <span class="nav-text">增强的空指针异常</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#swtich%E7%B1%BB%E5%9E%8B%E5%8C%B9%E9%85%8D"><span class="nav-number">1.3.</span> <span class="nav-text">swtich类型匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%9C%AC%E5%9D%97"><span class="nav-number">1.4.</span> <span class="nav-text">文本块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#record%E8%AE%B0%E5%BD%95%E7%B1%BB"><span class="nav-number">1.5.</span> <span class="nav-text">record记录类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1-%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8"><span class="nav-number">1.6.</span> <span class="nav-text">G1 垃圾收集器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ZGC"><span class="nav-number">1.7.</span> <span class="nav-text">ZGC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%98%E6%9C%89%E4%B8%80%E4%BA%9B%E8%AF%AD%E6%B3%95%E7%9A%84%E5%A2%9E%E5%BC%BA"><span class="nav-number">1.8.</span> <span class="nav-text">还有一些语法的增强</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ps"><span class="nav-number">1.9.</span> <span class="nav-text">ps</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">2.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-number">3.</span> <span class="nav-text">名词解释</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="转自: Accidentally Quadratic">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rust hash iteration reinsertion">
+<meta property="og:url" content="https://forgives.github.io/2022/01/26/note/rust-hash-iteration-reinsertion/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="转自: Accidentally Quadratic">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i3/O1CN01l8cnme1FsHP2ZSFDv_!!6000000000542-2-tps-500-375.png">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i3/O1CN01Fy27SX1RuMawy49Tn_!!6000000002171-2-tps-500-375.png">
+<meta property="article:published_time" content="2022-01-26T06:53:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.391Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="map">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/imgextra/i3/O1CN01l8cnme1FsHP2ZSFDv_!!6000000000542-2-tps-500-375.png">
+
+<link rel="canonical" href="https://forgives.github.io/2022/01/26/note/rust-hash-iteration-reinsertion/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>rust hash iteration reinsertion | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/01/26/note/rust-hash-iteration-reinsertion/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          rust hash iteration reinsertion
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-26 14:53:00" itemprop="dateCreated datePublished" datetime="2022-01-26T14:53:00+08:00">2022-01-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Rust/" itemprop="url" rel="index"><span itemprop="name">Rust</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>转自: <a target="_blank" rel="noopener" href="https://accidentallyquadratic.tumblr.com/post/153545455987/rust-hash-iteration-reinsertion">Accidentally Quadratic</a></p>
+<span id="more"></span>
+
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>It was recently discovered that some surprising operations on Rust’s standard hash table types could go quadratic.</p>
+<p>Perhaps the simplest illustration is this snippet from a comment, here simplified even further:</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::collections::hash_set::HashSet;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;populating...&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">one</span> = HashSet::<span class="title function_ invoke__">new</span>();</span><br><span class="line">    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">1</span>..<span class="number">5000000</span> &#123;</span><br><span class="line">        one.<span class="title function_ invoke__">insert</span>(i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">&quot;cloning...&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">two</span> = HashSet::<span class="title function_ invoke__">new</span>();</span><br><span class="line">    <span class="keyword">for</span> <span class="variable">v</span> <span class="keyword">in</span> one &#123;</span><br><span class="line">        two.<span class="title function_ invoke__">insert</span>(v);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>In this example, the first loop (populating one) finishes fairly quickly, as you would expect, but the second loop (copying into two) takes much, much longer.</p>
+<p>I enjoy this bug for at least two reasons: One, it’s fun technically, allowing us to take a brief deep dive into hash-table implementation – something most of us are normally able to treat as a solved problem – and two, it’s a great example of subtle quadratic behavior in a system specifically designed by smart and well-informed developers to avoid the possibility of accidental quadratic behavior!</p>
+<h3 id="Robin-Hood-hashing"><a href="#Robin-Hood-hashing" class="headerlink" title="Robin-Hood hashing"></a>Robin-Hood hashing</h3><p>To understand the bug, we’re going to need to understand the hash table strategy used by Rust’s standard hash tables. A major challenge in any general-purpose hash table implementation is how to handle hash collisions; If you have a table with N buckets, eventually you’ll get two elements with the same value of hashcode%N, and what do you do?</p>
+<p>Rust uses Robin Hood hashing, a relatively old technique that’s recently received new attention. Robin Hood hashing is a variation on good old open addressing with linear probing, with a small twist.</p>
+<p>First, let’s refresh our memory:</p>
+<p>In hash tables, “open addressing” refers to the technique of, upon encountering a collision, somehow selecting an alternate location in the hash table. It’s most commonly contrasted with “chaining”, in which you store multiple entries in a single hash bucket, typically using a linked list.</p>
+<p>Linear probing, in particular, means that select alternate buckets by scanning forward from the natural bucket. If you try to insert an element with hash code H into a table with N buckets, and bucket H%N is full, you try (H+1)%N, (H+2)%N and so on, until you find an empty bucket. On lookup, you start at H%N and scan forward until you find your element or an empty bucket.</p>
+<p>Open addressing with linear probing is arguably the simplest possible general-purpose hash table implementation, and it can work fine (assuming a good hash function) as long as you don’t let your load factor get too high (reminder: the load factor is the number of elements stored in the table, divided by the number of buckets in the hash table. A load factor of 0.5 means that half the buckets are in use). If your load factor gets too high, then elements can end up extremely far from their natural hash bucket, necessitating a lot of scanning on inserts and lookups.</p>
+<p>Robin Hood hashing improves on linear probing with a simple trick: When you’re scanning forward from H%N, look at each element you encounter. If the inserting element is further from its “natural” bucket than the element in the bucket you’re considering, then swap the new element and the element in that bucket, and continue scanning with the other element.</p>
+<p>Let’s consider an example. Imagine this is a subset of a hash table; I’ve labeled each bucket below it with its index, and inside the bucket I’ve placed hashcode%N, what I’ve been calling the “natural” index of an element:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+---+---+---+---+---+</span><br><span class="line">| 0 | 0 | 2 | 1 |   | ...</span><br><span class="line">+---+---+---+---+---+</span><br><span class="line">  0   1   2   3   4</span><br></pre></td></tr></table></figure>
+<p>Now suppose we want to insert an element with hash%N &#x3D;&#x3D; 1. We start at bucket 1, and find it full. The element in that bucket is at index 1 and wants to be at index 0, so it’s further from home than our new element is. We keep looking. At index 2 we find an element with natural index of 2. It is a distance 0 from home, and we’re a distance 1, which is further. So we place our new element at index 2, and pick up whatever element used to be there, and continue. Eventually, we end up with:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+---+---+---+---+---+</span><br><span class="line">| 0 | 0 | 1 | 1 | 2 | ...</span><br><span class="line">+---+---+---+---+---+</span><br><span class="line">  0   1   2   3   4</span><br></pre></td></tr></table></figure>
+
+<p>The net result of this process is to reduce the variance of how far out-of-position elements are. Reducing variance means we have much more predictable insert and lookup times, which is strongly desirable. When we employ robin hood hashing, we can safely load a table up to a load factor of 90% or even 95%. We can even prove (as the author of the original paper did) fairly tight bounds on the expected maximum probe distance.</p>
+<h3 id="The-Problem"><a href="#The-Problem" class="headerlink" title="The Problem"></a>The Problem</h3><p>Rust’s problem arises when you iterate over one table and insert the resulting entries into another table. The problem occurs because iteration over a hash table procedes by walking the backing array of the hash table directly. This results in yielding entries approximately in hash order, which turns out to be fatal when combined with the other elements of Rust’s implemention.</p>
+<p>The final detail we need to know in order to understand the bug is Rust’s table-sizing algorithm. Rust uses power-of-two sized tables (a common technique, since it means you can use bitmasks instead of more-expensive modulus), and grows tables when they reach a 90% load factor.</p>
+<p>Now, let’s consider what happens when we execute the above example. For simplicity, we’ll pretend that two starts out with a table size of half of one’s. In reality it will start out extremely small and grow through powers of two, but the half-size case exhibits the necessary behavior and is simpler for illustration. We can modify the above example to initialize two as let two &#x3D; HashSet::with_capacity(one.capacity()&#x2F;2); to verify that this still exhibits quadratic behavior.</p>
+<p>So, let’s consider what happens as we start copying one into a two half its size. Things procede uneventually for the first half of the table; Because two has half as many buckets as one, hash%two.raw_capacity() &#x3D;&#x3D; hash%one.raw_capacity() for the first half of the table, and elements are inserted into two in approximately the same indexes as they had in one. Because elements have been reordered slightly in one by the insertion process we occasionally have to search slightly, but never far, because most of the space to the right is still free. So, as we go, the picture looks something like (where Xs are filled buckets, and dots are empty):</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">one:    |XX.XX.XXXX.XXXXXX.XXX..XXX|</span><br><span class="line">                 ^-- cursor</span><br><span class="line">two:    |X.XXXX.XX....|</span><br></pre></td></tr></table></figure>
+<p>However, eventually we reach the midpoint of one’s table. At this point, indexes in two’s half-sized table wrap around, and we start searching for openings beginning near the start of two once again.</p>
+<p>At this point, two’s load factor is approximately equal to that of one; it has half as many buckets, and approximately half as many elements. Because Rust resizes tables at a 90% load factor, we know one’s load factor to be between 45% and 90%. If we suppose by way of example that one is at a 70% factor, two can absorb 20% of its capacity past one’s half-way point until it will resize.</p>
+<p>During the insertion of that additional 20% of two’s capacity (constituting something like 70% * 10% &#x3D; 7% of one’s elements), we run into trouble.</p>
+<p>We begin inserting at the beginning of two. two is 70% full, so as we insert we search to the right until we find an empty bucket.</p>
+<p>However, “immediately to the right” is also where our future inserts will land, since we’re walking two in bucket order. And so, as we go, the position at which we attempt an insertion marches forward at a rate of one bucket per bucket in one; But the insertions all “stack up”, pushing the distance-until-empty forward at greater than one bucket per bucket, since we must also contend with the 70% of buckets already full. The situation rapidly looks something more like:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">one:    |XX.XX.XXXX.XXXXXX.XXX..XXX|</span><br><span class="line">                           ^-- cursor</span><br><span class="line">two:    |XXXXXXX.X.....|</span><br><span class="line">            ^-- cursor/2</span><br></pre></td></tr></table></figure>
+<p>With each element we insert, we must search further and further to the right to find the empty spaces in two. This is, essentially, a classic triangular pattern, and definitely quadratic.</p>
+<p>This pattern continues until we fill up two to 90% capacity; At that point, two will be resized, and performance will go back to something reasonable. However, even though the quadratic regime covers only a small fraction of the middle of the loop, it’s an approximately-constant fraction, and so the quadratic behavior is still quadratic.</p>
+<p>We can demonstrate this, visually. If we augment the above program to measure the cumulative time to insert N elements into two, we observe the above behavior:<br><img src="https://img.alicdn.com/imgextra/i3/O1CN01l8cnme1FsHP2ZSFDv_!!6000000000542-2-tps-500-375.png" alt="elements inserted"></p>
+<p>We can see the exact behavior I described – efficient performance for the first half, a quadratic explosion, and then a return to efficiency.</p>
+<p>If we don’t preallocate capacity&#x2F;2 elements, we can see the full picture:<br><img src="https://img.alicdn.com/imgextra/i3/O1CN01Fy27SX1RuMawy49Tn_!!6000000002171-2-tps-500-375.png" alt="elements inserted"></p>
+<p>It is an essentially similar picture, except that the quadratic breakdown happens prior to each resize of the underlying table.</p>
+<h3 id="The-Fix"><a href="#The-Fix" class="headerlink" title="The Fix"></a>The Fix</h3><p>Rust is working around the issue by reseeding the underlying SipHash hashing algorithm on a per-table basis. This solves the problem very thoroughly, by ensuring that the order of elements in two different tables has no correlation to each other, restoring all the nice assumptions about independence that make Robin Hood hashing work. They’re also speculating about a more fundamental fix to the hash table implementation, so that users who drop in a different hash algorithm are not again vulnerable. One proposal is that hash tables ought to retain their insertion order, since this bug is much less likely to happen if tables do not leak their hash order.</p>
+<h3 id="Concluding-Thoughts"><a href="#Concluding-Thoughts" class="headerlink" title="Concluding Thoughts"></a>Concluding Thoughts</h3><p>This was a subtle bug. Rust’s hash tables were very carefully thought by experienced developers well-versed in the literature and practice of deliberate quadratic attacks on hash tables. They selected an algorithm, a hashing algorithm (SipHash) and developed an implementation specifically to avoid such anomalies. But quadratics are sneaky creatures, and unexpected correlations can bite any algorithm based on statistical independence.</p>
+<p>For my part, this was one of the harder bugs I’ve written up to understand. When the ticket was initially linked to me, I had to read it several times and read up on robin hood hashing and try several approaches to developing intuitions about the system before it began to make sense to me. But even then, when I sat down to write this post, I realized I had oversimplified it in my head and my explanation was wrong! I had to resort to a lot of experimentation with the above test case before I was confident I understood the dynamics.</p>
+<p>Surprisingly to me, the specific dynamics of Robin Hood hashing end up being relatively unimportant here; I believe that vanilla linear probing would exhibit similar behaviors. The key effect of Robin Hood hashing is just that it gives you confidence and&#x2F;or hubris to push a table to 90% capacity, which greatly exacerbates the problem.</p>
+<p>Definitely a keeper of a bug.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>rust有迭代重新插入的问题的原因归结于：</p>
+<ol>
+<li>Robin-Hood hash算法，采用了线形探测</li>
+<li>HashSet的扩容是容量大于90%后扩容的大小向上取按2的次方的容量</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://lemire.me/blog/2017/01/30/maps-and-sets-can-have-quadratic-time-performance/">Maps and sets can have quadratic-time performance</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.sebastiansylvan.com/post/robin-hood-hashing-should-be-your-default-hash-table-implementation/">Robin Hood Hashing should be your default Hash Table implementation</a></p>
+<p><a target="_blank" rel="noopener" href="https://accidentallyquadratic.tumblr.com/post/153545455987/rust-hash-iteration-reinsertion">rust-hash-iteration-reinsertion</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/gaochundong/p/hashtable_and_perfect_hashing.html">哈希表和完美哈希</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/map/" rel="tag"># map</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/11/22/db/mysql-bit/" rel="prev" title="mysql位操作概述">
+      <i class="fa fa-chevron-left"></i> mysql位操作概述
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/02/17/note/the-phoenix-project/" rel="next" title="凤凰架构读书笔记">
+      凤凰架构读书笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E6%96%87"><span class="nav-number">1.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Robin-Hood-hashing"><span class="nav-number">1.1.</span> <span class="nav-text">Robin-Hood hashing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#The-Problem"><span class="nav-number">1.2.</span> <span class="nav-text">The Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#The-Fix"><span class="nav-number">1.3.</span> <span class="nav-text">The Fix</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Concluding-Thoughts"><span class="nav-number">1.4.</span> <span class="nav-text">Concluding Thoughts</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

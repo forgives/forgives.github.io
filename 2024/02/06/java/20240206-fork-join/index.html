@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近需要递归查询组织架构人员信息，比较契合 Fork&#x2F;Join 框架的思想，复习一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fork&#x2F;Join 框架">
+<meta property="og:url" content="https://forgives.github.io/2024/02/06/java/20240206-fork-join/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="最近需要递归查询组织架构人员信息，比较契合 Fork&#x2F;Join 框架的思想，复习一下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://forgives.github.io/res/20240206214501.png">
+<meta property="article:published_time" content="2024-02-06T13:12:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.380Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://forgives.github.io/res/20240206214501.png">
+
+<link rel="canonical" href="https://forgives.github.io/2024/02/06/java/20240206-fork-join/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Fork/Join 框架 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2024/02/06/java/20240206-fork-join/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Fork/Join 框架
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-02-06 21:12:00" itemprop="dateCreated datePublished" datetime="2024-02-06T21:12:00+08:00">2024-02-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近需要递归查询组织架构人员信息，比较契合 Fork&#x2F;Join 框架的思想，复习一下。</p>
+<span id="more"></span>  
+
+<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><p>Java 7 introduced the fork&#x2F;join framework. It provides tools to help speed up parallel processing by attempting to use all available processor cores. It accomplishes this through a divide and conquer approach.<br>(核心就是分治的思想，同<code>MapReduce</code>)</p>
+<p>In practice, this means that the framework first “forks”, recursively breaking the task into smaller independent subtasks until they are simple enough to run asynchronously.<br>(递归的拆分成小任务，然后异步执行)</p>
+<p>After that, the “join” part begins. The results of all subtasks are recursively joined into a single result. In the case of a task that returns void, the program simply waits until every subtask runs.<br>(MapReduce 的的reduce部分，上面拆分的任务结果合并，见下图)</p>
+<p><img src="/res/20240206214501.png" alt="20240206214501.png"></p>
+<p>To provide effective parallel execution, the fork&#x2F;join framework uses a pool of threads called the <code>ForkJoinPool</code>. This pool manages worker threads of type ForkJoinWorkerThread.<br>(使用<code>ForkJoinPool</code>来提高并行执行的效率)</p>
+<h2 id="ForkJoinPool"><a href="#ForkJoinPool" class="headerlink" title="ForkJoinPool"></a>ForkJoinPool</h2><p>The <code>ForkJoinPool</code> is the heart of the framework. It is an implementation of the <code>ExecutorService</code> that manages worker threads and provides us with tools to get information about the thread pool state and performance.<br>(<code>ForkJoinPool</code>是框架的核心，实现了<code>ExecutorService</code>接口)</p>
+<p>Worker threads can execute only one task at a time, but the <code>ForkJoinPool</code> doesn’t create a separate thread for every single subtask.<br>Instead, each thread in the pool has its own double-ended queue (or deque, pronounced “deck”) that stores tasks.<br>(不是为每个任务都创建一个独立的执行线程，而是<strong>固定的工作线程数</strong>，每个工作线程都有自己的<strong>双端队列</strong>，然后使用下面的<strong>任务窃取算法</strong>来平衡每个线程的任务量)</p>
+<p>This architecture is vital(必不可少的) for balancing the thread’s workload with the help of the <strong>work-stealing algorithm</strong>.</p>
+<h3 id="Work-Stealing-Algorithm"><a href="#Work-Stealing-Algorithm" class="headerlink" title="Work-Stealing Algorithm"></a>Work-Stealing Algorithm</h3><p>Simply put(简而言之), free threads try to “steal” work from deques of busy threads.<br>(任务窃取算法简单说就是 <strong>没有工作任务的线程从繁忙线程的双端队列中窃取任务执行</strong>)</p>
+<p>By default, a worker thread gets tasks from the head of its own deque. When it is empty, the thread takes a task from the tail of the deque of another busy thread or from the global entry queue since this is where the biggest pieces of work are likely to be located.<br>(为什么是双端队列，因为自己线程获取任务是从队头，而窃取任务是从队尾获取任务。分别从两头来取任务减少对任务资源的竞争)</p>
+<p>This approach minimizes the possibility that threads will compete for tasks. It also reduces the number of times the thread will have to go looking for work, as it works on the biggest available chunks of work first.</p>
+<h3 id="ForkJoinPool-Instantiation"><a href="#ForkJoinPool-Instantiation" class="headerlink" title="ForkJoinPool Instantiation"></a>ForkJoinPool Instantiation</h3><p>In Java 8, the most convenient way to get access to the instance of the <code>ForkJoinPool</code> is to use its static method <code>commonPool()</code>. This will provide a reference to the common pool, which is a default thread pool for every ForkJoinTask.</p>
+<p>According to Oracle’s documentation, using the predefined common pool reduces resource consumption(消耗) since this discourages the creation of a separate thread pool per task.<br>(使用预先定义的<code>commonPool</code>可以减少资源消耗。下面总结说了，一个应用最好只用一个<code>ForkJoinPool</code>)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ForkJoinPool</span> <span class="variable">commonPool</span> <span class="operator">=</span> ForkJoinPool.commonPool();</span><br></pre></td></tr></table></figure>
+
+<p>We can achieve the same behavior in Java 7 by creating a ForkJoinPool and assigning it to a public static field of a utility class:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">ForkJoinPool</span> <span class="variable">forkJoinPool</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ForkJoinPool</span>(<span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<p>Now we can easily access it:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ForkJoinPool</span> <span class="variable">forkJoinPool</span> <span class="operator">=</span> PoolUtil.forkJoinPool;</span><br></pre></td></tr></table></figure>
+
+<p>With ForkJoinPool’s constructors, we can create a custom thread pool with a specific level of parallelism, thread factory and exception handler. Here the pool has a parallelism level of 2. This means that pool will use two processor cores.<br>(通常来说并行度一般定义成CPU的核数, <code>commonPool</code>是<em>CPU核数-1</em> <code>int parallelism = Math.max(1, Runtime.getRuntime().availableProcessors() - 1)</code>)</p>
+<h2 id="ForkJoinTask"><a href="#ForkJoinTask" class="headerlink" title="ForkJoinTask"></a>ForkJoinTask<V></h2><p><code>ForkJoinTask</code> is the base type for tasks executed inside <code>ForkJoinPool</code>. In practice, one of its two subclasses should be extended: the <code>RecursiveAction</code> for void tasks and the <code>RecursiveTask&lt;V&gt;</code> for tasks that return a value. They both have an abstract method <code>compute()</code> in which the task’s logic is defined.<br>(<code>ForkJoinTask</code>是<code>ForkJoinPool</code>中执行的任务的抽象类，有两个继承类：<code>RecursiveAction</code>和<code>RecursiveTask</code>，<code>RecursiveAction</code>不关心返回值，<code>RecursiveTask</code>有返回值)</p>
+<h3 id="RecursiveAction"><a href="#RecursiveAction" class="headerlink" title="RecursiveAction"></a>RecursiveAction</h3><p>In the example below, we use a String called workload to represent the unit of work to be processed. For demonstration purposes, the task is a nonsensical one: It simply uppercases its input and logs it.</p>
+<p>To demonstrate the forking behavior of the framework, the example splits the task if workload.length() is larger than a specified threshold using the createSubtask() method.</p>
+<p>The String is recursively divided into substrings, creating CustomRecursiveTask instances that are based on these substrings.</p>
+<p>As a result, the method returns a List<CustomRecursiveAction>.</p>
+<p>The list is submitted to the ForkJoinPool using the invokeAll() method:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CustomRecursiveAction</span> <span class="keyword">extends</span> <span class="title class_">RecursiveAction</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">String</span> <span class="variable">workload</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">THRESHOLD</span> <span class="operator">=</span> <span class="number">4</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">Logger</span> <span class="variable">logger</span> <span class="operator">=</span> </span><br><span class="line">      Logger.getAnonymousLogger();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">CustomRecursiveAction</span><span class="params">(String workload)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.workload = workload;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">compute</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (workload.length() &gt; THRESHOLD) &#123;</span><br><span class="line">            ForkJoinTask.invokeAll(createSubtasks());</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           processing(workload);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;CustomRecursiveAction&gt; <span class="title function_">createSubtasks</span><span class="params">()</span> &#123;</span><br><span class="line">        List&lt;CustomRecursiveAction&gt; subtasks = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">partOne</span> <span class="operator">=</span> workload.substring(<span class="number">0</span>, workload.length() / <span class="number">2</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">partTwo</span> <span class="operator">=</span> workload.substring(workload.length() / <span class="number">2</span>, workload.length());</span><br><span class="line"></span><br><span class="line">        subtasks.add(<span class="keyword">new</span> <span class="title class_">CustomRecursiveAction</span>(partOne));</span><br><span class="line">        subtasks.add(<span class="keyword">new</span> <span class="title class_">CustomRecursiveAction</span>(partTwo));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> subtasks;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processing</span><span class="params">(String work)</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> work.toUpperCase();</span><br><span class="line">        logger.info(<span class="string">&quot;This result - (&quot;</span> + result + <span class="string">&quot;) - was processed by &quot;</span> </span><br><span class="line">          + Thread.currentThread().getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>We can use this pattern to develop our own <code>RecursiveAction</code> classes. To do this, we create an object that represents the total amount of work, chose a suitable threshold, define a method to divide the work and define a method to do the work.</p>
+<h3 id="RecursiveTask"><a href="#RecursiveTask" class="headerlink" title="RecursiveTask"></a>RecursiveTask<V></h3><p>For tasks that return a value, the logic here is similar.</p>
+<p>The difference is that the result for each subtask is united in a single result:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CustomRecursiveTask</span> <span class="keyword">extends</span> <span class="title class_">RecursiveTask</span>&lt;Integer&gt; &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span>[] arr;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">THRESHOLD</span> <span class="operator">=</span> <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">CustomRecursiveTask</span><span class="params">(<span class="type">int</span>[] arr)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.arr = arr;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> Integer <span class="title function_">compute</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (arr.length &gt; THRESHOLD) &#123;</span><br><span class="line">            <span class="keyword">return</span> ForkJoinTask.invokeAll(createSubtasks())</span><br><span class="line">              .stream()</span><br><span class="line">              .mapToInt(ForkJoinTask::join)</span><br><span class="line">              .sum();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> processing(arr);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Collection&lt;CustomRecursiveTask&gt; <span class="title function_">createSubtasks</span><span class="params">()</span> &#123;</span><br><span class="line">        List&lt;CustomRecursiveTask&gt; dividedTasks = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        dividedTasks.add(<span class="keyword">new</span> <span class="title class_">CustomRecursiveTask</span>(</span><br><span class="line">          Arrays.copyOfRange(arr, <span class="number">0</span>, arr.length / <span class="number">2</span>)));</span><br><span class="line">        dividedTasks.add(<span class="keyword">new</span> <span class="title class_">CustomRecursiveTask</span>(</span><br><span class="line">          Arrays.copyOfRange(arr, arr.length / <span class="number">2</span>, arr.length)));</span><br><span class="line">        <span class="keyword">return</span> dividedTasks;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Integer <span class="title function_">processing</span><span class="params">(<span class="type">int</span>[] arr)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Arrays.stream(arr)</span><br><span class="line">          .filter(a -&gt; a &gt; <span class="number">10</span> &amp;&amp; a &lt; <span class="number">27</span>)</span><br><span class="line">          .map(a -&gt; a * <span class="number">10</span>)</span><br><span class="line">          .sum();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>In this example, we use an array stored in the arr field of the CustomRecursiveTask class to represent the work. The createSubtasks() method recursively divides the task into smaller pieces of work until each piece is smaller than the threshold. Then the <code>invokeAll()</code> method submits the subtasks to the common pool and returns a list of Future.</p>
+<p>To trigger execution, the <code>join()</code> method is called for each subtask.<br>(这里描述的有问题，不是<code>join</code>触发任务执行。 <strong><code>join</code>只是等待任务执行完毕获取结果</strong> ， <strong><code>fork</code>或<code>invokeAll</code>是把任务放入线程的任务队列等待执行并立即返回</strong> ，任务被工作线程获取到了就会执行，不会等到<code>join</code>才触发执行，比如<code>RecursiveAction</code>没有<code>join</code>也会执行任务)</p>
+<p>We’ve accomplished this here using Java 8’s Stream API. We use the sum() method as a representation of combining sub results into the final result.</p>
+<h2 id="Submitting-Tasks-to-the-ForkJoinPool"><a href="#Submitting-Tasks-to-the-ForkJoinPool" class="headerlink" title="Submitting Tasks to the ForkJoinPool"></a>Submitting Tasks to the ForkJoinPool</h2><p>We can use a few approaches to submit tasks to the thread pool.</p>
+<p>Let’s start with the <code>submit()</code> or <code>execute()</code> method (their use cases are the same):</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">forkJoinPool.execute(customRecursiveTask);</span><br><span class="line">int result = customRecursiveTask.join();</span><br></pre></td></tr></table></figure>
+<p>The <code>invoke()</code> method forks the task and waits for the result, and doesn’t need any manual joining:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int result = forkJoinPool.invoke(customRecursiveTask);</span><br></pre></td></tr></table></figure>
+<p>(通常直接使用<code>invoke()</code>方法就可以了)</p>
+<p>The <code>invokeAll()</code> method is the most convenient way to submit a sequence of <code>ForkJoinTasks</code> to the <code>ForkJoinPool</code>. It takes tasks as parameters (two tasks, var args or a collection), forks and then <strong>returns a collection of Future objects in the order</strong> in which they were produced.</p>
+<p>Alternatively, we can use separate <code>fork()</code> and <code>join()</code> methods. The <code>fork()</code> method submits a task to a pool, <del>but it doesn’t trigger its execution</del>, <del>We must use the <code>join()</code> method for this purpose</del>(<strong>这里错了</strong>).</p>
+<p>In the case of <code>RecursiveAction</code>, the <code>join()</code> returns nothing but <strong>null</strong>; for <code>RecursiveTask&lt;V&gt;</code>, it returns the result of the task’s execution:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">customRecursiveTaskFirst.fork();</span><br><span class="line">result = customRecursiveTaskLast.join();</span><br></pre></td></tr></table></figure>
+<p>Here we used the invokeAll() method to submit a sequence of subtasks to the pool. We can do the same job with fork() and join(), though this has consequences for the ordering of the results.</p>
+<p>To avoid confusion, it is generally a good idea to use invokeAll() method to submit more than one task to the ForkJoinPool.<br>(用<code>invokeAll()</code>提交多个任务)</p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>Using the fork&#x2F;join framework can speed up processing of large tasks, but to achieve this outcome, we should follow some guidelines:</p>
+<ol>
+<li><strong>Use as few thread pools as possible</strong>. In most cases, the best decision is to use one thread pool per application or system.(使用尽可能少的线程池)</li>
+<li><strong>Use the default common thread pool</strong> if no specific tuning is needed.(使用默认的<code>commonPool</code>)</li>
+<li><strong>Use a reasonable threshold</strong> for splitting ForkJoinTask into subtasks.(使用合理的阈值切分子任务)</li>
+<li><strong>Avoid any blocking in ForkJoinTasks</strong>.(避免在ForkJoinTask中使用阻塞)</li>
+</ol>
+<h2 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.baeldung.com/java-fork-join">Guide to the Fork&#x2F;Join Framework in Java</a></li>
+<li><a target="_blank" rel="noopener" href="https://java-8-tips.readthedocs.io/en/stable/forkjoin.html">ForkJoinPool</a></li>
+<li><a target="_blank" rel="noopener" href="https://howtodoinjava.com/java/forkjoin-framework-tutorial-forkjoinpool-example/">Java Fork&#x2F;Join Framework Tutorial</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/02/03/book/20240203-pysdmx/" rel="prev" title="<平原上的摩西>">
+      <i class="fa fa-chevron-left"></i> <平原上的摩西>
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/02/18/fun/20240218-the-diamond-sutra/" rel="next" title="金刚经">
+      金刚经 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Overview"><span class="nav-number">1.</span> <span class="nav-text">Overview</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ForkJoinPool"><span class="nav-number">2.</span> <span class="nav-text">ForkJoinPool</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Work-Stealing-Algorithm"><span class="nav-number">2.1.</span> <span class="nav-text">Work-Stealing Algorithm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ForkJoinPool-Instantiation"><span class="nav-number">2.2.</span> <span class="nav-text">ForkJoinPool Instantiation</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ForkJoinTask"><span class="nav-number">3.</span> <span class="nav-text">ForkJoinTask</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RecursiveAction"><span class="nav-number">3.1.</span> <span class="nav-text">RecursiveAction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RecursiveTask"><span class="nav-number">3.2.</span> <span class="nav-text">RecursiveTask</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Submitting-Tasks-to-the-ForkJoinPool"><span class="nav-number">4.</span> <span class="nav-text">Submitting Tasks to the ForkJoinPool</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conclusion"><span class="nav-number">5.</span> <span class="nav-text">Conclusion</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reference"><span class="nav-number">6.</span> <span class="nav-text">reference</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

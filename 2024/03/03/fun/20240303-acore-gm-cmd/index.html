@@ -1,0 +1,3722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="GM 命令记录 2024年03月03日。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AzerothCore GM命令">
+<meta property="og:url" content="https://forgives.github.io/2024/03/03/fun/20240303-acore-gm-cmd/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="GM 命令记录 2024年03月03日。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-03-03T12:33:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.376Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="wow">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2024/03/03/fun/20240303-acore-gm-cmd/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>AzerothCore GM命令 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2024/03/03/fun/20240303-acore-gm-cmd/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AzerothCore GM命令
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-03-03 20:33:00" itemprop="dateCreated datePublished" datetime="2024-03-03T20:33:00+08:00">2024-03-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B8%B8%E6%88%8F/" itemprop="url" rel="index"><span itemprop="name">游戏</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>GM 命令记录 2024年03月03日。</p>
+<span id="more"></span>
+
+<p>GM commands can be entered mainly in 2 ways. Either by typing it directly into the world console window.<br>In the world console window the leading dot (.) is not mandantory, but you can use it.<br>The other way is using the gm command ingame in the chat console of the wow client.<br>There, all commands must start with a leading dot, f.ex.: .gm on</p>
+<p>Note: Some commands are working only by selecting a player or a creature. These commands can not be used in the world console.</p>
+<p>Some commands require higher security level. To grant this you need to use the <code>account set gmlevel</code> command through the console.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Security</th>
+<th>Syntax</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>account addon</td>
+<td>1</td>
+<td><code>.account addon #addon</code></td>
+<td>Set expansion addon level allowed. Addon values: 0 - normal, 1 - tbc, 2 - wotlk.</td>
+</tr>
+<tr>
+<td>account 2fa setup</td>
+<td>0</td>
+<td><code>.account 2fa setup</code></td>
+<td>Setup 2fa authentication. Use .account 2fa setup 1 to receive token. Apply token to authenticator app (case sensitive). Use the pin from app with .account 2fa setup PIN to confirm setup.</td>
+</tr>
+<tr>
+<td>account 2fa remove</td>
+<td>0</td>
+<td><code>.account 2fa remove</code></td>
+<td>Remove 2fa authentication.</td>
+</tr>
+<tr>
+<td>account create</td>
+<td>4</td>
+<td><code>.account create $account $password</code></td>
+<td>Create account and set password to it.</td>
+</tr>
+<tr>
+<td>account delete</td>
+<td>4</td>
+<td><code>.account delete $account</code></td>
+<td>Delete account with all characters.</td>
+</tr>
+<tr>
+<td>account lock country</td>
+<td>0</td>
+<td><code>.account lock country [on/off]</code></td>
+<td>Allow login from account only from current used Country or remove this requirement.</td>
+</tr>
+<tr>
+<td>account lock</td>
+<td>0</td>
+<td><code>.account lock [on/off]</code></td>
+<td>Allow login from account only from current used IP or remove this requirement.</td>
+</tr>
+<tr>
+<td>account onlinelist</td>
+<td>4</td>
+<td><code>.account onlinelist</code></td>
+<td>Show list of online accounts.</td>
+</tr>
+<tr>
+<td>account password</td>
+<td>0</td>
+<td><code>.account password $old_password $new_password $new_password</code></td>
+<td>Change your account password.</td>
+</tr>
+<tr>
+<td>account set addon</td>
+<td>2</td>
+<td><code>.account set addon [$account] #addon</code></td>
+<td>Set user (possible targeted) expansion addon level allowed. Addon values: 0 - normal, 1 - tbc, 2 - wotlk.</td>
+</tr>
+<tr>
+<td>account set gmlevel</td>
+<td>4</td>
+<td><code>.account set gmlevel [$account] #level [#realmid]</code></td>
+<td>Set the security level for targeted player (can’t be used at self) or for account $name to a level of #level on the realm #realmID. #level may range from 0 to 3. #reamID may be -1 for all realms.</td>
+</tr>
+<tr>
+<td>account set password</td>
+<td>4</td>
+<td><code>.account set password $account $password $password</code></td>
+<td>Set password for account.</td>
+</tr>
+<tr>
+<td>account set</td>
+<td>2</td>
+<td><code>.account set $subcommand</code></td>
+<td>Type .account set to see the list of possible subcommands or .help account set $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>account</td>
+<td>0</td>
+<td><code>.account</code></td>
+<td>Display the access level of your account.</td>
+</tr>
+<tr>
+<td>achievement add</td>
+<td>2</td>
+<td><code>.achievement add $achievement</code></td>
+<td>Add an achievement to the targeted player. $achievement: can be either achievement id or achievement link</td>
+</tr>
+<tr>
+<td>achievement checkall</td>
+<td>3</td>
+<td><code>.achievement checkall</code></td>
+<td>Check all achievement criteria of the selected player.</td>
+</tr>
+<tr>
+<td>achievement</td>
+<td>2</td>
+<td><code>.achievement $subcommand</code></td>
+<td>Type .achievement to see the list of possible subcommands or .help achievement $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>additem</td>
+<td>2</td>
+<td><code>.additem Optional(playerName/playerGUID) #itemid/[#itemname]/#itemLink #itemcount</code></td>
+<td>Adds the specified item to you, the selected character or the specifed character name&#x2F;GUID. If #itemCount is negative, you will remove #itemID.</td>
+</tr>
+<tr>
+<td>additem set</td>
+<td>2</td>
+<td><code>.additem set #itemsetid</code></td>
+<td>Add items from itemset of id #itemsetid to your or selected character inventory. Will add by one example each item from itemset.</td>
+</tr>
+<tr>
+<td>announce</td>
+<td>2</td>
+<td><code>.announce $MessageToBroadcast</code></td>
+<td>Send a global message to all players online in chat log.</td>
+</tr>
+<tr>
+<td>appear</td>
+<td>1</td>
+<td><code>.appear [$charactername]</code></td>
+<td>Teleport to the given character. Either specify the character name or click on the character’s portrait,e.g. when you are in a group. Character can be offline.</td>
+</tr>
+<tr>
+<td>arena captain</td>
+<td>3</td>
+<td><code>.arena captain #TeamID $name</code></td>
+<td>A command to set new captain to the team. $name must be in the team</td>
+</tr>
+<tr>
+<td>arena create</td>
+<td>3</td>
+<td><code>.arena create $name &quot;arena name&quot; [2/3/5]</code></td>
+<td>Command to create a new Arena-team in game.</td>
+</tr>
+<tr>
+<td>arena disband</td>
+<td>3</td>
+<td><code>.arena disband #TeamID</code></td>
+<td>Command to disband Arena-team in game.</td>
+</tr>
+<tr>
+<td>arena info</td>
+<td>2</td>
+<td><code>.arena info #TeamID</code></td>
+<td>Command that show info about arena team</td>
+</tr>
+<tr>
+<td>arena lookup</td>
+<td>2</td>
+<td><code>.arena lookup $name</code></td>
+<td>Command that give a list of arenateam with the given $name</td>
+</tr>
+<tr>
+<td>arena rename</td>
+<td>3</td>
+<td><code>.arena rename &quot;oldname&quot; &quot;newname&quot;</code></td>
+<td>Command to rename Arena-team name.</td>
+</tr>
+<tr>
+<td>aura</td>
+<td>2</td>
+<td><code>.aura #spellid</code></td>
+<td>Add the aura from spell #spellid to the selected Unit.</td>
+</tr>
+<tr>
+<td>bags</td>
+<td>2</td>
+<td><code>.bags $subcommand</code></td>
+<td>Type .bags to see a list of all subcommands.</td>
+</tr>
+<tr>
+<td>bags clear</td>
+<td>2</td>
+<td><code>.bags clear $itemquality</code></td>
+<td>Clear from players’ bags all items including and below $itemQuality.</td>
+</tr>
+<tr>
+<td>bags clear all</td>
+<td>2</td>
+<td><code>.bags clear all</code></td>
+<td>Clear all items from player</td>
+</tr>
+<tr>
+<td>ban account</td>
+<td>2</td>
+<td><code>.ban account $account_name $bantime $reason</code></td>
+<td>Ban account and kick the player if ingame on any character. $bantime: negative value leads to permban, otherwise use a timestring like <code>4d20h3s</code>.</td>
+</tr>
+<tr>
+<td>ban character</td>
+<td>2</td>
+<td><code>.ban character $character_name $bantime $reason</code></td>
+<td>Ban character and kick that character if ingame. $bantime: negative value leads to permban, otherwise use a timestring like <code>4d20h3s</code>.</td>
+</tr>
+<tr>
+<td>ban ip</td>
+<td>2</td>
+<td><code>.ban ip $Ip $bantime $reason</code></td>
+<td>Ban IP. $bantime: negative value leads to permban, otherwise use a timestring like <code>4d20h3s</code>.</td>
+</tr>
+<tr>
+<td>ban playeraccount</td>
+<td>2</td>
+<td><code>.ban playeraccount $character_name $bantime $reason</code></td>
+<td>Ban an account based on the character’s name and kick that character if ingame. $bantime: negative value leads to permban, otherwise use a timestring like <code>4d20h3s</code>.</td>
+</tr>
+<tr>
+<td>ban</td>
+<td>2</td>
+<td><code>.ban $subcommand</code></td>
+<td>Type .ban to see the list of possible subcommands or .help ban $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>baninfo account</td>
+<td>2</td>
+<td><code>.baninfo account $accountid</code></td>
+<td>Watch full information about a specific ban.</td>
+</tr>
+<tr>
+<td>baninfo character</td>
+<td>2</td>
+<td><code>.baninfo character $charactername</code></td>
+<td>Watch full information about a specific ban.</td>
+</tr>
+<tr>
+<td>baninfo ip</td>
+<td>2</td>
+<td><code>.baninfo ip $ip</code></td>
+<td>Watch full information about a specific ban.</td>
+</tr>
+<tr>
+<td>baninfo</td>
+<td>2</td>
+<td><code>.baninfo $subcommand</code></td>
+<td>Type .baninfo to see the list of possible subcommands or .help baninfo $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>banlist account</td>
+<td>2</td>
+<td><code>.banlist account [$Name]</code></td>
+<td>Searches the banlist for a account name pattern or show full list account bans.</td>
+</tr>
+<tr>
+<td>banlist character</td>
+<td>2</td>
+<td><code>.banlist character $Name</code></td>
+<td>Searches the banlist for a character name pattern. Pattern required.</td>
+</tr>
+<tr>
+<td>banlist ip</td>
+<td>2</td>
+<td><code>.banlist ip [$Ip]</code></td>
+<td>Searches the banlist for a IP pattern or show full list of IP bans.</td>
+</tr>
+<tr>
+<td>banlist</td>
+<td>2</td>
+<td><code>.banlist $subcommand</code></td>
+<td>Type .banlist to see the list of possible subcommands or .help banlist $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>bf enable</td>
+<td>3</td>
+<td><code>.bf enable #battleid</code></td>
+<td></td>
+</tr>
+<tr>
+<td>bf start</td>
+<td>3</td>
+<td><code>.bf start #battleid</code></td>
+<td></td>
+</tr>
+<tr>
+<td>bf stop</td>
+<td>3</td>
+<td><code>.bf stop #battleid</code></td>
+<td></td>
+</tr>
+<tr>
+<td>bf switch</td>
+<td>3</td>
+<td><code>.bf switch #battleid</code></td>
+<td></td>
+</tr>
+<tr>
+<td>bf timer</td>
+<td>3</td>
+<td><code>.bf timer #battleid #timer</code></td>
+<td></td>
+</tr>
+<tr>
+<td>bindsight</td>
+<td>3</td>
+<td><code>.bindsight</code></td>
+<td>Binds vision to the selected unit indefinitely. Cannot be used while currently possessing a target.</td>
+</tr>
+<tr>
+<td>cache</td>
+<td>2</td>
+<td><code>.cache $subcommand</code></td>
+<td>Character data cached during start up. Type .cache to see a list of subcommands or .help $subcommand to see info on subcommands.</td>
+</tr>
+<tr>
+<td>cache delete</td>
+<td>3</td>
+<td><code>.cache delete $playername</code></td>
+<td>Deletes the cached data for the selected character. Use for debugging only!</td>
+</tr>
+<tr>
+<td>cache info</td>
+<td>2</td>
+<td><code>.cache info $playerNameDisplays</code></td>
+<td>cached data for the selected character.</td>
+</tr>
+<tr>
+<td>cache refresh</td>
+<td>2</td>
+<td><code>.cache refresh $playerName</code></td>
+<td>Deletes the current cache and refreshes it with updated data.</td>
+</tr>
+<tr>
+<td>cast back</td>
+<td>2</td>
+<td><code>.cast back #spellid [triggered]</code></td>
+<td>Selected target will cast #spellid to your character. If ‘trigered’ or part provided then spell casted with triggered flag.</td>
+</tr>
+<tr>
+<td>cast dest</td>
+<td>2</td>
+<td><code>.cast dest #spellid #x #y #z [triggered]</code></td>
+<td>Selected target will cast #spellid at provided destination. If ‘trigered’ or part provided then spell casted with triggered flag.</td>
+</tr>
+<tr>
+<td>cast dist</td>
+<td>2</td>
+<td><code>.cast dist #spellid [#dist [triggered]]</code></td>
+<td>You will cast spell to pint at distance #dist. If ‘trigered’ or part provided then spell casted with triggered flag. Not all spells can be casted as area spells.</td>
+</tr>
+<tr>
+<td>cast self</td>
+<td>2</td>
+<td><code>.cast self #spellid [triggered]</code></td>
+<td>Cast #spellid by target at target itself. If ‘trigered’ or part provided then spell casted with triggered flag.</td>
+</tr>
+<tr>
+<td>cast target</td>
+<td>2</td>
+<td><code>.cast target #spellid [triggered]</code></td>
+<td>Selected target will cast #spellid to his victim. If ‘trigered’ or part provided then spell casted with triggered flag.</td>
+</tr>
+<tr>
+<td>cast</td>
+<td>2</td>
+<td><code>.cast #spellid [triggered]</code></td>
+<td>Cast #spellid to selected target. If no target selected cast to self. If ‘trigered’ or part provided then spell casted with triggered flag.</td>
+</tr>
+<tr>
+<td>character changeaccount</td>
+<td>3</td>
+<td><code>.character changeaccount $NewAccountNAme $Name</code></td>
+<td>Moves the specified character to the provided account. Kicks the player if the character is online.</td>
+</tr>
+<tr>
+<td>character changefaction</td>
+<td>2</td>
+<td><code>.character changefaction $name</code></td>
+<td>Change character faction.</td>
+</tr>
+<tr>
+<td>character changerace</td>
+<td>2</td>
+<td><code>.character changerace $name</code></td>
+<td>Change character race.</td>
+</tr>
+<tr>
+<td>character check bag</td>
+<td>2</td>
+<td><code>.character check bag [$target_player] #bagSlot 1 - 4</code></td>
+<td>Check players bag.</td>
+</tr>
+<tr>
+<td>character check bank</td>
+<td>2</td>
+<td><code>.character check bank</code></td>
+<td>Check your own bank.</td>
+</tr>
+<tr>
+<td>character check profession</td>
+<td>2</td>
+<td><code>.character check profession [$target_player]</code></td>
+<td>Show known professions list for selected player</td>
+</tr>
+<tr>
+<td>character customize</td>
+<td>2</td>
+<td><code>.character customize [$name]</code></td>
+<td>Mark selected in game or by $name in command character for customize at next login.</td>
+</tr>
+<tr>
+<td>character deleted delete</td>
+<td>4</td>
+<td><code>.character deleted delete #guid\$name</code></td>
+<td>Completely deletes the selected characters. If $name is supplied, only characters with that string in their name will be deleted, if #guid is supplied, only the character with that GUID will be deleted.</td>
+</tr>
+<tr>
+<td>character deleted list</td>
+<td>3</td>
+<td><code>.character deleted list [#guid\$name]</code></td>
+<td>Shows a list with all deleted characters. If $name is supplied, only characters with that string in their name will be selected, if #guid is supplied, only the character with that GUID will be selected.</td>
+</tr>
+<tr>
+<td>character deleted purge</td>
+<td>4</td>
+<td><code>.character deleted purge [#keepDays]</code></td>
+<td>Completely removes all characters from the database that where deleted more than #keepDays ago. If #keepDays not provided the used value from worldserver.conf option ‘CharDelete.KeepDays’. If ‘CharDelete.KeepDays’ option is disabled (set to value 0) then this command can’t be used without the specifying #keepDays parameter.</td>
+</tr>
+<tr>
+<td>character deleted restore</td>
+<td>3</td>
+<td><code>.character deleted restore #guid\$name [$newname] [#new account]</code></td>
+<td>Restores deleted characters. If $name is supplied, only characters with that string in their name will be restored, if $guid is supplied, only the character with that GUID will be restored. If $newname is set, the character will be restored with that name instead of the original one. If #newaccount is set, the character will be restored to specific account character list. This works only with one character!</td>
+</tr>
+<tr>
+<td>character erase</td>
+<td>4</td>
+<td><code>.character erase $name</code></td>
+<td>Delete character $name. Character finally deleted in case any deleting options.</td>
+</tr>
+<tr>
+<td>character level</td>
+<td>3</td>
+<td><code>.character level [$playername] [#level]</code></td>
+<td>Set the level of character with $playername (or the selected if not name provided) by #numberoflevels Or +1 if no #numberoflevels provided). If #numberoflevels is omitted, the level will be increase by 1. If #numberoflevels is 0, the same level will be restarted. If no character is selected and name not provided, increase your level. Command can be used for offline character. All stats and dependent values recalculated. At level decrease talents can be reset if need. Also at level decrease equipped items with greater level requirement can be lost.</td>
+</tr>
+<tr>
+<td>character rename</td>
+<td>2</td>
+<td><code>.character rename [$character_name] [1]</code></td>
+<td>Mark selected in game or by $character_name in command character for rename at next login. Adding an <code>1</code> at the end saves the old name into the <code>characters.reserved_name</code> table and prevents accounts with GMlevel 0 from re-using said old name.</td>
+</tr>
+<tr>
+<td>character reputation</td>
+<td>2</td>
+<td><code>.character reputation [$player_name]</code></td>
+<td>Show reputation information for selected player or player find by $player_name.</td>
+</tr>
+<tr>
+<td>character titles</td>
+<td>2</td>
+<td><code>.character titles [$player_name]</code></td>
+<td>Show known titles list for selected player or player find by $player_name.</td>
+</tr>
+<tr>
+<td>cheat casttime</td>
+<td>2</td>
+<td><code>.cheat casttime [on/off]</code></td>
+<td>Enables or disables your character’s spell cast times.</td>
+</tr>
+<tr>
+<td>cheat cooldown</td>
+<td>2</td>
+<td><code>.cheat cooldown [on/off]</code></td>
+<td>Enables or disables your character’s spell cooldowns.</td>
+</tr>
+<tr>
+<td>cheat god</td>
+<td>2</td>
+<td><code>.cheat god [on/off]</code></td>
+<td>Enables or disables your character’s ability to take damage.</td>
+</tr>
+<tr>
+<td>cheat power</td>
+<td>2</td>
+<td><code>.cheat power [on/off]</code></td>
+<td>Enables or disables your character’s spell cost (e.g mana).</td>
+</tr>
+<tr>
+<td>cheat status</td>
+<td>2</td>
+<td><code>.cheat status</code></td>
+<td>Shows the cheats you currently have enabled.</td>
+</tr>
+<tr>
+<td>cheat taxi</td>
+<td>2</td>
+<td><code>.cheat taxi on/off</code></td>
+<td>Temporary grant access or remove to all taxi routes for the selected character. If no character is selected, hide or reveal all routes to you.Visited taxi nodes sill accessible after removing access.</td>
+</tr>
+<tr>
+<td>cheat waterwalk</td>
+<td>2</td>
+<td><code>.cheat waterwalk on/off</code></td>
+<td>Set on&#x2F;off waterwalk state for selected player or self if no player selected.</td>
+</tr>
+<tr>
+<td>cheat</td>
+<td>2</td>
+<td><code>.cheat $subcommand</code></td>
+<td>Type .cheat to see the list of possible subcommands or .help cheat $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>combatstop</td>
+<td>2</td>
+<td><code>.combatstop [$playername]</code></td>
+<td>Stop combat for selected character. If selected non-player then command applied to self. If $playername provided then attempt applied to online player $playername.</td>
+</tr>
+<tr>
+<td>cometome</td>
+<td>3</td>
+<td><code>.cometome $parameter</code></td>
+<td>Make selected creature come to your current location (new position not saved to DB).</td>
+</tr>
+<tr>
+<td>commands</td>
+<td>0</td>
+<td><code>.commands</code></td>
+<td>Display a list of available commands for your account level.</td>
+</tr>
+<tr>
+<td>cooldown</td>
+<td>2</td>
+<td><code>.cooldown [#spell_id]</code></td>
+<td>Remove all (if spell_id not provided) or #spel_id spell cooldown from selected character or you (if no selection).</td>
+</tr>
+<tr>
+<td>damage</td>
+<td>2</td>
+<td><code>.damage $damage_amount [$school [$spellid]]</code></td>
+<td>Apply $damage to target. If not $school and $spellid provided then this flat clean melee damage without any modifiers. If $school provided then damage modified by armor reduction (if school physical), and target absorbing modifiers and result applied as melee damage to target. If spell provided then damage modified and applied as spell damage. $spellid can be shift-link.</td>
+</tr>
+<tr>
+<td>debug areatriggers</td>
+<td>3</td>
+<td><code>.debug areatriggers</code></td>
+<td>Toggle debug mode for areatriggers. In debug mode GM will be notified if reaching an areatrigger</td>
+</tr>
+<tr>
+<td>debug arena</td>
+<td>3</td>
+<td><code>.debug arena</code></td>
+<td>Toggle debug mode for arenas. In debug mode GM can start arena with single player.</td>
+</tr>
+<tr>
+<td>debug bg</td>
+<td>3</td>
+<td><code>.debug bg</code></td>
+<td>Toggle debug mode for battlegrounds. In debug mode GM can start battleground with single player.</td>
+</tr>
+<tr>
+<td>debug entervehicle</td>
+<td>3</td>
+<td></td>
+<td>Enter targeted vehicle.</td>
+</tr>
+<tr>
+<td>debug getitemstate</td>
+<td>3</td>
+<td><code>.debug getitemstate [unchanged\changed\new\removed\queue\check_all]</code></td>
+<td>Get specified item state of the items of the selected player.</td>
+</tr>
+<tr>
+<td>debug getitemvalue</td>
+<td>3</td>
+<td><code>.debug getitemvalue $guid $index</code></td>
+<td>Get value from item with $guid at $index.</td>
+</tr>
+<tr>
+<td>debug getvalue</td>
+<td>3</td>
+<td><code>.debug $field [1\0]</code></td>
+<td>1: get uint32 value of $field of the selected unit; 0: get float value of $field of the selected unit</td>
+</tr>
+<tr>
+<td>debug hostil</td>
+<td>1</td>
+<td></td>
+<td>Get hostile reference list of the selected unit.</td>
+</tr>
+<tr>
+<td>debug itemexpire</td>
+<td>3</td>
+<td><code>.debug itemexpire $guid</code></td>
+<td>Delete the item with $guid.</td>
+</tr>
+<tr>
+<td>debug lfg</td>
+<td>3</td>
+<td><code>.debug lfg</code></td>
+<td>Toggle debug mode for lfg. In debug mode GM can start lfg queue with one player.</td>
+</tr>
+<tr>
+<td>debug lootrecipient</td>
+<td>3</td>
+<td><code>.debug lootrecipient</code></td>
+<td>Get loot recipient of the selected creature.</td>
+</tr>
+<tr>
+<td>debug los</td>
+<td>3</td>
+<td><code>.debug los</code></td>
+<td>Show information about the line of sight status.</td>
+</tr>
+<tr>
+<td>debug Mod32Value</td>
+<td>3</td>
+<td><code>.debug Mod32Value #field #value</code></td>
+<td>Add #value to field #field of your character.</td>
+</tr>
+<tr>
+<td>debug moveflags</td>
+<td>3</td>
+<td><code>.debug moveflags [$newMoveFlags [$newMoveFlags2]]</code></td>
+<td>No params given will output the current moveflags of the target</td>
+</tr>
+<tr>
+<td>debug objectcount</td>
+<td>3</td>
+<td><code>.debug objectcount &lt;optional map id&gt;</code></td>
+<td>Shows the number of Creatures and GameObjects for the specified map id or for all maps if none is specified</td>
+</tr>
+<tr>
+<td>debug play cinematic</td>
+<td>1</td>
+<td><code>.debug play cinematic #cinematicid</code></td>
+<td>Play cinematic #cinematicid for you. You stay at place while your mind fly.</td>
+</tr>
+<tr>
+<td>debug play movie</td>
+<td>1</td>
+<td><code>.debug play movie #movieid</code></td>
+<td>Play movie #movieid for you.</td>
+</tr>
+<tr>
+<td>debug play sound</td>
+<td>1</td>
+<td><code>.debug play sound #soundid</code></td>
+<td>Play sound with #soundid. Sound will be play only for you. Other players do not hear this. Warning: client may have more 5000 sounds…</td>
+</tr>
+<tr>
+<td>debug send buyerror</td>
+<td>3</td>
+<td><code>.debug send buyerror #errorid</code></td>
+<td>Test buy error id.</td>
+</tr>
+<tr>
+<td>debug send channelnotify</td>
+<td>3</td>
+<td><code>.debug send channelnotify #notifytype</code></td>
+<td>Send #notifytype to the channel “test”.</td>
+</tr>
+<tr>
+<td>debug send chatmmessage</td>
+<td>3</td>
+<td><code>.debug send chatmmessage #msgtype</code></td>
+<td>Send a message “testtest” of type #msgtype.</td>
+</tr>
+<tr>
+<td>debug send equiperror</td>
+<td>3</td>
+<td><code>.debug send equiperror #errorid</code></td>
+<td>Test equip error id.</td>
+</tr>
+<tr>
+<td>debug send largepacket</td>
+<td>3</td>
+<td><code>.send largepacket</code></td>
+<td>Send large packet (&gt;128000 bytes).</td>
+</tr>
+<tr>
+<td>debug send opcode</td>
+<td>3</td>
+<td><code>.debug send opcode</code></td>
+<td>Sends a packet to the current player as specified in the file “opcode.txt” which has to lie in the server’s working directory. Example for the content of the file: <code>631 uint32 6146</code> which starts a different background music on the client: Opcode “SMSG_PLAY_MUSIC” (dec 631, hex 0x277) which needs in this case an uint32 to specify the sound ID (here: 6146 “Zone - Orgrimmar02”).</td>
+</tr>
+<tr>
+<td>debug send qinvalidmsg</td>
+<td>3</td>
+<td><code>.debug send qinvalidmsg #questfailedreasons</code></td>
+<td>Send a quest failed message of type #questfailedreasons to the current player.</td>
+</tr>
+<tr>
+<td>debug send qpartymsg</td>
+<td>3</td>
+<td><code>.debug send qpartymsg #questsharemessages</code></td>
+<td>Send a quest share message of type #questsharemessages to the current player.</td>
+</tr>
+<tr>
+<td>debug send sellerror</td>
+<td>3</td>
+<td><code>.debug send sellerror #errorid</code></td>
+<td>Test sell error id.</td>
+</tr>
+<tr>
+<td>debug send setphaseshift</td>
+<td>3</td>
+<td><code>.debug send setphaseshift #phaseshift</code></td>
+<td>Send phase shift packet to the current player.</td>
+</tr>
+<tr>
+<td>debug send spellfail</td>
+<td>3</td>
+<td><code>.debug send spellfail #resultid [#arg1] [#arg2]</code></td>
+<td>Send spell fail packet to the current player using spell result #resultid and optional arguments #arg1 and #arg2.</td>
+</tr>
+<tr>
+<td>debug setaurastate</td>
+<td>3</td>
+<td><code>.debug setaurastate #aurastatetype</code></td>
+<td>Modify aura state of the selected unit (#aurastatetype &gt; 0) or reset the state (#aurastatetype &#x3D; 0).</td>
+</tr>
+<tr>
+<td>debug setbit</td>
+<td>3</td>
+<td><code>.debug setbit #fieldnumber #bitnumber</code></td>
+<td>Set bit #bitnumber of field #fieldnumber for the selected unit.</td>
+</tr>
+<tr>
+<td>debug setitemvalue</td>
+<td>3</td>
+<td><code>.debug getitemvalue $guid $index $value</code></td>
+<td>Set $value for item with $guid at $index.</td>
+</tr>
+<tr>
+<td>debug setvalue</td>
+<td>3</td>
+<td><code>.debug $field $value [1\0]</code></td>
+<td>1: set uint32 $value for $field of the selected unit; 0: set float $value for $field of the selected unit</td>
+</tr>
+<tr>
+<td>debug spawnvehicle</td>
+<td>3</td>
+<td><code>.debug spawnvehicle #entry [#vehicleid]</code></td>
+<td>Spawn vehicle with creature template #entry and optional #vehicleid.</td>
+</tr>
+<tr>
+<td>debug unitstate</td>
+<td>3</td>
+<td><code>.debug unitstate [#unitstate]</code></td>
+<td>Set #unitstate for the selected unit. If no parameter is specified show the unit state and the react state of the unit.</td>
+</tr>
+<tr>
+<td>debug uws</td>
+<td>3</td>
+<td><code>.debug uws #worldstate #value</code></td>
+<td>Send update world state for #worldstate and #value to the current player.</td>
+</tr>
+<tr>
+<td>debug</td>
+<td>2</td>
+<td><code>.debug $subcommand</code></td>
+<td>Type .debug to see the list of possible subcommands or .help debug $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>deserter bg add</td>
+<td>3</td>
+<td><code>.deserter bg add [$playerName] [$time]</code></td>
+<td>Adds the bg deserter debuff to a player or your target with $time duration. Default $time: 15m</td>
+</tr>
+<tr>
+<td>deserter bg remove</td>
+<td>3</td>
+<td><code>.deserter bg remove [$playerName]</code></td>
+<td>Removes the bg deserter debuff from a player or your target.</td>
+</tr>
+<tr>
+<td>deserter bg remove all</td>
+<td>3</td>
+<td><code>.deserter bg remove all [$maxDuration]</code></td>
+<td>Removes the bg deserter debuff from all online and offline players. $maxDuration sets the maximum duration to be removed. Default: 15m</td>
+</tr>
+<tr>
+<td>deserter instance add</td>
+<td>3</td>
+<td><code>.deserter instance add [$playerName] [$time]</code></td>
+<td>Adds the instance deserter debuff to a player or your target with $time duration. Default $time: 30m</td>
+</tr>
+<tr>
+<td>deserter instance remove</td>
+<td>3</td>
+<td><code>.deserter instance remove [$playerName]</code></td>
+<td>Removes the instance deserter debuff from a player or your target.</td>
+</tr>
+<tr>
+<td>deserter instance remove all</td>
+<td>3</td>
+<td><code>.deserter instance remove all [$maxDuration]</code></td>
+<td>Removes the instance deserter debuff from all online and offline players. $maxDuration sets the maximum duration to be removed. Default: 30m</td>
+</tr>
+<tr>
+<td>dev</td>
+<td>3</td>
+<td><code>.dev [on/off]</code></td>
+<td>Enable or Disable in game Dev tag or show current state if on&#x2F;off not provided.</td>
+</tr>
+<tr>
+<td>die</td>
+<td>2</td>
+<td><code>.die</code></td>
+<td>Kill the selected player. If no player is selected, it will kill you.</td>
+</tr>
+<tr>
+<td>disable add battleground</td>
+<td>3</td>
+<td><code>.disable add battleground $entry $flag $comment</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable add map</td>
+<td>3</td>
+<td><code>.disable add map $entry $flag $comment</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable add outdoorpvp</td>
+<td>3</td>
+<td><code>.disable add outdoorpvp $entry $flag $comment</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable add quest</td>
+<td>3</td>
+<td><code>.disable add quest $entry $flag $comment</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable add spell</td>
+<td>3</td>
+<td><code>.disable add spell $entry $flag $comment</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable add vmap</td>
+<td>3</td>
+<td><code>.disable add vmap $entry $flag $comment</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable remove battleground</td>
+<td>3</td>
+<td><code>.disable remove battleground $entry</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable remove map</td>
+<td>3</td>
+<td><code>.disable remove map $entry</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable remove outdoorpvp</td>
+<td>3</td>
+<td><code>.disable remove outdoorpvp $entry</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable remove quest</td>
+<td>3</td>
+<td><code>.disable remove quest $entry</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable remove spell</td>
+<td>3</td>
+<td><code>.disable remove spell $entry</code></td>
+<td></td>
+</tr>
+<tr>
+<td>disable remove vmap</td>
+<td>3</td>
+<td><code>.disable remove vmap $entry</code></td>
+<td></td>
+</tr>
+<tr>
+<td>dismount</td>
+<td>0</td>
+<td><code>.dismount</code></td>
+<td>Dismount you, if you are mounted.</td>
+</tr>
+<tr>
+<td>distance</td>
+<td>3</td>
+<td><code>.distance</code></td>
+<td>Display the distance from your character to the selected creature.</td>
+</tr>
+<tr>
+<td>event activelist</td>
+<td>2</td>
+<td><code>.event activelist</code></td>
+<td>Show list of currently active events.</td>
+</tr>
+<tr>
+<td>event start</td>
+<td>2</td>
+<td><code>.event start #event_id</code></td>
+<td>Start event #event_id. Set start time for event to current moment (change not saved in DB).</td>
+</tr>
+<tr>
+<td>event stop</td>
+<td>2</td>
+<td><code>.event stop #event_id</code></td>
+<td>Stop event #event_id. Set start time for event to time in past that make current moment is event stop time (change not saved in DB).</td>
+</tr>
+<tr>
+<td>event</td>
+<td>2</td>
+<td><code>.event #event_id</code></td>
+<td>Show details about event with #event_id.</td>
+</tr>
+<tr>
+<td>flusharenapoints</td>
+<td>3</td>
+<td><code>.flusharenapoints</code></td>
+<td>Use it to distribute arena points based on arena team ratings, and start a new week.</td>
+</tr>
+<tr>
+<td>freeze</td>
+<td>2</td>
+<td><code>.freeze (#player)</code></td>
+<td>“Freezes” #player and disables his chat. When using this without #name it will freeze your target.</td>
+</tr>
+<tr>
+<td>gear repair</td>
+<td>2</td>
+<td><code>.gear repair</code></td>
+<td>Repair all selected player’s items.</td>
+</tr>
+<tr>
+<td>gear stats</td>
+<td>0</td>
+<td><code>.gear stats</code></td>
+<td>Shows targeted players’ average itemlevel</td>
+</tr>
+<tr>
+<td>gm chat</td>
+<td>2</td>
+<td><code>.gm chat [on/off]</code></td>
+<td>Enable or disable chat GM MODE (show gm badge in messages) or show current state of on&#x2F;off not provided.</td>
+</tr>
+<tr>
+<td>gm fly</td>
+<td>2</td>
+<td><code>.gm fly [on/off]</code></td>
+<td>Enable&#x2F;disable gm fly mode.</td>
+</tr>
+<tr>
+<td>gm ingame</td>
+<td>0</td>
+<td><code>.gm ingame</code></td>
+<td>Display a list of available in game Game Masters.</td>
+</tr>
+<tr>
+<td>gm list</td>
+<td>3</td>
+<td><code>.gm list</code></td>
+<td>Display a list of all Game Masters accounts and security levels.</td>
+</tr>
+<tr>
+<td>gm visible</td>
+<td>2</td>
+<td><code>.gm visible on/off</code></td>
+<td>Output current visibility state or make GM visible(on) and invisible(off) for other players.</td>
+</tr>
+<tr>
+<td>gm</td>
+<td>1</td>
+<td><code>.gm [on/off]</code></td>
+<td>Enable or Disable in game GM MODE or show current state of on&#x2F;off not provided.</td>
+</tr>
+<tr>
+<td>gmannounce</td>
+<td>2</td>
+<td><code>.gmannounce $announcement</code></td>
+<td>Send an announcement to online Gamemasters.</td>
+</tr>
+<tr>
+<td>gmnameannounce</td>
+<td>2</td>
+<td><code>.gmnameannounce $announcement</code></td>
+<td>Send an announcement to all online GM’s, displaying the name of the sender.</td>
+</tr>
+<tr>
+<td>gmnotify</td>
+<td>2</td>
+<td><code>.gmnotify $notification</code></td>
+<td>Displays a notification on the screen of all online GM’s.</td>
+</tr>
+<tr>
+<td>go creature</td>
+<td>1</td>
+<td><code>.go creature #creature_guid</code></td>
+<td>Teleport your character to creature with guid #creature_guid. creature_guid.</td>
+</tr>
+<tr>
+<td>go creature id</td>
+<td>1</td>
+<td><code>.go creature id #creature_entry</code></td>
+<td>Teleports you to the given creature entry. <em>If</em> more than one creature is found, then you are teleported to the first that is found inside the database.</td>
+</tr>
+<tr>
+<td>go creature name</td>
+<td>1</td>
+<td><code>.go creature name #name</code></td>
+<td>Teleports you to the first spawn for the given creature name. <em>If</em> more than one creature is found, then you are teleported to the first that is found inside the database.</td>
+</tr>
+<tr>
+<td>go gobject</td>
+<td>1</td>
+<td><code>.go gobject #object_guid</code></td>
+<td>Teleport your character to gameobject with guid #object_guid</td>
+</tr>
+<tr>
+<td>go graveyard</td>
+<td>1</td>
+<td><code>.go graveyard #graveyardId</code></td>
+<td>Teleport to graveyard with the graveyardId specified.</td>
+</tr>
+<tr>
+<td>go grid</td>
+<td>1</td>
+<td><code>.go grid #gridX #gridY [#mapId]</code></td>
+<td>Teleport the gm to center of grid with provided indexes at map #mapId (or current map if it not provided).</td>
+</tr>
+<tr>
+<td>go taxinode</td>
+<td>1</td>
+<td><code>.go taxinode #taxinode</code></td>
+<td>Teleport player to taxinode coordinates. You can look up zone using .lookup taxinode $namepart</td>
+</tr>
+<tr>
+<td>go ticket</td>
+<td>2</td>
+<td><code>.go ticket #ticketid</code></td>
+<td>Teleports the user to the location where $ticketid was created.</td>
+</tr>
+<tr>
+<td>go trigger</td>
+<td>1</td>
+<td><code>.go trigger #trigger_id</code></td>
+<td>Teleport your character to areatrigger with id #trigger_id. Character will be teleported to trigger target if selected areatrigger is telporting trigger.</td>
+</tr>
+<tr>
+<td>go xyz</td>
+<td>1</td>
+<td><code>.go xyz #x #y [#z [#mapid [#orientation]]]</code></td>
+<td>Teleport player to point with (#x,#y,#z) coordinates at map #mapid with orientation #orientation. If z is not provided, ground&#x2F;water level will be used. If mapid is not provided, the current map will be used. If #orientation is not provided, the current orientation will be used. Non-numbers are allowed and will be ignored.</td>
+</tr>
+<tr>
+<td>go zonexy</td>
+<td>1</td>
+<td><code>.go zonexy #x #y [#zone]</code></td>
+<td>Teleport player to point with (#x,#y) client coordinates at ground(water) level in zone #zoneid or current zone if #zoneid not provided. You can look up zone using .lookup area $namepart</td>
+</tr>
+<tr>
+<td>go</td>
+<td>1</td>
+<td><code>.go $subcommand</code></td>
+<td>Type .go to see the list of possible subcommands or .help go $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>gobject activate</td>
+<td>2</td>
+<td><code>.gobject activate #guid</code></td>
+<td>Activates an object like a door or a button.</td>
+</tr>
+<tr>
+<td>gobject add temp</td>
+<td>2</td>
+<td></td>
+<td>Adds a temporary gameobject that is not saved to DB.</td>
+</tr>
+<tr>
+<td>gobject add</td>
+<td>3</td>
+<td><code>.gobject add #id</code></td>
+<td>Add a game object from game object templates to the world at your current location using the #id. spawntimesecs sets the spawntime, it is optional. Note: this is a copy of .gameobject.</td>
+</tr>
+<tr>
+<td>gobject delete</td>
+<td>3</td>
+<td><code>.gobject delete #go_guid</code></td>
+<td>Delete gameobject with guid #go_guid.</td>
+</tr>
+<tr>
+<td>gobject info</td>
+<td>1</td>
+<td><code>.gobject info [$object_entry]</code></td>
+<td>Query Gameobject information for selected gameobject or given entry.</td>
+</tr>
+<tr>
+<td>gobject move</td>
+<td>3</td>
+<td><code>.gobject move #goguid [#x #y #z]</code></td>
+<td>Move gameobject #goguid to character coordinates (or to (#x,#y,#z) coordinates if its provide).</td>
+</tr>
+<tr>
+<td>gobject near</td>
+<td>3</td>
+<td><code>.gobject near [#distance]</code></td>
+<td>Output gameobjects at distance #distance from player. Output gameobject guids and coordinates sorted by distance from character. If #distance not provided use 10 as default value.</td>
+</tr>
+<tr>
+<td>gobject respawn</td>
+<td>1</td>
+<td><code>.gobject respawn #guid</code></td>
+<td>Respwans the target gameobject</td>
+</tr>
+<tr>
+<td>gobject set</td>
+<td>3</td>
+<td><code>.gobject set</code></td>
+<td></td>
+</tr>
+<tr>
+<td>gobject set phase</td>
+<td>3</td>
+<td><code>.gobject set phase #guid #phasemask</code></td>
+<td>Gameobject with DB guid #guid phasemask changed to #phasemask with related world vision update for players. Gameobject state saved to DB and persistent.</td>
+</tr>
+<tr>
+<td>gobject set state</td>
+<td>3</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>gobject target</td>
+<td>1</td>
+<td><code>.gobject target [#go_id\#go_name_part]</code></td>
+<td>Locate and show position nearest gameobject. If #go_id or #go_name_part provide then locate and show position of nearest gameobject with gameobject template id #go_id or name included #go_name_part as part.</td>
+</tr>
+<tr>
+<td>gobject turn</td>
+<td>3</td>
+<td><code>.gobject turn #goguid</code></td>
+<td>Set for gameobject #goguid orientation same as current character orientation.</td>
+</tr>
+<tr>
+<td>gobject</td>
+<td>2</td>
+<td><code>.gobject $subcommand</code></td>
+<td>Type .gobject to see the list of possible subcommands or .help gobject $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>gps</td>
+<td>1</td>
+<td><code>.gps [$name\$shift-link]</code></td>
+<td>Display the position information for a selected character or creature (also if player name $name provided then for named player, or if creature&#x2F;gameobject shift-link provided then pointed creature&#x2F;gameobject if it loaded). Position information includes X, Y, Z, and orientation, map Id and zone Id</td>
+</tr>
+<tr>
+<td>group disband</td>
+<td>2</td>
+<td><code>.group disband [$characterName]</code></td>
+<td>Disbands the given character’s group.</td>
+</tr>
+<tr>
+<td>group join</td>
+<td>2</td>
+<td><code>.group join $AnyCharacterNameFromGroup [$CharacterName]</code></td>
+<td>Adds to group of player $AnyCharacterNameFromGroup player $CharacterName (or selected).</td>
+</tr>
+<tr>
+<td>group leader</td>
+<td>2</td>
+<td><code>.group leader [$characterName]</code></td>
+<td>Sets the given character as his group’s leader.</td>
+</tr>
+<tr>
+<td>group list</td>
+<td>2</td>
+<td><code>.group list [$CharacterName]</code></td>
+<td>Lists all the members of the group&#x2F;party the player is in.</td>
+</tr>
+<tr>
+<td>group remove</td>
+<td>2</td>
+<td><code>.group remove [$characterName]</code></td>
+<td>Removes the given character from his group.</td>
+</tr>
+<tr>
+<td>group</td>
+<td>2</td>
+<td><code>.group $subcommand</code></td>
+<td>Type .group to see the list of possible subcommands or .help group $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>groupsummon</td>
+<td>2</td>
+<td><code>.groupsummon [$charactername]</code></td>
+<td>Teleport the given character and his group to you. Teleported only online characters but original selected group member can be offline.</td>
+</tr>
+<tr>
+<td>guid</td>
+<td>2</td>
+<td><code>.guid</code></td>
+<td>Display the GUID for the selected character.</td>
+</tr>
+<tr>
+<td>guild create</td>
+<td>2</td>
+<td><code>.guild create [$GuildLeaderName] &quot;$GuildName&quot;</code></td>
+<td>Create a guild named $GuildName with the player $GuildLeaderName (or selected) as leader. Guild name must in quotes.</td>
+</tr>
+<tr>
+<td>guild delete</td>
+<td>2</td>
+<td><code>.guild delete &quot;$GuildName&quot;</code></td>
+<td>Delete guild $GuildName. Guild name must in quotes.</td>
+</tr>
+<tr>
+<td>guild info</td>
+<td>2</td>
+<td><code>.guild info</code></td>
+<td>Shows information about the target’s guild or a given Guild Id or Name.</td>
+</tr>
+<tr>
+<td>guild invite</td>
+<td>2</td>
+<td><code>.guild invite [$CharacterName] &quot;$GuildName&quot;</code></td>
+<td>Add player $CharacterName (or selected) into a guild $GuildName. Guild name must in quotes.</td>
+</tr>
+<tr>
+<td>guild rank</td>
+<td>2</td>
+<td><code>.guild rank [$CharacterName] #Rank</code></td>
+<td>Set for player $CharacterName (or selected) rank #Rank in a guild.</td>
+</tr>
+<tr>
+<td>guild rename</td>
+<td>2</td>
+<td><code>.guild rename &quot;$GuildName&quot; &quot;$NewGuildName&quot;</code></td>
+<td>Rename a guild named $GuildName with $NewGuildName. Guild name and new guild name must in quotes.</td>
+</tr>
+<tr>
+<td>guild uninvite</td>
+<td>2</td>
+<td><code>.guild uninvite [$CharacterName]</code></td>
+<td>Remove player $CharacterName (or selected) from a guild.</td>
+</tr>
+<tr>
+<td>guild</td>
+<td>2</td>
+<td><code>.guild $subcommand</code></td>
+<td>Type .guild to see the list of possible subcommands or .help guild $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>help</td>
+<td>0</td>
+<td><code>.help [$command]</code></td>
+<td>Display usage instructions for the given $command. If no $command provided show list available commands.</td>
+</tr>
+<tr>
+<td>hidearea</td>
+<td>3</td>
+<td><code>.hidearea #areaid</code></td>
+<td>Hide the area of #areaid to the selected character. If no character is selected, hide this area to you.</td>
+</tr>
+<tr>
+<td><del>honor add kill</del> NOT IMPLEMENTED</td>
+<td>2</td>
+<td>gi<code>.honor add kill</code></td>
+<td>Add the targeted unit as one of your pvp kills today (you only get honor if it’s a racial leader or a player)</td>
+</tr>
+<tr>
+<td>honor add</td>
+<td>2</td>
+<td><code>.honor add $amount</code></td>
+<td>Add a certain amount of honor (gained today) to the selected player.</td>
+</tr>
+<tr>
+<td>honor update</td>
+<td>2</td>
+<td><code>.honor update</code></td>
+<td>Force the yesterday’s honor fields to be updated with today’s data, which will get reset for the selected player.</td>
+</tr>
+<tr>
+<td>honor</td>
+<td>2</td>
+<td><code>.honor $subcommand</code></td>
+<td>Type .honor to see the list of possible subcommands or .help honor $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>instance getbossstate</td>
+<td>1</td>
+<td><code>.instance getbossstate $bossId [$Name]</code></td>
+<td>Gets the current EncounterState for the provided boss id. If no character name is provided, the current map will be used as target.</td>
+</tr>
+<tr>
+<td>instance listbinds</td>
+<td>1</td>
+<td><code>.instance listbinds</code></td>
+<td>Lists the binds of the selected player.</td>
+</tr>
+<tr>
+<td>instance savedata</td>
+<td>3</td>
+<td><code>.instance savedata</code></td>
+<td>Save the InstanceData for the current player’s map to the DB.</td>
+</tr>
+<tr>
+<td>instance setbossstate</td>
+<td>2</td>
+<td><code>.instance setbossstate $bossId $encounterState [$Name]</code></td>
+<td>Sets the EncounterState for the given boss id to a new value. EncounterStates range from 0 to 5. If no character name is provided, the current map will be used as target.</td>
+</tr>
+<tr>
+<td>instance stats</td>
+<td>1</td>
+<td><code>.instance stats</code></td>
+<td>Shows statistics about instances.</td>
+</tr>
+<tr>
+<td>instance unbind</td>
+<td>2</td>
+<td><code>.instance unbind &lt;mapid\all&gt; [difficulty]</code></td>
+<td>Clear all&#x2F;some of player’s binds</td>
+</tr>
+<tr>
+<td>instance</td>
+<td>1</td>
+<td><code>.instance $subcommand</code></td>
+<td>Type .instance to see the list of possible subcommands or .help instance $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>item move</td>
+<td>2</td>
+<td><code>.itemmove #sourceslotid #destinationslotid</code></td>
+<td>Move an item from slots #sourceslotid to #destinationslotid in your inventory Not yet implemented</td>
+</tr>
+<tr>
+<td>inventory count</td>
+<td>1</td>
+<td><code>.inventory count $playerName or $playerGuid</code></td>
+<td>Count free slots in bags divided into different bag types.</td>
+</tr>
+<tr>
+<td>item refund</td>
+<td>3</td>
+<td><code>.item refund &lt;name&gt; &lt;item&gt; &lt;extendedCost&gt;</code></td>
+<td>Removes the item and restores honor&#x2F;arena&#x2F;items according to extended cost.</td>
+</tr>
+<tr>
+<td>item restore</td>
+<td>2</td>
+<td><code>.item restore [#recoveryItemId] [#playername]</code></td>
+<td>Restore an disposed item for the specified player.</td>
+</tr>
+<tr>
+<td>item restore list</td>
+<td>2</td>
+<td><code>.item restore list [#playername]</code></td>
+<td>See restorable items for the specified player.</td>
+</tr>
+<tr>
+<td>kick</td>
+<td>2</td>
+<td><code>.kick [$charactername] [$reason]</code></td>
+<td>Kick the given character name from the world with or without reason. If no character name is provided then the selected player (except for yourself) will be kicked. If no reason is provided, default is “No Reason”.</td>
+</tr>
+<tr>
+<td>learn all crafts</td>
+<td>2</td>
+<td><code>.learn crafts</code></td>
+<td>Learn all professions and recipes.</td>
+</tr>
+<tr>
+<td>learn all default</td>
+<td>2</td>
+<td><code>.learn all default [$playername]</code></td>
+<td>Learn for selected&#x2F;$playername player all default spells for his race&#x2F;class and spells rewarded by completed quests.</td>
+</tr>
+<tr>
+<td>learn all gm</td>
+<td>2</td>
+<td><code>.learn all gm</code></td>
+<td>Learn all default spells for Game Masters.</td>
+</tr>
+<tr>
+<td>learn all lang</td>
+<td>2</td>
+<td><code>.learn all lang</code></td>
+<td>Learn all languages</td>
+</tr>
+<tr>
+<td>learn all my class</td>
+<td>2</td>
+<td><code>.learn all my class</code></td>
+<td>Learn all spells and talents available for his class.</td>
+</tr>
+<tr>
+<td>learn all my pettalents</td>
+<td>2</td>
+<td><code>.learn all my pettalents</code></td>
+<td>Learn all talents for your pet available for his creature type (only for hunter pets).</td>
+</tr>
+<tr>
+<td>learn all my spells</td>
+<td>2</td>
+<td><code>.learn all my spells</code></td>
+<td>Learn all spells (except talents and spells with first rank learned as talent) available for his class.</td>
+</tr>
+<tr>
+<td>learn all my talents</td>
+<td>2</td>
+<td><code>.learn all my talents</code></td>
+<td>Learn all talents (and spells with first rank learned as talent) available for his class.</td>
+</tr>
+<tr>
+<td>learn all recipes</td>
+<td>2</td>
+<td><code>.learn all recipes [$profession]</code></td>
+<td>Learns all recipes of specified profession and sets skill level to max. Example: .learn all recipes enchanting</td>
+</tr>
+<tr>
+<td>learn</td>
+<td>2</td>
+<td><code>.learn #spell [all]</code></td>
+<td>Selected character learn a spell of id #spell. If ‘all’ provided then all ranks learned.</td>
+</tr>
+<tr>
+<td>levelup</td>
+<td>2</td>
+<td><code>.levelup [$playername] [#numberoflevels]</code></td>
+<td>Increase&#x2F;decrease the level of character with $playername (or the selected if not name provided) by #numberoflevels Or +1 if no #numberoflevels provided). If #numberoflevels is omitted, the level will be increase by 1. If #numberoflevels is 0, the same level will be restarted. If no character is selected and name not provided, increase your level. Command can be used for offline character. All stats and dependent values recalculated. At level decrease talents can be reset if need. Also at level decrease equipped items with greater level requirement can be lost.</td>
+</tr>
+<tr>
+<td>lfg clean</td>
+<td>3</td>
+<td><code>.lfg clean</code></td>
+<td>Cleans current queue, only for debugging purposes.</td>
+</tr>
+<tr>
+<td>lfg group</td>
+<td>1</td>
+<td><code>.lfg group</code></td>
+<td>Shows information about all players in the group (state, roles, comment, dungeons selected).</td>
+</tr>
+<tr>
+<td>lfg options</td>
+<td>2</td>
+<td><code>.lfg options [new value]</code></td>
+<td>Shows current lfg options. New value is set if extra param is present.</td>
+</tr>
+<tr>
+<td>lfg player</td>
+<td>1</td>
+<td><code>.lfg player</code></td>
+<td>Shows information about player (state, roles, comment, dungeons selected).</td>
+</tr>
+<tr>
+<td>lfg queue</td>
+<td>1</td>
+<td><code>.lfg queue</code></td>
+<td>Shows info about current lfg queues.</td>
+</tr>
+<tr>
+<td>linkgrave</td>
+<td>3</td>
+<td><code>.linkgrave #graveyard_id [alliance\horde]</code></td>
+<td>Link current zone to graveyard for any (or alliance&#x2F;horde faction ghosts). This let character ghost from zone teleport to graveyard after die if graveyard is nearest from linked to zone and accept ghost of this faction. Add only single graveyard at another map and only if no graveyards linked (or planned linked at same map).</td>
+</tr>
+<tr>
+<td>list auras</td>
+<td>1</td>
+<td><code>.list auras</code></td>
+<td>List auras (passive and active) of selected creature or player. If no creature or player is selected, list your own auras.</td>
+</tr>
+<tr>
+<td>list creature</td>
+<td>1</td>
+<td><code>.list creature #creature_id [#max_count]</code></td>
+<td>Output creatures with creature id #creature_id found in world. Output creature guids and coordinates sorted by distance from character. Will be output maximum #max_count creatures. If #max_count not provided use 10 as default value.</td>
+</tr>
+<tr>
+<td>list gobject</td>
+<td>1</td>
+<td><code>.list gobject #gameobject_id [#max_count]</code></td>
+<td>Output gameobjects with gameobject id #gameobject_id found in world. Output gameobject guids and coordinates sorted by distance from character. Will be output maximum #max_count gameobject. If #max_count not provided use 10 as default value.</td>
+</tr>
+<tr>
+<td>list item</td>
+<td>1</td>
+<td><code>.list item #item_id [#max_count]</code></td>
+<td>Output items with item id #item_id found in all character inventories, mails, auctions, and guild banks. Output item guids, item owner guid, owner account and owner name (guild name and guid in case guild bank). Will be output maximum #max_count items. If #max_count not provided use 10 as default value.</td>
+</tr>
+<tr>
+<td>list</td>
+<td>1</td>
+<td><code>.list $subcommand</code></td>
+<td>Type .list to see the list of possible subcommands or .help list $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>lookup area</td>
+<td>1</td>
+<td><code>.lookup area $namepart</code></td>
+<td>Looks up an area by $namepart, and returns all matches with their area ID’s.</td>
+</tr>
+<tr>
+<td>lookup creature</td>
+<td>1</td>
+<td><code>.lookup creature $namepart</code></td>
+<td>Looks up a creature by $namepart, and returns all matches with their creature ID’s.</td>
+</tr>
+<tr>
+<td>lookup event</td>
+<td>1</td>
+<td><code>.lookup event $name</code></td>
+<td>Attempts to find the ID of the event with the provided $name.</td>
+</tr>
+<tr>
+<td>lookup faction</td>
+<td>1</td>
+<td><code>.lookup faction $name</code></td>
+<td>Attempts to find the ID of the faction with the provided $name.</td>
+</tr>
+<tr>
+<td>lookup gobject</td>
+<td>1</td>
+<td><code>.lookup gobject $objname</code></td>
+<td>Return gameobject(s) ID matching $objname.</td>
+</tr>
+<tr>
+<td>lookup item</td>
+<td>1</td>
+<td><code>.lookup item $itemname</code></td>
+<td>Looks up an item by $itemname, and returns all matches with their Item ID’s.</td>
+</tr>
+<tr>
+<td>lookup itemset</td>
+<td>1</td>
+<td><code>.lookup itemset $itemname</code></td>
+<td>Looks up an item set by $itemname, and returns all matches with their Item set ID’s.</td>
+</tr>
+<tr>
+<td>lookup map</td>
+<td>1</td>
+<td><code>.lookup map $namepart</code></td>
+<td>Looks up a map by $namepart, and returns all matches with their map ID’s.</td>
+</tr>
+<tr>
+<td>lookup player account</td>
+<td>2</td>
+<td><code>.lookup player account $account ($limit)</code></td>
+<td>Searchs players, which account username is $account with optional parametr $limit of results.</td>
+</tr>
+<tr>
+<td>lookup player email</td>
+<td>2</td>
+<td><code>.lookup player email $email ($limit)</code></td>
+<td>Searchs players, which account email is $email with optional parametr $limit of results.</td>
+</tr>
+<tr>
+<td>lookup player ip</td>
+<td>2</td>
+<td><code>.lookup player ip $ip ($limit)</code></td>
+<td>Searchs players, which account ast_ip is $ip with optional parametr $limit of results.</td>
+</tr>
+<tr>
+<td>lookup quest</td>
+<td>1</td>
+<td><code>.lookup quest $namepart</code></td>
+<td>Looks up a quest by $namepart, and returns all matches with their quest ID’s.</td>
+</tr>
+<tr>
+<td>lookup skill</td>
+<td>1</td>
+<td><code>.lookup skill $$namepart</code></td>
+<td>Looks up a skill by $namepart, and returns all matches with their skill ID’s.</td>
+</tr>
+<tr>
+<td>lookup spell id</td>
+<td>1</td>
+<td><code>.lookup spell id #spellid</code></td>
+<td>Looks up a spell by #spellid, and returns the match with its spell name.</td>
+</tr>
+<tr>
+<td>lookup spell</td>
+<td>1</td>
+<td><code>.lookup spell $namepart</code></td>
+<td>Looks up a spell by $namepart, and returns all matches with their spell ID’s.</td>
+</tr>
+<tr>
+<td>lookup taxinode</td>
+<td>1</td>
+<td><code>.lookup taxinode $substring</code></td>
+<td>Search and output all taxinodes with provide $substring in name.</td>
+</tr>
+<tr>
+<td>lookup teleport</td>
+<td>1</td>
+<td><code>.lookup teleport $substring</code></td>
+<td>Search and output all .teleport command locations with provide $substring in name.</td>
+</tr>
+<tr>
+<td>lookup title</td>
+<td>1</td>
+<td><code>.lookup title $$namepart</code></td>
+<td>Looks up a title by $namepart, and returns all matches with their title ID’s and index’s.</td>
+</tr>
+<tr>
+<td>lookup</td>
+<td>1</td>
+<td><code>.lookup $subcommand</code></td>
+<td>Type .lookup to see the list of possible subcommands or .help lookup $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>mailbox</td>
+<td>1</td>
+<td><code>.mailbox</code></td>
+<td>Open mailbox.</td>
+</tr>
+<tr>
+<td>maxskill</td>
+<td>2</td>
+<td><code>.maxskill</code></td>
+<td>Sets all skills of the targeted player to their maximum values for its current level.</td>
+</tr>
+<tr>
+<td>mmap loadedtiles</td>
+<td>3</td>
+<td><code>.mmap loadedtiles</code></td>
+<td>To show which tiles are currently loaded.</td>
+</tr>
+<tr>
+<td>mmap loc</td>
+<td>3</td>
+<td><code>.mmap loc</code></td>
+<td>To print on which tile one is.</td>
+</tr>
+<tr>
+<td>mmap path</td>
+<td>3</td>
+<td><code>.mmap path</code></td>
+<td>To calculate and show a path to current select unit.</td>
+</tr>
+<tr>
+<td>mmap stats</td>
+<td>3</td>
+<td><code>.mmap stats</code></td>
+<td>To show information about current state of mmaps.</td>
+</tr>
+<tr>
+<td>mmap testarea</td>
+<td>3</td>
+<td><code>.mmap testarea</code></td>
+<td>To calculate paths for all nearby npcs to player.</td>
+</tr>
+<tr>
+<td>modify arenapoints</td>
+<td>1</td>
+<td><code>.modify arenapoints #value</code></td>
+<td>Add $amount arena points to the selected player.</td>
+</tr>
+<tr>
+<td>modify bit</td>
+<td>2</td>
+<td><code>.modify bit #field #bit</code></td>
+<td>Toggle the #bit bit of the #field field for the selected player. If no player is selected, modify your character.</td>
+</tr>
+<tr>
+<td>modify drunk</td>
+<td>2</td>
+<td><code>.modify drunk #value</code></td>
+<td>Set drunk level to #value (0..100). Value 0 remove drunk state, 100 is max drunked state.</td>
+</tr>
+<tr>
+<td>modify energy</td>
+<td>2</td>
+<td><code>.modify energy #energy</code></td>
+<td>Modify the energy of the selected player. If no player is selected, modify your energy.</td>
+</tr>
+<tr>
+<td>modify faction</td>
+<td>3</td>
+<td><code>.modify faction #factionid #flagid #npcflagid #dynamicflagid</code></td>
+<td>Modify the faction and flags of the selected creature. Without arguments, display the faction and flags of the selected creature.</td>
+</tr>
+<tr>
+<td>modify gender</td>
+<td>2</td>
+<td><code>.modify gender male/female</code></td>
+<td>Change gender of selected player.</td>
+</tr>
+<tr>
+<td>modify honor</td>
+<td>2</td>
+<td><code>.modify honor $amount</code></td>
+<td>Add $amount honor points to the selected player.</td>
+</tr>
+<tr>
+<td>modify hp</td>
+<td>2</td>
+<td><code>.modify hp #newhp</code></td>
+<td>Modify the hp of the selected player. If no player is selected, modify your hp.</td>
+</tr>
+<tr>
+<td>modify mana</td>
+<td>2</td>
+<td><code>.modify mana #newmana</code></td>
+<td>Modify the mana of the selected player. If no player is selected, modify your mana.</td>
+</tr>
+<tr>
+<td>modify money</td>
+<td>2</td>
+<td><code>.modify money #money</code></td>
+<td>Add or remove money to the selected player. If no player is selected, modify your money. #gold can be negative to remove money.</td>
+</tr>
+<tr>
+<td>modify mount</td>
+<td>2</td>
+<td><code>.modify mount #id #speed</code></td>
+<td>Display selected player as mounted at #id creature and set speed to #speed value.</td>
+</tr>
+<tr>
+<td>modify phase</td>
+<td>2</td>
+<td><code>.modify phase #phasemask</code></td>
+<td>Selected character phasemask changed to #phasemask with related world vision update. Change active until in game phase changed, or GM-mode enable&#x2F;disable, or re-login. Character pts pasemask update to same value.</td>
+</tr>
+<tr>
+<td>modify rage</td>
+<td>2</td>
+<td><code>.modify rage #newrage</code></td>
+<td>Modify the rage of the selected player. If no player is selected, modify your rage.</td>
+</tr>
+<tr>
+<td>modify reputation</td>
+<td>2</td>
+<td><code>.modify reputation #repId (#repvalue \ $rankname [#delta])</code></td>
+<td>Sets the selected players reputation with faction #repId to #repvalue or to $reprank. If the reputation rank name is provided, the resulting reputation will be the lowest reputation for that rank plus the delta amount, if specified. You can use ‘.pinfo rep’ to list all known reputation ids, or use ‘.lookup faction $name’ to locate a specific faction id.</td>
+</tr>
+<tr>
+<td>modify runicpower</td>
+<td>2</td>
+<td><code>.modify runicpower #newrunicpower</code></td>
+<td>Modify the runic power of the selected player. If no player is selected, modify your runic power.</td>
+</tr>
+<tr>
+<td>modify scale</td>
+<td>2</td>
+<td><code>.modify scale #scale</code></td>
+<td>Modify size of the selected player or creature to “normal scale”*rate. If no player or creature is selected, modify your size. #rate may range from 0.1 to 10.</td>
+</tr>
+<tr>
+<td>modify speed all</td>
+<td>2</td>
+<td><code>.modify speed #rate</code></td>
+<td>Modify all speeds -run,swim,run back,swim back- of the selected player to “normalbase speed for this move type”*rate. If no player is selected, modify your speed. #rate may range from 0.1 to 50.</td>
+</tr>
+<tr>
+<td>modify speed backwalk</td>
+<td>2</td>
+<td><code>.modify speed backwalk #rate</code></td>
+<td>Modify the speed of the selected player while running backwards to “normal walk back speed”*rate. If no player is selected, modify your speed. #rate may range from 0.1 to 50.</td>
+</tr>
+<tr>
+<td>modify speed fly</td>
+<td>2</td>
+<td><code>.modify speed fly #rate</code></td>
+<td>Modify the flying speed of the selected player to “normal flying speed”*rate. If no player is selected, modify your speed. #rate may range from 0.1 to 50.</td>
+</tr>
+<tr>
+<td>modify speed swim</td>
+<td>2</td>
+<td><code>.modify speed swim #rate</code></td>
+<td>Modify the swim speed of the selected player to “normal swim speed”*rate. If no player is selected, modify your speed. #rate may range from 0.1 to 50.</td>
+</tr>
+<tr>
+<td>modify speed walk</td>
+<td>2</td>
+<td><code>.modify speed bwalk #rate</code></td>
+<td>Modify the speed of the selected player while running to “normal walk speed”*rate. If no player is selected, modify your speed. #rate may range from 0.1 to 50.</td>
+</tr>
+<tr>
+<td>modify speed</td>
+<td>2</td>
+<td><code>.modify speed $speedtype #rate</code></td>
+<td>Modify the running speed of the selected player to “normal base run speed”&#x3D; 1. If no player is selected, modify your speed. $speedtypes may be fly, all, walk, backwalk, or swim. #rate may range from 0.1 to 50.</td>
+</tr>
+<tr>
+<td>modify spell</td>
+<td>2</td>
+<td></td>
+<td>TODO</td>
+</tr>
+<tr>
+<td>modify standstate</td>
+<td>2</td>
+<td><code>.modify standstate #emoteid</code></td>
+<td>Change the emote of your character while standing to #emoteid.</td>
+</tr>
+<tr>
+<td>modify talentpoints</td>
+<td>2</td>
+<td><code>.modify talentpoints #amount</code></td>
+<td>Set free talent points for selected character or character’s pet. It will be reset to default expected at next levelup&#x2F;login&#x2F;quest reward.</td>
+</tr>
+<tr>
+<td>modify</td>
+<td>2</td>
+<td><code>.modify $subcommand</code></td>
+<td>Type .modify to see the list of possible subcommands or .help modify $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>morph reset</td>
+<td>1</td>
+<td><code>.morph reset</code></td>
+<td>Reset the original model for the selected target.</td>
+</tr>
+<tr>
+<td>morph</td>
+<td>1</td>
+<td><code>.morph #displayid</code></td>
+<td>Change your current model id to #displayid.</td>
+</tr>
+<tr>
+<td>movegens</td>
+<td>3</td>
+<td><code>.movegens</code></td>
+<td>Show movement generators stack for selected creature or player.</td>
+</tr>
+<tr>
+<td>mute</td>
+<td>2</td>
+<td><code>.mute [$playerName] $timeInMinutes [$reason]</code></td>
+<td>Disible chat messaging for any character from account of character $playerName (or currently selected) at $timeInMinutes minutes. Player can be offline.</td>
+</tr>
+<tr>
+<td>mutehistory</td>
+<td>2</td>
+<td><code>.mutehistory #accountname</code></td>
+<td>Show mute history for account #accountname.</td>
+</tr>
+<tr>
+<td>nameannounce</td>
+<td>2</td>
+<td><code>.nameannounce $announcement</code></td>
+<td>Send an announcement to all online players, displaying the name of the sender.</td>
+</tr>
+<tr>
+<td>neargrave</td>
+<td>2</td>
+<td><code>.neargrave [alliance\horde]</code></td>
+<td>Find nearest graveyard linked to zone (or only nearest from accepts alliance or horde faction ghosts).</td>
+</tr>
+<tr>
+<td>notify</td>
+<td>2</td>
+<td><code>.notify $MessageToBroadcast</code></td>
+<td>Send a global message to all players online in screen.</td>
+</tr>
+<tr>
+<td>npc add formation</td>
+<td>3</td>
+<td><code>.npc add formation $leader</code></td>
+<td>Add selected creature to a leader’s formation.</td>
+</tr>
+<tr>
+<td>npc add item</td>
+<td>3</td>
+<td><code>.npc add item #itemId &lt;#maxcount&gt;&lt;#incrtime&gt;&lt;#extendedcost&gt;r</code></td>
+<td>Add item #itemid to item list of selected vendor. Also optionally set max count item in vendor item list and time to item count restoring and items ExtendedCost.</td>
+</tr>
+<tr>
+<td>npc add move</td>
+<td>3</td>
+<td><code>.npc add move #creature_guid [#waittime]</code></td>
+<td>Add your current location as a waypoint for creature with guid #creature_guid. And optional add wait time.</td>
+</tr>
+<tr>
+<td>npc add temp</td>
+<td>3</td>
+<td><code>.npc add temp</code></td>
+<td>Adds temporary NPC, not saved to database.</td>
+</tr>
+<tr>
+<td>npc add</td>
+<td>3</td>
+<td><code>.npc add #creatureid</code></td>
+<td>Spawn a creature by the given template id of #creatureid.</td>
+</tr>
+<tr>
+<td>npc delete item</td>
+<td>3</td>
+<td><code>.npc delete item #itemId</code></td>
+<td>Remove item #itemid from item list of selected vendor.</td>
+</tr>
+<tr>
+<td>npc delete</td>
+<td>3</td>
+<td><code>.npc delete [#guid]</code></td>
+<td>Delete creature with guid #guid (or the selected if no guid is provided)</td>
+</tr>
+<tr>
+<td>npc follow stop</td>
+<td>2</td>
+<td><code>.npc follow stop</code></td>
+<td>Selected creature (non pet) stop follow you.</td>
+</tr>
+<tr>
+<td>npc follow</td>
+<td>2</td>
+<td><code>.npc follow start</code></td>
+<td>Selected creature start follow you until death&#x2F;fight&#x2F;etc.</td>
+</tr>
+<tr>
+<td>npc guid</td>
+<td>1</td>
+<td><code>.npc guid</code></td>
+<td>Intended to display database GUID of targeted creature. Currently displays GUID, faction, NPC flags, Entry ID, Model ID for selected creature.</td>
+</tr>
+<tr>
+<td>npc info</td>
+<td>1</td>
+<td><code>.npc info</code></td>
+<td>Display a list of details for the selected creature. The list includes: - GUID, Faction, NPC flags, Entry ID, Model ID, - Level, - Health (current&#x2F;maximum), - Field flags, dynamic flags, faction template, - Position information, - and the creature type, e.g. if the creature is a vendor.</td>
+</tr>
+<tr>
+<td>npc move</td>
+<td>3</td>
+<td><code>.npc move [#creature_guid]</code></td>
+<td>Move the targeted creature spawn point to your coordinates.</td>
+</tr>
+<tr>
+<td>npc playemote</td>
+<td>3</td>
+<td><code>.npc playemote #emoteid</code></td>
+<td>Make the selected creature emote with an emote of id #emoteid.</td>
+</tr>
+<tr>
+<td>npc say</td>
+<td>2</td>
+<td><code>.npc say $message</code></td>
+<td>Make selected creature say specified message.</td>
+</tr>
+<tr>
+<td>npc set allowmove</td>
+<td>3</td>
+<td><code>.npc set allowmove</code></td>
+<td>Enable or disable movement creatures in world. Not implemented.</td>
+</tr>
+<tr>
+<td>npc set data</td>
+<td>3</td>
+<td><code>.npc set data $field $data</code></td>
+<td>Sets data for the selected creature. Used for testing Scripting</td>
+</tr>
+<tr>
+<td>npc set entry</td>
+<td>3</td>
+<td><code>.npc set entry $entry</code></td>
+<td>Switch selected creature with another entry from creature_template. - New creature.id value not saved to DB.</td>
+</tr>
+<tr>
+<td>npc set faction original</td>
+<td>3</td>
+<td><code>.npc set faction original</code></td>
+<td>Revert the temporal faction of the selected creature.</td>
+</tr>
+<tr>
+<td>npc set faction permanent</td>
+<td>3</td>
+<td><code>.npc set faction permanent #factionid</code></td>
+<td>Permanently set the faction of the selected creature to #factionid.</td>
+</tr>
+<tr>
+<td>npc set faction temp</td>
+<td>3</td>
+<td><code>.npc set faction temp #factionid</code></td>
+<td>Temporarily set the faction of the selected creature to #factionid.</td>
+</tr>
+<tr>
+<td>npc set flag</td>
+<td>3</td>
+<td><code>.npc set flag #npcflag</code></td>
+<td>Set the NPC flags of creature template of the selected creature and selected creature to #npcflag. NPC flags will applied to all creatures of selected creature template after server restart or grid unload&#x2F;load.</td>
+</tr>
+<tr>
+<td>npc set level</td>
+<td>3</td>
+<td><code>.npc set level #level</code></td>
+<td>Change the level of the selected creature to #level. #level may range from 1 to (CONFIG_MAX_PLAYER_LEVEL) + 3.</td>
+</tr>
+<tr>
+<td>npc set link</td>
+<td>3</td>
+<td><code>.npc set link $creatureGUID</code></td>
+<td>Links respawn of selected creature to the condition that $creatureGUID defined is alive.</td>
+</tr>
+<tr>
+<td>npc set model</td>
+<td>3</td>
+<td><code>.npc set model #displayid</code></td>
+<td>Change the model id of the selected creature to #displayid.</td>
+</tr>
+<tr>
+<td>npc set movetype</td>
+<td>3</td>
+<td><code>.npc set movetype [#creature_guid] stay/random/way [NODEL]</code></td>
+<td>Set for creature pointed by #creature_guid (or selected if #creature_guid not provided) movement type and move it to respawn position (if creature alive). Any existing waypoints for creature will be removed from the database if you do not use NODEL. If the creature is dead then movement type will applied at creature respawn. Make sure you use NODEL, if you want to keep the waypoints.</td>
+</tr>
+<tr>
+<td>npc set phase</td>
+<td>3</td>
+<td><code>.npc set phase #phasemask</code></td>
+<td>Selected unit or pet phasemask changed to #phasemask with related world vision update for players. In creature case state saved to DB and persistent. In pet case change active until in game phase changed for owner, owner re-login, or GM-mode enable&#x2F;disable..</td>
+</tr>
+<tr>
+<td>npc set spawntime</td>
+<td>3</td>
+<td><code>.npc set spawntime #time</code></td>
+<td>Adjust spawntime of selected creature to time.</td>
+</tr>
+<tr>
+<td>npc set wanderdistance</td>
+<td>3</td>
+<td><code>.npc set wanderdistance #dist</code></td>
+<td>Adjust wanderdistance of selected creature to dist.</td>
+</tr>
+<tr>
+<td>npc tame</td>
+<td>2</td>
+<td><code>.npc tame</code></td>
+<td>Tame the selected creature (if it is tameable).</td>
+</tr>
+<tr>
+<td>npc textemote</td>
+<td>2</td>
+<td><code>.npc textemote #emoteid</code></td>
+<td>Make the selected creature to do textemote with an emote of id #emoteid.</td>
+</tr>
+<tr>
+<td>npc whisper</td>
+<td>2</td>
+<td><code>.npc whisper #playerguid #text</code></td>
+<td>Make the selected npc whisper #text to #playerguid.</td>
+</tr>
+<tr>
+<td>npc yell</td>
+<td>2</td>
+<td><code>.npc yell $message</code></td>
+<td>Make selected creature yell specified message.</td>
+</tr>
+<tr>
+<td>npc</td>
+<td>2</td>
+<td><code>.npc $subcommand</code></td>
+<td>Type .npc to see the list of possible subcommands or .help npc $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>pdump load</td>
+<td>3</td>
+<td><code>.pdump load $filename $account [$newname] [$newguid]</code></td>
+<td>Load character dump from dump file into character list of $account with saved or $newname, with saved (or first free) or $newguid guid.</td>
+</tr>
+<tr>
+<td>pdump write</td>
+<td>3</td>
+<td><code>.pdump write $filename $playerNameOrGUID</code></td>
+<td>Write character dump with name&#x2F;guid $playerNameOrGUID to file $filename.</td>
+</tr>
+<tr>
+<td>pdump</td>
+<td>3</td>
+<td><code>.pdump $subcommand</code></td>
+<td>Type .pdump to see the list of possible subcommands or .help pdump $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>pet create</td>
+<td>2</td>
+<td><code>.pet create</code></td>
+<td>Creates a pet of the selected creature.</td>
+</tr>
+<tr>
+<td>pet learn</td>
+<td>2</td>
+<td><code>.pet learn</code></td>
+<td>Learn #spellid to pet.</td>
+</tr>
+<tr>
+<td>pet unlearn</td>
+<td>2</td>
+<td><code>.pet unlean</code></td>
+<td>unLearn #spellid to pet.</td>
+</tr>
+<tr>
+<td>pet</td>
+<td>2</td>
+<td><code>.pet $subcommand</code></td>
+<td>Type .pet to see the list of possible subcommands or .help pet $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>pinfo</td>
+<td>2</td>
+<td><code>.pinfo [$player_name/#GUID]</code></td>
+<td>Output account information for selected player or player find by $player_name or #GUID.</td>
+</tr>
+<tr>
+<td>playall</td>
+<td>2</td>
+<td><code>.playall #soundid</code></td>
+<td>Player a sound to whole server.</td>
+</tr>
+<tr>
+<td>player learn</td>
+<td>2</td>
+<td><code>.player learn #playername #spell [all]</code></td>
+<td>Learn spell #spell for the specified player. If ‘all’ is added then all ranks are learned.</td>
+</tr>
+<tr>
+<td>player unlearn</td>
+<td>2</td>
+<td><code>.player unlearn #playername #spell [all]</code></td>
+<td>Unlearn spell #spell for the specified player. If ‘all’ is added then all ranks are unlearned.</td>
+</tr>
+<tr>
+<td>possess</td>
+<td>2</td>
+<td><code>.possess</code></td>
+<td>Possesses indefinitely the selected creature.</td>
+</tr>
+<tr>
+<td>quest add</td>
+<td>2</td>
+<td><code>.quest add #quest_id</code></td>
+<td>Add to character quest log quest #quest_id. Quest started from item can’t be added by this command but correct .additem call provided in command output.</td>
+</tr>
+<tr>
+<td>quest complete</td>
+<td>2</td>
+<td><code>.quest complete #questid</code></td>
+<td>Mark all quest objectives as completed for target character active quest. After this target character can go and get quest reward.</td>
+</tr>
+<tr>
+<td>quest remove</td>
+<td>2</td>
+<td><code>.quest remove #quest_id</code></td>
+<td>Set quest #quest_id state to not completed and not active (and remove from active quest list) for selected player.</td>
+</tr>
+<tr>
+<td>quest reward</td>
+<td>2</td>
+<td><code>.quest reward #questId</code></td>
+<td>Grants quest reward to selected player and removes quest from his log (quest must be in completed state).</td>
+</tr>
+<tr>
+<td>quest</td>
+<td>2</td>
+<td><code>.quest $subcommand</code></td>
+<td>Type .quest to see the list of possible subcommands or .help quest $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>recall</td>
+<td>2</td>
+<td><code>.recall [$playername]</code></td>
+<td>Teleport $playername or selected player to the place where he has been before last use of a teleportation command. If no $playername is entered and no player is selected, it will teleport you.</td>
+</tr>
+<tr>
+<td>reload access_requirement</td>
+<td>3</td>
+<td><code>.reload access_requirement</code></td>
+<td>Reload access_requirement table.</td>
+</tr>
+<tr>
+<td>reload achievement_reward_locale</td>
+<td>3</td>
+<td><code>.reload achievement_reward_locale</code></td>
+<td>Reload achievement_reward_locale table.</td>
+</tr>
+<tr>
+<td>reload achievement_reward</td>
+<td>3</td>
+<td><code>.reload achievement_reward</code></td>
+<td>Reload achievement_reward table.</td>
+</tr>
+<tr>
+<td>reload acore_string</td>
+<td>3</td>
+<td><code>.reload acore_string</code></td>
+<td>Reload acore_string table.</td>
+</tr>
+<tr>
+<td>reload all achievement</td>
+<td>3</td>
+<td><code>.reload all achievement</code></td>
+<td>Reload achievement_reward, achievement_criteria_data tables.</td>
+</tr>
+<tr>
+<td>reload all area</td>
+<td>3</td>
+<td><code>.reload all area</code></td>
+<td>Reload areatrigger_teleport, areatrigger_tavern, game_graveyard_zone tables.</td>
+</tr>
+<tr>
+<td>reload all gossips</td>
+<td>3</td>
+<td><code>.reload all gossips</code></td>
+<td>Reload gossip_menu, gossip_menu_option, gossip_scripts, points_of_interest tables.</td>
+</tr>
+<tr>
+<td>reload all item</td>
+<td>3</td>
+<td><code>.reload all item</code></td>
+<td>Reload page_text, item_enchantment_table tables.</td>
+</tr>
+<tr>
+<td>reload all locales</td>
+<td>3</td>
+<td><code>.reload all locales</code></td>
+<td>Reload all locales_* tables with reload support added and that can be safe reloaded.</td>
+</tr>
+<tr>
+<td>reload all loot</td>
+<td>3</td>
+<td><code>.reload all loot</code></td>
+<td>Reload all *_loot_template tables. This can be slow operation with lags for server run.</td>
+</tr>
+<tr>
+<td>reload all npc</td>
+<td>3</td>
+<td><code>.reload all npc</code></td>
+<td>Reload npc_option, npc_trainer, npc vendor, points of interest tables.</td>
+</tr>
+<tr>
+<td>reload all quest</td>
+<td>3</td>
+<td><code>.reload all quest</code></td>
+<td>Reload all quest related tables if reload support added for this table and this table can be safe reloaded.</td>
+</tr>
+<tr>
+<td>reload all scripts</td>
+<td>3</td>
+<td><code>.reload all scripts</code></td>
+<td>Reload gameobject_scripts, event_scripts, quest_end_scripts, quest_start_scripts, spell_scripts, db_script_string, waypoint_scripts tables.</td>
+</tr>
+<tr>
+<td>reload all spell</td>
+<td>3</td>
+<td><code>.reload all spell</code></td>
+<td>Reload all spell_* tables with reload support added and that can be safe reloaded.</td>
+</tr>
+<tr>
+<td>reload all</td>
+<td>3</td>
+<td><code>.reload all</code></td>
+<td>Reload all tables with reload support added and that can be safe reloaded.</td>
+</tr>
+<tr>
+<td>reload areatrigger_involvedrelation</td>
+<td>3</td>
+<td><code>.reload areatrigger_involvedrelation</code></td>
+<td>Reload areatrigger_involvedrelation table.</td>
+</tr>
+<tr>
+<td>reload areatrigger_tavern</td>
+<td>3</td>
+<td><code>.reload areatrigger_tavern</code></td>
+<td>Reload areatrigger_tavern table.</td>
+</tr>
+<tr>
+<td>reload areatrigger_teleport</td>
+<td>3</td>
+<td><code>.reload areatrigger_teleport</code></td>
+<td>Reload areatrigger_teleport table.</td>
+</tr>
+<tr>
+<td>reload auctions</td>
+<td>3</td>
+<td><code>.reload auctions</code></td>
+<td>Reload dynamic data tables from the database.</td>
+</tr>
+<tr>
+<td>reload autobroadcast</td>
+<td>3</td>
+<td><code>.reload autobroadcast</code></td>
+<td>Reload autobroadcast table.</td>
+</tr>
+<tr>
+<td>reload battleground_template</td>
+<td>3</td>
+<td><code>.reload battleground_template</code></td>
+<td>Reload battleground_template table.</td>
+</tr>
+<tr>
+<td>reload broadcast_text</td>
+<td>3</td>
+<td><code>.reload broadcast_text</code></td>
+<td>Reload broadcast_text table.</td>
+</tr>
+<tr>
+<td>reload command</td>
+<td>3</td>
+<td><code>.reload command</code></td>
+<td>Reload command table.</td>
+</tr>
+<tr>
+<td>reload conditions</td>
+<td>3</td>
+<td></td>
+<td>Reload conditions table.</td>
+</tr>
+<tr>
+<td>reload config</td>
+<td>3</td>
+<td><code>.reload config</code></td>
+<td>Reload config settings (by default stored in worldserver.conf). Not all settings can be change at reload: some new setting values will be ignored until restart, some values will applied with delay or only to new objects&#x2F;maps, some values will explicitly rejected to change at reload.</td>
+</tr>
+<tr>
+<td>reload creature_linked_respawn</td>
+<td>2</td>
+<td><code>.reload creature_linked_respawn</code></td>
+<td>Reload creature_linked_respawn table.</td>
+</tr>
+<tr>
+<td>reload creature_loot_template</td>
+<td>3</td>
+<td><code>.reload creature_loot_template</code></td>
+<td>Reload creature_loot_template table.</td>
+</tr>
+<tr>
+<td>reload creature_onkill_reputation</td>
+<td>3</td>
+<td><code>.reload creature_onkill_reputation</code></td>
+<td>Reload creature_onkill_reputation table.</td>
+</tr>
+<tr>
+<td>reload creature_questender</td>
+<td>3</td>
+<td><code>.reload creature_questender</code></td>
+<td>Reload creature_questender table.</td>
+</tr>
+<tr>
+<td>reload creature_queststarter</td>
+<td>3</td>
+<td><code>.reload creature_queststarter</code></td>
+<td>Reload creature_queststarter table.</td>
+</tr>
+<tr>
+<td>reload creature_template_locale</td>
+<td>3</td>
+<td><code>.reload creature_template_locale</code></td>
+<td>Reload creature_template_locale table.</td>
+</tr>
+<tr>
+<td>reload creature_template</td>
+<td>3</td>
+<td><code>.reload creature_template $entry</code></td>
+<td>Reload the specified creature’s template.</td>
+</tr>
+<tr>
+<td>reload creature_text_locale</td>
+<td>3</td>
+<td><code>.reload creature_text_locale</code></td>
+<td>Reload creature_text_locale table.</td>
+</tr>
+<tr>
+<td>reload creature_text</td>
+<td>3</td>
+<td><code>.reload creature_text</code></td>
+<td>Reload creature_text table.</td>
+</tr>
+<tr>
+<td>reload disables</td>
+<td>3</td>
+<td><code>.reload disables</code></td>
+<td>Reload disables table.</td>
+</tr>
+<tr>
+<td>reload disenchant_loot_template</td>
+<td>3</td>
+<td><code>.reload disenchant_loot_template</code></td>
+<td>Reload disenchant_loot_template table.</td>
+</tr>
+<tr>
+<td>reload event_scripts</td>
+<td>3</td>
+<td><code>.reload event_scripts</code></td>
+<td>Reload event_scripts table.</td>
+</tr>
+<tr>
+<td>reload fishing_loot_template</td>
+<td>3</td>
+<td><code>.reload fishing_loot_template</code></td>
+<td>Reload fishing_loot_template table.</td>
+</tr>
+<tr>
+<td>reload game_tele</td>
+<td>3</td>
+<td><code>.reload game_tele</code></td>
+<td>Reload game_tele table.</td>
+</tr>
+<tr>
+<td>reload gameobject_loot_template</td>
+<td>3</td>
+<td><code>.reload gameobject_loot_template</code></td>
+<td>Reload gameobject_loot_template table.</td>
+</tr>
+<tr>
+<td>reload gameobject_questender</td>
+<td>3</td>
+<td><code>.reload gameobject_questender</code></td>
+<td>Reload gameobject_questender table.</td>
+</tr>
+<tr>
+<td>reload gameobject_queststarter</td>
+<td>3</td>
+<td><code>.reload gameobject_queststarter</code></td>
+<td>Reload gameobject_queststarter table.</td>
+</tr>
+<tr>
+<td>reload gameobject_template_locale</td>
+<td>3</td>
+<td><code>.reload gameobject_template_locale</code></td>
+<td>Reload gameobject_template_locale table.</td>
+</tr>
+<tr>
+<td>reload gm_tickets</td>
+<td>3</td>
+<td><code>.reload gm_tickets</code></td>
+<td>Reload gm_tickets table.</td>
+</tr>
+<tr>
+<td>reload gossip_menu_option_locale</td>
+<td>3</td>
+<td><code>.reload gossip_menu_option_locale</code></td>
+<td>Reload gossip_menu_option_locale table.</td>
+</tr>
+<tr>
+<td>reload gossip_menu_option</td>
+<td>3</td>
+<td><code>.reload gossip_menu_option</code></td>
+<td>Reload gossip_menu_option table.</td>
+</tr>
+<tr>
+<td>reload gossip_menu</td>
+<td>3</td>
+<td><code>.reload gossip_menu</code></td>
+<td>Reload gossip_menu table.</td>
+</tr>
+<tr>
+<td>reload item_loot_template</td>
+<td>3</td>
+<td><code>.reload item_loot_template</code></td>
+<td>Reload item_loot_template table.</td>
+</tr>
+<tr>
+<td>reload item_set_name_locale</td>
+<td>3</td>
+<td><code>.reload item_set_name_locale</code></td>
+<td>Reload item_set_name_locale table.</td>
+</tr>
+<tr>
+<td>reload item_set_names</td>
+<td>3</td>
+<td><code>.reload item_set_names</code></td>
+<td>Reload item_set_names table.</td>
+</tr>
+<tr>
+<td>reload item_template_locale</td>
+<td>3</td>
+<td><code>.reload item_template_locale</code></td>
+<td>Reload item_template_locale table.</td>
+</tr>
+<tr>
+<td>reload lfg_dungeon_rewards</td>
+<td>3</td>
+<td><code>.reload lfg_dungeon_rewards</code></td>
+<td>Reload lfg_dungeon_rewards table.</td>
+</tr>
+<tr>
+<td>reload mail_level_reward</td>
+<td>3</td>
+<td><code>.reload mail_level_reward</code></td>
+<td>Reload mail_level_reward table.</td>
+</tr>
+<tr>
+<td>reload mail_loot_template</td>
+<td>3</td>
+<td><code>.reload quest_mail_loot_template</code></td>
+<td>Reload quest_mail_loot_template table.</td>
+</tr>
+<tr>
+<td>reload milling_loot_template</td>
+<td>3</td>
+<td><code>.reload milling_loot_template</code></td>
+<td>Reload milling_loot_template table.</td>
+</tr>
+<tr>
+<td>reload motd</td>
+<td>3</td>
+<td><code>.reload motd</code></td>
+<td>Reload motd table.</td>
+</tr>
+<tr>
+<td>reload npc_spellclick_spells</td>
+<td>3</td>
+<td><code>.reload npc_spellclick_spells</code></td>
+<td>Reload npc_spellclick_spells table.</td>
+</tr>
+<tr>
+<td>reload npc_text_locale</td>
+<td>3</td>
+<td><code>.reload npc_text_locale</code></td>
+<td>Reload npc_text_locale table.</td>
+</tr>
+<tr>
+<td>reload npc_trainer</td>
+<td>3</td>
+<td><code>.reload npc_trainer</code></td>
+<td>Reload npc_trainer table.</td>
+</tr>
+<tr>
+<td>reload npc_vendor</td>
+<td>3</td>
+<td><code>.reload npc_vendor</code></td>
+<td>Reload npc_vendor table.</td>
+</tr>
+<tr>
+<td>reload page_text_locale</td>
+<td>3</td>
+<td><code>.reload page_text_locale</code></td>
+<td>Reload page_tex_locale table.</td>
+</tr>
+<tr>
+<td>reload page_text</td>
+<td>3</td>
+<td><code>.reload page_text</code></td>
+<td>Reload page_text table.</td>
+</tr>
+<tr>
+<td>reload pickpocketing_loot_template</td>
+<td>3</td>
+<td><code>.reload pickpocketing_loot_template</code></td>
+<td>Reload pickpocketing_loot_template table.</td>
+</tr>
+<tr>
+<td>reload points_of_interest_locale</td>
+<td>3</td>
+<td><code>.reload points_of_interest_locale</code></td>
+<td>Reload points_of_interest_locale table.</td>
+</tr>
+<tr>
+<td>reload points_of_interest</td>
+<td>3</td>
+<td><code>.reload points_of_interest</code></td>
+<td>Reload points_of_interest table.</td>
+</tr>
+<tr>
+<td>reload prospecting_loot_template</td>
+<td>3</td>
+<td><code>.reload prospecting_loot_template</code></td>
+<td>Reload prospecting_loot_template table.</td>
+</tr>
+<tr>
+<td>reload quest_offer_reward_locale</td>
+<td>3</td>
+<td><code>.reload quest_offer_reward_locale</code></td>
+<td>Reload quest_offer_reward_locale table.</td>
+</tr>
+<tr>
+<td>reload quest_poi</td>
+<td>3</td>
+<td><code>.reload quest_poi</code></td>
+<td>Reload quest_poi table.</td>
+</tr>
+<tr>
+<td>reload quest_request_item_locale</td>
+<td>3</td>
+<td><code>.reload quest_request_item_locale</code></td>
+<td>Reload quest_request_item_locale table.</td>
+</tr>
+<tr>
+<td>reload quest_template_locale</td>
+<td>3</td>
+<td><code>.reload quest_template_locale</code></td>
+<td>Reload quest_template_locale table.</td>
+</tr>
+<tr>
+<td>reload quest_template</td>
+<td>3</td>
+<td><code>.reload quest_template</code></td>
+<td>Reload quest_template table.</td>
+</tr>
+<tr>
+<td>reload reference_loot_template</td>
+<td>3</td>
+<td><code>.reload reference_loot_template</code></td>
+<td>Reload reference_loot_template table.</td>
+</tr>
+<tr>
+<td>reload reputation_reward_rate</td>
+<td>3</td>
+<td><code>.reload reputation_reward_rate</code></td>
+<td>Reload reputation_reward_rate table.</td>
+</tr>
+<tr>
+<td>reload reputation_spillover_template</td>
+<td>3</td>
+<td><code>.reload reputation_spillover_template</code></td>
+<td>Reload reputation_spillover_template table.</td>
+</tr>
+<tr>
+<td>reload reserved_name</td>
+<td>3</td>
+<td><code>.reload reserved_name</code></td>
+<td>Reload reserved_name table.</td>
+</tr>
+<tr>
+<td>reload skill_discovery_template</td>
+<td>3</td>
+<td><code>.reload skill_discovery_template</code></td>
+<td>Reload skill_discovery_template table.</td>
+</tr>
+<tr>
+<td>reload skill_extra_item_template</td>
+<td>3</td>
+<td><code>.reload skill_extra_item_template</code></td>
+<td>Reload skill_extra_item_template table.</td>
+</tr>
+<tr>
+<td>reload skill_fishing_base_level</td>
+<td>3</td>
+<td><code>.reload skill_fishing_base_level</code></td>
+<td>Reload skill_fishing_base_level table.</td>
+</tr>
+<tr>
+<td>reload skinning_loot_template</td>
+<td>3</td>
+<td><code>.reload skinning_loot_template</code></td>
+<td>Reload skinning_loot_template table.</td>
+</tr>
+<tr>
+<td>reload smart_scripts</td>
+<td>3</td>
+<td><code>.reload smart_scripts</code></td>
+<td>Reload smart_scripts table.</td>
+</tr>
+<tr>
+<td>reload spell_area</td>
+<td>3</td>
+<td><code>.reload spell_area</code></td>
+<td>Reload spell_area table.</td>
+</tr>
+<tr>
+<td>reload spell_bonus_data</td>
+<td>3</td>
+<td><code>.reload spell_bonus_data</code></td>
+<td>Reload spell_bonus_data table.</td>
+</tr>
+<tr>
+<td>reload spell_group_stack_rules</td>
+<td>3</td>
+<td><code>.reload spell_group</code></td>
+<td>Reload spell_group_stack_rules table.</td>
+</tr>
+<tr>
+<td>reload spell_group</td>
+<td>3</td>
+<td><code>.reload spell_group</code></td>
+<td>Reload spell_group table.</td>
+</tr>
+<tr>
+<td>reload spell_linked_spell</td>
+<td>3</td>
+<td><code>.reload spell_linked_spell</code></td>
+<td>Reloads the spell_linked_spell DB table.</td>
+</tr>
+<tr>
+<td>reload spell_loot_template</td>
+<td>3</td>
+<td><code>.reload spell_loot_template</code></td>
+<td>Reload spell_loot_template table.</td>
+</tr>
+<tr>
+<td>reload spell_pet_auras</td>
+<td>3</td>
+<td><code>.reload spell_pet_auras</code></td>
+<td>Reload spell_pet_auras table.</td>
+</tr>
+<tr>
+<td>reload spell_proc_event</td>
+<td>3</td>
+<td><code>.reload spell_proc_event</code></td>
+<td>Reload spell_proc_event table.</td>
+</tr>
+<tr>
+<td>reload spell_proc</td>
+<td>3</td>
+<td><code>.reload spell_proc</code></td>
+<td>Reload spell_proc table.</td>
+</tr>
+<tr>
+<td>reload spell_required</td>
+<td>3</td>
+<td><code>.reload spell_required</code></td>
+<td>Reload spell_required table.</td>
+</tr>
+<tr>
+<td>reload spell_scripts</td>
+<td>3</td>
+<td><code>.reload spell_scripts</code></td>
+<td>Reload spell_scripts table.</td>
+</tr>
+<tr>
+<td>reload spell_target_position</td>
+<td>3</td>
+<td><code>.reload spell_target_position</code></td>
+<td>Reload spell_target_position table.</td>
+</tr>
+<tr>
+<td>reload spell_threats</td>
+<td>3</td>
+<td><code>.reload spell_threats</code></td>
+<td>Reload spell_threats table.</td>
+</tr>
+<tr>
+<td>reload vehicle_accessory</td>
+<td>3</td>
+<td><code>.reload vehicle_accessory</code></td>
+<td>Reloads GUID-based vehicle accessory definitions from the database.</td>
+</tr>
+<tr>
+<td>reload vehicle_template_accessory</td>
+<td>3</td>
+<td><code>.reload vehicle_template_accessory</code></td>
+<td>Reloads entry-based vehicle accessory definitions from the database.</td>
+</tr>
+<tr>
+<td>reload waypoint_data</td>
+<td>3</td>
+<td><code>.reload waypoint_data</code></td>
+<td>Will reload waypoint_data table.</td>
+</tr>
+<tr>
+<td>reload waypoint_scripts</td>
+<td>3</td>
+<td><code>.reload waypoint_scripts</code></td>
+<td>Reload waypoint_scripts table.</td>
+</tr>
+<tr>
+<td>reload</td>
+<td>3</td>
+<td><code>.reload $subcommand</code></td>
+<td>Type .reload to see the list of possible subcommands or .help reload $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>reset achievements</td>
+<td>4</td>
+<td><code>.reset achievements [$playername]</code></td>
+<td>Reset achievements data for selected or named (online or offline) character. Achievements for persistance progress data like completed quests&#x2F;etc re-filled at reset. Achievements for events like kills&#x2F;casts&#x2F;etc will lost.</td>
+</tr>
+<tr>
+<td>reset all</td>
+<td>4</td>
+<td><code>.reset all [spells/talents]</code></td>
+<td>Request reset spells or talents (including talents for all character’s pets if any) at next login each existed character.</td>
+</tr>
+<tr>
+<td>reset honor</td>
+<td>3</td>
+<td><code>.reset honor [Playername]</code></td>
+<td>Reset all honor data for targeted character.</td>
+</tr>
+<tr>
+<td>reset level</td>
+<td>3</td>
+<td><code>.reset level [Playername]</code></td>
+<td>Reset level to 1 including reset stats and talents. Equipped items with greater level requirement can be lost.</td>
+</tr>
+<tr>
+<td>reset spells</td>
+<td>3</td>
+<td><code>.reset spells [Playername]</code></td>
+<td>Removes all non-original spells from spellbook. . Playername can be name of offline character.</td>
+</tr>
+<tr>
+<td>reset stats</td>
+<td>3</td>
+<td><code>.reset stats [Playername]</code></td>
+<td>Resets(recalculate) all stats of the targeted player to their original VALUESat current level.</td>
+</tr>
+<tr>
+<td>reset talents</td>
+<td>3</td>
+<td><code>.reset talents [Playername]</code></td>
+<td>Removes all talents of the targeted player or pet or named player Playername can be name of offline character. With player talents also will be reset talents for all character’s pets if any.</td>
+</tr>
+<tr>
+<td>reset</td>
+<td>3</td>
+<td><code>.reset $subcommand</code></td>
+<td>Type .reset to see the list of possible subcommands or .help reset $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>respawn</td>
+<td>2</td>
+<td><code>.respawn</code></td>
+<td>Respawn target creature and GO without waiting for respawn time expiration. If no target provided, respawn all nearest creatures.</td>
+</tr>
+<tr>
+<td>revive</td>
+<td>2</td>
+<td><code>.revive</code></td>
+<td>Revive the selected player. If no player is selected, it will revive you.</td>
+</tr>
+<tr>
+<td>save</td>
+<td>0</td>
+<td><code>.save</code></td>
+<td>Saves your character.</td>
+</tr>
+<tr>
+<td>saveall</td>
+<td>2</td>
+<td><code>.saveall</code></td>
+<td>Save all characters in game.</td>
+</tr>
+<tr>
+<td>send items</td>
+<td>2</td>
+<td><code>.send items #playername &quot;#subject&quot; &quot;#text&quot; itemid1[:count1] itemid2[:count2] ... itemidN[:countN]</code></td>
+<td>Send a mail to a player. Subject and mail text must be in “”. If for itemid not provided related count values then expected 1, if count &gt; max items in stack then items will be send in required amount stacks. All stacks amount in mail limited to 12.</td>
+</tr>
+<tr>
+<td>send mail</td>
+<td>2</td>
+<td><code>.send mail #playername &quot;#subject&quot; &quot;#text&quot;</code></td>
+<td>Send a mail to a player. Subject and mail text must be in “”.</td>
+</tr>
+<tr>
+<td>send message</td>
+<td>3</td>
+<td><code>.send message $playername $message</code></td>
+<td>Send screen message to player from ADMINISTRATOR. <strong>Will return an error if player is offline (can be problematic with SOAP for example)!</strong></td>
+</tr>
+<tr>
+<td>send money</td>
+<td>2</td>
+<td><code>.send money #playername &quot;#subject&quot; &quot;#text&quot; #money</code></td>
+<td>Send mail with money to a player. Subject and mail text must be in “”.</td>
+</tr>
+<tr>
+<td>server corpses</td>
+<td>2</td>
+<td><code>.server corpses</code></td>
+<td>Triggering corpses expire check in world.</td>
+</tr>
+<tr>
+<td>server debug</td>
+<td>3</td>
+<td><code>.server debug</code></td>
+<td>Shows detailed information about the server setup, useful when reporting a bug.</td>
+</tr>
+<tr>
+<td>server exit</td>
+<td>4</td>
+<td><code>.server exit</code></td>
+<td>Terminate worldserver NOW. Exit code 0.</td>
+</tr>
+<tr>
+<td>server idlerestart cancel</td>
+<td>3</td>
+<td><code>.server idlerestart cancel</code></td>
+<td>Cancel the restart&#x2F;shutdown timer if any.</td>
+</tr>
+<tr>
+<td>server idlerestart</td>
+<td>4</td>
+<td><code>.server idlerestart #delay [#exit_code]</code></td>
+<td>Restart the server after #delay seconds if no active connections are present (no players). Use #exit_code to change the exit code, default &#x3D; 2.</td>
+</tr>
+<tr>
+<td>server idleshutdown cancel</td>
+<td>4</td>
+<td><code>.server idleshutdown cancel</code></td>
+<td>Cancel the restart&#x2F;shutdown timer if any.</td>
+</tr>
+<tr>
+<td>server idleshutdown</td>
+<td>3</td>
+<td><code>.server idleshutdown #delay [#exit_code]</code></td>
+<td>Shut the server down after #delay seconds if no active connections are present (no players). Use #exit_code to change the exit code, default &#x3D; 0.</td>
+</tr>
+<tr>
+<td>server info</td>
+<td>0</td>
+<td><code>.server info</code></td>
+<td>Display server version and the number of connected players.</td>
+</tr>
+<tr>
+<td>server motd</td>
+<td>0</td>
+<td><code>.server motd</code></td>
+<td>Show server Message of the day.</td>
+</tr>
+<tr>
+<td>server restart cancel</td>
+<td>3</td>
+<td><code>.server restart cancel</code></td>
+<td>Cancel the restart&#x2F;shutdown timer if any.</td>
+</tr>
+<tr>
+<td>server restart</td>
+<td>3</td>
+<td><code>.server restart #delay [#exit_code]</code></td>
+<td>Restart the server after #delay seconds. Use #exit_code to change the exit code, default &#x3D; 2.</td>
+</tr>
+<tr>
+<td>server set closed</td>
+<td>4</td>
+<td><code>.server set closed [on/off]</code></td>
+<td>Sets whether the world accepts new client connectsions.</td>
+</tr>
+<tr>
+<td>server set difftime</td>
+<td>4</td>
+<td><code>.server set difftime $time</code></td>
+<td>$time (in milliseconds) update time diff is written to the log file.</td>
+</tr>
+<tr>
+<td>server set loglevel</td>
+<td>4</td>
+<td><code>.server set loglevel $facility $name $loglevel</code></td>
+<td>$facility can take the values: appender (a) or logger (l). $loglevel can take the values: disabled (0), trace (1), debug (2), info (3), warn (4), error (5) or fatal (6)</td>
+</tr>
+<tr>
+<td>server set motd</td>
+<td>3</td>
+<td><code>.server set motd Optional($realmId) $MOTD</code></td>
+<td>Set server Message of the day for the specified $realmId. If $realmId is not provided it will update for the current realm. Use $realmId -1 to set motd for all realms.</td>
+</tr>
+<tr>
+<td>server shutdown cancel</td>
+<td>3</td>
+<td><code>.server shutdown cancel</code></td>
+<td>Cancel the restart&#x2F;shutdown timer if any.</td>
+</tr>
+<tr>
+<td>server shutdown</td>
+<td>3</td>
+<td><code>.server shutdown #delay [#exit_code]</code></td>
+<td>Shut the server down after #delay seconds. Use #exit_code to change the exit code, default &#x3D; 0.</td>
+</tr>
+<tr>
+<td>server togglequerylog</td>
+<td>4</td>
+<td><code>.server togglequerylog</code></td>
+<td>Toggle SQL query log on&#x2F;off.</td>
+</tr>
+<tr>
+<td>server</td>
+<td>3</td>
+<td><code>.server $subcommand</code></td>
+<td>Type .server to see the list of possible subcommands or .help server $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>setskill</td>
+<td>2</td>
+<td><code>.setskill #skill #level [#max]</code></td>
+<td>Set a skill of id #skill with a current skill value of #level and a maximum value of #max (or equal current maximum if not provide) for the selected character. If no character is selected, you learn the skill.</td>
+</tr>
+<tr>
+<td>showarea</td>
+<td>2</td>
+<td><code>.showarea #areaid</code></td>
+<td>Reveal the area of #areaid to the selected character. If no character is selected, reveal this area to you.</td>
+</tr>
+<tr>
+<td>skirmish</td>
+<td>3</td>
+<td><code>.skirmish [arena] [XvX] [Nick1] [Nick2] ... [NickN]</code></td>
+<td>[arena] can be “all” or comma-separated list of possible arenas (NA,BE,RL,DS,RV). [XvX] can be 1v1, 2v2, 3v3, 5v5. After [XvX] specify enough nicknames for that mode.</td>
+</tr>
+<tr>
+<td>spect leave</td>
+<td>0</td>
+<td><code>.spect leave</code></td>
+<td>Leave arena spectator.</td>
+</tr>
+<tr>
+<td>spect reset</td>
+<td>0</td>
+<td><code>.spect reset</code></td>
+<td>Reset arena spectator.</td>
+</tr>
+<tr>
+<td>spect spectate</td>
+<td>0</td>
+<td><code>.spect spectate #playername</code></td>
+<td>Start arena spectator, watch #playername.</td>
+</tr>
+<tr>
+<td>spect version</td>
+<td>0</td>
+<td><code>.spect version</code></td>
+<td>Check spectator addon version.</td>
+</tr>
+<tr>
+<td>spect watch</td>
+<td>0</td>
+<td><code>.spect watch #playername</code></td>
+<td>Watch #playername.</td>
+</tr>
+<tr>
+<td>summon</td>
+<td>2</td>
+<td><code>.summon [$charactername]</code></td>
+<td>Teleport the given character to you. Character can be offline.</td>
+</tr>
+<tr>
+<td>teleport add</td>
+<td>3</td>
+<td><code>.teleport add $name</code></td>
+<td>Add current your position to .teleport command target locations list with name $name.</td>
+</tr>
+<tr>
+<td>teleport del</td>
+<td>3</td>
+<td><code>.teleport del $name</code></td>
+<td>Remove location with name $name for .teleport command locations list.</td>
+</tr>
+<tr>
+<td>teleport group</td>
+<td>2</td>
+<td><code>.teleport group#location</code></td>
+<td>Teleport a selected player and his group members to a given location.</td>
+</tr>
+<tr>
+<td>teleport name</td>
+<td>2</td>
+<td><code>.teleport name [#playername] #location</code></td>
+<td>Teleport the given character to a given location. Character can be offline. To teleport to homebind, set #location to “$home” (without quotes).</td>
+</tr>
+<tr>
+<td>teleport</td>
+<td>1</td>
+<td><code>.teleport #location</code></td>
+<td>Teleport player to a given location.</td>
+</tr>
+<tr>
+<td>ticket assign</td>
+<td>2</td>
+<td><code>.ticket assign $ticketid $gmname</code></td>
+<td>Assigns the specified ticket to the specified Game Master.</td>
+</tr>
+<tr>
+<td>ticket close</td>
+<td>2</td>
+<td><code>.ticket close $ticketid</code></td>
+<td>Closes the specified ticket. Does not delete permanently.</td>
+</tr>
+<tr>
+<td>ticket closedlist</td>
+<td>2</td>
+<td></td>
+<td>Displays a list of closed GM tickets.</td>
+</tr>
+<tr>
+<td>ticket comment</td>
+<td>2</td>
+<td><code>.ticket comment $ticketid $comment</code></td>
+<td>Allows the adding or modifying of a comment to the specified ticket.</td>
+</tr>
+<tr>
+<td>ticket delete</td>
+<td>3</td>
+<td><code>.ticket delete $ticketid</code></td>
+<td>Deletes the specified ticket permanently. Ticket must be closed first.</td>
+</tr>
+<tr>
+<td>ticket escalate</td>
+<td>2</td>
+<td><code>.ticket escalate $ticketid</code></td>
+<td>Place the specified ticket in the escalation queue.</td>
+</tr>
+<tr>
+<td>ticket escalatedlist</td>
+<td>2</td>
+<td></td>
+<td>Show all tickets in the escalation queue.</td>
+</tr>
+<tr>
+<td>ticket list</td>
+<td>2</td>
+<td></td>
+<td>Displays a list of open GM tickets.</td>
+</tr>
+<tr>
+<td>ticket onlinelist</td>
+<td>2</td>
+<td></td>
+<td>Displays a list of open GM tickets whose owner is online.</td>
+</tr>
+<tr>
+<td>ticket reset</td>
+<td>2</td>
+<td><code>.ticket reset</code></td>
+<td>Removes all closed tickets and resets the counter, if no pending open tickets are existing.</td>
+</tr>
+<tr>
+<td>ticket response append</td>
+<td>2</td>
+<td><code>.ticket response append $ticketid $response</code></td>
+<td>Append response to the specified ticket (without newline).</td>
+</tr>
+<tr>
+<td>ticket response appendln</td>
+<td>2</td>
+<td><code>.ticket response appendln $ticketid $response</code></td>
+<td>Append response to the specified ticket (with newline).</td>
+</tr>
+<tr>
+<td>ticket togglesystem</td>
+<td>4</td>
+<td><code>.ticket togglesystem</code></td>
+<td>Toggle ticket system on&#x2F;off.</td>
+</tr>
+<tr>
+<td>ticket unassign</td>
+<td>2</td>
+<td><code>.ticket unassign $ticketid</code></td>
+<td>Unassigns the specified ticket from the current assigned Game Master.</td>
+</tr>
+<tr>
+<td>ticket viewid</td>
+<td>2</td>
+<td><code>.ticket viewid $ticketid</code></td>
+<td>Returns details about specified ticket. Ticket must be open and not deleted.</td>
+</tr>
+<tr>
+<td>ticket viewname</td>
+<td>2</td>
+<td><code>.ticket viewname $creatorname</code></td>
+<td>Returns details about specified ticket. Ticket must be open and not deleted.</td>
+</tr>
+<tr>
+<td>ticket</td>
+<td>2</td>
+<td><code>.ticket $subcommand</code></td>
+<td>Type .ticket to see the list of possible subcommands or .help ticket $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>titles add</td>
+<td>2</td>
+<td><code>.titles add #title</code></td>
+<td>Add title #title (id or shift-link) to known titles list for selected player.</td>
+</tr>
+<tr>
+<td>titles current</td>
+<td>2</td>
+<td><code>.titles current #title</code></td>
+<td>Set title #title (id or shift-link) as current selected titl for selected player. If title not in known title list for player then it will be added to list.</td>
+</tr>
+<tr>
+<td>titles remove</td>
+<td>2</td>
+<td><code>.titles remove #title</code></td>
+<td>Remove title #title (id or shift-link) from known titles list for selected player.</td>
+</tr>
+<tr>
+<td>titles set mask</td>
+<td>2</td>
+<td><code>.titles set mask #mask</code></td>
+<td>Allows user to use all titles from #mask. #mask&#x3D;0 disables the title-choose-field</td>
+</tr>
+<tr>
+<td>unaura</td>
+<td>2</td>
+<td><code>.unaura #spellid</code></td>
+<td>Remove aura due to spell #spellid from the selected Unit.</td>
+</tr>
+<tr>
+<td>unban account</td>
+<td>3</td>
+<td><code>.unban account $Name</code></td>
+<td>Unban accounts for account name pattern.</td>
+</tr>
+<tr>
+<td>unban character</td>
+<td>3</td>
+<td><code>.unban character $Name</code></td>
+<td>Unban accounts for character name pattern.</td>
+</tr>
+<tr>
+<td>unban ip</td>
+<td>3</td>
+<td><code>.unban ip $Ip</code></td>
+<td>Unban accounts for IP pattern.</td>
+</tr>
+<tr>
+<td>unban playeraccount</td>
+<td>3</td>
+<td><code>.unban playeraccount $characterName</code></td>
+<td>Unban the account that owns the character having the designated character name.</td>
+</tr>
+<tr>
+<td>unban</td>
+<td>3</td>
+<td><code>.unban $subcommand</code></td>
+<td>Type .unban to see the list of possible subcommands or .help unban $subcommand to see info on subcommands</td>
+</tr>
+<tr>
+<td>unbindsight</td>
+<td>3</td>
+<td><code>.unbindsight</code></td>
+<td>Removes bound vision. Cannot be used while currently possessing a target.</td>
+</tr>
+<tr>
+<td>unfreeze</td>
+<td>2</td>
+<td><code>.unfreeze (#player)</code></td>
+<td>“Unfreezes” #player and enables his chat again. When using this without #name it will unfreeze your target.</td>
+</tr>
+<tr>
+<td>unlearn</td>
+<td>2</td>
+<td><code>.unlearn #spell [all]</code></td>
+<td>Unlearn for selected player a spell #spell. If ‘all’ provided then all ranks unlearned.</td>
+</tr>
+<tr>
+<td>unmute</td>
+<td>2</td>
+<td><code>.unmute [$playerName]</code></td>
+<td>Restore chat messaging for any character from account of character $playerName (or selected). Character can be ofline.</td>
+</tr>
+<tr>
+<td>unpossess</td>
+<td>2</td>
+<td><code>.unpossess</code></td>
+<td>If you are possessed, unpossesses yourself; otherwise unpossesses current possessed target.</td>
+</tr>
+<tr>
+<td>unstuck</td>
+<td>2</td>
+<td><code>.unstuck $playername [inn/graveyard/startzone]</code></td>
+<td>Teleports specified player to specified location. Default location is player’s current hearth location.</td>
+</tr>
+<tr>
+<td>wchange</td>
+<td>3</td>
+<td><code>.wchange #weathertype #status</code></td>
+<td>Set current weather to #weathertype with an intensity of #status. #weathertype can be 1 for rain, 2 for snow, and 3 for sand. #status can be 0 for disabled, and 1 for enabled.</td>
+</tr>
+<tr>
+<td>whispers</td>
+<td>1</td>
+<td><code>.whispers on\off</code></td>
+<td>Enable&#x2F;disable accepting whispers by GM from players. By default use worldserver.conf setting.</td>
+</tr>
+<tr>
+<td>wp add</td>
+<td>3</td>
+<td><code>.wp add</code></td>
+<td>Add a waypoint for the selected creature at your current position.</td>
+</tr>
+<tr>
+<td>wp event</td>
+<td>3</td>
+<td><code>.wp event $subcommand</code></td>
+<td>Type .path event to see the list of possible subcommands or .help path event $subcommand to see info on subcommands.</td>
+</tr>
+<tr>
+<td>wp load</td>
+<td>3</td>
+<td><code>.wp load $pathid</code></td>
+<td>Load pathid number for selected creature. Creature must have no waypoint data.</td>
+</tr>
+<tr>
+<td>wp modify</td>
+<td>3</td>
+<td><code>.wp modify $optionOptions:action</code></td>
+<td>Changes the value actionaction_chance Changes the value action_chancedel Deletes a selected waypointdelay Changes the value delaymove Moves a selected waypointmove_flag Changes the value move_flag</td>
+</tr>
+<tr>
+<td>wp reload</td>
+<td>3</td>
+<td><code>.wp reload $pathid</code></td>
+<td>Load path changes ingame - IMPORTANT: must be applied first for new paths before .wp load #pathid</td>
+</tr>
+<tr>
+<td>wp show</td>
+<td>3</td>
+<td><code>.wp show $optionOptions:on $pathid (or selected creature with loaded path)</code></td>
+<td>Show visual waypoints (Note: You must have GM on to see the waypoints)off Hide the visual waypoints.info Shows info for selected waypoint.first Shows visual the first waypoint.last Shows visual the last waypoint.</td>
+</tr>
+<tr>
+<td>wp unload</td>
+<td>3</td>
+<td><code>.wp unload</code></td>
+<td>Unload path for selected creature.</td>
+</tr>
+<tr>
+<td>wpgps</td>
+<td>4</td>
+<td><code>.wpgps</code></td>
+<td>Output current positiFFFon to sql developer log as partial SQL query to be used in pathing</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/wow/" rel="tag"># wow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/02/25/fun/20240225-build-own-blog-on-netlify/" rel="prev" title="使用netlify建立个人网站">
+      <i class="fa fa-chevron-left"></i> 使用netlify建立个人网站
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/03/09/java/20240309-server-send-events/" rel="next" title="Server-Sent Events (SSE)">
+      Server-Sent Events (SSE) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

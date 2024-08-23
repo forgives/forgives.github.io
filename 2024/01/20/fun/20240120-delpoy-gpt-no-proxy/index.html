@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本篇介绍如何部署自己的ChatGPT，实现不使用代理即可访问。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="部署自己的ChatGPT">
+<meta property="og:url" content="https://forgives.github.io/2024/01/20/fun/20240120-delpoy-gpt-no-proxy/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="本篇介绍如何部署自己的ChatGPT，实现不使用代理即可访问。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://forgives.github.io/res/20240120213201.png">
+<meta property="og:image" content="https://forgives.github.io/res/20240120213202.png">
+<meta property="article:published_time" content="2024-01-20T13:18:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.375Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="net">
+<meta property="article:tag" content="aigc">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://forgives.github.io/res/20240120213201.png">
+
+<link rel="canonical" href="https://forgives.github.io/2024/01/20/fun/20240120-delpoy-gpt-no-proxy/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>部署自己的ChatGPT | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2024/01/20/fun/20240120-delpoy-gpt-no-proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          部署自己的ChatGPT
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-01-20 21:18:00" itemprop="dateCreated datePublished" datetime="2024-01-20T21:18:00+08:00">2024-01-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本篇介绍如何部署自己的<code>ChatGPT</code>，实现不使用代理即可访问。</p>
+<span id="more"></span>  
+
+<h2 id="开源项目"><a href="#开源项目" class="headerlink" title="开源项目"></a>开源项目</h2><p>这里首先推荐两个自建GPT的开源项目</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web">ChatGPT-Next-Web</a> 功能强大，界面美观。</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/anse-app/chatgpt-demo">chatgpt-demo</a> 功能与界面都比较简单，能满足基础对话需求。</li>
+</ul>
+<p>其中<code>ChatGPT-Next-Web</code>提供了部署好的免科学上网的访问<a target="_blank" rel="noopener" href="https://app.nextchat.dev/#/chat">网站</a>，直接使用自己的<code>API-KEY</code>就可以使用ChatGPT对话了。</p>
+<p><a target="_blank" rel="noopener" href="https://platform.openai.com/account/api-keys">获取OpenAI API Key</a> 注意如果这里没有使用手机验证是无法创建<code>API-KEY</code>的，但是有个小技巧：<br>直接使用<code>session</code>中的<code>sensitive_id</code>也可以作为<code>API-KEY</code>使用，获取方式：</p>
+<ol>
+<li>浏览器打开 <code>Network</code></li>
+<li>访问 <a target="_blank" rel="noopener" href="https://platform.openai.com/api-keys">https://platform.openai.com/api-keys</a></li>
+<li>找到 <code>https://api.openai.com/dashboard/onboarding/login</code> 请求，查看返回，找到<code>sensitive_id</code>就可以作为<code>API-KEY</code>使用了</li>
+</ol>
+<p>重置这个<code>sensitive_id</code>也很简单，退出重新登录即可。</p>
+<h2 id="部署项目"><a href="#部署项目" class="headerlink" title="部署项目"></a>部署项目</h2><p>这里使用 <a target="_blank" rel="noopener" href="https://vercel.com/">vercel</a>来部署项目。首先我们<code>fork</code>对应的项目，这里使用<code>ChatGPT-Next-Web</code>。<br>然后使用<code>GitHub</code>登录<code>vercel</code>，并设置<code>fork</code>后自己项目的访问权限，授权的时候只要设置<code>Only select repositories</code>然后选择对应的仓库即可。<br>随后点击<code>import</code>，主要需要在<code>Environment Variables</code>设置一下<code>OPENAPI_API_KEY</code>，最好也设置一下<code>SITE_PASSWORD</code>这样访问网站就需要登录密码了。<br>支持的环境变量可以<a target="_blank" rel="noopener" href="https://github.com/anse-app/chatgpt-demo?tab=readme-ov-file#environment-variables">参考文档</a><br>我这边设置三个</p>
+<ul>
+<li><strong>OPENAI_API_KEY</strong> API Key</li>
+<li><strong>SITE_PASSWORD</strong> 网站访问密码</li>
+<li><strong>OPENAI_API_MODEL</strong> 默认的模型，<a target="_blank" rel="noopener" href="https://openai.com/pricing">查看以及价格</a>，这里使用<code>gpt-3.5-turbo-1106</code></li>
+</ul>
+<p>点击部署，等待编译与部署之后，会得到一个分配的域名，这里最好绑定一下自己的域名，<code>vercel.app</code>域名已经被DNS污染了。</p>
+<p>部署效果图<br><img src="/res/20240120213201.png" alt="20240120213201.png"></p>
+<h3 id="绑定域名-可选"><a href="#绑定域名-可选" class="headerlink" title="绑定域名(可选)"></a>绑定域名(可选)</h3><p>自己二级域名的<code>DNS</code>配置<code>CNAME</code>记录到<code>cname.vercel-dns.com</code>，随后在<code>vercel</code>项目中<code>projet</code>选项卡的<code>domain</code>中添加刚才的域名即可。</p>
+<h2 id="部署Gemini"><a href="#部署Gemini" class="headerlink" title="部署Gemini"></a>部署Gemini</h2><p>同部署<code>ChatGPT</code> ，使用开源项目<a target="_blank" rel="noopener" href="https://github.com/babaohuang/GeminiProChat">GeminiProChat</a>，在<code>vercel</code>部署即可。获取<a target="_blank" rel="noopener" href="https://makersuite.google.com/app/apikey">GEMINI_API_KEY</a>。</p>
+<p>部署效果图<br><img src="/res/20240120213202.png" alt="20240120213202.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/net/" rel="tag"># net</a>
+              <a href="/tags/aigc/" rel="tag"># aigc</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/01/19/fun/20240119-wireguard/" rel="prev" title="V2rayNG 配置Warp的WireGuard节点">
+      <i class="fa fa-chevron-left"></i> V2rayNG 配置Warp的WireGuard节点
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/01/22/fun/20240122-warp-wg-conf/" rel="next" title="warp生成WireGard配置脚本">
+      warp生成WireGard配置脚本 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE"><span class="nav-number">1.</span> <span class="nav-text">开源项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.</span> <span class="nav-text">部署项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%91%E5%AE%9A%E5%9F%9F%E5%90%8D-%E5%8F%AF%E9%80%89"><span class="nav-number">2.1.</span> <span class="nav-text">绑定域名(可选)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2Gemini"><span class="nav-number">3.</span> <span class="nav-text">部署Gemini</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

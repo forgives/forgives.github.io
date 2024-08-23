@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在讲解G1垃圾回收器之前，我们再回顾下JDK9之前最常用的垃圾回收器CMS( @Deprecated )。 简介Concurrent Mark Sweep简称CMS，是一种以获取最短回收停顿时间为目标的收集器，尤其重视服务的响应速度。CMS是老年代垃圾回收器，基于标记-清除算法实现，只回收老年代和永久代（jdk 1.8开始为元数据区，需要设置CMSClassUnloadingEnabled），一般">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CMS垃圾回收器">
+<meta property="og:url" content="https://forgives.github.io/2023/02/22/java/20230222-cms-gc/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="在讲解G1垃圾回收器之前，我们再回顾下JDK9之前最常用的垃圾回收器CMS( @Deprecated )。 简介Concurrent Mark Sweep简称CMS，是一种以获取最短回收停顿时间为目标的收集器，尤其重视服务的响应速度。CMS是老年代垃圾回收器，基于标记-清除算法实现，只回收老年代和永久代（jdk 1.8开始为元数据区，需要设置CMSClassUnloadingEnabled），一般">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i3/O1CN01ZTlCEW1DFEUgLS12Z_!!6000000000186-0-tps-1704-950.jpg">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i4/O1CN01d3MKAX1bJrH2JDEb1_!!6000000003445-0-tps-857-337.jpg">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i1/O1CN01tJoeln1QOTUSGRvbU_!!6000000001966-0-tps-1192-443.jpg">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i2/O1CN01ABPZzb1aUYugnvmGR_!!6000000003333-0-tps-1177-405.jpg">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i2/O1CN01D3tC1R1VfUHbIAo4q_!!6000000002680-0-tps-909-349.jpg">
+<meta property="og:image" content="https://img.alicdn.com/imgextra/i2/O1CN01a3GUpJ1JJi3o8Mfjf_!!6000000001008-0-tps-909-349.jpg">
+<meta property="article:published_time" content="2023-02-22T03:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.379Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="jdk">
+<meta property="article:tag" content="jvm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/imgextra/i3/O1CN01ZTlCEW1DFEUgLS12Z_!!6000000000186-0-tps-1704-950.jpg">
+
+<link rel="canonical" href="https://forgives.github.io/2023/02/22/java/20230222-cms-gc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CMS垃圾回收器 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/02/22/java/20230222-cms-gc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CMS垃圾回收器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-02-22 11:00:00" itemprop="dateCreated datePublished" datetime="2023-02-22T11:00:00+08:00">2023-02-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在讲解G1垃圾回收器之前，我们再回顾下JDK9之前最常用的垃圾回收器<code>CMS</code>( <em>@Deprecated</em> )。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><code>Concurrent Mark Sweep</code>简称<code>CMS</code>，是一种以获取最短回收停顿时间为目标的收集器，尤其重视服务的响应速度。<br>CMS是<strong>老年代垃圾回收器</strong>，基于标记-清除算法实现，只回收<strong>老年代和永久代</strong>（jdk 1.8开始为元数据区，需要设置<code>CMSClassUnloadingEnabled</code>），一般配合<code>parNew</code>使用。</p>
+<span id="more"></span>  
+
+<p>CMS是一种预处理垃圾回收器，它不能等到old内存用尽时回收，需要在内存用尽前，完成回收操作，否则会导致并发回收失败；所以CMS垃圾回收器开始执行回收操作，有一个触发阈值，默认是老年代或永久代达到**92%**。</p>
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><h3 id="垃圾回收阶段"><a href="#垃圾回收阶段" class="headerlink" title="垃圾回收阶段"></a>垃圾回收阶段</h3><ol>
+<li>初始标记(CMS-initial-mark)，会导致<strong>STW</strong>；</li>
+<li>并发标记(CMS-concurrent-mark)，与用户线程同时运行；</li>
+<li>预清理(CMS-concurrent-preclean)，与用户线程同时运行；</li>
+<li>可被终止的预清理(CMS-concurrent-abortable-preclean)，与用户线程同时运行；</li>
+<li>重新标记(CMS-remark)，会导致<strong>STW</strong>；</li>
+<li>并发清理(CMS-concurrent-sweep)，与用户线程同时运行；</li>
+<li>并发重置状态等待下次CMS的触发(CMS-concurrent-reset)，与用户线程同时运行；</li>
+</ol>
+<p>其中<strong>初始标记</strong>、<strong>并发标记</strong>、<strong>重新标记</strong>和<strong>并发清理</strong>这四个比较重要。</p>
+<p>流程图如下:<br><img src="https://img.alicdn.com/imgextra/i3/O1CN01ZTlCEW1DFEUgLS12Z_!!6000000000186-0-tps-1704-950.jpg" alt="CMS流程图"></p>
+<p>下面通过GC信息详细分析下，添加如下JVM参数：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintCommandLineFlags                  [1]</span><br><span class="line">-XX:+UseConcMarkSweepGC                     [2]</span><br><span class="line">-XX:+UseCMSInitiatingOccupancyOnly          [3]</span><br><span class="line">-XX:CMSInitiatingOccupancyFraction=80       [4]</span><br><span class="line">-XX:+CMSClassUnloadingEnabled               [5]</span><br><span class="line">-XX:+UseParNewGC                            [6]</span><br><span class="line">-XX:+CMSParallelRemarkEnabled               [7]</span><br><span class="line">-XX:+CMSScavengeBeforeRemark                [8]</span><br><span class="line">-XX:+UseCMSCompactAtFullCollection          [9]</span><br><span class="line">-XX:CMSFullGCsBeforeCompaction=0            [10]</span><br><span class="line">-XX:+CMSConcurrentMTEnabled                 [11]</span><br><span class="line">-XX:ConcGCThreads=4                         [12]</span><br><span class="line">-XX:+ExplicitGCInvokesConcurrent            [13]</span><br><span class="line">-XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses    [14]</span><br><span class="line">-XX:+CMSParallelInitialMarkEnabled          [15]</span><br><span class="line">-XX:+PrintGCDetails                         [16]</span><br><span class="line">-XX:+PrintGCCause                           [17]</span><br><span class="line">-XX:+PrintGCTimeStamps                      [18]</span><br><span class="line">-XX:+PrintGCDateStamps                      [19]</span><br><span class="line">-Xloggc:../logs/gc.log                      [20]</span><br><span class="line">-XX:+HeapDumpOnOutOfMemoryError             [21]</span><br><span class="line">-XX:HeapDumpPath=../dump                    [22]</span><br></pre></td></tr></table></figure>
+
+<p>先介绍下上面几个参数的作用：</p>
+<p>[1]打印出启动参数行；</p>
+<p>[2]参数指定使用CMS垃圾回收器；</p>
+<p>[3]、[4]参数指定CMS垃圾回收器在老年代达到<code>80%</code>的时候开始工作，如果不指定那么默认的值为<code>92%</code>；</p>
+<p>[5]开启永久代（jdk 1.8以下版本）或元数据区（jdk 1.8及其以上版本）收集，如果没有设置这个标志，一旦永久代或元数据区耗尽空间也会尝试进行垃圾回收，但是回收不会是并行的，而再一次进行Full GC；</p>
+<p>[6]使用CMS时默认这个参数就是打开的，不需要配置，CMS只回收老年代，年轻代只能配合<code>Parallel New</code>或<code>Serial</code>回收器；</p>
+<p>[7]减少Remark阶段暂停的时间，启用并行Remark，如果Remark阶段暂停时间长，可以启用这个参数</p>
+<p>[8]如果Remark阶段暂停时间太长，可以启用这个参数，在Remark执行之前，先做一次ygc。因为这个阶段，年轻代也是CMS的gcroot，CMS会扫描年轻代指向老年代对象的引用，如果年轻代有大量引用需要被扫描，会让Remark阶段耗时增加；</p>
+<p>[9]、[10]两个参数是针对CMS垃圾回收器碎片做优化的，CMS是不会移动内存的，运行时间长了，会产生很多内存碎片，导致没有一段连续区域可以存放大对象，出现”promotion failed”、”concurrent mode failure”，导致fullgc，启用<code>UseCMSCompactAtFullCollection</code>在Full GC的时候，对年老代的内存进行压缩。<code>-XX:CMSFullGCsBeforeCompaction=0</code>则是代表多少次FGC后对老年代做压缩操作，<strong>默认值为0</strong>，代表每次都压缩，把对象移动到内存的最左边，<strong>可能会影响性能</strong>，但是可以消除碎片；</p>
+<blockquote>
+<p>106.641: [GC 106.641: [ParNew (promotion failed): 14784K-&gt;14784K(14784K), 0.0370328 secs]106.678: [CMS106.715: [CMS-concurrent-mark: 0.065&#x2F;0.103 secs] [Times: user&#x3D;0.17 sys&#x3D;0.00, real&#x3D;0.11 secs]<br>(concurrent mode failure): 41568K-&gt;27787K(49152K), 0.2128504 secs] 52402K-&gt;27787K(63936K), [CMS Perm : 2086K-&gt;2086K(12288K)], 0.2499776 secs] [Times: user&#x3D;0.28 sys&#x3D;0.00, real&#x3D;0.25 secs]</p>
+</blockquote>
+<p>[11]、[12] 定义并发CMS过程运行时的线程数。比如<code>value=4</code>意味着CMS周期的所有阶段都以4个线程来执行。尽管更多的线程会加快并发CMS过程，<br>但其也会带来额外的同步开销。因此，对于特定的应用程序，应该通过测试来判断增加CMS线程数是否真的能够带来性能的提升。<br>如果未设置这个参数，JVM会根据并行收集器中的<code>-XX:ParallelGCThreads</code>参数的值来计算出默认的并行CMS线程数( ncpus为cpu个数)：<code>𝑃𝑎𝑟𝑎𝑙𝑙𝑒𝑙𝐺𝐶𝑇ℎ𝑟𝑒𝑎𝑑𝑠=(𝑛𝑐𝑝𝑢𝑠&lt;=8?𝑛𝑐𝑝𝑢𝑠:8+(𝑛𝑐𝑝𝑢𝑠−8)∗5/8)</code><br>，<code>𝐶𝑜𝑛𝑐𝐺𝐶𝑇ℎ𝑟𝑒𝑎𝑑𝑠=(𝑃𝑎𝑟𝑎𝑙𝑙𝑒𝑙𝐺𝐶𝑇ℎ𝑟𝑒𝑎𝑑𝑠+3)/4</code>，这个参数一般不要自己设置，使用默认就好，除非发现默认的参数有调整的必要；</p>
+<p>[13]、[14]开启foreground CMS GC，CMS gc有两种模式，background和foreground，正常的CMS GC使用background模式，就是我们平时说的CMS GC；当并发收集失败或者调用了System.gc()的时候，就会导致一次Full GC，这个Full GC是不是CMS回收，而是Serial单线程回收器，加入了参数[12]后，执行Full GC的时候，就变成了CMS foreground gc，它是并行Full GC，只会执行CMS中stop the world阶段的操作，效率比单线程Serial full GC要高；需要注意的是它只会回收old，因为CMS收集器是老年代收集器；而正常的Serial收集是包含整个堆的，加入了参数[14]，代表永久代也会被CMS收集；</p>
+<p>[15]开启初始标记过程中的并行化，进一步提升初始化标记效率;</p>
+<p>[16]、[17]、[18]、[19]、[20]是打印gc日志，其中[16]在jdk1.8之后无需设置；</p>
+<p>[21]、[22]则是内存溢出时dump堆。</p>
+<p>下面就是该参数设置打印出来的gc信息，一些非关键的信息已经去掉，如时间：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">//第一步 初始标记 这一步会停顿</span><br><span class="line">[GC (CMS Initial Mark) [1 CMS-initial-mark: 299570K(307200K)] 323315K(491520K), 0.0026208 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span><br><span class="line">vmop                    [threads: total initially_running wait_to_block]    [time: spin block sync cleanup vmop] page_trap_count</span><br><span class="line">0.345: CMS_Initial_Mark                 [      10          0              1    ]      [     0     0     0     0     2    ]  0</span><br><span class="line">Total time for which application threads were stopped: 0.0028494 seconds</span><br><span class="line"></span><br><span class="line">//第二步 并发标记</span><br><span class="line">[CMS-concurrent-mark-start]</span><br><span class="line">[CMS-concurrent-mark: 0.012/0.012 secs] [Times: user=0.00 sys=0.00, real=0.01 secs]</span><br><span class="line"></span><br><span class="line">//第三步 预清理</span><br><span class="line">[CMS-concurrent-preclean-start]</span><br><span class="line">[CMS-concurrent-preclean: 0.001/0.001 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span><br><span class="line"></span><br><span class="line">//第四步 可被终止的预清理</span><br><span class="line">[CMS-concurrent-abortable-preclean-start]</span><br><span class="line">[CMS-concurrent-abortable-preclean: 0.000/0.000 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span><br><span class="line"></span><br><span class="line">//第五步 重新标记</span><br><span class="line">[GC (CMS Final Remark) [YG occupancy: 72704 K (184320 K)][Rescan (parallel) , 0.0009069 secs][weak refs processing, 0.0000083 secs][class unloading, 0.0002626 secs][scrub symbol table, 0.0003789 secs][scrub string table, 0.0001326 secs][1 CMS-remark: 299570K(307200K)] 372275K(491520K), 0.0017842 secs] [Times: user=0.05 sys=0.00, real=0.00 secs]</span><br><span class="line">vmop                    [threads: total initially_running wait_to_block]    [time: spin block sync cleanup vmop] page_trap_count</span><br><span class="line">0.360: CMS_Final_Remark                 [      10          0              1    ]      [     0     0     0     0     1    ]  0</span><br><span class="line">Total time for which application threads were stopped: 0.0018800 seconds</span><br><span class="line"></span><br><span class="line">//第六步 清理</span><br><span class="line">[CMS-concurrent-sweep-start]</span><br><span class="line">[CMS-concurrent-sweep: 0.007/0.007 secs] [Times: user=0.00 sys=0.00, real=0.01 secs]</span><br><span class="line"></span><br><span class="line">//第七步 重置</span><br><span class="line">[CMS-concurrent-reset-start]</span><br><span class="line">[CMS-concurrent-reset: 0.002/0.002 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]</span><br></pre></td></tr></table></figure>
+
+<h3 id="初始标记"><a href="#初始标记" class="headerlink" title="初始标记"></a>初始标记</h3><p>初始标记是CMS两次<code>stop-the-world</code>事件中的一次。这一步的作用是<strong>标记存活的对象</strong>，有两部分：</p>
+<ol>
+<li>标记老年代中所有的<code>GC Roots</code>对象，如下图节点1；</li>
+<li>标记年轻代中活着的对象引用到的老年代的对象（指的是年轻代中还存活的引用类型对象，引用指向老年代中的对象）如下图节点2、3；</li>
+</ol>
+<p><img src="https://img.alicdn.com/imgextra/i4/O1CN01d3MKAX1bJrH2JDEb1_!!6000000003445-0-tps-857-337.jpg" alt="初始标记"></p>
+<blockquote>
+<p>ps：为了加快此阶段处理速度，减少停顿时间，可以开启初始标记并行化，<code>-XX:+CMSParallelInitialMarkEnabled</code>，同时调大并行标记的线程数，线程数不要超过cpu的核数。</p>
+</blockquote>
+<h3 id="并发标记"><a href="#并发标记" class="headerlink" title="并发标记"></a>并发标记</h3><p>从“初始标记”阶段标记的对象开始找出所有存活的对象；</p>
+<p>因为是并发运行的，在运行期间会发生新生代的对象晋升到老年代、或者是直接在老年代分配对象、或者更新老年代对象的引用关系等等，对于这些对象，都是需要进行重新标记的，否则有些对象就会被遗漏。为了提高重新标记的效率，该阶段会把上述对象所在的<code>Card</code>标识为<code>Dirty</code>，后续只需扫描这些<code>Dirty Card</code>的对象，避免扫描整个老年代；</p>
+<p>并发标记阶段<strong>只负责将引用发生改变的Card标记为Dirty状态</strong>，不负责处理；</p>
+<p>如下图所示，也就是节点1、2、3，最终找到了节点4和5。并发标记的特点是和应用程序线程同时运行。并不是老年代的所有存活对象都会被标记，因为标记的同时应用程序会改变一些对象的引用等。</p>
+<p><img src="https://img.alicdn.com/imgextra/i1/O1CN01tJoeln1QOTUSGRvbU_!!6000000001966-0-tps-1192-443.jpg" alt="并发标记"></p>
+<p>这个阶段因为是并发的容易导致<code>concurrent mode failure</code>。</p>
+<h3 id="预清理阶段"><a href="#预清理阶段" class="headerlink" title="预清理阶段"></a>预清理阶段</h3><p>前一个阶段已经说明，不能标记出老年代全部的存活对象，是因为标记的同时应用程序会改变一些对象引用，这个阶段就是用来处理前一个阶段因为引用关系改变导致没有标记到的存活对象的，它会扫描所有标记为Direty的Card。</p>
+<p>如下图所示，在并标记理阶段，节点3的引用指向了6；则会把节点3的card标记为Dirty；</p>
+<p><img src="https://img.alicdn.com/imgextra/i2/O1CN01ABPZzb1aUYugnvmGR_!!6000000003333-0-tps-1177-405.jpg"></p>
+<p>最后将6标记为存活，如下图所示：</p>
+<p><img src="https://img.alicdn.com/imgextra/i2/O1CN01D3tC1R1VfUHbIAo4q_!!6000000002680-0-tps-909-349.jpg"></p>
+<h3 id="可终止的预处理"><a href="#可终止的预处理" class="headerlink" title="可终止的预处理"></a>可终止的预处理</h3><p>这个阶段尝试着去承担下一个阶段<code>Final Remark</code>阶段足够多的工作。这个阶段持续的时间依赖好多的因素，由于这个阶段是重复的做相同的事情直到发生<code>aboart</code>的条件（比如：重复的次数、多少量的工作、持续的时间等等）之一才会停止。</p>
+<blockquote>
+<p>ps：此阶段最大持续时间为5秒，之所以可以持续5秒，另外一个原因也是为了期待这5秒内能够发生一次ygc，清理年轻代的引用，是的下个阶段的重新标记阶段，扫描年轻代指向老年代的引用的时间减少；</p>
+</blockquote>
+<h3 id="重新标记"><a href="#重新标记" class="headerlink" title="重新标记"></a>重新标记</h3><p>这个阶段会导致第二次<code>stop the word</code>，该阶段的任务是完成标记整个年老代的所有的存活对象。</p>
+<p>这个阶段，重新标记的内存范围是整个堆，包含<code>young_gen</code>和<code>old_gen</code>。为什么要扫描新生代呢，因为对于老年代中的对象，如果被新生代中的对象引用，那么就会被视为存活对象，即使新生代的对象已经不可达了，也会使用这些不可达的对象当做CMS的<code>gc root</code>，来扫描老年代；因此对于老年代来说，引用了老年代中对象的新生代的对象，也会被老年代视作GC ROOTS:当此阶段耗时较长的时候，可以加入参数<code>-XX:+CMSScavengeBeforeRemark</code>，<strong>在重新标记之前，先执行一次ygc，回收掉年轻代的对象无用的对象</strong>，并将对象放入幸存代或晋升到老年代，这样再进行年轻代扫描时，只需要扫描幸存区的对象即可，一般幸存代非常小，这<strong>大大减少了扫描时间</strong>。</p>
+<p>由于之前的预处理阶段是与用户线程并发执行的，这时候可能年轻代的对象对老年代的引用已经发生了很多改变，这个时候，remark阶段要花很多时间处理这些改变，会导致很长<code>stop the word</code>，所以通常CMS尽量运行Final Remark阶段在年轻代是足够干净的时候。</p>
+<p>另外，还可以开启并行收集：<code>-XX:+CMSParallelRemarkEnabled</code>。</p>
+<h3 id="并发清理"><a href="#并发清理" class="headerlink" title="并发清理"></a>并发清理</h3><p>通过以上5个阶段的标记，老年代所有存活的对象已经被标记并且现在要通过<code>Garbage Collector</code>采用清扫的方式回收那些不能用的对象了。</p>
+<p>这个阶段主要是清除那些没有标记的对象并且回收空间；</p>
+<p><img src="https://img.alicdn.com/imgextra/i2/O1CN01a3GUpJ1JJi3o8Mfjf_!!6000000001008-0-tps-909-349.jpg" alt="并发清理"></p>
+<p>由于CMS并发清理阶段<strong>用户线程还在运行着</strong>，伴随程序运行自然就还会有新的垃圾不断产生，这一部分垃圾出现在标记过程之后，CMS无法在当次收集中处理掉它们，只好留待下一次GC时再清理掉。这一部分垃圾就称为<strong>浮动垃圾</strong>。</p>
+<h3 id="并发重置"><a href="#并发重置" class="headerlink" title="并发重置"></a>并发重置</h3><p>这个阶段并发执行，重新设置CMS算法内部的数据结构，准备下一个CMS生命周期的使用。</p>
+<blockquote>
+<p>CMS并发GC不是Full GC。<br>HotSpot VM里对concurrent collection和full collection有明确的区分。所有带有full collection字样的VM参数都是跟真正的Full GC相关，而跟CMS并发GC无关的，CMS收集算法只是清理老年代。</p>
+</blockquote>
+<h2 id="CMS存在的问题"><a href="#CMS存在的问题" class="headerlink" title="CMS存在的问题"></a>CMS存在的问题</h2><h3 id="重新标记停顿时间长"><a href="#重新标记停顿时间长" class="headerlink" title="重新标记停顿时间长"></a>重新标记停顿时间长</h3><p>一般CMS的GC耗时<strong>80%都在remark阶段</strong>，如果发现remark阶段停顿时间很长，可以尝试添加该参数：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:+CMSScavengeBeforeRemark</span><br></pre></td></tr></table></figure>
+<p>在执行remark操作之前先做一次<code>Young GC</code>，目的在于减少年轻代对老年代的无效引用，降低remark时的开销，如果添加该参数后𝑦𝑔𝑐停顿时间+𝑟𝑒𝑚𝑎𝑟𝑘时间 &lt; 添加该参数之前的𝑟𝑒𝑚𝑎𝑟𝑘时间，说明该参数是有效的。</p>
+<h3 id="内存碎片"><a href="#内存碎片" class="headerlink" title="内存碎片"></a>内存碎片</h3><p>CMS是基于标记-清除算法的，只会将标记为为存活的对象删除，并不会移动对象整理内存空间，会造成内存碎片，这时候我们需要用到这个参数;</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-XX:+UseCMSCompactAtFullCollection （空间碎片整理）</span><br><span class="line">-XX:CMSFullGCsBeforeCompaction=n</span><br></pre></td></tr></table></figure>
+<p><code>-XX:+UseCMSCompactAtFullCollection</code>(默认开启,JDK9废弃)，在进行Full GC 之前进行一次内存整理。虽然空间碎片解决了，但是停顿时间也增长了。<br><code>-XX:CMSFullGCBeforeCompaction=n</code>（默认为0，表示每次进入Full GC时都进行碎片整理），参数作用是当CMS执行n次不整理内存碎片后，下一次进入Full GC前先进行碎片整理。</p>
+<h3 id="无法处理浮动垃圾"><a href="#无法处理浮动垃圾" class="headerlink" title="无法处理浮动垃圾"></a>无法处理浮动垃圾</h3><p>在并发回收阶段时，当用户线程并发创建了一个对象年轻代放不下，直接晋升到老年代或者年轻代对象超过存活次数晋升到老年代，由于存在这种现象，因此CMS垃圾回收器就必须预留一部分空间给用户线程，不能等老年代满了才去回。<br>可通过 <code>-XX:CMSInitiatingOccupancyFraction=n -XX:+UseCMSInitiatingOccupancyOnly</code> 来设置（我这边都是设置成80: <em>-XX:CMSInitiatingOccupancyFraction&#x3D;80 -XX:+UseCMSInitiatingOccupancyOnly</em> ）。</p>
+<blockquote>
+<p>PS: 当只设置了-XX:CMSInitiatingOccupancyFraction，那么仅有第一次使用设定值，后续CMS自动调整占用率。此设置会失效，所以需要设置-XX:+UseCMSInitiatingOccupancyOnly来固定占用率多少开启回收。</p>
+</blockquote>
+<blockquote>
+<p>当设置的-XX:CMSInitiatingOccupancyFraction 过大时，就可能会出现在垃圾回收过程中，无法分配对象的问题，导致 并发失败 （Concurrent Mode Failure），此时会临时启用Serial Old回收器来重新进行老年代回收，这样会导致停顿时间更长。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li><p>CMS回收器<strong>只回收老年代</strong>，其是以<strong>吞吐量为代价换取回收速度</strong></p>
+</li>
+<li><p>CMS回收过程分为：初始标记、并发标记、并发预处理阶段、可终止预处理、重新标记以及并发清理阶段。其中<strong>初始标记</strong>、<strong>重新标记</strong>需要<code>STW</code>，CMS<strong>大部分时间花费在重新标记阶段</strong>，可以让虚拟机先进性一次Young GC，减少停顿时间。但CMS无法解决“浮动垃圾”问题。</p>
+</li>
+<li><p>由于CMS回收线程与用户线程并发，可能回收过程中会出现并发模式失败 Concurrent mode failure，解决方法是让CMS尽早GC，可以通过参数在一定次数的<code>Full GC</code> 之后让CMS对内存做一次整理，减少内存碎片。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://openjdk.org/jeps/291">CMS 在JDK9中被置为 Deprecate</a> ，结束了它璀璨的一生。<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/248">同版本G1成为了默认的垃圾回收器</a>。</p>
+</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ciel717/p/16179999.html">CMS垃圾回收器</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/meixiaoyu/articles/16672179.html">JVM基础系列：CMS垃圾回收器</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/cms.html">Concurrent Mark Sweep (CMS) Collector</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+              <a href="/tags/jvm/" rel="tag"># jvm</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/21/java/20230221-springboot-mybatis-plus/" rel="prev" title="SpringBoot 接入Mybatis-Plus">
+      <i class="fa fa-chevron-left"></i> SpringBoot 接入Mybatis-Plus
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/22/java/20230222-g1-gc/" rel="next" title="G1垃圾回收器">
+      G1垃圾回收器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E9%98%B6%E6%AE%B5"><span class="nav-number">2.1.</span> <span class="nav-text">垃圾回收阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E6%A0%87%E8%AE%B0"><span class="nav-number">2.2.</span> <span class="nav-text">初始标记</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%A0%87%E8%AE%B0"><span class="nav-number">2.3.</span> <span class="nav-text">并发标记</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E6%B8%85%E7%90%86%E9%98%B6%E6%AE%B5"><span class="nav-number">2.4.</span> <span class="nav-text">预清理阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E7%BB%88%E6%AD%A2%E7%9A%84%E9%A2%84%E5%A4%84%E7%90%86"><span class="nav-number">2.5.</span> <span class="nav-text">可终止的预处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E6%A0%87%E8%AE%B0"><span class="nav-number">2.6.</span> <span class="nav-text">重新标记</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%B8%85%E7%90%86"><span class="nav-number">2.7.</span> <span class="nav-text">并发清理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E9%87%8D%E7%BD%AE"><span class="nav-number">2.8.</span> <span class="nav-text">并发重置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CMS%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">CMS存在的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E6%A0%87%E8%AE%B0%E5%81%9C%E9%A1%BF%E6%97%B6%E9%97%B4%E9%95%BF"><span class="nav-number">3.1.</span> <span class="nav-text">重新标记停顿时间长</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%A2%8E%E7%89%87"><span class="nav-number">3.2.</span> <span class="nav-text">内存碎片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E6%B3%95%E5%A4%84%E7%90%86%E6%B5%AE%E5%8A%A8%E5%9E%83%E5%9C%BE"><span class="nav-number">3.3.</span> <span class="nav-text">无法处理浮动垃圾</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

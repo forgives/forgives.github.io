@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="java.util.concurrent.locks.Lock类">
+<meta property="og:type" content="article">
+<meta property="og:title" content="锁">
+<meta property="og:url" content="https://forgives.github.io/2018/07/12/note/about-lock/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="java.util.concurrent.locks.Lock类">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1e6sdI3mTBuNjy1XbXXaMrVXa-782-392.png">
+<meta property="article:published_time" content="2018-07-12T07:02:17.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.388Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="concurrent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/tfs/TB1e6sdI3mTBuNjy1XbXXaMrVXa-782-392.png">
+
+<link rel="canonical" href="https://forgives.github.io/2018/07/12/note/about-lock/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>锁 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2018/07/12/note/about-lock/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          锁
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-12 15:02:17" itemprop="dateCreated datePublished" datetime="2018-07-12T15:02:17+08:00">2018-07-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>java.util.concurrent.locks.Lock类</p>
+<span id="more"></span>
+<h2 id="什么是锁"><a href="#什么是锁" class="headerlink" title="什么是锁"></a>什么是锁</h2><p>锁的定义在<code>java.util.concurrent.locks.Lock</code>类中已有说明：</p>
+<blockquote>
+<p>A lock is a tool for controlling access to a shared resource by multiple threads.<br>锁是在多个线程中控制访问共享资源锁的工具。</p>
+</blockquote>
+<h2 id="java-util-concurrent-locks-Lock类"><a href="#java-util-concurrent-locks-Lock类" class="headerlink" title="java.util.concurrent.locks.Lock类"></a>java.util.concurrent.locks.Lock类</h2><p>官方说明<br><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/locks/Lock.html">https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/locks/Lock.html</a></p>
+<p>LocK提供的方法：<br><img src="https://img.alicdn.com/tfs/TB1e6sdI3mTBuNjy1XbXXaMrVXa-782-392.png"></p>
+<ul>
+<li>void lock() – 阻塞方式获取锁</li>
+<li>void lockInterruptibly() – 与lock()方法类似,但是阻塞线程可以被中断，抛出<code>java.lang.InterruptedException</code>后继续执行</li>
+<li>boolean tryLock() – 非阻塞的lock()版本，成功获取锁返回true，否则返回false</li>
+<li>boolean tryLock(long timeout, TimeUnit timeUnit) – 带有超时时间的尝试获取锁，比tryLock增加了超时等待。</li>
+<li>void unlock() – 释放锁</li>
+</ul>
+<p>Lock的使用方式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Lock</span> <span class="variable">lock</span> <span class="operator">=</span> ...; </span><br><span class="line">lock.lock();</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// access to the shared resource</span></span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">    lock.unlock();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Lock和synchronized的区别"><a href="#Lock和synchronized的区别" class="headerlink" title="Lock和synchronized的区别"></a>Lock和synchronized的区别</h3><p>Lock有比synchronized更精确的线程语义和更好的性能，Lock是显示的使用锁，而synchronized是隐式的，synchronized会自动释放锁，Lock要求手工释放（通常在finally中）。这种完全不同的语义使Lock能够满足更多场景的需求，比如保证顺序、不可重入、死锁检测等等，同时Lock也提供了非阻塞情况下尝试获取锁、有超时时间的获取锁等等一些增强的方法。</p>
+<p>这里总结的很好</p>
+<ul>
+<li>A synchronized block is fully contained within a method – we can have Lock API’s lock() and unlock() operation in separate methods（不局限于方法维度）</li>
+<li>A synchronized block does not support the fairness, any thread can acquire the lock ones released, no preference can be specified. We can achieve fairness within the Lock APIs by specifying the fairness property. It makes sure that longest waiting thread is given access to lock（Lock可以实现公平锁，等待最长时间的获得锁）</li>
+<li>A thread gets blocked if it can’t get an access to the synchronized block. The Lock API provides tryLock() method. The thread acquires lock only if it’s available and not held by any other thread. This reduces blocking time of thread waiting for the lock（Lock支持不阻塞的尝试获取锁）</li>
+<li>A thread which is in “waiting” state to acquire the access to synchronized block, can’t be interrupted. The Lock API provides a method lockInterruptibly() which can be used to interrupt the thread when it is waiting for the lock（Lock可以中断的等待锁）</li>
+</ul>
+<h3 id="Lock比较典型的实现"><a href="#Lock比较典型的实现" class="headerlink" title="Lock比较典型的实现"></a>Lock比较典型的实现</h3><ul>
+<li>ReentrantLock 提供与synchronized类似的功能，增加了一些灵活性与功能的扩展</li>
+<li>ReentrantReadWriteLock  读写锁。<ul>
+<li>Read Lock 在没有写锁的情况下多个线程都可以获取读锁</li>
+<li>Write Lock 在没有写锁的情况下只有一个线程能获取写锁</li>
+</ul>
+</li>
+<li>StampedLock 同样是读写锁，但是在获取锁的同时会返回一个邮戳来校验锁的有消息或释放锁。</li>
+</ul>
+<h4 id="ReentrantLock"><a href="#ReentrantLock" class="headerlink" title="ReentrantLock"></a>ReentrantLock</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SharedObject</span> &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="type">ReentrantLock</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantLock</span>();</span><br><span class="line">    <span class="type">int</span> <span class="variable">counter</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">perform</span><span class="params">()</span> &#123;</span><br><span class="line">        lock.lock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// Critical section here</span></span><br><span class="line">            count++;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">performTryLock</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">boolean</span> <span class="variable">isLockAcquired</span> <span class="operator">=</span> lock.tryLock(<span class="number">1</span>, TimeUnit.SECONDS);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(isLockAcquired) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">//Critical section here</span></span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                lock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="ReentrantReadWriteLock"><a href="#ReentrantReadWriteLock" class="headerlink" title="ReentrantReadWriteLock"></a>ReentrantReadWriteLock</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SynchronizedHashMapWithReadWriteLock</span> &#123;</span><br><span class="line"> </span><br><span class="line">    Map&lt;String,String&gt;  syncHashMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="type">ReadWriteLock</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantReadWriteLock</span>();</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="type">Lock</span> <span class="variable">writeLock</span> <span class="operator">=</span> lock.writeLock();</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">put</span><span class="params">(String key, String value)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            writeLock.lock();</span><br><span class="line">            syncHashMap.put(key, value);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            writeLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">remove</span><span class="params">(String key)</span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            writeLock.lock();</span><br><span class="line">            <span class="keyword">return</span> syncHashMap.remove(key);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            writeLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="type">Lock</span> <span class="variable">readLock</span> <span class="operator">=</span> lock.readLock();</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">get</span><span class="params">(String key)</span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            readLock.lock();</span><br><span class="line">            <span class="keyword">return</span> syncHashMap.get(key);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            readLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">containsKey</span><span class="params">(String key)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            readLock.lock();</span><br><span class="line">            <span class="keyword">return</span> syncHashMap.containsKey(key);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            readLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="StampedLock"><a href="#StampedLock" class="headerlink" title="StampedLock"></a>StampedLock</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">StampedLockDemo</span> &#123;</span><br><span class="line">    Map&lt;String,String&gt; map = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="type">StampedLock</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StampedLock</span>();</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">put</span><span class="params">(String key, String value)</span>&#123;</span><br><span class="line">        <span class="type">long</span> <span class="variable">stamp</span> <span class="operator">=</span> lock.writeLock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            map.put(key, value);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            lock.unlockWrite(stamp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">get</span><span class="params">(String key)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">long</span> <span class="variable">stamp</span> <span class="operator">=</span> lock.readLock();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> map.get(key);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            lock.unlockRead(stamp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>StampedLock还提供了乐观锁，通常，读的时候并不需要等待写的完成。乐观锁读：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> String <span class="title function_">readWithOptimisticLock</span><span class="params">(String key)</span> &#123;</span><br><span class="line">    <span class="type">long</span> <span class="variable">stamp</span> <span class="operator">=</span> lock.tryOptimisticRead();</span><br><span class="line">    <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> map.get(key); <span class="comment">//先直接获取资源</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span>(!lock.validate(stamp)) &#123; <span class="comment">//在获取时已经有新的写入了，有写竞争走悲观锁流程</span></span><br><span class="line">        stamp = lock.readLock();  <span class="comment">//重新获取读锁（悲观锁）</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> map.get(key);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            lock.unlock(stamp);               </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> value;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Conditions"><a href="#Conditions" class="headerlink" title="Conditions"></a>Conditions</h3><p>当一个线程获取到了资源的访问权限，但是却没有满足执行的权限时就用到了<code>Condition</code>.进程间的内部通讯机制，同wait(), notify() and notifyAll() 方法，但是允许定义多个Condition。</p>
+<p>例子如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ReentrantLockWithCondition</span> &#123;</span><br><span class="line"> </span><br><span class="line">    Stack&lt;String&gt; stack = <span class="keyword">new</span> <span class="title class_">Stack</span>&lt;&gt;();</span><br><span class="line">    <span class="type">int</span> <span class="variable">CAPACITY</span> <span class="operator">=</span> <span class="number">5</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="type">ReentrantLock</span> <span class="variable">lock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReentrantLock</span>();</span><br><span class="line">    <span class="type">Condition</span> <span class="variable">stackEmptyCondition</span> <span class="operator">=</span> lock.newCondition(); <span class="comment">//栈空的Condition</span></span><br><span class="line">    <span class="type">Condition</span> <span class="variable">stackFullCondition</span> <span class="operator">=</span> lock.newCondition(); <span class="comment">//栈满的Condition</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">pushToStack</span><span class="params">(String item)</span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            lock.lock();</span><br><span class="line">            <span class="keyword">while</span>(stack.size() == CAPACITY)&#123; <span class="comment">//注意这里的while循环，必须while校验条件是否满足</span></span><br><span class="line">                stackFullCondition.await();</span><br><span class="line">            &#125;</span><br><span class="line">            stack.push(item);</span><br><span class="line">            stackEmptyCondition.signalAll();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">popFromStack</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            lock.lock();</span><br><span class="line">            <span class="keyword">while</span>(stack.size() == <span class="number">0</span>)&#123;</span><br><span class="line">                stackEmptyCondition.await();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> stack.pop();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            stackFullCondition.signalAll();</span><br><span class="line">            lock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="JUC"><a href="#JUC" class="headerlink" title="JUC"></a>JUC</h2><p>JUC是<code>java.util.concurrent</code>包的简称，该包提供了并发编程的解决方案。JUC包有两大核心：CAS和AQS。其中CAS是<code>java.util.concurrent.atomic</code>包的基础，AQS是<code>java.util.concurrent.locks</code>包以及一些常用类比如Semophore等类的基础</p>
+<h3 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h3><p>CAS的全称为<code>Compare-And-Swap</code>,它是一条CPU并发原语.它的功能是判断内存某个位置的值是否为预期值，如果是则更改为新的值，这个过程是原子的。CAS并发原语体现在JAVA语言中就是sun.misc.Unsafe类中的各个方法。调用UnSafe类中的CAS方法，JVM会帮我们实现出CAS汇编指令。这是一种完全依赖于硬件的功能。</p>
+<p>典型的使用场景<code>java.util.concurrent.atomic.AtomicInteger</code>，参见其源码(1.7源码)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="type">int</span> <span class="title function_">incrementAndGet</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">current</span> <span class="operator">=</span> get();</span><br><span class="line">        <span class="type">int</span> <span class="variable">next</span> <span class="operator">=</span> current + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (compareAndSet(current, next))</span><br><span class="line">            <span class="keyword">return</span> next;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>CAS是乐观锁，是一种冲突重试的机制，在并发竞争不是很激烈的情况下(也是大多数情况)，他的性能要好于基于锁的并发性能。因为并发竞争激烈的话，冲突重试的过程会很多。</p>
+<h3 id="AQS"><a href="#AQS" class="headerlink" title="AQS"></a>AQS</h3><p>AQS是<code>AbstractQueuedSynchronizer</code>的简称。它是一个同步框架，负责<strong>资源的管理和资源申请者的管理</strong>。<br>AQS有两个主要部分</p>
+<ul>
+<li>volatile int state; 代表共享资源</li>
+<li>FIFO线程等待队列;  多线程争用资源被阻塞时会进入此队列</li>
+</ul>
+<p>AQS定义两种资源共享方式：Exclusive（独占，只有一个线程能执行，如ReentrantLock）和Share（共享，多个线程可同时执行，如Semaphore&#x2F;CountDownLatch）。</p>
+<p>实现自定义同步器时只需要实现共享资源state的获取与释放方式即可，至于具体线程等待队列的维护（如获取资源失败入队&#x2F;唤醒出队等），AQS已经在顶层实现好了。自定义同步器实现时主要实现以下几种方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">isHeldExclusively()：该线程是否正在独占资源。只有用到condition才需要去实现它。</span><br><span class="line">tryAcquire(<span class="type">int</span>)：独占方式。尝试获取资源，成功则返回<span class="literal">true</span>，失败则返回<span class="literal">false</span>。</span><br><span class="line">tryRelease(<span class="type">int</span>)：独占方式。尝试释放资源，成功则返回<span class="literal">true</span>，失败则返回<span class="literal">false</span>。</span><br><span class="line">tryAcquireShared(<span class="type">int</span>)：共享方式。尝试获取资源。负数表示失败；<span class="number">0</span>表示成功，但没有剩余可用资源；正数表示成功，且有剩余资源。</span><br><span class="line">tryReleaseShared(<span class="type">int</span>)：共享方式。尝试释放资源，成功则返回<span class="literal">true</span>，失败则返回<span class="literal">false</span>。</span><br></pre></td></tr></table></figure>
+
+<p>以ReentrantLock为例，state初始化为0，表示未锁定状态。A线程lock()时，会调用tryAcquire()独占该锁并将state+1。此后，其他线程再tryAcquire()时就会失败，直到A线程unlock()到state&#x3D;0（即释放锁）为止，其它线程才有机会获取该锁。当然，释放锁之前，A线程自己是可以重复获取此锁的（state会累加），这就是可重入的概念。但要注意，获取多少次就要释放多么次，这样才能保证state是能回到零态的。<br>再以CountDownLatch以例，任务分为N个子线程去执行，state也初始化为N（注意N要与线程个数一致）。这N个子线程是并行执行的，每个子线程执行完后countDown()一次，state会CAS减1。等到所有子线程都执行完后(即state&#x3D;0)，会unpark()主调用线程，然后主调用线程就会从await()函数返回，继续后余动作。<br>一般来说，自定义同步器要么是独占方法，要么是共享方式，他们也只需实现tryAcquire-tryRelease、tryAcquireShared-tryReleaseShared中的一种即可。但AQS也支持自定义同步器同时实现独占和共享两种方式，如ReentrantReadWriteLock。</p>
+<p>一般来说，自定义同步器要么是独占方法，要么是共享方式，他们也只需实现tryAcquire-tryRelease、tryAcquireShared-tryReleaseShared中的一种即可。但AQS也支持自定义同步器同时实现独占和共享两种方式，如ReentrantReadWriteLock。</p>
+<p>自定义同步器类的例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Mutex</span> <span class="keyword">implements</span> <span class="title class_">Lock</span> , Serializable&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Syn</span> <span class="keyword">extends</span> <span class="title class_">AbstractQueuedSynchronizer</span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="type">boolean</span> <span class="title function_">isHeldExclusively</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> getState()==<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="type">boolean</span> <span class="title function_">tryAcquire</span><span class="params">(<span class="type">int</span> arg)</span> &#123;</span><br><span class="line">            <span class="keyword">assert</span> arg==<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span>(compareAndSetState(<span class="number">0</span>,<span class="number">1</span>)) &#123;</span><br><span class="line">                setExclusiveOwnerThread(Thread.currentThread());</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="type">boolean</span> <span class="title function_">tryRelease</span><span class="params">(<span class="type">int</span> arg)</span> &#123;</span><br><span class="line">            <span class="keyword">assert</span> arg==<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span>(getState()==<span class="number">0</span>)</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalMonitorStateException</span>();</span><br><span class="line">            setExclusiveOwnerThread(<span class="literal">null</span>);</span><br><span class="line">            setState(<span class="number">0</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> Syn syn=<span class="keyword">new</span> <span class="title class_">Syn</span>();</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">lock</span><span class="params">()</span> &#123;</span><br><span class="line">        syn.acquire(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">unlock</span><span class="params">()</span> &#123;</span><br><span class="line">        syn.release(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">lockInterruptibly</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException&#123;</span><br><span class="line">        syn.acquireInterruptibly(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">tryLock</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> syn.tryAcquire(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">tryLock</span><span class="params">(<span class="type">long</span> time, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException&#123;</span><br><span class="line">        <span class="keyword">return</span> syn.tryAcquireNanos(<span class="number">1</span>,unit.toNanos(time));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> Condition <span class="title function_">newCondition</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>acquire()方法是独占模式获取资源的顶级入口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title function_">acquire</span><span class="params">(<span class="type">int</span> arg)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">        selfInterrupt();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>流程如下：</p>
+<ol>
+<li>调用自定义同步器的tryAcquire()尝试直接去获取资源，如果成功则直接返回；</li>
+<li>没成功，则addWaiter()将该线程加入等待队列的尾部，并标记为独占模式；</li>
+<li>acquireQueued()使线程在等待队列中休息，有机会时（轮到自己，会被unpark()）会去尝试获取资源。获取到资源后才返回。如果在整个等待过程中被中断过，则返回true，否则返回false。</li>
+<li>如果线程在等待过程中被中断过，它是不响应的。只是获取资源后才再进行自我中断selfInterrupt()，将中断补上。</li>
+</ol>
+<p>再看release()方法，release()方法是独占模式下释放资源的顶级入口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="type">boolean</span> <span class="title function_">release</span><span class="params">(<span class="type">int</span> arg)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (tryRelease(arg)) &#123;</span><br><span class="line">        <span class="type">Node</span> <span class="variable">h</span> <span class="operator">=</span> head;<span class="comment">//找到头结点</span></span><br><span class="line">        <span class="keyword">if</span> (h != <span class="literal">null</span> &amp;&amp; h.waitStatus != <span class="number">0</span>)</span><br><span class="line">            unparkSuccessor(h);<span class="comment">//唤醒等待队列里的下一个线程</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>AQS是许多常用类的基础，比如ReentrantLock,Semaphore,ReentrantReadWriteLock，CountDownLatch等等，都是基于AQS构建的.</p>
+<h2 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h2><p>待补充<br><a target="_blank" rel="noopener" href="https://github.com/redisson/redisson#quick-start">https://github.com/redisson/redisson#quick-start</a><br>org.redisson.RedissonLock</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><p>Guide to java.util.concurrent.Locks<br><a target="_blank" rel="noopener" href="http://www.baeldung.com/java-concurrent-locks">http://www.baeldung.com/java-concurrent-locks</a></p>
+<p>JUC之CAS<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/yizhenn/article/details/52384590">https://blog.csdn.net/yizhenn/article/details/52384590</a><br>JUC之AQS<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/yizhenn/article/details/52384592">https://blog.csdn.net/yizhenn/article/details/52384592</a></p>
+<p>AtomicInteger源码分析——基于CAS的乐观锁实现<br><a target="_blank" rel="noopener" href="https://www.aliyun.com/jiaocheng/290273.html?spm=5176.100033.1.24.tnquSx">https://www.aliyun.com/jiaocheng/290273.html?spm=5176.100033.1.24.tnquSx</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/concurrent/" rel="tag"># concurrent</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/07/12/note/rate-limiter/" rel="prev" title="限流">
+      <i class="fa fa-chevron-left"></i> 限流
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/07/22/fun/the-fate-of-the-German-empire/" rel="next" title="脆弱的崛起-大战略与德意志帝国的命运">
+      脆弱的崛起-大战略与德意志帝国的命运 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%94%81"><span class="nav-number">1.</span> <span class="nav-text">什么是锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-util-concurrent-locks-Lock%E7%B1%BB"><span class="nav-number">2.</span> <span class="nav-text">java.util.concurrent.locks.Lock类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lock%E5%92%8Csynchronized%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.1.</span> <span class="nav-text">Lock和synchronized的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Lock%E6%AF%94%E8%BE%83%E5%85%B8%E5%9E%8B%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.2.</span> <span class="nav-text">Lock比较典型的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ReentrantLock"><span class="nav-number">2.2.1.</span> <span class="nav-text">ReentrantLock</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ReentrantReadWriteLock"><span class="nav-number">2.2.2.</span> <span class="nav-text">ReentrantReadWriteLock</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#StampedLock"><span class="nav-number">2.2.3.</span> <span class="nav-text">StampedLock</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Conditions"><span class="nav-number">2.3.</span> <span class="nav-text">Conditions</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JUC"><span class="nav-number">3.</span> <span class="nav-text">JUC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAS"><span class="nav-number">3.1.</span> <span class="nav-text">CAS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AQS"><span class="nav-number">3.2.</span> <span class="nav-text">AQS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81"><span class="nav-number">4.</span> <span class="nav-text">分布式锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="nav-number">5.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

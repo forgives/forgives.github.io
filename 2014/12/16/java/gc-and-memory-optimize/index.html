@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="要了解Java垃圾收集机制，先理解JVM内存模式是非常重要的。今天我们将会了解JVM内存的各个部分、如何监控以及垃圾收集调优。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java内存与垃圾回收调优">
+<meta property="og:url" content="https://forgives.github.io/2014/12/16/java/gc-and-memory-optimize/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="要了解Java垃圾收集机制，先理解JVM内存模式是非常重要的。今天我们将会了解JVM内存的各个部分、如何监控以及垃圾收集调优。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1YZfDaMmTBuNjy1XbXXaMrVXa-2312-952.png">
+<meta property="article:published_time" content="2014-12-15T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.381Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="j2se">
+<meta property="article:tag" content="jvm">
+<meta property="article:tag" content="内存管理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/tfs/TB1YZfDaMmTBuNjy1XbXXaMrVXa-2312-952.png">
+
+<link rel="canonical" href="https://forgives.github.io/2014/12/16/java/gc-and-memory-optimize/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java内存与垃圾回收调优 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2014/12/16/java/gc-and-memory-optimize/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java内存与垃圾回收调优
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2014-12-16 00:00:00" itemprop="dateCreated datePublished" datetime="2014-12-16T00:00:00+08:00">2014-12-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>要了解Java垃圾收集机制，先理解JVM内存模式是非常重要的。今天我们将会了解JVM内存的各个部分、如何监控以及垃圾收集调优。</p>
+<span id="more"></span>
+<h2 id="Java（JVM）内存模型"><a href="#Java（JVM）内存模型" class="headerlink" title="Java（JVM）内存模型"></a>Java（JVM）内存模型</h2><p><img src="https://img.alicdn.com/tfs/TB1YZfDaMmTBuNjy1XbXXaMrVXa-2312-952.png" alt="内存模型"></p>
+<p>JVM内存被分成多个独立的部分。广泛地说，JVM堆内存被分为两部分——年轻代（Young Generation）和老年代（Old Generation）。</p>
+<h2 id="年轻代"><a href="#年轻代" class="headerlink" title="年轻代"></a>年轻代</h2><p>年轻代是所有新对象产生的地方。当年轻代内存空间被用完时，就会触发垃圾回收。这个垃圾回收叫做Minor GC。年轻代被分为3个部分——Enden区和两个Survivor区。</p>
+<p>年轻代空间的要点</p>
+<ul>
+<li>大多数新建的对象都位于Eden区。</li>
+<li>当Eden区被对象填满时，就会执行Minor GC。并把所有存活下来的对象转移到其中一个survivor区。</li>
+<li>Minor GC同样会检查存活下来的对象，并把它们转移到另一个survivor区。这样在一段时间内，总会有一个空的survivor区。</li>
+<li>经过多次GC周期后，仍然存活下来的对象会被转移到年老代内存空间。通常这是在年轻代有资格提升到年老代前通过设定年龄阈值来完成的。</li>
+</ul>
+<h2 id="年老代"><a href="#年老代" class="headerlink" title="年老代"></a>年老代</h2><p>年老代内存里包含了长期存活的对象和经过多次Minor GC后依然存活下来的对象。通常会在老年代内存被占满时进行垃圾回收。老年代的垃圾收集叫做Major GC。Major GC会花费更多的时间。</p>
+<h3 id="Stop-the-World事件"><a href="#Stop-the-World事件" class="headerlink" title="Stop the World事件"></a>Stop the World事件</h3><p>所有的垃圾收集都是“Stop the World”事件，因为所有的应用线程都会停下来直到操作完成（所以叫“Stop the World”）。</p>
+<p>因为年轻代里的对象都是一些临时（short-lived ）对象，执行Minor GC非常快，所以应用不会受到（“Stop the World”）影响。主要是老年代的GC。</p>
+<p>由于Major GC会检查所有存活的对象，因此会花费更长的时间。应该尽量减少Major GC。因为Major GC会在垃圾回收期间让你的应用反应迟钝，所以如果你有一个需要快速响应的应用发生多次Major GC，你会看到超时错误。</p>
+<p>垃圾回收时间取决于垃圾回收策略。这就是为什么有必要去监控垃圾收集和对垃圾收集进行调优。从而避免要求快速响应的应用出现超时错误。</p>
+<h2 id="永久代"><a href="#永久代" class="headerlink" title="永久代"></a>永久代</h2><p>永久代或者“Perm Gen”包含了JVM需要的应用元数据，这些元数据描述了在应用里使用的类和方法。注意，永久代不是Java堆内存的一部分。<br>永久代存放JVM运行时使用的类。永久代同样包含了Java SE库的类和方法。<strong>永久代的对象在full GC时进行垃圾收集</strong>。</p>
+<h3 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h3><p>方法区是<strong>永久代空间的一部分</strong>，并用来存储类型信息（运行时常量和静态变量）和方法代码和构造函数代码。</p>
+<h3 id="内存池"><a href="#内存池" class="headerlink" title="内存池"></a>内存池</h3><p>如果JVM实现支持，JVM内存管理会为创建内存池，用来为不变对象创建对象池。字符串池就是内存池类型的一个很好的例子。内存池可以属于堆或者永久代，这取决于JVM内存管理的实现。</p>
+<h3 id="运行时常量池"><a href="#运行时常量池" class="headerlink" title="运行时常量池"></a>运行时常量池</h3><p>运行时常量池是每个类常量池的运行时代表。它包含了类的运行时常量和静态方法。运行时常量池是方法区的一部分。</p>
+<h2 id="Java栈内存"><a href="#Java栈内存" class="headerlink" title="Java栈内存"></a>Java栈内存</h2><p>Java栈内存用于运行线程。它们包含了方法里的临时数据、堆里其它对象引用的特定数据。你可以阅读栈内存和堆内存的区别。</p>
+<h2 id="Java-堆内存开关"><a href="#Java-堆内存开关" class="headerlink" title="Java 堆内存开关"></a>Java 堆内存开关</h2><p>Java提供了大量的内存开关（参数），我们可以用它来设置内存大小和它们的比例。下面是一些常用的开关：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">VM 开关	VM 开关描述</span><br><span class="line">-Xms	设置JVM启动时堆的初始化大小。</span><br><span class="line">-Xmx	设置堆最大值。</span><br><span class="line">-Xmn	设置年轻代的空间大小，剩下的为老年代的空间大小。</span><br><span class="line">-XX:PermGen	设置永久代内存的初始化大小。</span><br><span class="line">-XX:MaxPermGen	设置永久代的最大值。</span><br><span class="line">-XX:SurvivorRatio	提供Eden区和survivor区的空间比例。比如，如果年轻代的大小为10m并且VM开关是-XX:SurvivorRatio=2，那么将会保留5m内存给Eden区和每个Survivor区分配2.5m内存。默认比例是8。</span><br><span class="line">-XX:NewRatio	提供年老代和年轻代的比例大小。默认值是2。</span><br></pre></td></tr></table></figure>
+
+<p>大多数时候，上面的选项已经足够使用了。但是如果你还想了解其他的选项，那么请查看<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/tech/vmoptions-jsp-140102.html">JVM选项官方网页</a>。</p>
+<h2 id="Java垃圾回收"><a href="#Java垃圾回收" class="headerlink" title="Java垃圾回收"></a>Java垃圾回收</h2><p>Java垃圾回收会找出没用的对象，把它从内存中移除并释放出内存给以后创建的对象使用。Java程序语言中的一个最大优点是<strong>自动垃圾回收</strong>，不像其他的程序语言那样需要手动分配和释放内存，比如C语言。</p>
+<p>垃圾收集器是一个后台运行程序。它管理着内存中的所有对象并找出没被引用的对象。所有的这些未引用的对象都会被删除，回收它们的空间并分配给其他对象。</p>
+<p>一个基本的垃圾回收过程涉及三个步骤：</p>
+<ul>
+<li><code>标记</code>：这是第一步。在这一步，垃圾收集器会找出哪些对象正在使用和哪些对象不在使用。</li>
+<li><code>正常清除</code>：垃圾收集器清会除不在使用的对象，回收它们的空间分配给其他对象。</li>
+<li><code>压缩清除</code>：为了提升性能，压缩清除会在删除没用的对象后，把所有存活的对象移到一起。这样可以提高分配新对象的效率。</li>
+</ul>
+<p>简单标记和清除方法存在两个问题：</p>
+<ul>
+<li>效率很低。因为大多数新建对象都会成为“没用对象”。</li>
+<li>经过多次垃圾回收周期的对象很有可能在以后的周期也会存活下来。</li>
+</ul>
+<h2 id="Java垃圾回收类型"><a href="#Java垃圾回收类型" class="headerlink" title="Java垃圾回收类型"></a>Java垃圾回收类型</h2><h3 id="Serial-GC（-XX-UseSerialGC）"><a href="#Serial-GC（-XX-UseSerialGC）" class="headerlink" title="Serial GC（-XX:+UseSerialGC）"></a>Serial GC（-XX:+UseSerialGC）</h3><p>Serial GC使用简单的标记、清除、压缩方法对年轻代和年老代进行垃圾回收，即Minor GC和Major GC。Serial GC在client模式（客户端模式）很有用，比如在简单的独立应用和CPU配置较低的机器。这个模式对占有内存较少的应用很管用。</p>
+<h3 id="Parallel-GC（-XX-UseParallelGC）"><a href="#Parallel-GC（-XX-UseParallelGC）" class="headerlink" title="Parallel GC（-XX:+UseParallelGC）"></a>Parallel GC（-XX:+UseParallelGC）</h3><p>除了会产生N个线程来进行年轻代的垃圾收集外，Parallel GC和Serial GC几乎一样。这里的N是系统CPU的核数。我们可以使用 -XX:ParallelGCThreads&#x3D;n 这个JVM选项来控制线程数量。并行垃圾收集器也叫throughput收集器。因为它使用了多CPU加快垃圾回收性能。<strong>Parallel GC在进行年老代垃圾收集时使用单线程</strong>。</p>
+<h3 id="Parallel-Old-GC（-XX-UseParallelOldGC）"><a href="#Parallel-Old-GC（-XX-UseParallelOldGC）" class="headerlink" title="Parallel Old GC（-XX:+UseParallelOldGC）"></a>Parallel Old GC（-XX:+UseParallelOldGC）</h3><p>和Parallel GC一样。不同之处，Parallel Old GC在年轻代垃圾收集和年老代垃圾回收时都使用多线程收集。</p>
+<h3 id="并发标记清除（CMS）收集器（-XX-UseConcMarkSweepGC"><a href="#并发标记清除（CMS）收集器（-XX-UseConcMarkSweepGC" class="headerlink" title="并发标记清除（CMS）收集器（-XX:+UseConcMarkSweepGC)"></a>并发标记清除（CMS）收集器（-XX:+UseConcMarkSweepGC)</h3><p>CMS收集器也被称为短暂停顿并发收集器。它是对年老代进行垃圾收集的。CMS收集器通过多线程并发进行垃圾回收，尽量减少垃圾收集造成的停顿。CMS收集器对年轻代进行垃圾回收使用的算法和Parallel收集器一样。这个垃圾收集器适用于不能忍受长时间停顿要求快速响应的应用。可使用 -XX:ParallelCMSThreads&#x3D;n JVM选项来限制CMS收集器的线程数量。</p>
+<h2 id="G1垃圾收集器（-XX-UseG1GC-G1（Garbage-First）"><a href="#G1垃圾收集器（-XX-UseG1GC-G1（Garbage-First）" class="headerlink" title="G1垃圾收集器（-XX:+UseG1GC) G1（Garbage First）"></a>G1垃圾收集器（-XX:+UseG1GC) G1（Garbage First）</h2><p>垃圾收集器是在Java 7后才可以使用的特性，它的长远目标时代替CMS收集器。G1收集器是一个并行的、并发的和增量式压缩短暂停顿的垃圾收集器。G1收集器和其他的收集器运行方式不一样，不区分年轻代和年老代空间。它把堆空间划分为多个大小相等的区域。当进行垃圾收集时，它会优先收集存活对象较少的区域，因此叫“Garbage First”。你可以在Oracle Garbage-FIrst收集器文档找到更多详细信息。</p>
+<h2 id="Java垃圾收集监控"><a href="#Java垃圾收集监控" class="headerlink" title="Java垃圾收集监控"></a>Java垃圾收集监控</h2><p>我们可以使用命令行和图形工具来监控监控应用垃圾回收。例如，我使用Java SE下载页中的一个demo来实验。</p>
+<p>如果你想使用同样的应用，可以到Java SE下载页面下载JDK 7和JavaFX演示和示例。我使用的示例应用是Java2Demo.jar，它位于 jdk1.7.0_55&#x2F;demo&#x2F;jfc&#x2F;Java2D 目录下。这只是一个可选步骤，你可以运行GC监控命令监控任何Java应用。</p>
+<p>我打开演示应用使用的命令是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pankaj@Pankaj:~/Downloads/jdk1.7.0_55/demo/jfc/Java2D$ java -Xmx120m -Xms30m -Xmn10m -XX:PermSize=20m -XX:MaxPermSize=20m -XX:+UseSerialGC -jar Java2Demo.jar</span><br></pre></td></tr></table></figure>
+
+<h3 id="jsat"><a href="#jsat" class="headerlink" title="jsat"></a>jsat</h3><p>可以使用jstat命令行工具监控JVM内存和垃圾回收。标准的JDK已经附带了jstat，所以不需要做任何额外的事情就可以得到它。<br>要运行jstat你需要知道应用的进程id，你可以使用 <code>ps -eaf | grep java</code> 命令获取进程id。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ps-eaf |grepJava2Demo.jar</span><br><span class="line">501 9582 11579 0 9:48PM ttys000 0:21.66/usr/bin/java-Xmx120m -Xms30m -Xmn10m -XX:PermSize=20m -XX:MaxPermSize=20m -XX:+UseG1GC -jar Java2Demo.jar</span><br></pre></td></tr></table></figure>
+<p>从上面知道，我的Java应用进程id是9582。现在可以运行jstat命令了，就像下面展示的一样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ jstat -gc 9582 1000</span><br><span class="line">S0C S1C S0U S1U EC EU OC OU PC PU YGC YGCT FGC FGCT GCT</span><br><span class="line">1024.0 1024.0 0.0 0.0 8192.0 7933.3 42108.0 23401.3 20480.0 19990.9 157 0.274 40 1.381 1.654</span><br><span class="line">1024.0 1024.0 0.0 0.0 8192.0 8026.5 42108.0 23401.3 20480.0 19990.9 157 0.274 40 1.381 1.654</span><br><span class="line">1024.0 1024.0 0.0 0.0 8192.0 8030.0 42108.0 23401.3 20480.0 19990.9 157 0.274 40 1.381 1.654</span><br><span class="line">1024.0 1024.0 0.0 0.0 8192.0 8122.2 42108.0 23401.3 20480.0 19990.9 157 0.274 40 1.381 1.654</span><br><span class="line">1024.0 1024.0 0.0 0.0 8192.0 8171.2 42108.0 23401.3 20480.0 19990.9 157 0.274 40 1.381 1.654</span><br><span class="line">1024.0 1024.0 48.7 0.0 8192.0 106.7 42108.0 23401.3 20480.0 19990.9 158 0.275 40 1.381 1.656</span><br><span class="line">1024.0 1024.0 48.7 0.0 8192.0 145.8 42108.0 23401.3 20480.0 19990.9 158 0.275 40 1.381 1.656</span><br></pre></td></tr></table></figure>
+
+<p>jstat命令的最后一个参数是每个输出的时间间隔。每隔一秒就会打印出内存和垃圾收集数据。<br>让我们一起来对每一列的意义进行逐一了解：</p>
+<ul>
+<li>S0C和S1C：这一列展示了Survivor0和Survivor1区的当前大小（单位KB）。</li>
+<li>S0U和S1U：这一列展示了当前Survivor0和Survivor1区的使用情况（单位KB）。注意：无论任何时候，总会有一个Survivor区是空着的。</li>
+<li>EC和EU：这些列展示了Eden区当前空间大小和使用情况（单位KB）。注意：EU的大小一直在增大。而且只要大小接近EC时，就会触发Minor GC并且EU将会减小。</li>
+<li>OC和OU：这些列展示了年老代当前空间大小和当前使用情况（单位KB）。</li>
+<li>PC和PU：这些列展示了Perm Gen（永久代）当前空间大小和当前使用情况（单位KB）。</li>
+<li>YGC和YGCT：YGC这列显示了发生在年轻代的GC事件的数量。YGCT这列显示了在年轻代进行GC操作的累计时间。注意：在EU的值由于minor GC导致下降时，同一行的YGC和YGCT都会增加。</li>
+<li>FGC和FGCT：FGC列显示了发生Full GC事件的次数。FGCT显示了进行Full GC操作的累计时间。注意：相对于年轻代的GC使用时间，Full GC所用的时间长很多。</li>
+<li>GCT：这一列显示了GC操作的总累计时间。注意：总累计时间是YGCT和FGCT两列所用时间的总和（GCT&#x3D;YGCT+FGCT）。</li>
+</ul>
+<p>jstat的优点，我们同样可以在没有GUI的远程服务器上运行jstat。注意：我们是通过 -Xmn10m 选项来指定S0C、S1C和EC的总和为10m的。</p>
+<h3 id="Java-VisualVM及Visual-GC插件"><a href="#Java-VisualVM及Visual-GC插件" class="headerlink" title="Java VisualVM及Visual GC插件"></a>Java VisualVM及Visual GC插件</h3><p>如果你想在GUI里查看内存和GC，那么可以使用jvisualvm工具。Java VisualVM同样是JDK的一部分，所以你不需要单独去下载。<br>在终端运行jvisualvm命令启动Java VisualVM程序。一旦启动程序，你需要从Tools-&gt;Plugins选项安装Visual GC插件.</p>
+<h2 id="Java垃圾回收调优"><a href="#Java垃圾回收调优" class="headerlink" title="Java垃圾回收调优"></a>Java垃圾回收调优</h2><p>Java垃圾回收调优应该是提升应用吞吐量的最后一个选择。在你发现应用由于长时间垃圾回收导致了应用性能下降、出现超时的时候，应该考虑Java垃圾收集调优。</p>
+<p>如果你在日志里看到 <code>java.lang.OutOfMemoryError: PermGen space</code>错误，那么可以尝试使用 <code>-XX:PermGen</code> 和 <code>-XX:MaxPermGen</code> JVM选项去监控并增加Perm Gen内存空间。你也可以尝试使用<code>-XX:+CMSClassUnloadingEnabled</code>并查看使用CMS垃圾收集器的执行性能。如果你看到了大量的Full GC操作，那么你应该尝试增大老年代的内存空间。全面垃圾收集调优要花费大量的努力和时间，这里没有一尘不变的硬性调优规则。你需要去尝试不同的选项并且对这些选项进行对比，从而找出最适合自己应用的方案。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/j2se/" rel="tag"># j2se</a>
+              <a href="/tags/jvm/" rel="tag"># jvm</a>
+              <a href="/tags/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag"># 内存管理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2014/11/30/java/HttpServlet-src-analyze/" rel="prev" title="HttpServlet源码分析">
+      <i class="fa fa-chevron-left"></i> HttpServlet源码分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/03/01/note/linux-fg-bg-cmd/" rel="next" title="linux的fg bg jobs & ctrl+z命令记录">
+      linux的fg bg jobs & ctrl+z命令记录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%EF%BC%88JVM%EF%BC%89%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">Java（JVM）内存模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B4%E8%BD%BB%E4%BB%A3"><span class="nav-number">2.</span> <span class="nav-text">年轻代</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B4%E8%80%81%E4%BB%A3"><span class="nav-number">3.</span> <span class="nav-text">年老代</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Stop-the-World%E4%BA%8B%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">Stop the World事件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B0%B8%E4%B9%85%E4%BB%A3"><span class="nav-number">4.</span> <span class="nav-text">永久代</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%8C%BA"><span class="nav-number">4.1.</span> <span class="nav-text">方法区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B1%A0"><span class="nav-number">4.2.</span> <span class="nav-text">内存池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%97%B6%E5%B8%B8%E9%87%8F%E6%B1%A0"><span class="nav-number">4.3.</span> <span class="nav-text">运行时常量池</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E6%A0%88%E5%86%85%E5%AD%98"><span class="nav-number">5.</span> <span class="nav-text">Java栈内存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java-%E5%A0%86%E5%86%85%E5%AD%98%E5%BC%80%E5%85%B3"><span class="nav-number">6.</span> <span class="nav-text">Java 堆内存开关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6"><span class="nav-number">7.</span> <span class="nav-text">Java垃圾回收</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%B1%BB%E5%9E%8B"><span class="nav-number">8.</span> <span class="nav-text">Java垃圾回收类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Serial-GC%EF%BC%88-XX-UseSerialGC%EF%BC%89"><span class="nav-number">8.1.</span> <span class="nav-text">Serial GC（-XX:+UseSerialGC）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Parallel-GC%EF%BC%88-XX-UseParallelGC%EF%BC%89"><span class="nav-number">8.2.</span> <span class="nav-text">Parallel GC（-XX:+UseParallelGC）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Parallel-Old-GC%EF%BC%88-XX-UseParallelOldGC%EF%BC%89"><span class="nav-number">8.3.</span> <span class="nav-text">Parallel Old GC（-XX:+UseParallelOldGC）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%A0%87%E8%AE%B0%E6%B8%85%E9%99%A4%EF%BC%88CMS%EF%BC%89%E6%94%B6%E9%9B%86%E5%99%A8%EF%BC%88-XX-UseConcMarkSweepGC"><span class="nav-number">8.4.</span> <span class="nav-text">并发标记清除（CMS）收集器（-XX:+UseConcMarkSweepGC)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#G1%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%EF%BC%88-XX-UseG1GC-G1%EF%BC%88Garbage-First%EF%BC%89"><span class="nav-number">9.</span> <span class="nav-text">G1垃圾收集器（-XX:+UseG1GC) G1（Garbage First）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E7%9B%91%E6%8E%A7"><span class="nav-number">10.</span> <span class="nav-text">Java垃圾收集监控</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#jsat"><span class="nav-number">10.1.</span> <span class="nav-text">jsat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-VisualVM%E5%8F%8AVisual-GC%E6%8F%92%E4%BB%B6"><span class="nav-number">10.2.</span> <span class="nav-text">Java VisualVM及Visual GC插件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E8%B0%83%E4%BC%98"><span class="nav-number">11.</span> <span class="nav-text">Java垃圾回收调优</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

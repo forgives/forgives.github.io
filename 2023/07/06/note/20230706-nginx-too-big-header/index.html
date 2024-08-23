@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="线上报表的http中转服务302到错误页面问题排查记录。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx 请求头过大问题">
+<meta property="og:url" content="https://forgives.github.io/2023/07/06/note/20230706-nginx-too-big-header/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="线上报表的http中转服务302到错误页面问题排查记录。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-07-06T03:15:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.387Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2023/07/06/note/20230706-nginx-too-big-header/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>nginx 请求头过大问题 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/07/06/note/20230706-nginx-too-big-header/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          nginx 请求头过大问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-07-06 11:15:00" itemprop="dateCreated datePublished" datetime="2023-07-06T11:15:00+08:00">2023-07-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>线上报表的<code>http</code>中转服务302到错误页面问题排查记录。</p>
+<span id="more"></span>
+<p>首先还是debug了java应用，发现controller正常返回，怀疑是 <code>nginx</code> 的问题，查看nginx错误日志。<br>错误日志线上好几种分隔方法，先确定如何组织的，查看Nginx的 <code>error_log</code> 配置</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">error_log   &quot;pipe:/opt/install/cronolog/sbin/cronolog logs/cronolog/%Y/%m/%Y-%m-%d-error_log&quot; warn;</span><br></pre></td></tr></table></figure>
+<p>按年月分隔的目录，日志文件到天。查看当天的错误发现有报错：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upstream sent too big header while reading response header from upstream</span><br></pre></td></tr></table></figure>
+
+<p>看上去是请求头太大了，看了下报错的url的确参数带了200多个，再加上前端喜欢在cookie里面放各种信息，导致整个请求头过大。</p>
+<p>知道问题就好解决了，在http模块中增加配置调大请求头（实际情况是驳回了调大的方案，前端传参不合理）</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">proxy_buffer_size  64k;</span><br><span class="line">proxy_buffers   32 64k;</span><br><span class="line">proxy_busy_buffers_size 128k;</span><br></pre></td></tr></table></figure>
+
+<p><strong>proxy_buffer_size</strong></p>
+<ul>
+<li>语法：  <code>proxy_buffer_size  the size</code> </li>
+<li>默认值：<code>proxy_buffer_size 4k/8k</code></li>
+<li>上下文： http,server,location</li>
+</ul>
+<p>该指令设置缓冲区大小,从代理后端服务器取得的第一部分的响应内容,会放到这里.小的响应header通常位于这部分响应内容里边.默认来说,该缓冲区大小等于指令 <code>proxy_buffers</code>所设置的;但是,你可以把它设置得更小.</p>
+<p>ChatGPT</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">在 Nginx 中，proxy_buffer_size 是一个用于配置代理缓冲区大小的参数。它指定了单个连接的代理缓冲区大小，通常用于控制 Nginx 与代理服务器之间的数据传输速度，以及控制 Nginx 缓冲数据的行为。</span><br><span class="line"></span><br><span class="line">当 Nginx 作为代理服务器（即使用 proxy_pass 指令转发请求）时，如果代理服务器返回的响应数据较大，Nginx 会将响应数据分成多个缓冲区进行传输，并在接收完所有缓冲区后再将它们合并起来。而 proxy_buffer_size 参数就是用于控制这些缓冲区的大小。</span><br><span class="line"></span><br><span class="line">具体来说，proxy_buffer_size 参数控制了单个缓冲区的大小，即控制了每次从代理服务器读取数据的最大量。如果代理服务器返回的数据超过了 proxy_buffer_size 指定的大小，Nginx 将会在接收到第一个缓冲区后就开始将数据发送给客户端，然后将接下来的缓冲区数据存储在内存中，直到所有缓冲区的数据都被接收完毕后再将它们合并起来。</span><br><span class="line"></span><br><span class="line">需要注意的是，proxy_buffer_size 参数不适用于使用 HTTP/2 协议的代理连接，因为在 HTTP/2 中，每个数据帧都有自己的大小限制，不需要额外设置缓冲区大小。</span><br><span class="line"></span><br><span class="line">在实际使用中，可以根据代理服务器返回的数据大小和网络带宽等情况来调整 proxy_buffer_size 参数的大小，以达到最优的性能和可靠性。通常情况下，可以将 proxy_buffer_size 设置为比较大的值，以便提高数据传输的效率。但是，如果服务器的处理能力较低或者网络带宽较小，可能需要将 proxy_buffer_size 设置为较小的值，以防止过度消耗服务器资源或者发生数据丢失的情况。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>proxy_buffers</strong></p>
+<ul>
+<li>语法：proxy_buffers  数量  大小</li>
+<li>默认值：proxy_buffers 8  4k&#x2F;8k</li>
+<li>上下文：http,server,location</li>
+</ul>
+<p>该指令设置缓冲区的大小和数量,从被代理的后端服务器取得的响应内容,会放置到这里. 默认情况下,一个缓冲区的大小等于内存页面大小,可能是4K也可能是8K,这取决于平台。</p>
+<p>ChatGPT</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">在 Nginx 中，proxy_buffers 是一个用于设置代理缓冲区数量和大小的参数。它可以控制 Nginx 与后端代理服务器之间的数据传输速度和缓冲区的使用方式。</span><br><span class="line"></span><br><span class="line">当 Nginx 作为代理服务器时，如果后端代理服务器返回的响应数据较大，Nginx 会将响应数据分成多个缓冲区进行传输，并在接收完所有缓冲区后再将它们合并起来。而 proxy_buffers 参数就是用于控制这些缓冲区的数量和大小。</span><br><span class="line"></span><br><span class="line">具体来说，proxy_buffers 参数由两部分组成：缓冲区的数量和每个缓冲区的大小。例如： proxy_buffers 4 256k;</span><br><span class="line"></span><br><span class="line">上述配置表示 Nginx 会使用 4 个大小为 256KB 的缓冲区来存储代理传输的数据。</span><br><span class="line"></span><br><span class="line">当代理服务器返回的响应数据超过一个缓冲区的大小时，Nginx 会将响应数据分成多个缓冲区进行传输，并在接收完所有缓冲区后再将它们合并起来。如果代理服务器返回的数据较小，则只会使用一个缓冲区。如果缓冲区不足以存储完整的响应数据，Nginx 将会分多次传输数据，直到所有响应数据都被接收完毕。</span><br><span class="line"></span><br><span class="line">需要注意的是，proxy_buffers 参数只在使用 HTTP/1 协议的代理连接中起作用，不适用于使用 HTTP/2 协议的连接。当使用 HTTP/2 时，每个数据帧都有自己的大小限制，不需要额外设置缓冲区大小。</span><br><span class="line"></span><br><span class="line">在实际使用中，可以根据代理服务器返回的数据大小和网络带宽等情况来调整 proxy_buffers 的数量和大小，以达到最优的性能和可靠性。通常情况下，可以将 proxy_buffers 设置为较大的值，以便提高数据传输的效率。但是，如果服务器的处理能力较低或者网络带宽较小，可能需要将 proxy_buffers 设置为较小的值，以防止过度消耗服务器资源或者发生数据丢失的情况。</span><br></pre></td></tr></table></figure>
+
+
+<p><strong>proxy_busy_buffers_size</strong></p>
+<ul>
+<li>语法：proxy_busy_buffers_size  大小</li>
+<li>默认值：proxy_busy_buffers_size  proxy_buffer_size*2</li>
+<li>上下文：http,server,location</li>
+</ul>
+<p>nginx会在没有完全读完后端响应就开始向客户端传送数据，所以它会划出一部分busy状态的buffer来专门向客户端传送数据(建议为proxy_buffers中单个缓冲区的2倍)，然后它继续从后端取数据。</p>
+<p>ChatGPT</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">proxy_busy_buffers_size 是 Nginx 的一个代理模块参数，用于控制代理缓冲区的使用方式。</span><br><span class="line"></span><br><span class="line">在 Nginx 作为代理服务器的情况下，代理服务器返回的响应数据可能会非常大，因此 Nginx 会将响应数据分成多个缓冲区进行传输，然后将这些缓冲区合并起来。proxy_busy_buffers_size 参数用于控制 Nginx 何时将缓冲区标记为“繁忙”，以便将缓冲区交给其他请求使用。</span><br><span class="line"></span><br><span class="line">具体来说，proxy_busy_buffers_size 参数指定了缓冲区的最大可用内存大小，当缓冲区的内存使用超过了这个值时，Nginx 将会标记该缓冲区为“繁忙”，表示该缓冲区正在被使用中，不能被其他请求使用。这样可以防止缓冲区被错误地重用，从而避免数据传输中的错误和数据丢失。</span><br><span class="line"></span><br><span class="line">需要注意的是，当缓冲区被标记为“繁忙”时，Nginx 不会立即释放该缓冲区，而是等到该缓冲区的所有数据都被传输完毕后才会释放。</span><br><span class="line"></span><br><span class="line">在实际使用中，可以根据服务器的处理能力和网络带宽等因素来调整 proxy_busy_buffers_size 的大小。如果代理服务器返回的响应数据较大且处理能力较强，可以将 proxy_busy_buffers_size 设置为较大的值，以提高数据传输的效率。但是，如果代理服务器处理能力较弱或者网络带宽较小，可能需要将 proxy_busy_buffers_size 设置为较小的值，以避免过度消耗服务器资源或者发生数据丢失的情况。</span><br><span class="line"></span><br><span class="line">需要注意的是，proxy_busy_buffers_size 参数仅在使用 HTTP/1 协议的代理连接中起作用，不适用于使用 HTTP/2 协议的连接。在 HTTP/2 中，每个数据帧都有自己的大小限制，不需要额外设置缓冲区大小。</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/nginx/" rel="tag"># nginx</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/06/05/db/202230606-mvcc/" rel="prev" title="MySQL MVCC 实现原理">
+      <i class="fa fa-chevron-left"></i> MySQL MVCC 实现原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/09/24/note/20231020-state-machine/" rel="next" title="有限状态机的实现">
+      有限状态机的实现 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

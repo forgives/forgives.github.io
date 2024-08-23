@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="对网上warp生成WireGard配置脚本做分析记录，知其然且知其所以然。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="warp生成WireGard配置脚本">
+<meta property="og:url" content="https://forgives.github.io/2024/01/22/fun/20240122-warp-wg-conf/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="对网上warp生成WireGard配置脚本做分析记录，知其然且知其所以然。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-01-22T13:46:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.375Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="net">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2024/01/22/fun/20240122-warp-wg-conf/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>warp生成WireGard配置脚本 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2024/01/22/fun/20240122-warp-wg-conf/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          warp生成WireGard配置脚本
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-01-22 21:46:00" itemprop="dateCreated datePublished" datetime="2024-01-22T21:46:00+08:00">2024-01-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C/" itemprop="url" rel="index"><span itemprop="name">网络</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>对网上warp生成WireGard配置脚本做分析记录，知其然且知其所以然。</p>
+<span id="more"></span>  
+
+<p>脚本主要使用工具 <a target="_blank" rel="noopener" href="https://github.com/ViRb3/wgcf">wgcf</a> </p>
+<h2 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h2><h3 id="注册"><a href="#注册" class="headerlink" title="注册"></a>注册</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wgcf register</span><br></pre></td></tr></table></figure>
+<p>注册新的账号并把账号信息保存在<code>wgcf-account.toml</code>中 (这里是随意注册的一个账户)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cat</span> wgcf-account.toml</span></span><br><span class="line">access_token = &#x27;bd88d432-9237-4edb-be29-d548913aaa3c&#x27;</span><br><span class="line">device_id = &#x27;1ddcf044-49f5-4a2b-b07e-5b6dea119f70&#x27;</span><br><span class="line">license_key = &#x27;02p3t7mN-z5Qu246C-k196XJA0&#x27;</span><br><span class="line">private_key = &#x27;SO/R6UTO0rbizGiWT1iDRBpg1HWZRCdpa2V6GS7fmGw=&#x27;</span><br></pre></td></tr></table></figure>
+<p>其中的<code>license_key</code>就是<code>warp</code>提供的Key</p>
+<h3 id="更新Key"><a href="#更新Key" class="headerlink" title="更新Key"></a>更新Key</h3><p>修改<code>wgcf-account.toml</code> 文件中的<code>license_key</code>，然后执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wgcf update --name forg20240122</span><br></pre></td></tr></table></figure>
+<p>上面的<code>--name</code>参数是更新设备名称。</p>
+<p>注意更新之后记得需要重新生成<code>WireGuard</code>的配置文件<code>wgcf generate</code>。生成之后就可以直接导入到支持<code>WireGuard</code>的工具中使用了。</p>
+<h3 id="生成配置"><a href="#生成配置" class="headerlink" title="生成配置"></a>生成配置</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wgcf generate</span><br></pre></td></tr></table></figure>
+<p>生成<code>wgcf-profile.conf</code>的<code>WireGuard</code>配置文件。</p>
+<h3 id="查看设备状态"><a href="#查看设备状态" class="headerlink" title="查看设备状态"></a>查看设备状态</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">wgcf status</span><br><span class="line"></span><br><span class="line">2024/01/26 21:43:35 Using config file: wgcf-account.toml</span><br><span class="line">2024/01/26 21:43:36 Setting device name</span><br><span class="line">2024/01/26 21:43:38 =======================================</span><br><span class="line">2024/01/26 21:43:38 Device name   : forg20240126</span><br><span class="line">2024/01/26 21:43:38 Device model  : PC</span><br><span class="line">2024/01/26 21:43:38 Device active : true</span><br><span class="line">2024/01/26 21:43:38 Account type  : limited</span><br><span class="line">2024/01/26 21:43:38 Role          : child</span><br><span class="line">2024/01/26 21:43:38 Premium data  : 21.85 PiB</span><br><span class="line">2024/01/26 21:43:38 Quota         : 21.85 PiB</span><br><span class="line">2024/01/26 21:43:38 =======================================</span><br><span class="line">2024/01/26 21:43:38 Successfully updated Cloudflare Warp account</span><br></pre></td></tr></table></figure>
+<p>上面是我使用自己的设备与<code>Warp+</code>的key生成的账户状态。</p>
+<h2 id="制品解析"><a href="#制品解析" class="headerlink" title="制品解析"></a>制品解析</h2><p>使用<code>replit</code> 作为运行环境 <a target="_blank" rel="noopener" href="https://replit.com/@misaka-blog/wgcf-profile-generator">https://replit.com/@misaka-blog/wgcf-profile-generator</a><br>开始解析网上流传的生成配置的shell脚本。</p>
+<h3 id="前置步骤"><a href="#前置步骤" class="headerlink" title="前置步骤"></a>前置步骤</h3><p>删除<code>wgcf-account.toml</code>与<code>wgcf-profile.conf</code>文件，相当于做下清理初始化。<br>随后执行<code>wgcf register</code>获得一个免费账户，并生成记录文件<code>wgcf-account.toml</code></p>
+<h3 id="选项2"><a href="#选项2" class="headerlink" title="选项2"></a>选项2</h3><p>提示输入 Warp 的 key, 输入之后直接替换账户文件<code>wgcf-account.toml</code>中的<code>license_key</code>配置，然后提示输入自定义的设备名称。<br>随后使用<code>wgcf update</code>更新账户信息，继续使用<code>wgcf generate</code>生成配置文件<code>wgcf-profile.conf</code>。</p>
+<h3 id="选项3"><a href="#选项3" class="headerlink" title="选项3"></a>选项3</h3><p>使用当前的<code>wgcf-account.toml</code>账户信息生成配置文件<code>wgcf-profile.conf</code>。<br>随后让用户选择使用<code>Teams TOKEN</code>或者使用提取出来的xml 配置。</p>
+<p>先看xml配置导入：</p>
+<ol>
+<li>提取配置</li>
+<li>填入git gist</li>
+<li>从git gist下载到服务器</li>
+<li>解析出私钥，地址等信息</li>
+<li>替换<code>wgcf-profile.conf</code>配置内容</li>
+</ol>
+<p>token的输入：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://web--public--warp-team-api--coia-mfs4.code.run/">https://web--public--warp-team-api--coia-mfs4.code.run</a> 获取token</li>
+<li>生成私钥和公钥</li>
+<li>通过API接口(<a target="_blank" rel="noopener" href="https://api.cloudflareclient.com/v0a2158/reg">https://api.cloudflareclient.com/v0a2158/reg</a>) 申请配置</li>
+<li>使用返回结果替换<code>wgcf-profile.conf</code>配置内容</li>
+</ol>
+<p>最终两种方法都是根据得到的配置信息替换<code>wgcf-profile.conf</code>，然后统一执行后置步骤。</p>
+<h3 id="选项1"><a href="#选项1" class="headerlink" title="选项1"></a>选项1</h3><p>直接使用<code>wgcf-account.toml</code>生成<code>wgcf-profile.conf</code>。</p>
+<h3 id="后置步骤"><a href="#后置步骤" class="headerlink" title="后置步骤"></a>后置步骤</h3><p>输出配置文件<code>wgcf-profile.conf</code>的内容，并使用文件内容调用<code>qrencode</code>程序生成二维码（所以扫码导入其实就是扫出的配置文件内容）。</p>
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p>知道了原理，直接可以在Windows 下完成以上操作。下载对应的windows版本<code>wgcf_2.2.21_windows_amd64.exe</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">wgcf.exe  register</span></span><br><span class="line">2024/01/26 20:46:05 =======================================</span><br><span class="line">2024/01/26 20:46:05 Device name   : 0E6E15</span><br><span class="line">2024/01/26 20:46:05 Device model  : PC</span><br><span class="line">2024/01/26 20:46:05 Device active : true</span><br><span class="line">2024/01/26 20:46:05 Account type  : free</span><br><span class="line">2024/01/26 20:46:05 Role          : child</span><br><span class="line">2024/01/26 20:46:05 Premium data  : 0.00 B</span><br><span class="line">2024/01/26 20:46:05 Quota         : 0.00 B</span><br><span class="line">2024/01/26 20:46:05 =======================================</span><br><span class="line">2024/01/26 20:46:05 Successfully created Cloudflare Warp account</span><br></pre></td></tr></table></figure>
+<p>同时成功生成<code>wgcf-account.toml</code>账户文件。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">wgcf.exe  generate</span></span><br><span class="line">2024/01/26 20:47:25 Using config file: wgcf-account.toml</span><br><span class="line">2024/01/26 20:47:27 =======================================</span><br><span class="line">2024/01/26 20:47:27 Device name   : 0E6E15</span><br><span class="line">2024/01/26 20:47:27 Device model  : PC</span><br><span class="line">2024/01/26 20:47:27 Device active : true</span><br><span class="line">2024/01/26 20:47:27 Account type  : free</span><br><span class="line">2024/01/26 20:47:27 Role          : child</span><br><span class="line">2024/01/26 20:47:27 Premium data  : 0.00 B</span><br><span class="line">2024/01/26 20:47:27 Quota         : 0.00 B</span><br><span class="line">2024/01/26 20:47:27 =======================================</span><br><span class="line">2024/01/26 20:47:27 Successfully generated WireGuard profile: wgcf-profile.conf</span><br></pre></td></tr></table></figure>
+<p>成功生成配置文件<code>wgcf-profile.conf</code> 注意这<code>Quota</code>是0 ，免费账户是没有流量额度的。</p>
+<p>使用<code>Warp+ Bot</code>生成<code>Warp+</code>的Key, 然后替换<code>wgcf-account.toml</code>中的<code>license_key</code>。<br>随后执行更新<code>wgcf.exe update --name forg20240126</code>，并重新生成配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">wgcf.exe generate</span></span><br><span class="line">2024/01/26 22:27:53 Using config file: wgcf-account.toml</span><br><span class="line">2024/01/26 22:27:54 =======================================</span><br><span class="line">2024/01/26 22:27:54 Device name   : forg20240126</span><br><span class="line">2024/01/26 22:27:54 Device model  : PC</span><br><span class="line">2024/01/26 22:27:54 Device active : true</span><br><span class="line">2024/01/26 22:27:54 Account type  : limited</span><br><span class="line">2024/01/26 22:27:54 Role          : child</span><br><span class="line">2024/01/26 22:27:54 Premium data  : 21.85 PiB</span><br><span class="line">2024/01/26 22:27:54 Quota         : 21.85 PiB</span><br><span class="line">2024/01/26 22:27:54 =======================================</span><br><span class="line">2024/01/26 22:27:54 Successfully generated WireGuard profile: wgcf-profile.conf</span><br></pre></td></tr></table></figure>
+<p>好了，找个二维码生成器把<code>wgcf-profile.conf</code>内容贴进去，生成二维码之后扫码导入，启动成功连接。</p>
+<h2 id="PS"><a href="#PS" class="headerlink" title="PS"></a>PS</h2><p>脚本备份</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/sh</span></span><br><span class="line"></span><br><span class="line">red()&#123;</span><br><span class="line">    echo -e &quot;\033[31m\033[01m$1\033[0m&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">green()&#123;</span><br><span class="line">    echo -e &quot;\033[32m\033[01m$1\033[0m&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">yellow()&#123;</span><br><span class="line">    echo -e &quot;\033[33m\033[01m$1\033[0m&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">rm -f wgcf-account.toml wgcf-profile.conf</span><br><span class="line">echo | ./wgcf register</span><br><span class="line">chmod +x wgcf-account.toml</span><br><span class="line"></span><br><span class="line">clear</span><br><span class="line">yellow &quot;请选择需要使用的 WARP 账户类型&quot;</span><br><span class="line">echo &quot;&quot;</span><br><span class="line">echo -e &quot; $&#123;GREEN&#125;1.$&#123;PLAIN&#125; WARP 免费账户 $&#123;YELLOW&#125;(默认)$&#123;PLAIN&#125;&quot;</span><br><span class="line">echo -e &quot; $&#123;GREEN&#125;2.$&#123;PLAIN&#125; WARP+&quot;</span><br><span class="line">echo -e &quot; $&#123;GREEN&#125;3.$&#123;PLAIN&#125; WARP Teams&quot;</span><br><span class="line">echo &quot;&quot;</span><br><span class="line">read -p &quot;请输入选项 [1-3]: &quot; account_type</span><br><span class="line">if [[ $account_type == 2 ]]; then</span><br><span class="line">  yellow &quot;获取 CloudFlare WARP 账号密钥信息方法: &quot;</span><br><span class="line">  green &quot;电脑: 下载并安装 CloudFlare WARP → 设置 → 偏好设置 → 账户 →复制密钥到脚本中&quot;</span><br><span class="line">  green &quot;手机: 下载并安装 1.1.1.1 APP → 菜单 → 账户 → 复制密钥到脚本中&quot;</span><br><span class="line">  echo &quot;&quot;</span><br><span class="line">  yellow &quot;重要：请确保手机或电脑的 1.1.1.1 APP 的账户状态为WARP+！&quot;</span><br><span class="line">  echo &quot;&quot;</span><br><span class="line">  read -rp &quot;输入 WARP 账户许可证密钥 (26个字符): &quot; warpkey</span><br><span class="line">  until [[ $warpkey =~ ^[A-Z0-9a-z]&#123;8&#125;-[A-Z0-9a-z]&#123;8&#125;-[A-Z0-9a-z]&#123;8&#125;$ ]]; do</span><br><span class="line">    red &quot;WARP 账户许可证密钥格式输入错误，请重新输入！&quot;</span><br><span class="line">    read -rp &quot;输入 WARP 账户许可证密钥 (26个字符): &quot; warpkey</span><br><span class="line">  done</span><br><span class="line">  sed -i &quot;s/license_key.*/license_key = \&quot;$warpkey\&quot;/g&quot; wgcf-account.toml</span><br><span class="line">  read -rp &quot;请输入自定义设备名，如未输入则使用默认随机设备名: &quot; devicename</span><br><span class="line">  green &quot;注册 WARP+ 账户中, 如下方显示: 400 Bad Request, 则使用 WARP 免费版账户&quot;</span><br><span class="line">  if [[ -n $devicename ]]; then</span><br><span class="line">    ./wgcf update --name $(echo $devicename | sed s/[[:space:]]/_/g)</span><br><span class="line">  else</span><br><span class="line">    ./wgcf update</span><br><span class="line">  fi</span><br><span class="line">  ./wgcf generate</span><br><span class="line">elif [[ $account_type == 3 ]]; then</span><br><span class="line">  ./wgcf generate</span><br><span class="line">  chmod +x wgcf-profile.conf</span><br><span class="line">  </span><br><span class="line">  yellow &quot;请选择申请 WARP Teams 账户方式&quot;</span><br><span class="line">  echo &quot;&quot;</span><br><span class="line">  echo -e &quot; $&#123;GREEN&#125;1.$&#123;PLAIN&#125; 使用 Teams TOKEN $&#123;YELLOW&#125;(默认)$&#123;PLAIN&#125;&quot;</span><br><span class="line">  echo -e &quot; $&#123;GREEN&#125;2.$&#123;PLAIN&#125; 使用提取出来的 xml 配置文件&quot;</span><br><span class="line">  echo &quot;&quot;</span><br><span class="line">  read -p &quot;请输入选项 [1-2]: &quot; team_type</span><br><span class="line"></span><br><span class="line">  if [[ $team_type == 2 ]]; then</span><br><span class="line">    yellow &quot;获取 WARP Teams 账户 xml 配置文件方法：https://blog.misaka.rest/2023/02/11/wgcfteam-config/&quot;</span><br><span class="line">    yellow &quot;请将提取到的 xml 配置文件上传至：https://gist.github.com&quot;</span><br><span class="line">    read -rp &quot;请粘贴 WARP Teams 账户配置文件链接：&quot; teamconfigurl</span><br><span class="line">    if [[ -n $teamconfigurl ]]; then</span><br><span class="line">      teams_config=$(curl -sSL &quot;$teamconfigurl&quot; | sed &quot;s/\&quot;/\&amp;quot;/g&quot;)</span><br><span class="line">      private_key=$(expr &quot;$teams_config&quot; : &#x27;.*private_key&amp;quot;&gt;\([^&lt;]*\).*&#x27;)</span><br><span class="line">      private_v6=$(expr &quot;$teams_config&quot; : &#x27;.*v6&amp;quot;:&amp;quot;\([^[&amp;]*\).*&#x27;)</span><br><span class="line">      sed -i &quot;s#PrivateKey.*#PrivateKey = $private_key#g&quot; wgcf-profile.conf;</span><br><span class="line">      sed -i &quot;s#Address.*128#Address = $private_v6/128#g&quot; wgcf-profile.conf;</span><br><span class="line">    else</span><br><span class="line">      red &quot;未提供WARP Teams 账户配置文件链接，脚本退出！&quot;</span><br><span class="line">      exit 1</span><br><span class="line">    fi</span><br><span class="line">  else</span><br><span class="line">    # 询问用户 WARP Teams 账户 TOKEN，并提示获取方式</span><br><span class="line">    yellow &quot;请在此网站：https://web--public--warp-team-api--coia-mfs4.code.run/ 获取你的 WARP Teams 账户 TOKEN&quot;</span><br><span class="line">    read -rp &quot;请输入 WARP Teams 账户的 TOKEN：&quot; teams_token</span><br><span class="line"></span><br><span class="line">    if [[ -n $teams_token ]]; then</span><br><span class="line">      # 生成 WireGuard 公私钥及 WARP 设备 ID 和 FCM Token</span><br><span class="line">      private_key=$(wg genkey)</span><br><span class="line">      public_key=$(wg pubkey &lt;&lt;&lt; &quot;$private_key&quot;)</span><br><span class="line">      install_id=$(tr -dc &#x27;A-Za-z0-9&#x27; &lt;/dev/urandom | head -c 22)</span><br><span class="line">      fcm_token=&quot;$&#123;install_id&#125;:APA91b$(tr -dc &#x27;A-Za-z0-9&#x27; &lt;/dev/urandom | head -c 134)&quot;</span><br><span class="line"></span><br><span class="line">      # 使用 CloudFlare API 申请 Teams 配置信息</span><br><span class="line">      team_result=$(curl --silent --location --tlsv1.3 --request POST &#x27;https://api.cloudflareclient.com/v0a2158/reg&#x27; \</span><br><span class="line">        --header &#x27;User-Agent: okhttp/3.12.1&#x27; \</span><br><span class="line">        --header &#x27;CF-Client-Version: a-6.10-2158&#x27; \</span><br><span class="line">        --header &#x27;Content-Type: application/json&#x27; \</span><br><span class="line">        --header &quot;Cf-Access-Jwt-Assertion: $&#123;team_token&#125;&quot; \</span><br><span class="line">        --data &#x27;&#123;&quot;key&quot;:&quot;&#x27;$&#123;public_key&#125;&#x27;&quot;,&quot;install_id&quot;:&quot;&#x27;$&#123;install_id&#125;&#x27;&quot;,&quot;fcm_token&quot;:&quot;&#x27;$&#123;fcm_token&#125;&#x27;&quot;,&quot;tos&quot;:&quot;&#x27;$(date +&quot;%Y-%m-%dT%H:%M:%S.%3NZ&quot;)&#x27;&quot;,&quot;model&quot;:&quot;Linux&quot;,&quot;serial_number&quot;:&quot;&#x27;$&#123;install_id&#125;&#x27;&quot;,&quot;locale&quot;:&quot;zh_CN&quot;&#125;&#x27;)</span><br><span class="line"></span><br><span class="line">      # 提取 WARP IPv6 内网地址，用于替换 wgcf-profile.conf 文件中对应的内容</span><br><span class="line">      private_v6=$(expr &quot;$team_result&quot; : &#x27;.*&quot;v6&quot;:[ ]*&quot;\([^&quot;]*\).*&#x27;)</span><br><span class="line">      </span><br><span class="line">      sed -i &quot;s#PrivateKey.*#PrivateKey = $private_key#g&quot; wgcf-profile.conf;</span><br><span class="line">      sed -i &quot;s#Address.*128#Address = $private_v6/128#g&quot; wgcf-profile.conf;</span><br><span class="line">    fi</span><br><span class="line">  fi</span><br><span class="line">else</span><br><span class="line">  ./wgcf generate</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">clear</span><br><span class="line">green &quot;WGCF 的 WireGuard 配置文件已生成成功！&quot;</span><br><span class="line">yellow &quot;下面是配置文件内容：&quot;</span><br><span class="line">red &quot;$(cat wgcf-profile.conf)&quot;</span><br><span class="line">echo &quot;&quot;</span><br><span class="line">yellow &quot;下面是配置文件分享二维码：&quot;</span><br><span class="line">qrencode -t ansiutf8 &lt; wgcf-profile.conf</span><br><span class="line">echo &quot;&quot;</span><br><span class="line">yellow &quot;请在本地使用此方法：https://blog.misaka.rest/2023/03/12/cf-warp-yxip/ 优选可用的 Endpoint IP&quot;</span><br></pre></td></tr></table></figure>
+
+
+<p>记录下有类似脚本会把<code>Endpoint</code>换成<code>162.159.193.10:2408</code>。</p>
+<p><a target="_blank" rel="noopener" href="https://blog.misaka.rest/2023/03/12/cf-warp-yxip/">https://blog.misaka.rest/2023/03/12/cf-warp-yxip/</a></p>
+<p>Endpoint 范围</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">162.159.192.1（1的取值范围0-254）</span><br><span class="line">162.159.193.1（1的取值范围0-254）</span><br><span class="line">162.159.195.1（1的取值范围0-254）</span><br><span class="line">162.159.204.1（1的取值范围0-254）</span><br><span class="line">188.114.96.1（1的取值范围0-254）</span><br><span class="line">188.114.97.1（1的取值范围0-254）</span><br><span class="line">188.114.98.1（1的取值范围0-254）</span><br><span class="line">188.114.99.1（1的取值范围0-254）</span><br></pre></td></tr></table></figure>
+
+<p>可用端口：500、854、859、864、878、880、890、891、894、903、908、928、934、939、942、943、945、946、955、968、987、988、1002、1010、1014、1018、1070、1074、1180、1387、1701、1843、2371、2408、2506、3138、3476、3581、3854、4177、4198、4233、4500、5279、5956、7103、7152、7156、7281、7559、8319、8742、8854、8886</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/net/" rel="tag"># net</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/01/20/fun/20240120-delpoy-gpt-no-proxy/" rel="prev" title="部署自己的ChatGPT">
+      <i class="fa fa-chevron-left"></i> 部署自己的ChatGPT
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/01/23/java/20240123-openjdk-versions/" rel="next" title="OpenJDK版本">
+      OpenJDK版本 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">基础命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C"><span class="nav-number">1.1.</span> <span class="nav-text">注册</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0Key"><span class="nav-number">1.2.</span> <span class="nav-text">更新Key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E9%85%8D%E7%BD%AE"><span class="nav-number">1.3.</span> <span class="nav-text">生成配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E8%AE%BE%E5%A4%87%E7%8A%B6%E6%80%81"><span class="nav-number">1.4.</span> <span class="nav-text">查看设备状态</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%B6%E5%93%81%E8%A7%A3%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">制品解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.1.</span> <span class="nav-text">前置步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E9%A1%B92"><span class="nav-number">2.2.</span> <span class="nav-text">选项2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E9%A1%B93"><span class="nav-number">2.3.</span> <span class="nav-text">选项3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E9%A1%B91"><span class="nav-number">2.4.</span> <span class="nav-text">选项1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8E%E7%BD%AE%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.5.</span> <span class="nav-text">后置步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-number">3.</span> <span class="nav-text">验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PS"><span class="nav-number">4.</span> <span class="nav-text">PS</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

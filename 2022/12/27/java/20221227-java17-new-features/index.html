@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="jdk 17 主要的新特性参考:  openjdk JDK 17 baeldung New Features in Java 17 Java 17 新功能介绍（LTS）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 17 新特性">
+<meta property="og:url" content="https://forgives.github.io/2022/12/27/java/20221227-java17-new-features/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="jdk 17 主要的新特性参考:  openjdk JDK 17 baeldung New Features in Java 17 Java 17 新功能介绍（LTS）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pics6.baidu.com/feed/3c6d55fbb2fb4316653c60b09f0a072908f7d315.jpeg">
+<meta property="article:published_time" content="2022-12-27T08:10:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.378Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="java17">
+<meta property="article:tag" content="jdk">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pics6.baidu.com/feed/3c6d55fbb2fb4316653c60b09f0a072908f7d315.jpeg">
+
+<link rel="canonical" href="https://forgives.github.io/2022/12/27/java/20221227-java17-new-features/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 17 新特性 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2022/12/27/java/20221227-java17-new-features/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 17 新特性
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-12-27 16:10:00" itemprop="dateCreated datePublished" datetime="2022-12-27T16:10:00+08:00">2022-12-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>jdk 17 主要的新特性参考: </p>
+<p>openjdk <a target="_blank" rel="noopener" href="https://openjdk.org/projects/jdk/17/">JDK 17</a></p>
+<p>baeldung <a target="_blank" rel="noopener" href="https://www.baeldung.com/java-17-new-features">New Features in Java 17</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.wdbyte.com/java/java-17/">Java 17 新功能介绍（LTS）</a></p>
+<span id="more"></span>  
+
+<h2 id="JDK-17-的新特性"><a href="#JDK-17-的新特性" class="headerlink" title="JDK 17 的新特性"></a>JDK 17 的新特性</h2><p>Java 17 于<em>2021 年 9 月 14 日</em>发布，包含新特性：</p>
+<ul>
+<li>306:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/306">Restore Always-Strict Floating-Point Semantics</a></li>
+<li>356:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/356">Enhanced Pseudo-Random Number Generators</a></li>
+<li>382:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/382">New macOS Rendering Pipeline</a></li>
+<li>391:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/391">macOS&#x2F;AArch64 Port</a></li>
+<li>398:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/398">Deprecate the Applet API for Removal</a></li>
+<li>403:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/403">Strongly Encapsulate JDK Internals</a></li>
+<li>406:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/406">Pattern Matching for switch (Preview)</a></li>
+<li>407:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/407">Remove RMI Activation</a></li>
+<li>409:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/409">Sealed Classes</a></li>
+<li>410:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/410">Remove the Experimental AOT and JIT Compiler</a></li>
+<li>411:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/411">Deprecate the Security Manager for Removal</a></li>
+<li>412:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/411">Foreign Function &amp; Memory API (Incubator)</a></li>
+<li>414:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/414">Vector API (Second Incubator)</a></li>
+<li>415:	<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/415">Context-Specific Deserialization Filters</a></li>
+</ul>
+<h2 id="Restore-Always-Strict-Floating-Point-Semantics-JEP-306"><a href="#Restore-Always-Strict-Floating-Point-Semantics-JEP-306" class="headerlink" title="Restore Always-Strict Floating-Point Semantics(JEP 306)"></a>Restore Always-Strict Floating-Point Semantics(<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/306">JEP 306</a>)</h2><p>这个特性主要是为了科学计算的应用，它可以保证浮点运算始终是严格的。在 <strong>Java SE 1.2</strong> 之前，所有的浮点计算<strong>都是严格的</strong>，但是以当初的情况来看，过于严格的浮点计算在当初流行的 x86 架构和 x87 浮点协议处理器上运行，需要大量的额外的指令开销，所以在 Java SE 1.2 开始，需要手动使用关键字 <code>strictfp</code>（_strict float point_） 才能启用严格的浮点计算。<br>但是在 2021 年的今天，硬件早已发生巨变，当初的问题已经不存在了，所以从 <strong>Java 17</strong> 开始，恢复了始终严格的浮点语义这一特性。<br><strong>严格的浮点语义保证了再所有平台，计算结果都是同样的结果</strong>。</p>
+<p>扩展：<code>strictfp</code> 是 Java 中的一个关键字，大多数人可能没有注意过它，它可以用在<strong>类</strong>、<strong>接口</strong>或者<strong>方法</strong>上，被 <code>strictfp</code> 修饰的部分中的 float 和 double 表达式会进行严格浮点计算。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">strictfp</span> <span class="keyword">void</span> <span class="title function_">testStrictfp</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">float</span> <span class="variable">aFloat</span> <span class="operator">=</span> <span class="number">0.66666666f</span>;</span><br><span class="line">    <span class="type">double</span> <span class="variable">aDouble</span> <span class="operator">=</span> <span class="number">0.88888888d</span>;</span><br><span class="line">    <span class="type">double</span> <span class="variable">sum</span> <span class="operator">=</span> aFloat + aDouble;</span><br><span class="line">    <span class="comment">// 1.5555555665348817</span></span><br><span class="line">    System.out.println(<span class="string">&quot;sum: &quot;</span> + sum);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>java 17 就不需要再使用 <code>strictfp</code> 这个关键字了。</p>
+<h2 id="Enhanced-Pseudo-Random-Number-Generators-JEP-356"><a href="#Enhanced-Pseudo-Random-Number-Generators-JEP-356" class="headerlink" title="Enhanced Pseudo-Random Number Generators(JEP 356)"></a>Enhanced Pseudo-Random Number Generators(<a target="_blank" rel="noopener" href="https://openjdk.org/jeps/356">JEP 356</a>)</h2><p>JEP 356 为<strong>伪随机数生成器</strong>(<em>Pseudo-Random Number Generators (PRNG)</em>)提供了新的接口与实现，让开发者可以更简单的使用不同的算法，且为流式编程提供了更好的支持。</p>
+<p>java 17 这次增加了 <code>RandomGenerator</code> 接口，为所有的 PRNG 算法提供统一的 API，并且可以获取不同类型的 PRNG 对象流。同时也提供了一个新类 <code>RandomGeneratorFactory</code> 用于构造各种 <code>RandomGenerator</code> 实例，在 <code>RandomGeneratorFactory</code> 中使用 <code>ServiceLoader.provider</code> 来加载各种 PRNG 实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> IntStream <span class="title function_">getPseudoInts</span><span class="params">(String algorithm, <span class="type">int</span> streamSize)</span> &#123;</span><br><span class="line">    <span class="comment">// returns an IntStream with size @streamSize of random numbers generated using the @algorithm</span></span><br><span class="line">    <span class="comment">// where the lower bound is 0 and the upper is 100 (exclusive)</span></span><br><span class="line">    <span class="keyword">return</span> RandomGeneratorFactory.of(algorithm)</span><br><span class="line">            .create()</span><br><span class="line">            .ints(streamSize, <span class="number">0</span>,<span class="number">100</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>例子，创建5个0-10(不包含)的随机数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testPrng</span><span class="params">()</span>&#123;</span><br><span class="line">    RandomGeneratorFactory&lt;RandomGenerator&gt; l128X256MixRandom = RandomGeneratorFactory.of(<span class="string">&quot;L128X256MixRandom&quot;</span>);</span><br><span class="line">    <span class="comment">// 使用时间戳作为随机数种子</span></span><br><span class="line">    <span class="type">RandomGenerator</span> <span class="variable">randomGenerator</span> <span class="operator">=</span> l128X256MixRandom.create(System.currentTimeMillis());</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        System.out.print(randomGenerator.nextInt(<span class="number">10</span>)+<span class="string">&quot;\t&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查看所有的随机数生成<br>算法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testAllPrng</span><span class="params">()</span>&#123;</span><br><span class="line">    RandomGeneratorFactory.all().forEach(factory -&gt; &#123;</span><br><span class="line">        System.out.println(factory.group() + <span class="string">&quot;:&quot;</span> + factory.name());</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">LXM:L32X64MixRandom</span><br><span class="line">LXM:L128X128MixRandom</span><br><span class="line">LXM:L64X128MixRandom</span><br><span class="line">Legacy:SecureRandom</span><br><span class="line">LXM:L128X1024MixRandom</span><br><span class="line">LXM:L64X128StarStarRandom</span><br><span class="line">Xoshiro:Xoshiro256PlusPlus</span><br><span class="line">LXM:L64X256MixRandom</span><br><span class="line">Legacy:Random</span><br><span class="line">Xoroshiro:Xoroshiro128PlusPlus</span><br><span class="line">LXM:L128X256MixRandom</span><br><span class="line">Legacy:SplittableRandom</span><br><span class="line">LXM:L64X1024MixRandom</span><br></pre></td></tr></table></figure>
+<p>老的算法 <code>Legacy:Random</code> 也在其中，新的 API 兼容了老的 Random 方式，所以你也可以使用新的 API 调用 Random 类生成随机数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">RandomGeneratorFactory&lt;RandomGenerator&gt; random = RandomGeneratorFactory.of(<span class="string">&quot;Random&quot;</span>);</span><br><span class="line"><span class="comment">// 使用时间戳作为随机数种子</span></span><br><span class="line"><span class="type">RandomGenerator</span> <span class="variable">randomGenerator2</span> <span class="operator">=</span> random.create(System.currentTimeMillis());</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">System.out.print(randomGenerator2.nextInt(<span class="number">10</span>)+<span class="string">&quot;\t&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="New-macOS-Rendering-Pipeline-JEP-382"><a href="#New-macOS-Rendering-Pipeline-JEP-382" class="headerlink" title="New macOS Rendering Pipeline (JEP 382)"></a>New macOS Rendering Pipeline (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/382">JEP 382</a>)</h2><p>macOS 为了提高图形的渲染性能，在 <em>2018 年 9 月</em>抛弃了之前 Swing GUI 的 OpenGL 渲染库(<em>macOS 10.14</em>) ，而使用了 Apple Metal 进行代替。<br>Java 17 这次更新开始支持 Apple Metal，不过对于 API 没有任何改变，这一些都是内部修改。</p>
+<h2 id="macOS-AArch64-Port-JEP-391"><a href="#macOS-AArch64-Port-JEP-391" class="headerlink" title="macOS&#x2F;AArch64 Port (JEP 391)"></a>macOS&#x2F;AArch64 Port (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/391">JEP 391</a>)</h2><p>起因是 Apple 在 <em>2020 年 6 月</em>的 WWDC 演讲中宣布，将开启一项长期的将 <strong>Macintosh</strong>(麦金托什) 计算机系列从 <strong>x64</strong> 过度到 <strong>AArch64</strong> 的长期计划，因此需要尽快的让 JDK 支持 <strong>macOS&#x2F;AArch64</strong> 。</p>
+<p>Linux 上的 AArch64 支持以及在 Java 16 时已经支持。</p>
+<p>ps. 英特尔虽然当年打赢了指令集之战，但CISC终究不是未来，诚然为了兼容主流PC依然还是会继续使用CISC，但是新的领域与封闭的场景还是会逐渐迁移掉的。</p>
+<h2 id="Deprecate-the-Applet-API-for-Removal-JEP-398"><a href="#Deprecate-the-Applet-API-for-Removal-JEP-398" class="headerlink" title="Deprecate the Applet API for Removal (JEP 398)"></a>Deprecate the Applet API for Removal (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/398">JEP 398</a>)</h2><p>Applet 是使用 Java 编写的可以嵌入到 HTML 中的小应用程序，嵌入方式是通过普通的 HTML 标记语法，由于早已过时，几乎没有场景在使用了。<br>好多浏览器也已经移除了对其的支持，java 9中就已经不建议使用了，java 17正式删除了。</p>
+<p>ps. 岁月啊…当年学java的时候还是重点学了Applet</p>
+<h2 id="Strongly-Encapsulate-JDK-Internals-JEP-403"><a href="#Strongly-Encapsulate-JDK-Internals-JEP-403" class="headerlink" title="Strongly Encapsulate JDK Internals (JEP 403)"></a>Strongly Encapsulate JDK Internals (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/403">JEP 403</a>)</h2><p>JEP403对JDK内部封装的又进一步增强，直接删除了<code>–illegal-access</code> 参数，如果设置了，平台将忽略该标志并且打印停用的警告。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">➜  bin ./java -version</span><br><span class="line">openjdk version <span class="string">&quot;17&quot;</span> <span class="number">2021</span>-09-<span class="number">14</span></span><br><span class="line">OpenJDK Runtime <span class="title function_">Environment</span> <span class="params">(build <span class="number">17</span>+<span class="number">35</span>-<span class="number">2724</span>)</span></span><br><span class="line">OpenJDK <span class="number">64</span>-Bit Server <span class="title function_">VM</span> <span class="params">(build <span class="number">17</span>+<span class="number">35</span>-<span class="number">2724</span>, mixed mode, sharing)</span></span><br><span class="line">➜  bin ./java --illegal-access=warn</span><br><span class="line">OpenJDK <span class="number">64</span>-Bit Server VM warning: Ignoring option --illegal-access=warn; support was removed in <span class="number">17.0</span></span><br></pre></td></tr></table></figure>
+<p>除了<code>sun.misc.Unsafe</code> 这种关键API， 其他的内部API 都禁止访问了。</p>
+<h2 id="Pattern-Matching-for-Switch-Preview-JEP-406"><a href="#Pattern-Matching-for-Switch-Preview-JEP-406" class="headerlink" title="Pattern Matching for Switch (Preview) (JEP 406)"></a>Pattern Matching for Switch (Preview) (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/406">JEP 406</a>)</h2><p>如 <code>instanceof</code> 一样，为 <code>switch</code> 也增加了类型匹配自动转换功能。<br>instanceof中可以直接</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (obj <span class="keyword">instanceof</span> String s) &#123;</span><br><span class="line"><span class="comment">// Let pattern matching do the work!</span></span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在<code>switch</code>也支持了这种模式转化</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> String <span class="title function_">formatterPatternSwitch</span><span class="params">(Object o)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">switch</span> (o) &#123;</span><br><span class="line">        <span class="keyword">case</span> Integer i -&gt; String.format(<span class="string">&quot;int %d&quot;</span>, i);</span><br><span class="line">        <span class="keyword">case</span> Long l    -&gt; String.format(<span class="string">&quot;long %d&quot;</span>, l);</span><br><span class="line">        <span class="keyword">case</span> Double d  -&gt; String.format(<span class="string">&quot;double %f&quot;</span>, d);</span><br><span class="line">        <span class="keyword">case</span> String s  -&gt; String.format(<span class="string">&quot;String %s&quot;</span>, s);</span><br><span class="line">        <span class="keyword">default</span>        -&gt; o.toString();</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>switch</code>同时也增加了对<code>null</code>值得支持</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Java 17 之前</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testFooBar</span><span class="params">(String s)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (s == <span class="literal">null</span>) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;oops!&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">switch</span> (s) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&quot;Foo&quot;</span>, <span class="string">&quot;Bar&quot;</span> -&gt; System.out.println(<span class="string">&quot;Great&quot;</span>);</span><br><span class="line">        <span class="keyword">default</span>           -&gt; System.out.println(<span class="string">&quot;Ok&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Java 17</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testFooBar</span><span class="params">(String s)</span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> (s) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="literal">null</span>         -&gt; System.out.println(<span class="string">&quot;Oops&quot;</span>);</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&quot;Foo&quot;</span>, <span class="string">&quot;Bar&quot;</span> -&gt; System.out.println(<span class="string">&quot;Great&quot;</span>);</span><br><span class="line">        <span class="keyword">default</span>           -&gt; System.out.println(<span class="string">&quot;Ok&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>另一个例子，复杂的用法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">record</span> <span class="title class_">Human</span> (String name, <span class="type">int</span> age, String profession) &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">checkObject</span><span class="params">(Object obj)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">switch</span> (obj) &#123;</span><br><span class="line">        <span class="keyword">case</span> Human h -&gt; <span class="string">&quot;Name: %s, age: %s and profession: %s&quot;</span>.formatted(h.name(), h.age(), h.profession());</span><br><span class="line">        <span class="keyword">case</span> Circle c -&gt; <span class="string">&quot;This is a circle&quot;</span>;</span><br><span class="line">        <span class="keyword">case</span> Shape s -&gt; <span class="string">&quot;It is just a shape&quot;</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="literal">null</span> -&gt; <span class="string">&quot;It is null&quot;</span>;</span><br><span class="line">        <span class="keyword">default</span> -&gt; <span class="string">&quot;It is an object&quot;</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">checkShape</span><span class="params">(Shape shape)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">switch</span> (shape) &#123;</span><br><span class="line">        <span class="keyword">case</span> Triangle t &amp;&amp; (t.getNumberOfSides() != <span class="number">3</span>) -&gt; <span class="string">&quot;This is a weird triangle&quot;</span>;</span><br><span class="line">        <span class="keyword">case</span> Circle c &amp;&amp; (c.getNumberOfSides() != <span class="number">0</span>) -&gt; <span class="string">&quot;This is a weird circle&quot;</span>;</span><br><span class="line">        <span class="keyword">default</span> -&gt; <span class="string">&quot;Just a normal shape&quot;</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="Remove-RMI-Activation-JEP-407"><a href="#Remove-RMI-Activation-JEP-407" class="headerlink" title="Remove RMI Activation (JEP 407)"></a>Remove RMI Activation (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/407">JEP 407</a>)</h2><p>RMI Activation 在 Java 15 中的 JEP 385 已经被标记为过时废弃，至今没有收到不良反馈，因此决定在 Java 17 中正式移除。</p>
+<h2 id="Sealed-Classes-JEP-409"><a href="#Sealed-Classes-JEP-409" class="headerlink" title="Sealed Classes (JEP 409)"></a>Sealed Classes (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/409">JEP 409</a>)</h2><p><code>Sealed Classes</code> 在 Java 15 中的 JEP 360 中提出，在 Java 16 中的 JEP 397 再次预览，现在 Java 17 中成为正式的功能，相比 Java 16 并<strong>没有功能变化</strong>，这里不再重复介绍。</p>
+<p>补充下 Sealed classes 是<a target="_blank" rel="noopener" href="https://openjdk.org/projects/amber/">Project Amber</a>其中的一部分，<em>Project Amber</em> 的目标是探索和培育更小的、面向生产力的Java语言特性，这些特性已被OpenJDKJEP过程中的候选JEP所接受。<br>大多数Project Amber功能在成为Java平台的正式组成部分之前，至少要经过两轮预览。对于给定的特性，每一轮预览和最终标准化都有单独的JEP。<br>比如 switch 的模式匹配，文本块等都是这个项目中的一部分。</p>
+<h2 id="Remove-the-Experimental-AOT-and-JIT-Compiler-JEP-410"><a href="#Remove-the-Experimental-AOT-and-JIT-Compiler-JEP-410" class="headerlink" title="Remove the Experimental AOT and JIT Compiler (JEP 410)"></a>Remove the Experimental AOT and JIT Compiler (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/410">JEP 410</a>)</h2><p>在 Java 9 和 Java 10 中分别引入的 Ahead-Of-Time (AOT) <a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/295">JEP 295</a>编译与Just-In-Time (JIT) 编译器<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/317">JEP-317</a> 花费了大量人力来维护，但用处却不大，所以Java 17决定删除这些特性。</p>
+<p>主要移除了三个 JDK 模块：</p>
+<ul>
+<li>jdk.aot - jaotc 工具。</li>
+<li>Jdk.internal.vm.compiler - Graal 编译器。</li>
+<li>jdk.internal.vm.compiler.management</li>
+</ul>
+<h2 id="Deprecate-the-Security-Manager-for-Removal-JEP-411"><a href="#Deprecate-the-Security-Manager-for-Removal-JEP-411" class="headerlink" title="Deprecate the Security Manager for Removal (JEP 411)"></a>Deprecate the Security Manager for Removal (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/411">JEP 411</a>)</h2><p>Security Manager 在 JDK 1.0 时就已经引入，但是它一直都不是保护服务端以及客户端 Java 代码的主要手段，没啥价值，删了。</p>
+<h2 id="Foreign-Function-and-Memory-API-Incubator-JEP-412"><a href="#Foreign-Function-and-Memory-API-Incubator-JEP-412" class="headerlink" title="Foreign Function and Memory API (Incubator) (JEP 412)"></a>Foreign Function and Memory API (Incubator) (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/412">JEP 412</a>)</h2><p>新的 API 允许 Java 开发者与 JVM 之外的代码和数据进行交互，通过调用外部函数，可以在不使用 JNI 的情况下调用本地库。</p>
+<p>这是一个孵化功能；需要添加 <code>--add-modules jdk.incubator.foreign</code> 来编译和运行 Java 代码。</p>
+<p>历史: </p>
+<ul>
+<li>Java 14 <a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/370">JEP 370</a> 引入了外部内存访问 API（孵化器）。</li>
+<li>Java 15 <a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/383">JEP 383</a> 引入了外部内存访问 API（第二孵化器）。</li>
+<li>Java 16 <a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/389">JEP 389</a> 引入了外部链接器 API（孵化器）。</li>
+<li>Java 16 <a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/393">JEP 393</a> 引入了外部内存访问 API（第三孵化器）。</li>
+<li>Java 17 <a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/412">JEP 412</a> 引入了外部函数和内存 API（孵化器）。</li>
+</ul>
+<p>比如在java中加载c的库</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> SymbolLookup libLookup;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="comment">// loads a particular C library</span></span><br><span class="line">    <span class="type">var</span> <span class="variable">path</span> <span class="operator">=</span> JEP412.class.getResource(<span class="string">&quot;/print_name.so&quot;</span>).getPath();</span><br><span class="line">    System.load(path);</span><br><span class="line">    libLookup = SymbolLookup.loaderLookup();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过对应的API加载到库，然后通过对应的方法签名找到目标方法，最后去执行它。操作如下： </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">getPrintNameFormat</span><span class="params">(String name)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">var</span> <span class="variable">printMethod</span> <span class="operator">=</span> libLookup.lookup(<span class="string">&quot;printName&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (printMethod.isPresent()) &#123;</span><br><span class="line">        <span class="type">var</span> <span class="variable">methodReference</span> <span class="operator">=</span> CLinker.getInstance()</span><br><span class="line">            .downcallHandle(</span><br><span class="line">                printMethod.get(),</span><br><span class="line">                MethodType.methodType(MemoryAddress.class, MemoryAddress.class),</span><br><span class="line">                FunctionDescriptor.of(CLinker.C_POINTER, CLinker.C_POINTER)</span><br><span class="line">            );</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">var</span> <span class="variable">nativeString</span> <span class="operator">=</span> CLinker.toCString(name, newImplicitScope());</span><br><span class="line">            <span class="type">var</span> <span class="variable">invokeReturn</span> <span class="operator">=</span> methodReference.invoke(nativeString.address());</span><br><span class="line">            <span class="type">var</span> <span class="variable">memoryAddress</span> <span class="operator">=</span> (MemoryAddress) invokeReturn;</span><br><span class="line">            <span class="keyword">return</span> CLinker.toJavaString(memoryAddress);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable throwable) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(throwable);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(<span class="string">&quot;printName function not found.&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Vector-API-Second-Incubator-JEP-414"><a href="#Vector-API-Second-Incubator-JEP-414" class="headerlink" title="Vector API (Second Incubator) (JEP 414)"></a>Vector API (Second Incubator) (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/414">JEP 414</a>)</h2><p>java 16中有介绍，矢量API ，这是第二次孵化。</p>
+<p>简单的例子说明下矢量相乘：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">newVectorComputation</span><span class="params">(<span class="type">float</span>[] a, <span class="type">float</span>[] b, <span class="type">float</span>[] c)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">var</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; a.length; i += SPECIES.length()) &#123;</span><br><span class="line">        <span class="type">var</span> <span class="variable">m</span> <span class="operator">=</span> SPECIES.indexInRange(i, a.length);</span><br><span class="line">        <span class="type">var</span> <span class="variable">va</span> <span class="operator">=</span> FloatVector.fromArray(SPECIES, a, i, m);</span><br><span class="line">        <span class="type">var</span> <span class="variable">vb</span> <span class="operator">=</span> FloatVector.fromArray(SPECIES, b, i, m);</span><br><span class="line">        <span class="type">var</span> <span class="variable">vc</span> <span class="operator">=</span> va.mul(vb);</span><br><span class="line">        vc.intoArray(c, i, m);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">commonVectorComputation</span><span class="params">(<span class="type">float</span>[] a, <span class="type">float</span>[] b, <span class="type">float</span>[] c)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">var</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; a.length; i ++) &#123;</span><br><span class="line">        c[i] = a[i] * b[i];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Context-Specific-Deserialization-Filters-JEP-415"><a href="#Context-Specific-Deserialization-Filters-JEP-415" class="headerlink" title="Context-Specific Deserialization Filters (JEP 415)"></a>Context-Specific Deserialization Filters (<a target="_blank" rel="noopener" href="https://openjdk.java.net/jeps/415">JEP 415</a>)</h2><p>首先是在 JDK 9 中被引进，可以使我们验证一下从不可信来源传入的序列化数据。反序列化一直是安全的重灾区，我们无法验证反序列化的数据是否是安全的，所以JEP 415  允许在反序列化时，通过一个过滤配置，来告知本次反序列化允许或者禁止操作的类，反序列化时碰到被禁止的类，则会反序列化失败。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.ByteArrayInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectInputFilter;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectInputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.ObjectOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JEP415</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="type">Dog</span> <span class="variable">dog</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Dog</span>(<span class="string">&quot;哈士奇&quot;</span>);</span><br><span class="line">        dog.setPoc(<span class="keyword">new</span> <span class="title class_">Poc</span>());</span><br><span class="line">        <span class="comment">// 序列化 - 对象转字节数组</span></span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">byteArrayOutputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">objectOutputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(byteArrayOutputStream);) &#123;</span><br><span class="line">            objectOutputStream.writeObject(dog);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">byte</span>[] bytes = byteArrayOutputStream.toByteArray();</span><br><span class="line">        <span class="comment">// 反序列化 - 字节数组转对象</span></span><br><span class="line">        <span class="type">ByteArrayInputStream</span> <span class="variable">byteArrayInputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(bytes);</span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">objectInputStream</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(byteArrayInputStream);</span><br><span class="line">        <span class="comment">// 允许 com.wdbyte.java17.Dog 类，允许 java.base 中的所有类，拒绝其他任何类</span></span><br><span class="line">        <span class="type">ObjectInputFilter</span> <span class="variable">filter</span> <span class="operator">=</span> ObjectInputFilter.Config.createFilter(</span><br><span class="line">                        <span class="string">&quot;com.wdbyte.java17.Dog;java.base/*;!*&quot;</span>);</span><br><span class="line">        objectInputStream.setObjectInputFilter(filter);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">object</span> <span class="operator">=</span> objectInputStream.readObject();</span><br><span class="line">        System.out.println(object.toString());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Dog</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Poc poc;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Dog</span><span class="params">(String name)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">toString</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Dog&#123;&quot;</span> + <span class="string">&quot;name=&#x27;&quot;</span> + name + <span class="string">&#x27;\&#x27;&#x27;</span> + <span class="string">&#x27;&#125;&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="comment">// get...set...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Poc</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时反序列化会得到异常:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread &quot;main&quot; java.io.InvalidClassException: filter status: REJECTED</span><br><span class="line">	at java.base/java.io.ObjectInputStream.filterCheck(ObjectInputStream.java:1412)</span><br><span class="line">	at java.base/java.io.ObjectInputStream.readNonProxyDesc(ObjectInputStream.java:2053)</span><br><span class="line">	at java.base/java.io.ObjectInputStream.readClassDesc(ObjectInputStream.java:1907)</span><br><span class="line">	....</span><br></pre></td></tr></table></figure>
+
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>Java 17 是个 LTS 版本，22年最新统计，国外使用最广泛的版本是Java 11，大概也是发布时间的原因的问题。<br><img src="https://pics6.baidu.com/feed/3c6d55fbb2fb4316653c60b09f0a072908f7d315.jpeg"></p>
+<p>虽然我本人还是很看好Java 17的(毕竟都被Java之父带了波节奏了，Spring 6.0 也说最低支持Java 17)，但是它是否能成为超越Java 8的经典存在，我觉得还是有差距的，到不如期待下一个 LTS 版本 <strong>Java 21</strong>的表现,毕竟 Project Loom 会带来大的变革。<br>但是 Java 21要等到2023年9月份才发布，还是建议拥抱变化，先把重点放在 Java 17上面把。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java17/" rel="tag"># java17</a>
+              <a href="/tags/jdk/" rel="tag"># jdk</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/23/java/20221223-java16-new-features/" rel="prev" title="Java 16 新特性">
+      <i class="fa fa-chevron-left"></i> Java 16 新特性
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/08/note/20230207-web3-note/" rel="next" title="Web3.0发展趋势学习笔记">
+      Web3.0发展趋势学习笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK-17-%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">JDK 17 的新特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Restore-Always-Strict-Floating-Point-Semantics-JEP-306"><span class="nav-number">2.</span> <span class="nav-text">Restore Always-Strict Floating-Point Semantics(JEP 306)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Enhanced-Pseudo-Random-Number-Generators-JEP-356"><span class="nav-number">3.</span> <span class="nav-text">Enhanced Pseudo-Random Number Generators(JEP 356)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#New-macOS-Rendering-Pipeline-JEP-382"><span class="nav-number">4.</span> <span class="nav-text">New macOS Rendering Pipeline (JEP 382)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#macOS-AArch64-Port-JEP-391"><span class="nav-number">5.</span> <span class="nav-text">macOS&#x2F;AArch64 Port (JEP 391)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deprecate-the-Applet-API-for-Removal-JEP-398"><span class="nav-number">6.</span> <span class="nav-text">Deprecate the Applet API for Removal (JEP 398)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Strongly-Encapsulate-JDK-Internals-JEP-403"><span class="nav-number">7.</span> <span class="nav-text">Strongly Encapsulate JDK Internals (JEP 403)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pattern-Matching-for-Switch-Preview-JEP-406"><span class="nav-number">8.</span> <span class="nav-text">Pattern Matching for Switch (Preview) (JEP 406)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Remove-RMI-Activation-JEP-407"><span class="nav-number">9.</span> <span class="nav-text">Remove RMI Activation (JEP 407)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sealed-Classes-JEP-409"><span class="nav-number">10.</span> <span class="nav-text">Sealed Classes (JEP 409)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Remove-the-Experimental-AOT-and-JIT-Compiler-JEP-410"><span class="nav-number">11.</span> <span class="nav-text">Remove the Experimental AOT and JIT Compiler (JEP 410)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deprecate-the-Security-Manager-for-Removal-JEP-411"><span class="nav-number">12.</span> <span class="nav-text">Deprecate the Security Manager for Removal (JEP 411)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Foreign-Function-and-Memory-API-Incubator-JEP-412"><span class="nav-number">13.</span> <span class="nav-text">Foreign Function and Memory API (Incubator) (JEP 412)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Vector-API-Second-Incubator-JEP-414"><span class="nav-number">14.</span> <span class="nav-text">Vector API (Second Incubator) (JEP 414)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Context-Specific-Deserialization-Filters-JEP-415"><span class="nav-number">15.</span> <span class="nav-text">Context-Specific Deserialization Filters (JEP 415)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">16.</span> <span class="nav-text">其他</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

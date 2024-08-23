@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="常用命令记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux常用命令记录">
+<meta property="og:url" content="https://forgives.github.io/2016/03/15/note/20160315-linux-cmd-note/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="常用命令记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-03-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.387Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2016/03/15/note/20160315-linux-cmd-note/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>linux常用命令记录 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2016/03/15/note/20160315-linux-cmd-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          linux常用命令记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-03-15 00:00:00" itemprop="dateCreated datePublished" datetime="2016-03-15T00:00:00+08:00">2016-03-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>常用命令记录</p>
+<span id="more"></span>
+
+<h2 id="scp"><a href="#scp" class="headerlink" title="scp"></a>scp</h2><p>远程复制到本地</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scp -r lianhui.klh@30.37.92.42:/Users/kanlianhui/workspace/  /local/dir</span><br><span class="line">sudo -u admin scp -r lianhui.klh@11.179.119.42:/home/admin/batch*  /home/admin/</span><br></pre></td></tr></table></figure>
+
+<p>本地复制到远程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp -r /local/dir lianhui.klh@30.37.92.42:/Users/kanlianhui/workspace/</span><br></pre></td></tr></table></figure>
+
+<h2 id="pmap"><a href="#pmap" class="headerlink" title="pmap"></a>pmap</h2><p>report memory map of a process<br>查看进程的内存映射</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pmap 1536 | grep spring | awk &#x27;&#123;print $4&#125;&#x27; | sort</span><br></pre></td></tr></table></figure>
+
+<h2 id="awk"><a href="#awk" class="headerlink" title="awk"></a>awk</h2><p>params</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-F fs</span><br><span class="line">    --field-separator fs</span><br><span class="line">    Use fs for the input field separator (the value of the FS predefined variable).</span><br><span class="line">    指定分隔符</span><br></pre></td></tr></table></figure>
+
+<p>exp<br>删除大文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ls -l | awk &#x27;&#123;if($5&gt;2000000000) print $9&#125;&#x27; | xargs sudo -u admin  rm -f</span><br></pre></td></tr></table></figure>
+
+<h2 id="uniq"><a href="#uniq" class="headerlink" title="uniq"></a>uniq</h2><p>uniq 检查重复行的时候，只会检查相邻的行.所以一般和<code>sort</code>一起使用</p>
+<p>params</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">-c, --count</span><br><span class="line">        prefix lines by the number of occurrences</span><br><span class="line">        在每列旁边显示该行重复出现的次数</span><br><span class="line">-d, --repeated</span><br><span class="line">        only print duplicate lines, one for each group</span><br><span class="line">        仅显示重复出现的行列</span><br><span class="line">-f, --skip-fields=N</span><br><span class="line">        avoid comparing the first N fields</span><br><span class="line">        -f 忽略的段数，-f 1 忽略第一段</span><br><span class="line">--group[=METHOD]</span><br><span class="line">        show all items, separating groups with an empty line;</span><br><span class="line">        METHOD=&#123;separate(default),prepend,append,both&#125;</span><br><span class="line">-i, --ignore-case</span><br><span class="line">        ignore differences in case when comparing</span><br><span class="line">        不区分大小写  </span><br><span class="line">-s, --skip-chars=N</span><br><span class="line">        avoid comparing the first N characters</span><br><span class="line">        根-f有点像，不过-s是忽略，后面多少个字符 -s 5就忽略后面5个字符  </span><br><span class="line">-u, --unique</span><br><span class="line">        only print unique lines</span><br><span class="line">        全部显示出来，根mysql的distinct功能上有点像  </span><br><span class="line">-z, --zero-terminated</span><br><span class="line">        line delimiter is NUL, not newline</span><br><span class="line">-w, --check-chars=N</span><br><span class="line">        compare no more than N characters in lines</span><br><span class="line">        对每行第N 个字符以后的内容不作对照</span><br></pre></td></tr></table></figure>
+
+<p>exp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /home/admin/output/logs/usr/radiance/radiance.log | grep &#x27;FUCK&#x27; | awk &#x27;&#123;print $7&#125;&#x27; | sort |uniq</span><br></pre></td></tr></table></figure>
+<p>几个命令组合使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep &#x27;com.xxx.china.bolttask.common&#x27; xxx.log | awk -F &#x27;[&#x27; &#x27;&#123;print $6&#125;&#x27; | sort | uniq -c | sort -rn | head -n 5</span><br></pre></td></tr></table></figure>
+
+<h2 id="tar"><a href="#tar" class="headerlink" title="tar"></a>tar</h2><p>解压</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo -u admin tar -zxvf taobao-hsf.tgz </span><br></pre></td></tr></table></figure>
+
+<p>压缩</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zcvf xxx.tar.gz ./xxx.log</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="grep"><a href="#grep" class="headerlink" title="grep"></a>grep</h2><p>params</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">-R, -r, --recursive</span><br><span class="line">    Read all files under each directory, recursively; this is equivalent to the -d recurse option.</span><br><span class="line">    遍历所有文件</span><br><span class="line">-l, --files-with-matches</span><br><span class="line">    Suppress normal output; instead print the name of each input file from which output would normally have been printed. The scanning will stop on the first match. (-l is specified by POSIX .)</span><br><span class="line">    显示匹配的文件名称</span><br><span class="line">-v, --invert-match</span><br><span class="line">    Invert the sense of matching, to select non-matching lines. (-v is specified by POSIX .)</span><br><span class="line">    反转查找不匹配的行</span><br><span class="line">-F, --fixed-strings</span><br><span class="line">    Interpret PATTERN as a list of fixed strings, separated by newlines, any of which is to be matched. (-F is specified by POSIX .)</span><br><span class="line">    固定字符串列表查找</span><br><span class="line">-c, --count</span><br><span class="line">    Suppress normal output; instead print a count of matching lines for each input file. With the -v, --invert-match option (see below), count non-matching lines. (-c is specified by POSIX .)</span><br><span class="line">    显示匹配行数</span><br><span class="line">-n, --line-number</span><br><span class="line">    Prefix each line of output with the 1-based line number within its input file. (-n is specified by POSIX .)  </span><br><span class="line">    显示匹配行数的行号  </span><br><span class="line">-o, --only-matching</span><br><span class="line">    Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line.</span><br><span class="line">    只输出匹配到的内容</span><br><span class="line">-b, --byte-offset</span><br><span class="line">    Print the 0-based byte offset within the input file before each line of output. If -o (--only-matching) is specified, print the offset of the matching part itself.</span><br><span class="line">    输出从0开始的字节偏移地址</span><br><span class="line">-i, --ignore-case</span><br><span class="line">    Ignore case distinctions in both the PATTERN and the input files. (-i is specified by POSIX .)</span><br><span class="line">    忽略大小写</span><br><span class="line">-A NUM, --after-context=NUM</span><br><span class="line">    Print NUM lines of trailing context after matching lines. Places a line containing a group separator (--) between contiguous groups of matches. With the -o or --only-matching option, this has no effect and a warning is given.</span><br><span class="line">    输出后x行</span><br><span class="line">-B NUM, --before-context=NUM</span><br><span class="line">    Print NUM lines of leading context before matching lines. Places a line containing a group separator (--) between contiguous groups of matches. With the -o or --only-matching option, this has no effect and a warning is given.</span><br><span class="line">    输出前x行</span><br><span class="line">-C NUM, -NUM, --context=NUM</span><br><span class="line">    Print NUM lines of output context. Places a line containing a group separator (--) between contiguous groups of matches. With the -o or --only-matching option, this has no effect and a warning is given.</span><br><span class="line">    输出前后x行</span><br></pre></td></tr></table></figure>
+
+<p>exp<br>查找包含StringUtils的jar包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep -rl &#x27;StringUtils&#x27; ./libs/</span><br></pre></td></tr></table></figure>
+<p>查询不包含<code>|00|</code>行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat eagleeye.log* | grep Daoli | grep queryInvitationsInSeller | grep -vF &#x27;|00|&#x27; | more</span><br></pre></td></tr></table></figure>
+
+<p>匹配正则</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat /home/admin/logs/hsf/hsf.log  | grep -E &#x27;TraceId=.*00\w&#123;5&#125;,&#x27;</span><br><span class="line">ps -ef | grep java | grep -Eo &#x27;taskname=\w*\s&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>颜色显示匹配</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep --color &#x27;OfferQueryService&#x27; /home/admin/logs/xxx.log</span><br></pre></td></tr></table></figure>
+
+<p>排除grep自身</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -ef| grep java | grep -v grep | awk &#x27;&#123;print $2&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="curl"><a href="#curl" class="headerlink" title="curl"></a>curl</h2><p>params</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-I/--head   只显示响应头</span><br><span class="line">-s/--silent 静默方式</span><br><span class="line">-#/--progress-bar   只显示进度条</span><br></pre></td></tr></table></figure>
+
+<p>exp<br>只显示响应头</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ curl -I &quot;https://res.xxx.com/fly/irecom.do?recid=77721&amp;uid=b2b-3434172625c2082&quot;</span><br><span class="line">HTTP/1.1 302 Found</span><br><span class="line">Date: Wed, 18 Apr 2018 02:36:10 GMT</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Location: https://login.xxx.com/jump?target=https%3A%2F%2Fres.xxx.com%2Ffly%2Firecom.do%3Ftbpm%3D1%26recid%3D77721%26uid%3Db2b-3434172625c2082</span><br><span class="line">Server: Tengine/Aserver</span><br><span class="line">EagleEye-TraceId: 0bb6128415240189703251686e711a</span><br><span class="line">Strict-Transport-Security: max-age=31536000</span><br><span class="line">Timing-Allow-Origin: *</span><br></pre></td></tr></table></figure>
+
+<h2 id="top"><a href="#top" class="headerlink" title="top"></a>top</h2><p>实时动态地查看系统的整体运行情况</p>
+<p><a target="_blank" rel="noopener" href="https://linux.die.net/man/1/top">doc</a></p>
+<p>params</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-a : Sort by memory usage</span><br><span class="line">    This switch makes top to sort the processes by allocated memory</span><br><span class="line">-H : Threads toggle</span><br><span class="line">    Starts top with the last remembered &#x27;H&#x27; state reversed. When this toggle is On, all individual threads will be displayed. Otherwise, top displays a summation of all threads in a process.</span><br><span class="line">-p : Monitor PIDs as: -pN1 -pN2 ... or -pN1, N2 [,...]</span><br><span class="line">    Monitor only processes with specified process IDs. This option can be given up to 20 times, or you can provide a comma delimited list with up to 20 pids. Co-mingling both approaches is permitted.</span><br><span class="line">    This is a command-line option only. And should you wish to return to normal operation, it is not necessary to quit and and restart top -- just issue the &#x27;=&#x27; interactive command.</span><br></pre></td></tr></table></figure>
+
+<p>查看指定进程中的线程占用cpu的情况</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">top -Hp &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="du"><a href="#du" class="headerlink" title="du"></a>du</h2><p>du命令是对文件和目录磁盘使用的空间的查看，默认是查看的目录，可以用参数<code>-a</code>查看所有文件。</p>
+<p>参数列表： </p>
+<ul>
+<li><code>-a</code> 或 <code>--all</code>：列出所有文件和目录的磁盘使用情况，而不仅仅是目录。</li>
+<li><code>-c</code> 或 <code>--total</code>：在最后输出所有选定文件的总计。</li>
+<li><code>-h</code> 或 <code>--human-readable</code>：以可读性更高的格式（如KB、MB、GB）显示文件大小。</li>
+<li><code>-s</code> 或 <code>--summarize</code>：只显示总计，即当前目录的总磁盘使用量而不显示其下各个子目录或文件的磁盘使用量。</li>
+<li><code>-d</code> 或 <code>--max-depth=N</code>：查找到指定深度<code>N</code>的目录树磁盘使用情况，不会更深入地查找。</li>
+<li><code>-x</code> 或 <code>--one-file-system</code>：只检查和输出当前文件系统的磁盘使用情况，忽略挂载的其他文件系统。</li>
+<li><code>-L</code> 或 <code>--dereference</code>：跟随符号链接，显示符号链接所指向的实际文件的大小。</li>
+<li><code>--exclude=PATTERN</code>：排除匹配模式<code>PATTERN</code>的文件或目录。</li>
+<li><code>-B</code> 或 <code>--block-size=SIZE</code>：以指定的块大小显示每个文件的磁盘使用量。</li>
+<li><code>--time</code>：显示每个文件或目录的最后修改时间。</li>
+<li><code>--time=WORD</code> 或 <code>--time-style=STYLE</code>：显示时间，可以定义时间显示方式，例如<code>full-iso</code>、<code>long-iso</code>、<code>iso</code>等。</li>
+</ul>
+<p>查看当前目录下一级子文件和子目录占用的磁盘容量。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">du -ah --max-depth=1 /etc</span><br></pre></td></tr></table></figure>
+<p>可以直接用<code>-d</code>来限定层级（同<code>--max-depth</code>）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">du -ah -d 1 /etc</span><br></pre></td></tr></table></figure>
+
+<p>查看当前目录总共占的容量</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">du -sh</span><br></pre></td></tr></table></figure>
+
+<p>查看大文件（这里使用<code>find -size +n</code>更合适）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">du -am | awk -F &#x27; &#x27; &#x27;&#123;if($1 &gt; 500) print $1 &quot; ~ &quot; $2&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>列出文件大小前5的目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">du --max-depth=1  | sort -nr | head -5</span><br><span class="line">同</span><br><span class="line">du -d 1 . | sort -rn | head -5</span><br></pre></td></tr></table></figure>
+
+<p>各个显示文件大小单位的参数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-B：--block-size=SIZE，指定单位大小。</span><br><span class="line">-b：--bytes，以字节为单</span><br><span class="line">-k：和--block-size=1k类似，以KB为单位</span><br><span class="line">-m：和--block-size=1m类似，以MB为单位</span><br></pre></td></tr></table></figure>
+
+<h2 id="uname"><a href="#uname" class="headerlink" title="uname"></a>uname</h2><p>uname命令用于显示系统信息</p>
+<p>params</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-a或--all 　显示全部的信息。</span><br><span class="line">-m或--machine 　显示电脑类型。</span><br><span class="line">-n或-nodename 　显示在网络上的主机名称。</span><br><span class="line">-r或--release 　显示操作系统的发行编号。</span><br><span class="line">-s或--sysname 　显示操作系统名称。</span><br><span class="line">-v 　显示操作系统的版本。</span><br><span class="line">--help 　显示帮助。</span><br><span class="line">--version 　显示版本信息。</span><br></pre></td></tr></table></figure>
+
+<p>exp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$uname -a</span><br><span class="line">Linux wisp011010179090.pre.na62 4.9.79-009.ali3000.ecsvm.alios7.x86_64 #1 SMP Mon Mar 26 10:38:04 CST 2018 x86_64 x86_64 x86_64 GNU/Linux</span><br></pre></td></tr></table></figure>
+
+<h2 id="sort"><a href="#sort" class="headerlink" title="sort"></a>sort</h2><p>params</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-u  输出行中去重</span><br><span class="line">-r  倒序排列 </span><br><span class="line">-o  输出重定向     </span><br><span class="line">-n  以数字排序</span><br><span class="line">-t/-k   -t指定分隔符，-k选中列数（1开始）</span><br><span class="line">-f 忽略大小写</span><br><span class="line">-b  从第一个可见字符开始  </span><br></pre></td></tr></table></figure>
+
+<p>exp<br>文件大小排序</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">du --max-depth=2 |sort  -rnk 1 -t&#x27; &#x27;  </span><br><span class="line">或</span><br><span class="line">du --max-depth=2 |sort  -nr</span><br></pre></td></tr></table></figure>
+
+<h2 id="find"><a href="#find" class="headerlink" title="find"></a>find</h2><p><code>find   path   -option   [   -print ]   [ -exec   -ok   command ]   &#123;&#125; \;</code></p>
+<p>params</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-type </span><br><span class="line">    文件类型（f 普通文件，l 符号连接，d 目录，c 字符设备，b 块设备，s 套接字，p Fifo）</span><br><span class="line">-size </span><br><span class="line">    文件大小(b—bit,c—byte,w—word,k-kb,M-m,G-g）, + 号代表大于，-代表小于，无符号代表等于 比如 +800M</span><br><span class="line">-name</span><br><span class="line">    按文件名称</span><br><span class="line">-print </span><br><span class="line">    问查找到的文件输出，默认</span><br><span class="line">-exec</span><br><span class="line">    匹配的文件执行shell命令，格式 &#x27;command&#x27; &#123; &#125; \;，注意&#123; &#125;和\；之间的空格</span><br></pre></td></tr></table></figure>
+
+<p>比如查找文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find ~/ -name fuck.log*</span><br></pre></td></tr></table></figure>
+
+<p>查找大于300M的文件，并输出详细路径</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find ~/ -type f -size +300M -exec ls -lh &#123;&#125; \;</span><br></pre></td></tr></table></figure>
+
+<h2 id="nohup"><a href="#nohup" class="headerlink" title="nohup"></a>nohup</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup ./test &gt; myout.txt 2&gt;&amp;1 &amp;</span><br></pre></td></tr></table></figure>
+<p>&amp; 让程序后台允许<br>nohup 退出终端不挂起<br>2&gt;&amp;1 错误重定向到标准输出</p>
+<h2 id="netstat"><a href="#netstat" class="headerlink" title="netstat"></a>netstat</h2><p>查看端口占用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -anp | grep 8080。</span><br></pre></td></tr></table></figure>
+
+<p>ps. 讲一下 lsof:<br>lsof(list open files)是一个列出当前系统打开文件的工具。<br>lsof 查看端口占用语法格式： <code>lsof -i:端口号</code></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/02/28/note/cap-theory/" rel="prev" title="CAP原则(CAP定理)、BASE理论">
+      <i class="fa fa-chevron-left"></i> CAP原则(CAP定理)、BASE理论
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/04/20/note/understandering-load/" rel="next" title="理解linux系统负荷">
+      理解linux系统负荷 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#scp"><span class="nav-number">1.</span> <span class="nav-text">scp</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pmap"><span class="nav-number">2.</span> <span class="nav-text">pmap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#awk"><span class="nav-number">3.</span> <span class="nav-text">awk</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#uniq"><span class="nav-number">4.</span> <span class="nav-text">uniq</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tar"><span class="nav-number">5.</span> <span class="nav-text">tar</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#grep"><span class="nav-number">6.</span> <span class="nav-text">grep</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#curl"><span class="nav-number">7.</span> <span class="nav-text">curl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#top"><span class="nav-number">8.</span> <span class="nav-text">top</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#du"><span class="nav-number">9.</span> <span class="nav-text">du</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#uname"><span class="nav-number">10.</span> <span class="nav-text">uname</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sort"><span class="nav-number">11.</span> <span class="nav-text">sort</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#find"><span class="nav-number">12.</span> <span class="nav-text">find</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nohup"><span class="nav-number">13.</span> <span class="nav-text">nohup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#netstat"><span class="nav-number">14.</span> <span class="nav-text">netstat</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

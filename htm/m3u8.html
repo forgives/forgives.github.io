@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>M3U8播放器</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js" type="text/javascript"></script>
+    <script src="https://cdn.bootcss.com/hls.js/0.10.1/hls.min.js"></script>
+    <script src="https://cdn.bootcss.com/dplayer/1.25.0/DPlayer.min.js"></script>
+    <link href="https://cdn.bootcss.com/dplayer/1.25.0/DPlayer.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="head-v3">
+        <div class="centers">
+            <div class="searchs">
+                <div class="from">
+                    <input name="url" id="url" type="text" class="text" value="" size="120" placeholder="请输入m3u8地址">
+
+                    <input name="doplayers" type="button" id="doplayers" class="button" value="立即播放" style="height: 25px;width: 80px;border: none;background: rgb(0, 47, 255);color: yellow;">
+                </div>
+                <div id="clear"></div>
+            </div>
+            <div id="ckplays" style="height:650px;background:#eee">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $("#doplayers").on("click", function () {
+                if ($("#url").val()) {
+                    const dp = new DPlayer({
+                        container: document.getElementById('ckplays'),
+                        video: {
+                            url: $("#url").val(),
+                            type: 'hls',
+
+                        },
+		     preload: 'auto',
+		     autoplay:true
+                    });
+                }
+            })
+        })
+    </script>
+
+</body>
+
+</html>

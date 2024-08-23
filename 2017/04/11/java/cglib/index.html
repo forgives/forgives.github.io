@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="cglib 文档">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cglib doc">
+<meta property="og:url" content="https://forgives.github.io/2017/04/11/java/cglib/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="cglib 文档">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-04-11T08:47:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.380Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="cglib">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2017/04/11/java/cglib/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>cglib doc | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2017/04/11/java/cglib/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          cglib doc
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-04-11 16:47:00" itemprop="dateCreated datePublished" datetime="2017-04-11T16:47:00+08:00">2017-04-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>cglib 文档</p>
+<span id="more"></span>
+
+<h2 id="Wiki"><a href="#Wiki" class="headerlink" title="Wiki"></a>Wiki</h2><p><a target="_blank" rel="noopener" href="https://github.com/cglib/cglib/wiki/Tutorial">https://github.com/cglib/cglib/wiki/Tutorial</a></p>
+<p><a target="_blank" rel="noopener" href="http://mydailyjava.blogspot.com/2013/11/cglib-missing-manual.html">http://mydailyjava.blogspot.com/2013/11/cglib-missing-manual.html</a></p>
+<h2 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h2><p><a target="_blank" rel="noopener" href="https://github.com/cglib/cglib">https://github.com/cglib/cglib</a></p>
+<h2 id="other-doc"><a href="#other-doc" class="headerlink" title="other doc"></a>other doc</h2><p><a target="_blank" rel="noopener" href="http://agapple.iteye.com/blog/799827">http://agapple.iteye.com/blog/799827</a></p>
+<h2 id="Enhancer"><a href="#Enhancer" class="headerlink" title="Enhancer"></a>Enhancer</h2><p>Enhancer创建代理，基本流程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">@Test</span><br><span class="line">public void testFixedValue() throws Exception &#123;</span><br><span class="line">  Enhancer enhancer = new Enhancer();</span><br><span class="line">  enhancer.setSuperclass(SampleClass.class);</span><br><span class="line">  enhancer.setCallback(new FixedValue() &#123;</span><br><span class="line">    @Override</span><br><span class="line">    public Object loadObject() throws Exception &#123;</span><br><span class="line">      return &quot;Hello cglib!&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">  SampleClass proxy = (SampleClass) enhancer.create();</span><br><span class="line">  assertEquals(&quot;Hello cglib!&quot;, proxy.test(null));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>callback</code>有很多类型，定义不同，作用也不同。</p>
+<h2 id="Callbacks"><a href="#Callbacks" class="headerlink" title="Callbacks"></a>Callbacks</h2><h3 id="Dispatcher-net-sf-cglib-proxy"><a href="#Dispatcher-net-sf-cglib-proxy" class="headerlink" title="Dispatcher (net.sf.cglib.proxy)"></a>Dispatcher (net.sf.cglib.proxy)</h3><h3 id="FixedValue-net-sf-cglib-proxy"><a href="#FixedValue-net-sf-cglib-proxy" class="headerlink" title="FixedValue (net.sf.cglib.proxy)"></a>FixedValue (net.sf.cglib.proxy)</h3><pre><code>锁定方法返回值，无论被代理类的方法返回什么值，回调方法都返回固定值。
+</code></pre>
+<h3 id="InvocationHandler-net-sf-cglib-proxy"><a href="#InvocationHandler-net-sf-cglib-proxy" class="headerlink" title="InvocationHandler (net.sf.cglib.proxy)"></a>InvocationHandler (net.sf.cglib.proxy)</h3><h3 id="LazyLoader-net-sf-cglib-proxy"><a href="#LazyLoader-net-sf-cglib-proxy" class="headerlink" title="LazyLoader (net.sf.cglib.proxy)"></a>LazyLoader (net.sf.cglib.proxy)</h3><pre><code>在使用延迟加载对象的时候触发一次回调。当创建对象代价很昂贵，且不知道会不会被用到的时使用比较合适。
+</code></pre>
+<p>官方解释如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">LazyLoader: </span><br><span class="line">Even though the LazyLoader&#x27;s only method has the same method signature as FixedValue, </span><br><span class="line">the LazyLoader is fundamentally different to the FixedValue interceptor. </span><br><span class="line">The LazyLoader is actually supposed to return an instance of a subclass of the enhanced class. </span><br><span class="line">This instance is requested only when a method is called on the enhanced object and then </span><br><span class="line">stored for future invocations of the generated proxy. </span><br><span class="line">This makes sense if your object is expensive in its creation </span><br><span class="line">without knowing if the object will ever be used. Be aware that some </span><br><span class="line">constructor of the enhanced class must be called both for the proxy </span><br><span class="line">object and for the lazily loaded object. Thus, make sure that there is </span><br><span class="line">another cheap (maybe protected) constructor available or use an interface </span><br><span class="line">type for the proxy. You can choose the invoked constructed by supplying </span><br><span class="line">arguments to Enhancer#create(Object...)</span><br></pre></td></tr></table></figure>
+
+<p>exp:</p>
+<p><code>LoaderBean.java:</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public class LoaderBean &#123;  </span><br><span class="line">    private String loaderName;  </span><br><span class="line">    private int loaderValue;  </span><br><span class="line">    private PropertyBean propertyBean;  </span><br><span class="line">    public LoaderBean()&#123;  </span><br><span class="line">        this.loaderName=&quot;loaderNameA&quot;;  </span><br><span class="line">        this.loaderValue=123;  </span><br><span class="line">        this.propertyBean=createPropertyBean();  </span><br><span class="line">    &#125;  </span><br><span class="line">    protected PropertyBean createPropertyBean()&#123;  </span><br><span class="line">        Enhancer enhancer=new Enhancer();  </span><br><span class="line">        enhancer.setSuperclass(PropertyBean.class);  </span><br><span class="line">        return (PropertyBean)enhancer.create(PropertyBean.class,new ConcreteClassLazyLoader());  </span><br><span class="line">    &#125;  </span><br><span class="line">      </span><br><span class="line">    //setter/getter...  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+<p><code>PropertyBean.java</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public class PropertyBean &#123;  </span><br><span class="line">    private String propertyName;  </span><br><span class="line">    private int propertyValue;  </span><br><span class="line">      </span><br><span class="line">    //setter/getter  </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p><code>LazyLoader</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">public class ConcreteClassLazyLoader implements LazyLoader&#123;  </span><br><span class="line">    public Object loadObject() throws Exception &#123;  </span><br><span class="line">        System.out.println(&quot;LazyLoader loadObject() ...&quot;);  </span><br><span class="line">        PropertyBean bean=new PropertyBean();  </span><br><span class="line">        bean.setPropertyName(&quot;lazy-load object propertyName!&quot;);  </span><br><span class="line">        bean.setPropertyValue(11);  </span><br><span class="line">        return bean;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+<p><code>main</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">LoaderBean loader=new LoaderBean();  </span><br><span class="line">System.out.println(loader.getLoaderName());  </span><br><span class="line">System.out.println(loader.getLoaderValue());  </span><br><span class="line">PropertyBean propertyBean=loader.getPropertyBean();//访问延迟加载对象  </span><br><span class="line">System.out.println(propertyBean.getPropertyName());  </span><br><span class="line">System.out.println(propertyBean.getPropertyValue());  </span><br><span class="line">System.out.println(&quot;after...&quot;);  </span><br><span class="line">//当再次访问延迟加载对象时,就不会再执行回调了  </span><br><span class="line">System.out.println(propertyBean.getPropertyName()); </span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">loaderNameA  </span><br><span class="line">123  </span><br><span class="line">LazyLoader loadObject() ...  </span><br><span class="line">lazy-load object propertyName!  </span><br><span class="line">11  </span><br><span class="line">after...  </span><br><span class="line">lazy-load object propertyName! </span><br></pre></td></tr></table></figure>
+
+<h3 id="MethodInterceptor-net-sf-cglib-proxy"><a href="#MethodInterceptor-net-sf-cglib-proxy" class="headerlink" title="MethodInterceptor (net.sf.cglib.proxy)"></a>MethodInterceptor (net.sf.cglib.proxy)</h3><h3 id="NoOp-net-sf-cglib-proxy"><a href="#NoOp-net-sf-cglib-proxy" class="headerlink" title="NoOp (net.sf.cglib.proxy)"></a>NoOp (net.sf.cglib.proxy)</h3><pre><code>NoOp表示no operator，即什么操作也不做，代理类直接调用被代理的方法不进行拦截。
+</code></pre>
+<h3 id="ProxyRefDispatcher-net-sf-cglib-proxy"><a href="#ProxyRefDispatcher-net-sf-cglib-proxy" class="headerlink" title="ProxyRefDispatcher (net.sf.cglib.proxy)"></a>ProxyRefDispatcher (net.sf.cglib.proxy)</h3><h2 id="CallbackFilter"><a href="#CallbackFilter" class="headerlink" title="CallbackFilter"></a>CallbackFilter</h2><p>负责把执行的方法映射到对应的回调。<br><code>int accept(Method method);</code>返回callback数组的序号。<code>由setCallbacks(Callback[] callbacks)设置</code></p>
+<p>exp:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public class ConcreteClassNoInterface &#123;  </span><br><span class="line">    public String getConcreteMethodA(String str)&#123;  </span><br><span class="line">        System.out.println(&quot;ConcreteMethod A ... &quot;+str);  </span><br><span class="line">        return str;  </span><br><span class="line">    &#125;  </span><br><span class="line">    public int getConcreteMethodB(int n)&#123;  </span><br><span class="line">        System.out.println(&quot;ConcreteMethod B ... &quot;+n);  </span><br><span class="line">        return n+10;  </span><br><span class="line">    &#125;  </span><br><span class="line">    public int getConcreteMethodFixedValue(int n)&#123;  </span><br><span class="line">        System.out.println(&quot;getConcreteMethodFixedValue...&quot;+n);  </span><br><span class="line">        return n+10;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class ConcreteClassCallbackFilter implements CallbackFilter&#123;  </span><br><span class="line">    public int accept(Method method) &#123;  </span><br><span class="line">        if(&quot;getConcreteMethodB&quot;.equals(method.getName()))&#123;  </span><br><span class="line">            return 0;//Callback callbacks[0]  </span><br><span class="line">        &#125;else if(&quot;getConcreteMethodA&quot;.equals(method.getName()))&#123;  </span><br><span class="line">            return 1;//Callback callbacks[1]  </span><br><span class="line">        &#125;else if(&quot;getConcreteMethodFixedValue&quot;.equals(method.getName()))&#123;  </span><br><span class="line">            return 2;//Callback callbacks[2]  </span><br><span class="line">        &#125;  </span><br><span class="line">        return 1;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Enhancer enhancer=new Enhancer();  </span><br><span class="line">enhancer.setSuperclass(ConcreteClassNoInterface.class);  </span><br><span class="line">CallbackFilter filter=new ConcreteClassCallbackFilter();  </span><br><span class="line">enhancer.setCallbackFilter(filter);  </span><br><span class="line">  </span><br><span class="line">Callback interceptor=new ConcreteClassInterceptor();//(1)  </span><br><span class="line">Callback noOp=NoOp.INSTANCE;//(2)  </span><br><span class="line">Callback fixedValue=new ConcreteClassFixedValue();//(3)  </span><br><span class="line">Callback[] callbacks=new Callback[]&#123;interceptor,noOp,fixedValue&#125;;  </span><br><span class="line">enhancer.setCallbacks(callbacks);  </span><br><span class="line">ConcreteClassNoInterface proxyObject=(ConcreteClassNoInterface)enhancer.create();  </span><br><span class="line">System.out.println(&quot;*** NoOp Callback ***&quot;);  </span><br><span class="line">proxyObject.getConcreteMethodA(&quot;abcde&quot;);  </span><br><span class="line">  </span><br><span class="line">System.out.println(&quot;*** MethodInterceptor Callback ***&quot;);  </span><br><span class="line">proxyObject.getConcreteMethodB(1);  </span><br><span class="line">  </span><br><span class="line">System.out.println(&quot;*** FixedValue Callback ***&quot;);  </span><br><span class="line">int fixed1=proxyObject.getConcreteMethodFixedValue(128);  </span><br><span class="line">System.out.println(&quot;fixedValue1:&quot;+fixed1);  </span><br><span class="line">int fixed2=proxyObject.getConcreteMethodFixedValue(256);  </span><br><span class="line">System.out.println(&quot;fixedValue2:&quot;+fixed2);  </span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public class ConcreteClassFixedValue implements FixedValue&#123;  </span><br><span class="line">    public Object loadObject() throws Exception &#123;  </span><br><span class="line">        System.out.println(&quot;ConcreteClassFixedValue loadObject ...&quot;);  </span><br><span class="line">        Object object=999;  </span><br><span class="line">        return object;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">*** NoOp Callback ***  </span><br><span class="line">ConcreteMethod A ... abcde  </span><br><span class="line">  </span><br><span class="line">*** MethodInterceptor Callback ***  </span><br><span class="line">Before :public int generic.cglib.proxy.ConcreteClassNoInterface.getConcreteMethodB(int)  </span><br><span class="line">ConcreteMethod B ... 1  </span><br><span class="line">After :public int generic.cglib.proxy.ConcreteClassNoInterface.getConcreteMethodB(int)  </span><br><span class="line">ConcreteClassInterceptor end...  </span><br><span class="line">  </span><br><span class="line">*** FixedValue Callback ***  </span><br><span class="line">ConcreteClassFixedValue loadObject ...  </span><br><span class="line">fixedValue1:999  </span><br><span class="line">ConcreteClassFixedValue loadObject ...  </span><br><span class="line">fixedValue2:999  </span><br></pre></td></tr></table></figure>
+<p>getConcreteMethodA对应CallbackFilter中定义的索引1，在Callback[]数组中使用的过滤为NoOp,因此直接执行了被代理方法。<br>getConcreteMethodB对应CallbackFilter中定义的索引0，在Callback[]数组中使用的过滤为MethodInterceptor，因此执行了方法拦截器进行拦截。<br>getConcreteMethodFixedValue对应CallbackFilter中定义的索引2，在Callback[]数组中使用的过滤为FixedValue，因此2次赋值128和256的调用其结果均被锁定为返回999。</p>
+<h2 id="BeanCopier"><a href="#BeanCopier" class="headerlink" title="BeanCopier"></a>BeanCopier</h2><p>不同bean相同属性名的互相拷贝，性能非常好。而且还支持不同类型的拷贝。<br>性能对比：<a target="_blank" rel="noopener" href="http://www.iteye.com/topic/801577">http://www.iteye.com/topic/801577</a></p>
+<ol>
+<li>避免每次进行BeanCopier.create创建对象，一般建议是通过static BeanCopier copier &#x3D; BeanCopier.create()</li>
+<li>合理使用converter。</li>
+<li>应用场景：两个对象之间同名同属性的数据拷贝, 不能单独针对其中的几个属性单独拷贝</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/cglib/" rel="tag"># cglib</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/02/09/java/java-load-balance/" rel="prev" title="多种负载均衡算法及其Java代码实现">
+      <i class="fa fa-chevron-left"></i> 多种负载均衡算法及其Java代码实现
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/04/19/note/compare-and-swap/" rel="next" title="compare-and-swap">
+      compare-and-swap <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Wiki"><span class="nav-number">1.</span> <span class="nav-text">Wiki</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Code"><span class="nav-number">2.</span> <span class="nav-text">Code</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#other-doc"><span class="nav-number">3.</span> <span class="nav-text">other doc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Enhancer"><span class="nav-number">4.</span> <span class="nav-text">Enhancer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Callbacks"><span class="nav-number">5.</span> <span class="nav-text">Callbacks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dispatcher-net-sf-cglib-proxy"><span class="nav-number">5.1.</span> <span class="nav-text">Dispatcher (net.sf.cglib.proxy)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FixedValue-net-sf-cglib-proxy"><span class="nav-number">5.2.</span> <span class="nav-text">FixedValue (net.sf.cglib.proxy)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#InvocationHandler-net-sf-cglib-proxy"><span class="nav-number">5.3.</span> <span class="nav-text">InvocationHandler (net.sf.cglib.proxy)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LazyLoader-net-sf-cglib-proxy"><span class="nav-number">5.4.</span> <span class="nav-text">LazyLoader (net.sf.cglib.proxy)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MethodInterceptor-net-sf-cglib-proxy"><span class="nav-number">5.5.</span> <span class="nav-text">MethodInterceptor (net.sf.cglib.proxy)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NoOp-net-sf-cglib-proxy"><span class="nav-number">5.6.</span> <span class="nav-text">NoOp (net.sf.cglib.proxy)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ProxyRefDispatcher-net-sf-cglib-proxy"><span class="nav-number">5.7.</span> <span class="nav-text">ProxyRefDispatcher (net.sf.cglib.proxy)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CallbackFilter"><span class="nav-number">6.</span> <span class="nav-text">CallbackFilter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BeanCopier"><span class="nav-number">7.</span> <span class="nav-text">BeanCopier</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

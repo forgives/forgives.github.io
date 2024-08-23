@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="基于方法参数注解切面的实现方式参考https:&#x2F;&#x2F;stackoverflow.com&#x2F;questions&#x2F;2766844&#x2F;pointcut-matching-methods-with-annotated-parameters">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于方法参数注解的切面">
+<meta property="og:url" content="https://forgives.github.io/2021/11/05/java/parameter-annotation-aspect/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="基于方法参数注解切面的实现方式参考https:&#x2F;&#x2F;stackoverflow.com&#x2F;questions&#x2F;2766844&#x2F;pointcut-matching-methods-with-annotated-parameters">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-11-05T07:00:05.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.384Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="j2se">
+<meta property="article:tag" content="aspect">
+<meta property="article:tag" content="kfile">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2021/11/05/java/parameter-annotation-aspect/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>基于方法参数注解的切面 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2021/11/05/java/parameter-annotation-aspect/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于方法参数注解的切面
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-11-05 15:00:05" itemprop="dateCreated datePublished" datetime="2021-11-05T15:00:05+08:00">2021-11-05</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>基于方法参数注解切面的实现方式参考<br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/2766844/pointcut-matching-methods-with-annotated-parameters">https://stackoverflow.com/questions/2766844/pointcut-matching-methods-with-annotated-parameters</a></p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>实现文件管理系统的时候对路径的修正采用了切面的方式：</p>
+<p>RevisePath</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.PARAMETER&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> RevisePath &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>RevisePathAspect<br>切点的声明</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Pointcut(&quot;execution(public * *(.., @com.forg.kfile.component.aspect.RevisePath (*), ..))&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">reviseParamPathPointcut</span><span class="params">()</span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>修正路径参数需要改变方法的参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Around(&quot;reviseParamPathPointcut()&quot;)</span></span><br><span class="line"><span class="keyword">public</span> Object <span class="title function_">revisePath</span><span class="params">(ProceedingJoinPoint joinPoint)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">    ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="注解参数的识别与修改"><a href="#注解参数的识别与修改" class="headerlink" title="注解参数的识别与修改"></a>注解参数的识别与修改</h2><p><code>Around</code>注解方法的第一个参数类型是 <a target="_blank" rel="noopener" href="https://www.eclipse.org/aspectj/doc/next/runtime-api/org/aspectj/lang/ProceedingJoinPoint.html">ProceedingJoinPoint</a> ，注意这个类是所属的包是<code>org.aspectj.lang</code> ， spring 实现的类是 <a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/aop/aspectj/MethodInvocationProceedingJoinPoint.html">MethodInvocationProceedingJoinPoint</a>。 </p>
+<p>获取切点的参数是有直接的方法的  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">java.lang.Object[]	getArgs()</span><br><span class="line">          Returns the arguments at this join point.</span><br></pre></td></tr></table></figure>
+<p>但是哪一个参数是有注解的参数并不能直接获取到。起初我的实现比较复杂：<br>通过解析方法签名参数类型，通过反射找到对应对应的方法。在从方法上找到参数对应的所有的注解判断参数位置，确定参数位置后修改参数内容，代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Around(&quot;reviseParamPathPointcut()&quot;)</span></span><br><span class="line"><span class="keyword">public</span> Object <span class="title function_">revisePath</span><span class="params">(ProceedingJoinPoint joinPoint)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line"></span><br><span class="line">    Object[] args = joinPoint.getArgs();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//无参数不处理</span></span><br><span class="line">    <span class="keyword">if</span>(args.length &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> joinPoint.proceed();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(args.length == <span class="number">1</span> )&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>( args[<span class="number">0</span>] <span class="keyword">instanceof</span> String || args[<span class="number">0</span>] == <span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> (String)args[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">            args[<span class="number">0</span>] = revisePath(path);</span><br><span class="line">            <span class="keyword">return</span> joinPoint.proceed(args);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//多个参数的时候，获取指定注解参数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//目标对象</span></span><br><span class="line">    <span class="type">Object</span> <span class="variable">target</span> <span class="operator">=</span> joinPoint.getTarget();</span><br><span class="line"></span><br><span class="line">    <span class="type">String</span> <span class="variable">longString</span> <span class="operator">=</span> joinPoint.getSignature().toLongString();</span><br><span class="line">    <span class="comment">// 解析方法签名参数类型</span></span><br><span class="line">    String [] paramClass = longString.substring(</span><br><span class="line">        longString.lastIndexOf(<span class="string">&quot;(&quot;</span>)+<span class="number">1</span>,</span><br><span class="line">        longString.lastIndexOf(<span class="string">&quot;)&quot;</span>)).split(<span class="string">&quot;,&quot;</span>);</span><br><span class="line"></span><br><span class="line">    Class [] clz = <span class="keyword">new</span> <span class="title class_">Class</span>[args.length];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(paramClass.length != args.length)&#123;</span><br><span class="line">        <span class="keyword">return</span> joinPoint.proceed(args);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i&lt; args.length ;i++)&#123;</span><br><span class="line">        <span class="keyword">if</span>(args[i] ==<span class="literal">null</span>)&#123;</span><br><span class="line">            <span class="type">Class</span> <span class="variable">c</span> <span class="operator">=</span> Class.forName(paramClass[i]);</span><br><span class="line">            clz[i] = c;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        clz[i] = args[i].getClass();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> target.getClass().getDeclaredMethod(joinPoint.getSignature().getName(),clz);</span><br><span class="line"></span><br><span class="line">        Annotation[][] annotations = method.getParameterAnnotations();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(annotations == <span class="literal">null</span> || annotations.length == <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> joinPoint.proceed(args);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        List&lt;Integer&gt; pos = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(args.length);</span><br><span class="line">        <span class="type">int</span> <span class="variable">p</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(Annotation[] as : annotations)&#123;</span><br><span class="line">            <span class="keyword">for</span>(Annotation a : as)&#123;</span><br><span class="line">                <span class="keyword">if</span>(a <span class="keyword">instanceof</span> RevisePath)&#123;</span><br><span class="line">                    <span class="comment">//</span></span><br><span class="line">                    pos.add(p);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            p++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(pos.size() &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> joinPoint.proceed(args);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (Integer _p : pos)&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(!(clz[_p].equals(String.class) ))&#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(StringUtils.isEmpty(args[_p]))&#123;</span><br><span class="line">                args[_p] =revisePath((String)args[_p]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> (NoSuchMethodException e) &#123;</span><br><span class="line">        logger.error(<span class="string">&quot;error&quot;</span>,e);</span><br><span class="line">        <span class="keyword">return</span> joinPoint.proceed(args);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> joinPoint.proceed(args);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中确定调用方法就很麻烦，反射通过方法名称与参数类型去查找。因为我是通过spring做的aop，所以ProceedingJoinPoint的类型应该是<code>MethodInvocationProceedingJoinPoint</code>，而<code>MethodInvocationProceedingJoinPoint</code>类的说明很清楚的指名：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">An implementation of the AspectJ ProceedingJoinPoint interface wrapping an AOP Alliance MethodInvocation.</span><br></pre></td></tr></table></figure>
+<p>它是<code>MethodInvocation</code>的包装。拿到<code>MethodInvocation</code>就能拿到method。而<code>MethodInvocationProceedingJoinPoint</code>中的<code>methodInvocation</code>并没有暴露出来，但是可以通过其中的<code>MethodSignature</code>获取</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">MethodInvocationProceedingJoinPoint</span> <span class="variable">methodInvocationProceedingJoinPoint</span> <span class="operator">=</span></span><br><span class="line">    (MethodInvocationProceedingJoinPoint)joinPoint;</span><br><span class="line"></span><br><span class="line"><span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> ((MethodSignature)methodInvocationProceedingJoinPoint.getSignature()).getMethod();</span><br><span class="line"></span><br><span class="line">Annotation[][] annotations = method.getParameterAnnotations();</span><br></pre></td></tr></table></figure>
+<p>当然也可以直接通过反射获取</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">MethodInvocationProceedingJoinPoint</span> <span class="variable">methodJoinPoint</span> <span class="operator">=</span> (MethodInvocationProceedingJoinPoint) pjp;</span><br><span class="line"><span class="type">Field</span> <span class="variable">methodInvocationfield</span> <span class="operator">=</span> methodJoinPoint.getClass().getDeclaredField(<span class="string">&quot;methodInvocation&quot;</span>);</span><br><span class="line"></span><br><span class="line">methodInvocationfield.setAccessible(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">Annotation[][] argAnnotations = ((ReflectiveMethodInvocation) methodInvocationfield.get(methodJoinPoint)).getMethod().getParameterAnnotations();</span><br></pre></td></tr></table></figure>
+<p>后面就是简单的定位到参数然后修改值后在传入<code>proceed</code>方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; positionList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(<span class="number">1</span>);</span><br><span class="line"><span class="type">int</span> <span class="variable">p</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span>(Annotation[] as : annotations)&#123;</span><br><span class="line">    <span class="keyword">for</span>(Annotation a : as)&#123;</span><br><span class="line">        <span class="keyword">if</span>(a <span class="keyword">instanceof</span> RevisePath)&#123;</span><br><span class="line">            <span class="comment">//</span></span><br><span class="line">            positionList.add(p);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    p++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(positionList.size() &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> joinPoint.proceed(args);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (Integer position : positionList)&#123;</span><br><span class="line">    <span class="keyword">if</span>(args[position] == <span class="literal">null</span> || args[position] <span class="keyword">instanceof</span> String)&#123;</span><br><span class="line">        args[position] = revisePath((String)args[position]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> joinPoint.proceed(args);</span><br></pre></td></tr></table></figure>
+
+<h2 id="其他需要知道的"><a href="#其他需要知道的" class="headerlink" title="其他需要知道的"></a>其他需要知道的</h2><p>刚开始我使用的是<code>@Before</code>来修改参数，发现<code>@Before</code>是不能修改参数内容的，原因是<br>MethodInvocationProceedingJoinPoint </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public Object[] getArgs() &#123;</span><br><span class="line">    if (this.args == null) &#123;</span><br><span class="line">        this.args = this.methodInvocation.getArguments().clone();</span><br><span class="line">    &#125;</span><br><span class="line">    return this.args;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>MethodInvocationProceedingJoinPoint<br><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/aop/aspectj/MethodInvocationProceedingJoinPoint.html">https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/aop/aspectj/MethodInvocationProceedingJoinPoint.html</a></p>
+<p>MethodInvocationProceedingJoinPoint example<br><a target="_blank" rel="noopener" href="https://www.programcreek.com/java-api-examples/?api=org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint">https://www.programcreek.com/java-api-examples/?api=org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint</a></p>
+<p>Pointcut matching methods with annotated parameters<br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/2766844/pointcut-matching-methods-with-annotated-parameters">https://stackoverflow.com/questions/2766844/pointcut-matching-methods-with-annotated-parameters</a></p>
+<p>AspectJ: Pointcut to declare and retrieve an annotation of a method’s parameter<br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/63894176/aspectj-pointcut-to-declare-and-retrieve-an-annotation-of-a-methods-parameter">https://stackoverflow.com/questions/63894176/aspectj-pointcut-to-declare-and-retrieve-an-annotation-of-a-methods-parameter</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/j2se/" rel="tag"># j2se</a>
+              <a href="/tags/aspect/" rel="tag"># aspect</a>
+              <a href="/tags/kfile/" rel="tag"># kfile</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/20/java/expression_test/" rel="prev" title="Java表达式测试">
+      <i class="fa fa-chevron-left"></i> Java表达式测试
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/11/22/db/mysql-bit/" rel="next" title="mysql位操作概述">
+      mysql位操作概述 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E8%A7%A3%E5%8F%82%E6%95%B0%E7%9A%84%E8%AF%86%E5%88%AB%E4%B8%8E%E4%BF%AE%E6%94%B9"><span class="nav-number">2.</span> <span class="nav-text">注解参数的识别与修改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E9%9C%80%E8%A6%81%E7%9F%A5%E9%81%93%E7%9A%84"><span class="nav-number">3.</span> <span class="nav-text">其他需要知道的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

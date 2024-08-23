@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="svn 常用操作命令记录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="svn 常用操作命令">
+<meta property="og:url" content="https://forgives.github.io/2018/02/13/note/svn-cmd-note/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="svn 常用操作命令记录">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-02-13T07:46:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.391Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="svn">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2018/02/13/note/svn-cmd-note/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>svn 常用操作命令 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2018/02/13/note/svn-cmd-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          svn 常用操作命令
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-02-13 15:46:00" itemprop="dateCreated datePublished" datetime="2018-02-13T15:46:00+08:00">2018-02-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%89%88%E6%9C%AC/" itemprop="url" rel="index"><span itemprop="name">版本</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>svn 常用操作命令记录</p>
+<!-- more -->
+<h1 id="检出"><a href="#检出" class="headerlink" title="检出"></a>检出</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn  checkout  http://路径(目录或文件的全路径)　[本地目录全路径] --username　用户名</span><br><span class="line">svn  checkout  svn://路径(目录或文件的全路径)　[本地目录全路径]  --username　用户名</span><br></pre></td></tr></table></figure>
+
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">svn co svn://localhost/测试工具 /home/testtools --username wzhnsc</span><br><span class="line">svn co http://localhost/test/testapp --username wzhnsc</span><br><span class="line">svn checkout svn://localhost/测试工具 /home/testtools --username wzhnsc</span><br><span class="line">svn checkouthttp://localhost/test/testapp --username wzhnsc</span><br></pre></td></tr></table></figure>
+<p>注：如果不带–password 参数传输密码的话，会提示输入密码，建议不要用明文的–password 选项。其中 username 与 password前是两个短线，不是一个。不指定本地目录全路径，则检出到当前目录下。</p>
+<h1 id="导出"><a href="#导出" class="headerlink" title="导出"></a>导出</h1><p>(导出一个干净的不带.svn文件夹的目录树)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">svn  export  [-r 版本号]  http://路径(目录或文件的全路径) [本地目录全路径]　--username　用户名</span><br><span class="line">svn  export  [-r 版本号]  svn://路径(目录或文件的全路径) [本地目录全路径]　--username　用户名</span><br><span class="line">svn  export  本地检出的(即带有.svn文件夹的)目录全路径  要导出的本地目录全路径</span><br></pre></td></tr></table></figure>
+
+<h2 id="例子-1"><a href="#例子-1" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">svn export svn://localhost/测试工具 /home/testtools --username wzhnsc</span><br><span class="line">svn export svn://localhost/test/testapp --username wzhnsc</span><br><span class="line">svn export /home/testapp /home/testtools</span><br></pre></td></tr></table></figure>
+<p>注：第一种从版本库导出干净工作目录树的形式是指定URL，<br>如果指定了修订版本号，会导出相应的版本，<br>如果没有指定修订版本，则会导出最新的，导出到指定位置。<br>如果省略 本地目录全路径，URL的最后一部分会作为本地目录的名字。<br>第二种形式是指定 本地检出的目录全路径 到 要导出的本地目录全路径，所有的本地修改将会保留，<br>但是不在版本控制下(即没提交的新文件，因为.svn文件夹里没有与之相关的信息记录)的文件不会拷贝。</p>
+<h1 id="添加新文件"><a href="#添加新文件" class="headerlink" title="添加新文件"></a>添加新文件</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">svn　add　文件名</span><br></pre></td></tr></table></figure>
+<p>注：告诉SVN服务器要添加文件了，还要用svn commint -m真实的上传上去！</p>
+<h2 id="例子-2"><a href="#例子-2" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">svn add test.php ＜－ 添加test.php </span><br><span class="line">svn commit -m “添加我的测试用test.php“ test.php</span><br><span class="line">svn add *.php ＜－ 添加当前目录下所有的php文件</span><br><span class="line">svn commit -m “添加我的测试用全部php文件“ *.php</span><br></pre></td></tr></table></figure>
+
+<h1 id="提交"><a href="#提交" class="headerlink" title="提交"></a>提交</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">svn　commit　-m　“提交备注信息文本“　[-N]　[--no-unlock]　文件名</span><br><span class="line">svn　ci　-m　“提交备注信息文本“　[-N]　[--no-unlock]　文件名</span><br><span class="line">必须带上-m参数，参数可以为空，但是必须写上-m</span><br></pre></td></tr></table></figure>
+<h2 id="例子-3"><a href="#例子-3" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">svn commit -m “提交当前目录下的全部在版本控制下的文件“ * ＜－ 注意这个*表示全部文件</span><br><span class="line">svn commit -m “提交我的测试用test.php“ test.php</span><br><span class="line">svn commit -m “提交我的测试用test.php“ -N --no-unlock test.php ＜－ 保持锁就用–no-unlock开关</span><br><span class="line">svn ci -m “提交当前目录下的全部在版本控制下的文件“ * ＜－ 注意这个*表示全部文件</span><br><span class="line">svn ci -m “提交我的测试用test.php“ test.php</span><br><span class="line">svn ci -m “提交我的测试用test.php“ -N --no-unlock test.php ＜－ 保持锁就用–no-unlock开关</span><br></pre></td></tr></table></figure>
+
+<h1 id="更新文件"><a href="#更新文件" class="headerlink" title="更新文件"></a>更新文件</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">svn　update</span><br><span class="line">svn　update　-r　修正版本　文件名</span><br><span class="line">svn　update　文件名</span><br></pre></td></tr></table></figure>
+<h2 id="例子-4"><a href="#例子-4" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">svn update ＜－ 后面没有目录，默认将当前目录以及子目录下的所有文件都更新到最新版本</span><br><span class="line">svn update -r 200 test.cpp ＜－ 将版本库中的文件 test.cpp 还原到修正版本（revision）200</span><br><span class="line">svn update test.php ＜－ 更新与版本库同步。</span><br><span class="line">　　　　　　　　　　　 提交的时候提示过期冲突，需要先 update 修改文件，</span><br><span class="line">　　　　　　　　　　　 然后清除svn resolved，最后再提交commit。</span><br></pre></td></tr></table></figure>
+<h1 id="删除文件"><a href="#删除文件" class="headerlink" title="删除文件"></a>删除文件</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">svn　delete　svn://路径(目录或文件的全路径) -m “删除备注信息文本”</span><br><span class="line">推荐如下操作：</span><br><span class="line">svn　delete　文件名 </span><br><span class="line">svn　ci　-m　“删除备注信息文本”</span><br></pre></td></tr></table></figure>
+<h2 id="例子-5"><a href="#例子-5" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">svn delete svn://localhost/testapp/test.php -m “删除测试文件test.php”</span><br><span class="line">推荐如下操作：</span><br><span class="line">svn delete test.php </span><br><span class="line">svn ci -m “删除测试文件test.php”</span><br></pre></td></tr></table></figure>
+<h1 id="加锁-解锁"><a href="#加锁-解锁" class="headerlink" title="加锁&#x2F;解锁"></a>加锁&#x2F;解锁</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn　lock　-m　“加锁备注信息文本“　[--force]　文件名 </span><br><span class="line">svn　unlock　文件名</span><br></pre></td></tr></table></figure>
+<h2 id="例子-6"><a href="#例子-6" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn lock -m “锁信测试用test.php文件“ test.php </span><br><span class="line">svn unlock test.php</span><br></pre></td></tr></table></figure>
+<h1 id="比较差异"><a href="#比较差异" class="headerlink" title="比较差异"></a>比较差异</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn　diff　文件名 </span><br><span class="line">svn　diff　-r　修正版本号m:修正版本号n　文件名</span><br></pre></td></tr></table></figure>
+<h2 id="例子-7"><a href="#例子-7" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn diff test.php＜－ 将修改的文件与基础版本比较</span><br><span class="line">svn diff -r 200:201 test.php＜－ 对 修正版本号200 和 修正版本号201 比较差异</span><br></pre></td></tr></table></figure>
+<h1 id="查看文件或者目录状态"><a href="#查看文件或者目录状态" class="headerlink" title="查看文件或者目录状态"></a>查看文件或者目录状态</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn st 目录路径/名</span><br><span class="line">svn status 目录路径/名＜－ 目录下的文件和子目录的状态，正常状态不显示 </span><br></pre></td></tr></table></figure>
+<p>【?：不在svn的控制中；  M：内容被修改；C：发生冲突；A：预定加入到版本库；K：被锁定】 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn  -v 目录路径/名</span><br><span class="line">svn status -v 目录路径/名＜－ 显示文件和子目录状态</span><br></pre></td></tr></table></figure>
+<p>【第一列保持相同，第二列显示工作版本号，第三和第四列显示最后一次修改的版本号和修改人】 </p>
+<p>注：svn status、svn diff和 svn revert这三条命令在没有网络的情况下也可以执行的，原因是svn在本地的.svn中保留了本地版本的原始拷贝。</p>
+<p>查看日志</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">svn　log　文件名</span><br></pre></td></tr></table></figure>
+<h2 id="例子-8"><a href="#例子-8" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">svn log test.php＜－ 显示这个文件的所有修改记录，及其版本号的变化 </span><br></pre></td></tr></table></figure>
+<h1 id="查看文件详细信息"><a href="#查看文件详细信息" class="headerlink" title="查看文件详细信息"></a>查看文件详细信息</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">svn　info　文件名</span><br></pre></td></tr></table></figure>
+<h2 id="例子-9"><a href="#例子-9" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">svn info test.php</span><br><span class="line">SVN 帮助</span><br><span class="line">svn　help ＜－ 全部功能选项</span><br><span class="line">svn　help　ci ＜－ 具体功能的说明</span><br></pre></td></tr></table></figure>
+<h1 id="查看版本库下的文件和目录列表"><a href="#查看版本库下的文件和目录列表" class="headerlink" title="查看版本库下的文件和目录列表"></a>查看版本库下的文件和目录列表</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn　list　svn://路径(目录或文件的全路径)</span><br><span class="line">svn　ls　svn://路径(目录或文件的全路径)</span><br></pre></td></tr></table></figure>
+<h2 id="例子-10"><a href="#例子-10" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn list svn://localhost/test</span><br><span class="line">svn ls svn://localhost/test ＜－ 显示svn://localhost/test目录下的所有属于版本库的文件和目录 </span><br></pre></td></tr></table></figure>
+<h1 id="创建纳入版本控制下的新目录"><a href="#创建纳入版本控制下的新目录" class="headerlink" title="创建纳入版本控制下的新目录"></a>创建纳入版本控制下的新目录</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn　mkdir　目录名</span><br><span class="line">svn　mkdir　-m　&quot;新增目录备注文本&quot;　http://目录全路径</span><br></pre></td></tr></table></figure>
+<h2 id="例子-11"><a href="#例子-11" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">svn mkdir newdir</span><br><span class="line">svn mkdir -m &quot;Making a new dir.&quot; svn://localhost/test/newdir </span><br><span class="line">注：添加完子目录后，一定要回到根目录更新一下，不然在该目录下提交文件会提示“提交失败”</span><br></pre></td></tr></table></figure>
+<p>svn update<br>注：如果手工在checkout出来的目录里创建了一个新文件夹newsubdir，再用svn mkdir newsubdir命令后，SVN会提示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">　　svn: 尝试用 “svn add”或 “svn add --non-recursive”代替？</span><br><span class="line">　　svn: 无法创建目录“hello”: 文件已经存在</span><br></pre></td></tr></table></figure>
+<p>此时，用如下命令解决：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">　　svn add --non-recursive newsubdir</span><br></pre></td></tr></table></figure>
+<p>在进入这个newsubdir文件夹，用ls -a查看它下面的全部目录与文件，会发现多了：.svn目录,再用 svn mkdir -m “添hello功能模块文件” svn:&#x2F;&#x2F;localhost&#x2F;test&#x2F;newdir&#x2F;newsubdir 命令，SVN提示：<code>svn: File already exists: filesystem &#39;/data/svnroot/test/db&#39;, transaction &#39;4541-1&#39;,path &#39;/newdir/newsubdir &#39;</code></p>
+<h1 id="恢复本地修改"><a href="#恢复本地修改" class="headerlink" title="恢复本地修改"></a>恢复本地修改</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn　revert　[--recursive]　文件名</span><br><span class="line">注意: 本子命令不会存取网络，并且会解除冲突的状况。但是它不会恢复被删除的目录。</span><br></pre></td></tr></table></figure>
+<h2 id="例子-12"><a href="#例子-12" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">svn revert foo.c ＜－ 丢弃对一个文件的修改</span><br><span class="line">svn revert --recursive . ＜－恢复一整个目录的文件，. 为当前目录 </span><br></pre></td></tr></table></figure>
+<h1 id="把工作拷贝更新到别的URL"><a href="#把工作拷贝更新到别的URL" class="headerlink" title="把工作拷贝更新到别的URL"></a>把工作拷贝更新到别的URL</h1><p>svn　switch　http:&#x2F;&#x2F;目录全路径　本地目录全路径</p>
+<h2 id="例子-13"><a href="#例子-13" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">svn switch http://localhost/test/456 . ＜－ (原为123的分支)当前所在目录分支到localhost/test/456</span><br></pre></td></tr></table></figure>
+<h1 id="解决冲突"><a href="#解决冲突" class="headerlink" title="解决冲突"></a>解决冲突</h1><p>svn　resolved　[本地目录全路径]</p>
+<h2 id="例子-14"><a href="#例子-14" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ svn update</span><br><span class="line">C foo.c</span><br><span class="line">Updated to revision 31.</span><br><span class="line">如果你在更新时得到冲突，你的工作拷贝会产生三个新的文件：</span><br><span class="line">$ ls</span><br><span class="line">foo.c</span><br><span class="line">foo.c.mine</span><br><span class="line">foo.c.r30</span><br><span class="line">foo.c.r31</span><br></pre></td></tr></table></figure>
+
+<p>当你解决了foo.c的冲突，并且准备提交，运行svn resolved让你的工作拷贝知道你已经完成了所有事情。<br>你可以仅仅删除冲突的文件并且提交，但是svn resolved除了删除冲突文件，还修正了一些记录在工作拷贝管理区域的记录数据，所以我们推荐你使用这个命令。<br>不checkout而查看输出特定文件或URL的内容</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">svn　cat　http://文件全路径</span><br></pre></td></tr></table></figure>
+<h2 id="例子-15"><a href="#例子-15" class="headerlink" title="例子"></a>例子</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">svn cat http://localhost/test/readme.txt</span><br></pre></td></tr></table></figure>
+<h1 id="新建一个分支copy"><a href="#新建一个分支copy" class="headerlink" title="新建一个分支copy"></a>新建一个分支copy</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">svn copy branchA branchB  -m &quot;make B branch&quot; // 从branchA拷贝出一个新分支branchB</span><br></pre></td></tr></table></figure>
+<h1 id="合并内容到分支merge"><a href="#合并内容到分支merge" class="headerlink" title="合并内容到分支merge"></a>合并内容到分支merge</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">svn merge branchA branchB  // 把对branchA的修改合并到分支branchB</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/svn/" rel="tag"># svn</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/10/26/java/robo-code-env/" rel="prev" title="RoboCode的Intellij环境搭建">
+      <i class="fa fa-chevron-left"></i> RoboCode的Intellij环境搭建
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/02/13/note/change-mac2zsh/" rel="next" title="Mac下采用zsh代替bash">
+      Mac下采用zsh代替bash <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A3%80%E5%87%BA"><span class="nav-number">1.</span> <span class="nav-text">检出</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90"><span class="nav-number">1.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AF%BC%E5%87%BA"><span class="nav-number">2.</span> <span class="nav-text">导出</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-1"><span class="nav-number">2.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E6%96%B0%E6%96%87%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">添加新文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-2"><span class="nav-number">3.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8F%90%E4%BA%A4"><span class="nav-number">4.</span> <span class="nav-text">提交</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-3"><span class="nav-number">4.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E6%96%87%E4%BB%B6"><span class="nav-number">5.</span> <span class="nav-text">更新文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-4"><span class="nav-number">5.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6"><span class="nav-number">6.</span> <span class="nav-text">删除文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-5"><span class="nav-number">6.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%A0%E9%94%81-%E8%A7%A3%E9%94%81"><span class="nav-number">7.</span> <span class="nav-text">加锁&#x2F;解锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-6"><span class="nav-number">7.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AF%94%E8%BE%83%E5%B7%AE%E5%BC%82"><span class="nav-number">8.</span> <span class="nav-text">比较差异</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-7"><span class="nav-number">8.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%96%87%E4%BB%B6%E6%88%96%E8%80%85%E7%9B%AE%E5%BD%95%E7%8A%B6%E6%80%81"><span class="nav-number">9.</span> <span class="nav-text">查看文件或者目录状态</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-8"><span class="nav-number">9.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%96%87%E4%BB%B6%E8%AF%A6%E7%BB%86%E4%BF%A1%E6%81%AF"><span class="nav-number">10.</span> <span class="nav-text">查看文件详细信息</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-9"><span class="nav-number">10.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E7%89%88%E6%9C%AC%E5%BA%93%E4%B8%8B%E7%9A%84%E6%96%87%E4%BB%B6%E5%92%8C%E7%9B%AE%E5%BD%95%E5%88%97%E8%A1%A8"><span class="nav-number">11.</span> <span class="nav-text">查看版本库下的文件和目录列表</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-10"><span class="nav-number">11.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%BA%B3%E5%85%A5%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E4%B8%8B%E7%9A%84%E6%96%B0%E7%9B%AE%E5%BD%95"><span class="nav-number">12.</span> <span class="nav-text">创建纳入版本控制下的新目录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-11"><span class="nav-number">12.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%81%A2%E5%A4%8D%E6%9C%AC%E5%9C%B0%E4%BF%AE%E6%94%B9"><span class="nav-number">13.</span> <span class="nav-text">恢复本地修改</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-12"><span class="nav-number">13.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8A%8A%E5%B7%A5%E4%BD%9C%E6%8B%B7%E8%B4%9D%E6%9B%B4%E6%96%B0%E5%88%B0%E5%88%AB%E7%9A%84URL"><span class="nav-number">14.</span> <span class="nav-text">把工作拷贝更新到别的URL</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-13"><span class="nav-number">14.1.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81"><span class="nav-number">15.</span> <span class="nav-text">解决冲突</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-14"><span class="nav-number">15.1.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90-15"><span class="nav-number">15.2.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%B0%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%88%86%E6%94%AFcopy"><span class="nav-number">16.</span> <span class="nav-text">新建一个分支copy</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%88%E5%B9%B6%E5%86%85%E5%AE%B9%E5%88%B0%E5%88%86%E6%94%AFmerge"><span class="nav-number">17.</span> <span class="nav-text">合并内容到分支merge</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

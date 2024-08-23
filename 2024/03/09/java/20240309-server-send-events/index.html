@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近对接AI服务，AI应答的内容是HTTP 流式返回的，应答的Content-Type是text&#x2F;event-stream，查阅了些相关的资料，做下笔记。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Server-Sent Events (SSE)">
+<meta property="og:url" content="https://forgives.github.io/2024/03/09/java/20240309-server-send-events/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="最近对接AI服务，AI应答的内容是HTTP 流式返回的，应答的Content-Type是text&#x2F;event-stream，查阅了些相关的资料，做下笔记。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://forgives.github.io/res/20240309000001.jpg">
+<meta property="article:published_time" content="2024-03-09T08:55:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.380Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="spring">
+<meta property="article:tag" content="http">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://forgives.github.io/res/20240309000001.jpg">
+
+<link rel="canonical" href="https://forgives.github.io/2024/03/09/java/20240309-server-send-events/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Server-Sent Events (SSE) | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2024/03/09/java/20240309-server-send-events/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Server-Sent Events (SSE)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-03-09 16:55:00" itemprop="dateCreated datePublished" datetime="2024-03-09T16:55:00+08:00">2024-03-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近对接AI服务，AI应答的内容是<strong>HTTP 流式返回</strong>的，应答的<code>Content-Type</code>是<code>text/event-stream</code>，查阅了些相关的资料，做下笔记。</p>
+<span id="more"></span>  
+
+<h2 id="HTTP流式返回"><a href="#HTTP流式返回" class="headerlink" title="HTTP流式返回"></a>HTTP流式返回</h2><p>HTTP流式返回(<em>HTTP Streaming</em>) 是一种在客户端和服务器之间持续传输数据的技术，与传统的HTTP响应不同，后者通常在服务器处理完所有数据后一次性返回给客户端，流式返回允许服务器在处理请求时，<strong>不必等待所有数据准备完毕，就可以开始向客户端发送数据</strong>。这种方式对于处理大量数据或者长时间运行的任务非常有用，因为它可以提高用户体验，让客户端能够实时接收和处理数据，而不需要等待整个过程完成。</p>
+<p>流式返回的实现方式主要有以下几种：</p>
+<ol>
+<li><strong>分块传输编码（Chunked Transfer Encoding）</strong>：这是<strong>HTTP&#x2F;1.1协议中的一种特性</strong>，允许服务器在不知道内容总长度的情况下，将数据分成多个块（chunks）发送给客户端。每个块包含数据和块长度信息，最后一个块的长度为0，表示传输结束。客户端可以边接收边处理这些数据块。</li>
+<li><strong>Server-Sent Events （SSE）</strong> ：SSE是一种允许服务器向客户端推送实时更新的技术。服务器通过创建一个HTTP连接，然后定期发送更新数据给客户端。客户端可以通过JavaScript的<code>EventSource</code>接口监听这些事件。SSE适用于<strong>单向通信，即服务器到客户端的数据流</strong>。</li>
+<li><strong>WebSockets</strong>：WebSocket提供了全双工的通信能力，允许服务器和客户端之间建立一个持久的连接，双方可以随时发送消息。<strong>虽然WebSocket不是HTTP协议的一部分</strong>，但它提供了更为灵活的实时通信能力，适用于需要<strong>双向通信</strong>的场景。</li>
+</ol>
+<p>下面着重介绍一下<code>Server-Sent Events (SSE)</code>。</p>
+<h2 id="SSE-详解"><a href="#SSE-详解" class="headerlink" title="SSE 详解"></a>SSE 详解</h2><p>SSE是一种允许服务器向客户端推送实时更新的技术。它是HTML5规范的一部分，提供了一种轻量级的方法来实现<strong>服务器到客户端的单向通信</strong>。与传统的轮询和长轮询相比，SSE提供了更高效和实时的数据推送机制。</p>
+<h3 id="SSE-的特点"><a href="#SSE-的特点" class="headerlink" title="SSE 的特点"></a>SSE 的特点</h3><p>SSE 与 <code>WebSocket</code> 作用相似，都是建立浏览器与服务器之间的通信渠道，然后服务器向浏览器推送信息。总体来说，WebSocket 更强大和灵活。因为它是<strong>全双工通道，可以双向通信</strong>；SSE 是<strong>单向通道，只能服务器向浏览器发送，因为流信息本质上就是下载</strong>。如果浏览器向服务器发送信息，就变成了另一次 HTTP 请求。</p>
+<p><img src="/res/20240309000001.jpg" alt="20240309000001.jpg"></p>
+<p>但是，SSE 也有自己的优点:</p>
+<ol>
+<li>SSE E基于 HTTP 协议，现有的服务器软件都支持。WebSocket 是一个独立协议。</li>
+<li>SSE 属于轻量级，使用简单；WebSocket 协议相对复杂。</li>
+<li>SSE默认支持断线重连，如果连接意外关闭，客户端会自动尝试重新建立连接。WebSocket 需要自己实现。</li>
+<li>SSE 一般只用来传送文本，二进制数据需要编码后传送，WebSocket 默认支持传送二进制数据。</li>
+<li>SSE 支持自定义发送的消息类型。</li>
+</ol>
+<h3 id="SSE-数据格式"><a href="#SSE-数据格式" class="headerlink" title="SSE 数据格式"></a>SSE 数据格式</h3><p>服务器向客户端发送的 SSE 数据，必须是 UTF-8 编码的文本，具有如下的 HTTP 头信息：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: text/event-stream</span><br><span class="line">Cache-Control: no-cache</span><br><span class="line">Connection: keep-alive</span><br></pre></td></tr></table></figure>
+
+<p><code>Content-Type</code>必须指定 MIME 类型为<code>event-steam</code>。每一次发送的信息，由若干个message组成，每个message之间用<code>\n\n</code>分隔。每个message内部由若干行组成，每一行都是如下格式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[field]: value\n</span><br></pre></td></tr></table></figure>
+<p>上面的<code>field</code>可以取四个值:</p>
+<ul>
+<li>data</li>
+<li>id</li>
+<li>event</li>
+<li>retry</li>
+</ul>
+<p>此外，还可以有冒号开头的行，表示注释。通常，服务器每隔一段时间就会向浏览器发送一个注释，保持连接不中断。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">: This is a comment</span><br></pre></td></tr></table></figure>
+
+<h4 id="data"><a href="#data" class="headerlink" title="data"></a>data</h4><p>数据内容用data字段表示。(规范上没有对data格式有任何限制，可以是纯文本或者是JSON、XML格式)</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data:  message\n\n</span><br></pre></td></tr></table></figure>
+<p>如果数据很长，可以分成多行，最后一行用\n\n结尾，前面行都用\n结尾。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">data: begin message\n</span><br><span class="line">data: continue message\n\n</span><br></pre></td></tr></table></figure>
+
+<h4 id="id"><a href="#id" class="headerlink" title="id"></a>id</h4><p>数据标识符用id字段表示，相当于每一条数据的编号。<br>浏览器用lastEventId属性读取这个值。一旦连接断线，浏览器会发送一个 HTTP 头，里面包含一个特殊的<code>Last-Event-ID</code>头信息，将这个值发送回来，用来帮助服务器端重建连接。因此，这个头信息可以被视为一种同步机制。</p>
+<h4 id="event"><a href="#event" class="headerlink" title="event"></a>event</h4><p>event字段表示自定义的事件类型，默认是message事件。浏览器可以用<code>addEventListener()</code>监听该事件。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">event: foo\n</span><br><span class="line">data: a foo event\n\n</span><br><span class="line"></span><br><span class="line">data: an unnamed event\n\n</span><br><span class="line"></span><br><span class="line">event: bar\n</span><br><span class="line">data: a bar event\n\n</span><br></pre></td></tr></table></figure>
+<p>上面的代码创造了三条信息。第一条的名字是foo，触发浏览器的foo事件；第二条未取名，表示默认类型，触发浏览器的message事件；第三条是bar，触发浏览器的bar事件</p>
+<h4 id="retry"><a href="#retry" class="headerlink" title="retry"></a>retry</h4><p>服务器可以用retry字段，指定浏览器重新发起连接的时间间隔。<br>两种情况会导致浏览器重新发起连接：一种是时间间隔到期，二是由于网络错误等原因，导致连接出错。</p>
+<h2 id="SSE完整例子"><a href="#SSE完整例子" class="headerlink" title="SSE完整例子"></a>SSE完整例子</h2><p><code>Java</code>服务端(Spring Boot 3.x + JDK17)</p>
+<p>StreamingController: </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GetMapping(value = &quot;/sse&quot;, produces = MediaType.TEXT_EVENT_STREAM_VALUE)</span></span><br><span class="line"><span class="keyword">public</span> SseEmitter <span class="title function_">streamSseMvc</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">SseEmitter</span> <span class="variable">emitter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SseEmitter</span>();</span><br><span class="line"></span><br><span class="line">    EXECUTE_SERVICE.execute(() -&gt; &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">15</span>; i++) &#123;</span><br><span class="line">                <span class="type">LocalDateTime</span> <span class="variable">now</span> <span class="operator">=</span> LocalDateTime.now();</span><br><span class="line">                <span class="type">String</span> <span class="variable">data</span> <span class="operator">=</span> now.format(DATE_FORMATTER_SS);</span><br><span class="line">                SseEmitter.<span class="type">SseEventBuilder</span> <span class="variable">event</span> <span class="operator">=</span> SseEmitter.event()</span><br><span class="line">                        .id(String.valueOf(i))</span><br><span class="line">                        .data(data + <span class="string">&quot;\nanother line.&quot;</span>)</span><br><span class="line">                        .name(<span class="string">&quot;test&quot;</span>)</span><br><span class="line">                        .reconnectTime(<span class="number">1000</span>)</span><br><span class="line">                        .comment(<span class="string">&quot;comment&quot;</span>);</span><br><span class="line">                emitter.send(event);</span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            emitter.complete();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">            emitter.completeWithError(ex);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> emitter;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>报文格式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">id:0</span><br><span class="line">data:20240309194825</span><br><span class="line">data:another line.</span><br><span class="line">event:test</span><br><span class="line">retry:1000</span><br><span class="line">:comment</span><br><span class="line"></span><br><span class="line">id:1</span><br><span class="line">data:20240309194827</span><br><span class="line">data:another line.</span><br><span class="line">event:test</span><br><span class="line">retry:1000</span><br><span class="line">:comment</span><br><span class="line"></span><br><span class="line">id:2</span><br><span class="line">data:20240309194828</span><br><span class="line">data:another line.</span><br><span class="line">event:test</span><br><span class="line">retry:1000</span><br><span class="line">:comment</span><br><span class="line"></span><br><span class="line">......</span><br><span class="line"></span><br><span class="line">id:10</span><br><span class="line">data:20240309194836</span><br><span class="line">data:another line.</span><br><span class="line">event:test</span><br><span class="line">retry:1000</span><br><span class="line">:comment</span><br></pre></td></tr></table></figure>
+
+
+<p><code>Java</code>客户端（HTTPClient）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testSSE</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">RequestConfig</span> <span class="variable">requestConfig</span> <span class="operator">=</span> RequestConfig.custom()</span><br><span class="line">                .setConnectTimeout(CONNECT_TIMEOUT)</span><br><span class="line">                .setSocketTimeout(CONNECT_TIMEOUT)</span><br><span class="line">                .setConnectionRequestTimeout(CONNECT_TIMEOUT)</span><br><span class="line">                .build();</span><br><span class="line">        <span class="comment">// 创建HttpClient实例，并应用上面的超时设置</span></span><br><span class="line">        <span class="type">CloseableHttpClient</span> <span class="variable">httpClient</span> <span class="operator">=</span> HttpClients.custom()</span><br><span class="line">                .setDefaultRequestConfig(requestConfig)</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="type">long</span> <span class="variable">start</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line"></span><br><span class="line">            <span class="type">HttpGet</span> <span class="variable">httpGet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HttpGet</span>(<span class="string">&quot;http://localhost:8080/sse&quot;</span>);</span><br><span class="line">            httpGet.addHeader(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;application/json&quot;</span>);</span><br><span class="line">            httpGet.addHeader(<span class="string">&quot;Accept&quot;</span>, <span class="string">&quot;*/*&quot;</span>);</span><br><span class="line">            <span class="comment">// 创建一个自定义的ResponseHandler来处理流式响应</span></span><br><span class="line">            ResponseHandler&lt;String&gt; responseHandler = response -&gt; &#123;</span><br><span class="line">                <span class="type">int</span> <span class="variable">status</span> <span class="operator">=</span> response.getStatusLine().getStatusCode();</span><br><span class="line">                <span class="keyword">if</span> (status != <span class="number">200</span>) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(<span class="string">&quot;invalid http status code: &quot;</span> + status);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="type">HttpEntity</span> <span class="variable">entity</span> <span class="operator">=</span> response.getEntity();</span><br><span class="line">                <span class="keyword">if</span> (entity == <span class="literal">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(<span class="string">&quot;invalid http response: null&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 获取响应实体的内容流</span></span><br><span class="line">                <span class="keyword">try</span> (<span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> entity.getContent();</span><br><span class="line">                     <span class="type">InputStreamReader</span> <span class="variable">inputStreamReader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(inputStream, StandardCharsets.UTF_8);</span><br><span class="line">                     <span class="type">BufferedReader</span> <span class="variable">bufferedReader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(inputStreamReader)) &#123;</span><br><span class="line"></span><br><span class="line">                    <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">                    String line;</span><br><span class="line">                    <span class="keyword">while</span> ((line = bufferedReader.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                        <span class="comment">// 处理每一行数据</span></span><br><span class="line">                        <span class="keyword">if</span> (StringUtils.isNotBlank(line) &amp;&amp; StringUtils.startsWith(line, <span class="string">&quot;data:&quot;</span>)) &#123;</span><br><span class="line">                            <span class="type">String</span> <span class="variable">data</span> <span class="operator">=</span> StringUtils.trim(line.substring(<span class="number">5</span>));</span><br><span class="line">                            System.out.println(<span class="string">&quot;&gt;&gt;&gt;&quot;</span> + data);</span><br><span class="line">                            result = data;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">return</span> result;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line">            <span class="comment">// 执行HTTP POST请求，并通过ResponseHandler处理流式响应</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> httpClient.execute(httpGet, responseHandler);</span><br><span class="line">            System.out.println(<span class="string">&quot;Last result is [&quot;</span> + result + <span class="string">&quot;]&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;调用失败: &quot;</span> + e.getMessage());</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                httpClient.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;cost &quot;</span> + (System.currentTimeMillis() - start) / <span class="number">1000</span> + <span class="string">&quot; s&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc9112#section-7.1">Chunked Transfer Coding RFC 9112 §7.1</a></p>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Chunked_transfer_encoding">Chunked transfer encoding Wiki</a></p>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Server-sent_events">Server-sent_events Wiki</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.ruanyifeng.com/blog/2017/05/server-sent_events.html">Server-Sent Events 教程</a></p>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/WebSocket">WebSocket</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.baeldung.com/spring-server-sent-events">Server-Sent Events in Spring</a></p>
+<p><a target="_blank" rel="noopener" href="https://dev.to/bsorrentino/how-to-stream-data-over-http-using-node-and-fetch-api-4ij2">How to stream data over HTTP using Node and Fetch API</a></p>
+<p><a target="_blank" rel="noopener" href="https://copyprogramming.com/howto/stream-a-http-response-in-java#stream-a-http-response-in-java">Java Implementation for Streaming HTTP Response</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.tangshuang.net/8744.html">基于HTTP流式传输的长时响应体验提升</a></p>
+<p><a target="_blank" rel="noopener" href="https://gist.github.com/CMCDragonkai/6bfade6431e9ffb7fe88">HTTP Streaming (or Chunked vs Store &amp; Forward)</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+              <a href="/tags/http/" rel="tag"># http</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/03/03/fun/20240303-acore-gm-cmd/" rel="prev" title="AzerothCore GM命令">
+      <i class="fa fa-chevron-left"></i> AzerothCore GM命令
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/04/06/java/20240406-websocket/" rel="next" title="WebSocket">
+      WebSocket <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP%E6%B5%81%E5%BC%8F%E8%BF%94%E5%9B%9E"><span class="nav-number">1.</span> <span class="nav-text">HTTP流式返回</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSE-%E8%AF%A6%E8%A7%A3"><span class="nav-number">2.</span> <span class="nav-text">SSE 详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SSE-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">2.1.</span> <span class="nav-text">SSE 的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SSE-%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">SSE 数据格式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#data"><span class="nav-number">2.2.1.</span> <span class="nav-text">data</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#id"><span class="nav-number">2.2.2.</span> <span class="nav-text">id</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#event"><span class="nav-number">2.2.3.</span> <span class="nav-text">event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#retry"><span class="nav-number">2.2.4.</span> <span class="nav-text">retry</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSE%E5%AE%8C%E6%95%B4%E4%BE%8B%E5%AD%90"><span class="nav-number">3.</span> <span class="nav-text">SSE完整例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

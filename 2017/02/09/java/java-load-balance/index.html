@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="首先给大家介绍下什么是负载均衡（来自百科） 负载均衡 建立在现有网络结构之上，它提供了一种廉价有效透明的方法扩展 网络设备和 服务器的带宽、增加 吞吐量、加强网络数据处理能力、提高网络的灵活性和可用性。 负载均衡，英文名称为Load Balance，其意思就是分摊到多个操作单元上进行执行，例如Web 服务器、 FTP服务器、 企业关键应用服务器和其它关键任务服务器等，从而共同完成工作任务。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多种负载均衡算法及其Java代码实现">
+<meta property="og:url" content="https://forgives.github.io/2017/02/09/java/java-load-balance/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="首先给大家介绍下什么是负载均衡（来自百科） 负载均衡 建立在现有网络结构之上，它提供了一种廉价有效透明的方法扩展 网络设备和 服务器的带宽、增加 吞吐量、加强网络数据处理能力、提高网络的灵活性和可用性。 负载均衡，英文名称为Load Balance，其意思就是分摊到多个操作单元上进行执行，例如Web 服务器、 FTP服务器、 企业关键应用服务器和其它关键任务服务器等，从而共同完成工作任务。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-02-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.383Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="j2ee">
+<meta property="article:tag" content="load">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2017/02/09/java/java-load-balance/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>多种负载均衡算法及其Java代码实现 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2017/02/09/java/java-load-balance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          多种负载均衡算法及其Java代码实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-02-09 00:00:00" itemprop="dateCreated datePublished" datetime="2017-02-09T00:00:00+08:00">2017-02-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>首先给大家介绍下什么是负载均衡（来自百科）</p>
+<p>负载均衡 建立在现有网络结构之上，它提供了一种廉价有效透明的方法扩展 网络设备和 服务器的带宽、增加 吞吐量、加强网络数据处理能力、提高网络的灵活性和可用性。</p>
+<p>负载均衡，英文名称为Load Balance，其意思就是分摊到多个操作单元上进行执行，例如Web 服务器、 FTP服务器、 企业关键应用服务器和其它关键任务服务器等，从而共同完成工作任务。</p>
+<span id="more"></span>
+
+<p>本文讲述的是”将外部发送来的请求均匀分配到对称结构中的某一台服务器上”的各种算法，并以Java代码演示每种算法的具体实现，OK，下面进入正题，在进入正题前，先写一个类来模拟Ip列表：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> ashang.peng@aliyun.com</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 二月 07, 2017</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">IpMap</span>   &#123;</span><br><span class="line">    <span class="comment">// 待路由的Ip列表，Key代表Ip，Value代表该Ip的权重</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> HashMap&lt;String, Integer&gt; serverWeightMap =</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, Integer&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span></span><br><span class="line">    &#123;</span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.100&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.101&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        <span class="comment">// 权重为4</span></span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.102&quot;</span>, <span class="number">4</span>);</span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.103&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.104&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        <span class="comment">// 权重为3</span></span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.105&quot;</span>, <span class="number">3</span>);</span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.106&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        <span class="comment">// 权重为2</span></span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.107&quot;</span>, <span class="number">2</span>);</span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.108&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.109&quot;</span>, <span class="number">1</span>);</span><br><span class="line">        serverWeightMap.put(<span class="string">&quot;192.168.1.110&quot;</span>, <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="轮询（Round-Robin）"><a href="#轮询（Round-Robin）" class="headerlink" title="轮询（Round Robin）"></a>轮询（Round Robin）</h2><p>轮询调度算法的原理是每一次把来自用户的请求轮流分配给内部中的服务器，从1开始，直到N(内部服务器个数)，然后重新开始循环。算法的优点是其简洁性，它无需记录当前所有连接的状态，所以它是一种无状态调度。</p>
+<p>其代码实现大致如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> ashang.peng@aliyun.com</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 二月 07, 2017</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RoundRobin</span>   &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">Integer</span> <span class="variable">pos</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getServer</span><span class="params">()</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 重建一个Map，避免服务器的上下线导致的并发问题</span></span><br><span class="line">        Map&lt;String, Integer&gt; serverMap =</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, Integer&gt;();</span><br><span class="line">        serverMap.putAll(IpMap.serverWeightMap);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 取得Ip地址List</span></span><br><span class="line">        Set&lt;String&gt; keySet = serverMap.keySet();</span><br><span class="line">        ArrayList&lt;String&gt; keyList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">        keyList.addAll(keySet);</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">server</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">synchronized</span> (pos)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (pos &gt; keySet.size())</span><br><span class="line">                pos = <span class="number">0</span>;</span><br><span class="line">            server = keyList.get(pos);</span><br><span class="line">            pos ++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> server;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于serverWeightMap中的地址列表是动态的，随时可能有机器上线、下线或者宕机，因此为了避免可能出现的并发问题，方法内部要新建局部变量serverMap，现将serverMap中的内容复制到线程本地，以避免被多个线程修改。这样可能会引入新的问题，复制以后serverWeightMap的修改无法反映给serverMap，也就是说这一轮选择服务器的过程中，新增服务器或者下线服务器，负载均衡算法将无法获知。新增无所谓，如果有服务器下线或者宕机，那么可能会访问到不存在的地址。因此，服务调用端需要有相应的容错处理，比如重新发起一次server选择并调用。</p>
+<p>对于当前轮询的位置变量pos，为了保证服务器选择的顺序性，需要在操作时对其加锁，使得同一时刻只能有一个线程可以修改pos的值，否则当pos变量被并发修改，则无法保证服务器选择的顺序性，甚至有可能导致keyList数组越界。</p>
+<p>轮询法的<code>优点</code>在于：试图做到请求转移的绝对均衡。</p>
+<p>轮询法的<code>缺点</code>在于：为了做到请求转移的绝对均衡，必须付出相当大的代价，因为为了保证pos变量修改的互斥性，需要引入重量级的悲观锁synchronized，这将会导致该段轮询代码的并发吞吐量发生明显的下降。</p>
+<h2 id="随机（Random）法"><a href="#随机（Random）法" class="headerlink" title="随机（Random）法"></a>随机（Random）法</h2><p>通过系统的随机算法，根据后端服务器的列表大小值来随机选取其中的一台服务器进行访问。由概率统计理论可以得知，随着客户端调用服务端的次数增多，</p>
+<p>其实际效果越来越接近于平均分配调用量到后端的每一台服务器，也就是轮询的结果。</p>
+<p>随机法的代码实现大致如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> ashang.peng@aliyun.com</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 二月 07, 2017</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">class</span> <span class="title class_">Random</span>   &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getServer</span><span class="params">()</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 重建一个Map，避免服务器的上下线导致的并发问题   </span></span><br><span class="line">        Map&lt;String, Integer&gt; serverMap =</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, Integer&gt;();</span><br><span class="line">        serverMap.putAll(IpMap.serverWeightMap);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 取得Ip地址List   </span></span><br><span class="line">        Set&lt;String&gt; keySet = serverMap.keySet();</span><br><span class="line">        ArrayList&lt;String&gt; keyList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">        keyList.addAll(keySet);</span><br><span class="line"></span><br><span class="line">        java.util.<span class="type">Random</span> <span class="variable">random</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.util.Random();</span><br><span class="line">        <span class="type">int</span> <span class="variable">randomPos</span> <span class="operator">=</span> random.nextInt(keyList.size());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> keyList.get(randomPos);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>整体代码思路和轮询法一致，先重建serverMap，再获取到server列表。在选取server的时候，通过Random的nextInt方法取0~keyList.size()区间的一个随机值，从而从服务器列表中随机获取到一台服务器地址进行返回。基于概率统计的理论，吞吐量越大，随机算法的效果越接近于轮询算法的效果。</p>
+<h2 id="源地址哈希（Hash）法"><a href="#源地址哈希（Hash）法" class="headerlink" title="源地址哈希（Hash）法"></a>源地址哈希（Hash）法</h2><p>源地址哈希的思想是根据获取客户端的IP地址，通过哈希函数计算得到的一个数值，用该数值对服务器列表的大小进行取模运算，得到的结果便是客服端要访问服务器的序号。采用源地址哈希法进行负载均衡，同一IP地址的客户端，当后端服务器列表不变时，它每次都会映射到同一台后端服务器进行访问。</p>
+<p>源地址哈希算法的代码实现大致如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> ashang.peng@aliyun.com</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 二月 07, 2017</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">class</span> <span class="title class_">Hash</span>      &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getServer</span><span class="params">()</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 重建一个Map，避免服务器的上下线导致的并发问题</span></span><br><span class="line">        Map&lt;String, Integer&gt; serverMap =</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, Integer&gt;();</span><br><span class="line">        serverMap.putAll(IpMap.serverWeightMap);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 取得Ip地址List</span></span><br><span class="line">        Set&lt;String&gt; keySet = serverMap.keySet();</span><br><span class="line">        ArrayList&lt;String&gt; keyList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">        keyList.addAll(keySet);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 在Web应用中可通过HttpServlet的getRemoteIp方法获取</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">remoteIp</span> <span class="operator">=</span> <span class="string">&quot;127.0.0.1&quot;</span>;</span><br><span class="line">        <span class="type">int</span> <span class="variable">hashCode</span> <span class="operator">=</span> remoteIp.hashCode();</span><br><span class="line">        <span class="type">int</span> <span class="variable">serverListSize</span> <span class="operator">=</span> keyList.size();</span><br><span class="line">        <span class="type">int</span> <span class="variable">serverPos</span> <span class="operator">=</span> hashCode % serverListSize;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> keyList.get(serverPos);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>前两部分和轮询法、随机法一样就不说了，差别在于路由选择部分。通过客户端的ip也就是remoteIp，取得它的Hash值，对服务器列表的大小取模，结果便是选用的服务器在服务器列表中的索引值。</p>
+<p>源地址哈希法的优点在于：保证了相同客户端IP地址将会被哈希到同一台后端服务器，直到后端服务器列表变更。根据此特性可以在服务消费者与服务提供者之间建立有状态的session会话。</p>
+<p>源地址哈希算法的缺点在于：除非集群中服务器的非常稳定，基本不会上下线，否则一旦有服务器上线、下线，那么通过源地址哈希算法路由到的服务器是服务器上线、下线前路由到的服务器的概率非常低，如果是session则取不到session，如果是缓存则可能引发”雪崩”。如果这么解释不适合明白，可以看我之前的一篇文章MemCache超详细解读，一致性Hash算法部分。</p>
+<h3 id="加权轮询（Weight-Round-Robin）法"><a href="#加权轮询（Weight-Round-Robin）法" class="headerlink" title="加权轮询（Weight Round Robin）法"></a>加权轮询（Weight Round Robin）法</h3><p>不同的后端服务器可能机器的配置和当前系统的负载并不相同，因此它们的抗压能力也不相同。给配置高、负载低的机器配置更高的权重，让其处理更多的请；而配置低、负载高的机器，给其分配较低的权重，降低其系统负载，加权轮询能很好地处理这一问题，并将请求顺序且按照权重分配到后端。加权轮询法的代码实现大致如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> ashang.peng@aliyun.com</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 二月 07, 2017</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WeightRoundRobin</span>   &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Integer pos;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getServer</span><span class="params">()</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 重建一个Map，避免服务器的上下线导致的并发问题</span></span><br><span class="line">        Map&lt;String, Integer&gt; serverMap =</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, Integer&gt;();</span><br><span class="line">        serverMap.putAll(IpMap.serverWeightMap);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 取得Ip地址List</span></span><br><span class="line">        Set&lt;String&gt; keySet = serverMap.keySet();</span><br><span class="line">        Iterator&lt;String&gt; iterator = keySet.iterator();</span><br><span class="line"></span><br><span class="line">        List&lt;String&gt; serverList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">        <span class="keyword">while</span> (iterator.hasNext())</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">server</span> <span class="operator">=</span> iterator.next();</span><br><span class="line">            <span class="type">int</span> <span class="variable">weight</span> <span class="operator">=</span> serverMap.get(server);</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; weight; i++)</span><br><span class="line">                serverList.add(server);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">server</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">synchronized</span> (pos)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (pos &gt; keySet.size())</span><br><span class="line">                pos = <span class="number">0</span>;</span><br><span class="line">            server = serverList.get(pos);</span><br><span class="line">            pos ++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> server;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>与轮询法类似，只是在获取服务器地址之前增加了一段权重计算的代码，根据权重的大小，将地址重复地增加到服务器地址列表中，权重越大，该服务器每轮所获得的请求数量越多。</p>
+<h3 id="加权随机（Weight-Random）法"><a href="#加权随机（Weight-Random）法" class="headerlink" title="加权随机（Weight Random）法"></a>加权随机（Weight Random）法</h3><p>与加权轮询法一样，加权随机法也根据后端机器的配置，系统的负载分配不同的权重。不同的是，它是按照权重随机请求后端服务器，而非顺序。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> ashang.peng@aliyun.com</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 二月 07, 2017</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">class</span> <span class="title class_">WeightRandom</span>   &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getServer</span><span class="params">()</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 重建一个Map，避免服务器的上下线导致的并发问题</span></span><br><span class="line">        Map&lt;String, Integer&gt; serverMap =</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, Integer&gt;();</span><br><span class="line">        serverMap.putAll(IpMap.serverWeightMap);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 取得Ip地址List</span></span><br><span class="line">        Set&lt;String&gt; keySet = serverMap.keySet();</span><br><span class="line">        Iterator&lt;String&gt; iterator = keySet.iterator();</span><br><span class="line"></span><br><span class="line">        List&lt;String&gt; serverList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;String&gt;();</span><br><span class="line">        <span class="keyword">while</span> (iterator.hasNext())</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">server</span> <span class="operator">=</span> iterator.next();</span><br><span class="line">            <span class="type">int</span> <span class="variable">weight</span> <span class="operator">=</span> serverMap.get(server);</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; weight; i++)</span><br><span class="line">                serverList.add(server);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        java.util.<span class="type">Random</span> <span class="variable">random</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.util.Random();</span><br><span class="line">        <span class="type">int</span> <span class="variable">randomPos</span> <span class="operator">=</span> random.nextInt(serverList.size());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> serverList.get(randomPos);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码相当于是随机法和加权轮询法的结合，比较好理解，就不解释了。</p>
+<h3 id="最小连接数（Least-Connections）法"><a href="#最小连接数（Least-Connections）法" class="headerlink" title="最小连接数（Least Connections）法"></a>最小连接数（Least Connections）法</h3><p>最小连接数算法比较灵活和智能，由于后端服务器的配置不尽相同，对于请求的处理有快有慢，它是根据后端服务器当前的连接情况，动态地选取其中当前</p>
+<p>积压连接数最少的一台服务器来处理当前的请求，尽可能地提高后端服务的利用效率，将负责合理地分流到每一台服务器。</p>
+<p>前面几种方法费尽心思来实现服务消费者请求次数分配的均衡，当然这么做是没错的，可以为后端的多台服务器平均分配工作量，最大程度地提高服务器的利用率，但是实际情况是否真的如此？实际情况中，请求次数的均衡真的能代表负载的均衡吗？这是一个值得思考的问题。</p>
+<p>上面的问题，再换一个角度来说就是：以后端服务器的视角来观察系统的负载，而非请求发起方来观察。最小连接数法便属于此类。</p>
+<p>最小连接数算法比较灵活和智能，由于后端服务器的配置不尽相同，对于请求的处理有快有慢，它正是根据后端服务器当前的连接情况，动态地选取其中当前积压连接数最少的一台服务器来处理当前请求，尽可能地提高后端服务器的利用效率，将负载合理地分流到每一台机器。由于最小连接数设计服务器连接数的汇总和感知，设计与实现较为繁琐，此处就不说它的实现了。</p>
+<p>附了一个说明“NGINX的实现原因，大家可以看看”：</p>
+<p><a target="_blank" rel="noopener" href="http://blog.csdn.net/zhangskd/article/details/50242241">Nginx的负载均衡 - 最少连接 (least_conn)</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/j2ee/" rel="tag"># j2ee</a>
+              <a href="/tags/load/" rel="tag"># load</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/02/07/java/jar-confict-check/" rel="prev" title="jar包冲突排查">
+      <i class="fa fa-chevron-left"></i> jar包冲突排查
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/04/11/java/cglib/" rel="next" title="cglib doc">
+      cglib doc <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AE%E8%AF%A2%EF%BC%88Round-Robin%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">轮询（Round Robin）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%EF%BC%88Random%EF%BC%89%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">随机（Random）法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BA%90%E5%9C%B0%E5%9D%80%E5%93%88%E5%B8%8C%EF%BC%88Hash%EF%BC%89%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">源地址哈希（Hash）法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E6%9D%83%E8%BD%AE%E8%AF%A2%EF%BC%88Weight-Round-Robin%EF%BC%89%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">加权轮询（Weight Round Robin）法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E6%9D%83%E9%9A%8F%E6%9C%BA%EF%BC%88Weight-Random%EF%BC%89%E6%B3%95"><span class="nav-number">3.2.</span> <span class="nav-text">加权随机（Weight Random）法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E8%BF%9E%E6%8E%A5%E6%95%B0%EF%BC%88Least-Connections%EF%BC%89%E6%B3%95"><span class="nav-number">3.3.</span> <span class="nav-text">最小连接数（Least Connections）法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

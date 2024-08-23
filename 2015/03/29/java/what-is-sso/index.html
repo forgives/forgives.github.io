@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="SSO服务源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSO服务源码分析">
+<meta property="og:url" content="https://forgives.github.io/2015/03/29/java/what-is-sso/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="SSO服务源码分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1jd0kaKuSBuNjy1XcXXcYjFXa-654-380.png">
+<meta property="article:published_time" content="2015-03-28T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.386Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="sso">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.alicdn.com/tfs/TB1jd0kaKuSBuNjy1XcXXcYjFXa-654-380.png">
+
+<link rel="canonical" href="https://forgives.github.io/2015/03/29/java/what-is-sso/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SSO服务源码分析 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2015/03/29/java/what-is-sso/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SSO服务源码分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-03-29 00:00:00" itemprop="dateCreated datePublished" datetime="2015-03-29T00:00:00+08:00">2015-03-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>SSO服务源码分析</p>
+<span id="more"></span>
+
+<p>SSO英文全称Single Sign On，<strong>单点登录</strong>。SSO是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。<br>实现单点登录的实质就是要解决如何产生和存储信任，再就是其他系统如何验证这个信任的有效性，因此要点也就以下几个：</p>
+<ul>
+<li>存储信任</li>
+<li>验证信任<br>只要解决了以上的问题，达到了开头讲得效果就可以说是SSO。最简单实现SSO的方法就是用Cookie，实现流程如下所示：<br><img src="https://img.alicdn.com/tfs/TB1jd0kaKuSBuNjy1XcXXcYjFXa-654-380.png" alt="sso"></li>
+</ul>
+<p>但是目前Cookie的实现存在两个问题：</p>
+<ul>
+<li>Cookie不安全</li>
+<li>不能跨域免登<br>第一个问题可以通过对Cookie加密处理解决，第二个问题却是硬伤了。</li>
+</ul>
+<p>SSO的实现除了Cookie之外还有许多实现方式，这里暂且分析一下一个基于Cookie的实现源码。</p>
+<p>首先给出本次分析的结论，具体源码贴在结论之后。</p>
+<h2 id="具体实现逻辑总结"><a href="#具体实现逻辑总结" class="headerlink" title="具体实现逻辑总结"></a>具体实现逻辑总结</h2><p>设置web应用的filter，用于初始化每次请求线程的SSOInfo（其中包含 <code>登陆有效性的ticket</code>，<code>用户的业务数据（比如userId）</code>，本次请求的<code>HttpServletRequest</code>和<code>HttpServletResponse</code>（<em>可选</em>））。</p>
+<ol>
+<li>读取Cookies获取ticket放入SSOInfo，无则ticket为null。</li>
+<li>把SSOInfo存储进一个线程隔离级别的容器中（这里使用ThreadLocal实现）</li>
+<li>在需要拦截的Controller前设置拦截器，对SSOInfo中包含的ticket进行有效性校验。（这里的有效性校验实现方式很多，本次系统中是用redis来存储、管理ticket有效性的）无效ticket的情况下引导登陆，创建ticket(由特定字段与<code>UUID.randomUUID()</code>来实现),保存（ticket为redis的key，存储value为用户id），管理（redis设置超时规则）ticket。<br>以上就是这个SSO系统的具体实现逻辑。分析出来实现逻辑比较简单。可适用于一般的小型单域名的网站。</li>
+</ol>
+<p>以下为具体实现代码：</p>
+<p>web项目设置初始化filter。<br>web.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">filter</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>AuthFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>com.jc.sso.client.AuthFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">filter</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>AuthFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>AuthFilter：读取cookies初始化SSOInfo</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest request, ServletResponse response, FilterChain chain)</span> <span class="keyword">throws</span> IOException, ServletException &#123; </span><br><span class="line">  </span><br><span class="line">    <span class="type">SSOInfo</span> <span class="variable">info</span> <span class="operator">=</span> SSOCookieUtil.vistSsoCookie((HttpServletRequest)request); </span><br><span class="line">    SsoManager.setSSOInfo(info); </span><br><span class="line">    info.setRequestObj((HttpServletRequest)request); </span><br><span class="line">    info.setResponseObj((HttpServletResponse)response); </span><br><span class="line">    <span class="keyword">try</span> &#123; </span><br><span class="line">        <span class="comment">// pass the request along the filter chain </span></span><br><span class="line">            chain.doFilter(request, response); </span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123; </span><br><span class="line">            SsoManager.clearSSOInfo(); </span><br><span class="line">    &#125; </span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>SSOInfo<br>记录SSO的ticket的bean,为了额外信息的获取，同时记录了HttpServletRequest和HttpServletResponse（这里只是为了额外信息的记录，比如访问Ip地址等等）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> User user; </span><br><span class="line"><span class="keyword">private</span> String ticket; </span><br><span class="line"><span class="keyword">private</span> String uid;</span><br><span class="line"><span class="comment">//标识pc主机的id </span></span><br><span class="line"><span class="keyword">private</span> String app; <span class="comment">/** * 是否已经进行过ticket的校验 */</span> </span><br><span class="line"><span class="keyword">private</span> <span class="type">boolean</span> <span class="variable">isValidated</span> <span class="operator">=</span> <span class="literal">false</span>; </span><br><span class="line"><span class="keyword">private</span> HttpServletRequest requestObj; </span><br><span class="line"><span class="keyword">private</span> HttpServletResponse responseObj; </span><br><span class="line"><span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isLogin</span><span class="params">()</span> &#123; </span><br><span class="line">    <span class="keyword">if</span> (ticket == <span class="literal">null</span>) &#123; </span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>; </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">if</span> (!isValidated) &#123; </span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NotValidateException</span>(); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> user != <span class="literal">null</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>SSOCookieUtil<br>一个Cookie的操作类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> SSOInfo <span class="title function_">vistSsoCookie</span><span class="params">(HttpServletRequest request)</span> &#123; </span><br><span class="line">    Cookie[] cookies = getAllCookies(request); </span><br><span class="line">    <span class="keyword">if</span>(cookies == <span class="literal">null</span> || cookies.length == <span class="number">0</span>)&#123; </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">SSOInfo</span>(<span class="literal">null</span>); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="type">String</span> <span class="variable">ticket</span> <span class="operator">=</span> <span class="literal">null</span>; </span><br><span class="line">    <span class="type">String</span> <span class="variable">uid</span> <span class="operator">=</span> <span class="string">&quot;none&quot;</span>; </span><br><span class="line">    <span class="keyword">for</span>(Cookie cookie : cookies)&#123; </span><br><span class="line">        <span class="keyword">if</span>(TICKET_GRANT_TICKET_COOKIE.equals(cookie.getName()))&#123; </span><br><span class="line">            ticket = cookie.getValue(); </span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span>(UID_COOKIE.equals(cookie.getName()))&#123; </span><br><span class="line">            ticket = cookie.getValue(); </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">    </span><br><span class="line">    <span class="type">SSOInfo</span> <span class="variable">si</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SSOInfo</span>(ticket); </span><br><span class="line">    si.setUid(uid); </span><br><span class="line">    <span class="type">String</span> <span class="variable">app</span> <span class="operator">=</span> SsoManager.config.getValue(SsoManager.CONFIG_APP_ID); </span><br><span class="line">    si.setApp(app); </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> si; </span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>初次访问会返回一个ticket为null的SSOInfo。</p>
+<p>存储线程级别的SSOInfo。（注意，<strong>上面是在filter中进行的初始化</strong>，此时请求继续分发）</p>
+<p>SsoManager.setSSOInfo(info);</p>
+<p>SsoManager</p>
+<p>private static ThreadLocal<SSOInfo> tempStore &#x3D; new ThreadLocal<SSOInfo>(); public static SSOInfo getSSOInfo() { return tempStore.get(); } public static void setSSOInfo(SSOInfo info) { tempStore.set(info); } </p>
+<p>在请求中设置拦截器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> &lt;mvc:interceptors&gt; </span><br><span class="line">     &lt;mvc:interceptor&gt; </span><br><span class="line">        &lt;mvc:mapping path=&quot;/user/*.html&quot; /&gt; </span><br><span class="line">        &lt;bean class=&quot;com.jc.site.common.interceptor.UserAccountInterceptor&quot;&gt;&lt;/bean&gt; </span><br><span class="line">     &lt;/mvc:interceptor&gt; </span><br><span class="line">&lt;/mvc:interceptors&gt;</span><br></pre></td></tr></table></figure>
+<p>UserAccountInterceptor.preHandle</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (SsoManager.validateWebTicket() ) &#123;<span class="comment">//登陆状态 </span></span><br><span class="line">   <span class="type">String</span> <span class="variable">userId</span> <span class="operator">=</span> SsoManager.getSSOInfo().getUser().getUserId();</span><br></pre></td></tr></table></figure>
+
+<p>验证登录状态</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">validateWebTicket</span><span class="params">()</span> &#123; </span><br><span class="line">    <span class="type">SSOInfo</span> <span class="variable">si</span> <span class="operator">=</span> tempStore.get(); </span><br><span class="line">    <span class="keyword">if</span> (si == <span class="literal">null</span>) &#123; </span><br><span class="line">        logger.warn(<span class="string">&quot;The ssoinfo object is missed, check whether some unexpected operation on ThreadLocal is executed!&quot;</span>); <span class="keyword">return</span> <span class="literal">false</span>; </span><br><span class="line">    &#125; </span><br><span class="line">    validate2Server(si); </span><br><span class="line">    <span class="keyword">return</span> si.isLogin(); </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>validate2Server</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">validate2Server</span><span class="params">(SSOInfo si)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (si == <span class="literal">null</span>) &#123; </span><br><span class="line">        <span class="keyword">return</span>; </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">if</span> (si.isValidated()) &#123; </span><br><span class="line">        <span class="keyword">return</span> ; </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">if</span> (si.getTicket() == <span class="literal">null</span> || si.getTicket().length() == <span class="number">0</span>) &#123;</span><br><span class="line">        si.setValidated(<span class="literal">true</span>); </span><br><span class="line">        <span class="keyword">return</span>; </span><br><span class="line">    &#125; …………（后台是远程调用验证系统传入ticket） </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>验证系统</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(value = &quot;validate.html&quot;)</span> </span><br><span class="line"><span class="meta">@ResponseBody</span> </span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">validateLogin</span><span class="params">(<span class="meta">@RequestParam(value=&quot;t&quot;, required=false)</span>String ticket, String app, </span></span><br><span class="line"><span class="params"><span class="meta">@RequestParam(value=&quot;did&quot;, required=false)</span>String deviceId)</span> &#123; </span><br><span class="line">    <span class="keyword">if</span> (StringUtils.isEmpty(ticket)) &#123; </span><br><span class="line">        <span class="keyword">return</span> setErrorView(<span class="string">&quot;ticket值为空&quot;</span>); </span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(StringUtils.isEmpty(app)) &#123; </span><br><span class="line">        <span class="keyword">return</span> setErrorView(<span class="string">&quot;app类型不能为空&quot;</span>); </span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(StringUtils.isEmpty(deviceId)) &#123; </span><br><span class="line">        <span class="keyword">return</span> setErrorView(<span class="string">&quot;设备ID为空&quot;</span>); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">try</span> &#123; </span><br><span class="line">        <span class="type">String</span> <span class="variable">user</span> <span class="operator">=</span> authManager.checkTGT(ticket, app); </span><br><span class="line">    <span class="keyword">if</span> (user != <span class="literal">null</span>) &#123; </span><br><span class="line">        <span class="keyword">return</span> buildSuccessResponse(user); </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123; </span><br><span class="line">        <span class="keyword">return</span> buildErrorResponse(user); </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123; </span><br><span class="line">        logger.error(<span class="string">&quot;登录异常(Unexpected)&quot;</span>, e); </span><br><span class="line">        <span class="keyword">return</span> setErrorView(<span class="string">&quot;服务异常，请稍后再试&quot;</span>); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里以ticket作为key来从redis中获取userId的信息</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> String <span class="title function_">checkTGT</span><span class="params">(String tgt, String app)</span> &#123; </span><br><span class="line">    <span class="type">String</span> <span class="variable">user</span> <span class="operator">=</span> <span class="literal">null</span>; </span><br><span class="line">    <span class="keyword">try</span>&#123; </span><br><span class="line">        user = redisTemplate.get(tgt); </span><br><span class="line">        <span class="type">int</span> <span class="variable">tmpApp</span> <span class="operator">=</span> StringUtil.getIntValue(app, SSOConstant.APP_SITE); </span><br><span class="line">        <span class="keyword">if</span>(!StringUtils.isEmpty(user))&#123; </span><br><span class="line">            prolongTicket(tgt,app, user, getValiateTime(tmpApp)); </span><br><span class="line">        &#125; </span><br><span class="line"></span><br><span class="line">        &#125;<span class="keyword">catch</span>(Exception e)&#123; </span><br><span class="line">            logger.error(<span class="string">&quot;检查TGT异常:&quot;</span>,e); </span><br><span class="line">        &#125; </span><br><span class="line">    <span class="keyword">return</span> user; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上就是认证的整个流程，下面是登陆流程</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123; </span><br><span class="line">    userInDb = loginServiceImpl.login(user); </span><br><span class="line">&#125; <span class="keyword">catch</span> (PasswordNotMatchException e) &#123; </span><br><span class="line">    <span class="keyword">if</span> (logger.isInfoEnabled()) &#123; </span><br><span class="line">        logger.info(<span class="string">&quot;登录失败,密码错误&quot;</span>); </span><br><span class="line">    &#125; </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">//4. 登陆成功情况下，生成ticket </span></span><br><span class="line">user.setType(SSOConstant.APP_SITE); </span><br><span class="line"><span class="type">String</span> <span class="variable">ticket</span> <span class="operator">=</span> authManager.generateSiteTGT(request, response, <span class="string">&quot;&quot;</span> + user.getType(), userInDb);</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">generateSiteTGT</span><span class="params">(HttpServletRequest request,HttpServletResponse response, String app, User user)</span> &#123; </span><br><span class="line">    <span class="type">String</span> <span class="variable">tgt</span> <span class="operator">=</span> <span class="literal">null</span>; </span><br><span class="line">    <span class="keyword">try</span>&#123; </span><br><span class="line">        <span class="type">UUID</span> <span class="variable">uuid</span> <span class="operator">=</span> UUID.randomUUID(); </span><br><span class="line">        tgt = app + <span class="string">&quot;-&quot;</span> + SSOConstant.TICKET_GRANT_TICKET + <span class="string">&quot;-&quot;</span> + uuid.toString().replaceAll(<span class="string">&quot;-&quot;</span>, <span class="string">&quot;&quot;</span>); </span><br><span class="line">        <span class="type">int</span> <span class="variable">tmpApp</span> <span class="operator">=</span> StringUtil.getIntValue(app, SSOConstant.APP_SITE); </span><br><span class="line">        <span class="type">int</span> <span class="variable">longLogin</span> <span class="operator">=</span> getValiateTime(tmpApp); </span><br><span class="line">        setupTicket(tgt, app, <span class="string">&quot;&quot;</span>, user, longLogin); </span><br><span class="line"></span><br><span class="line">        <span class="type">Cookie</span> <span class="variable">ticket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Cookie</span>(SSOConstant.TICKET_GRANT_TICKET_COOKIE, tgt); </span><br><span class="line">        <span class="type">String</span> <span class="variable">domain</span> <span class="operator">=</span> PropertiesUtil.getString(SSOConstant.PROPERY_DOMAIN); </span><br><span class="line">        ticket.setDomain(domain); </span><br><span class="line">        ticket.setPath(<span class="string">&quot;/&quot;</span>); </span><br><span class="line">        ticket.setMaxAge(longLogin); </span><br><span class="line"></span><br><span class="line">        response.addCookie(ticket); </span><br><span class="line">    &#125;<span class="keyword">catch</span>(Exception e)&#123; </span><br><span class="line">        logger.error(<span class="string">&quot;生成TGT异常:&quot;</span>,e); </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">return</span> tgt; </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">setupTicket</span><span class="params">(String ticket, String app, String deviceId, User user, <span class="type">int</span> longLogin)</span> &#123; </span><br><span class="line">    <span class="keyword">if</span> (ticket == <span class="literal">null</span>) &#123; </span><br><span class="line">        <span class="keyword">return</span> ; </span><br><span class="line">    &#125; </span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(longLogin &lt; <span class="number">1</span>)&#123; </span><br><span class="line">    <span class="comment">//保存30分钟 </span></span><br><span class="line">        longLogin = SSOConstant.TICKET_GRANT_TICKET_TIME_OUT_DEFAULT; </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="type">String</span> <span class="variable">oldTicket</span> <span class="operator">=</span> redisTemplate.get(app + <span class="string">&quot;_&quot;</span> + user.getUserId()); </span><br><span class="line">    <span class="keyword">if</span> (oldTicket != <span class="literal">null</span>) &#123; </span><br><span class="line">        redisTemplate.delKey(oldTicket); </span><br><span class="line">    &#125; </span><br><span class="line">    redisTemplate.setex(ticket, longLogin, user.getId() + <span class="string">&quot;:&quot;</span> + user.getUserId()); </span><br><span class="line">    redisTemplate.setex(app + <span class="string">&quot;_&quot;</span> + user.getUserId(), longLogin, ticket); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/sso/" rel="tag"># sso</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/03/17/java/class-loader-load-class/" rel="prev" title="从一道面试题来认识java类加载时机与过程">
+      <i class="fa fa-chevron-left"></i> 从一道面试题来认识java类加载时机与过程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/04/20/java/java-IRR/" rel="next" title="Java版的IRR(内部收益率)实现">
+      Java版的IRR(内部收益率)实现 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0%E9%80%BB%E8%BE%91%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">具体实现逻辑总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

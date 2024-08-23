@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近虽然乌龟服上线了，但是不用加速器还是太卡，继续玩回自己的开源服。这次是把22年遗留下来的PlayerBots 卡顿的问题解决下，顺便更新一版本，说不定最新版的性能会更好一些。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AzerothCore PlayerBots编译记录">
+<meta property="og:url" content="https://forgives.github.io/2023/10/02/fun/20231002-azerothcore-playerbots/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="最近虽然乌龟服上线了，但是不用加速器还是太卡，继续玩回自己的开源服。这次是把22年遗留下来的PlayerBots 卡顿的问题解决下，顺便更新一版本，说不定最新版的性能会更好一些。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://forgives.github.io/res/20231002215601.png">
+<meta property="og:image" content="https://forgives.github.io/res/20231002215602.png">
+<meta property="article:published_time" content="2023-10-02T13:47:00.000Z">
+<meta property="article:modified_time" content="2024-08-23T13:34:54.374Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="fun">
+<meta property="article:tag" content="wow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://forgives.github.io/res/20231002215601.png">
+
+<link rel="canonical" href="https://forgives.github.io/2023/10/02/fun/20231002-azerothcore-playerbots/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>AzerothCore PlayerBots编译记录 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2023/10/02/fun/20231002-azerothcore-playerbots/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AzerothCore PlayerBots编译记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-10-02 21:47:00" itemprop="dateCreated datePublished" datetime="2023-10-02T21:47:00+08:00">2023-10-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-08-23 21:34:54" itemprop="dateModified" datetime="2024-08-23T21:34:54+08:00">2024-08-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B8%B8%E6%88%8F/" itemprop="url" rel="index"><span itemprop="name">游戏</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近虽然乌龟服上线了，但是不用加速器还是太卡，继续玩回自己的开源服。<br>这次是把22年遗留下来的<code>PlayerBots</code> 卡顿的问题解决下，顺便更新一版本，说不定最新版的性能会更好一些。</p>
+<span id="more"></span>
+
+<h2 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h2><p>编译基本上和原版类似，注意需要使用对应的 <a target="_blank" rel="noopener" href="https://github.com/ZhengPeiRu21/azerothcore-wotlk">azerothcore</a>版本。<br>MOD是 <a target="_blank" rel="noopener" href="https://github.com/ZhengPeiRu21/mod-playerbots">mod-playerbots</a> ，但是我这边选择更新更频繁的 <a target="_blank" rel="noopener" href="https://github.com/liyunfan1223/mod-playerbots">FORK版本</a><br>为了后续方便扩展，这边还是打上<code>Eluna</code>的MOD: <a target="_blank" rel="noopener" href="https://github.com/azerothcore/mod-eluna">mod-eluna</a></p>
+<p>当前时间<code>2023年10月2日 21:53:12</code> 的源码直接编译是有错误的，MOD的源码需要简单改两个地方:<br><img src="/res/20231002215601.png" alt="20231002215601.png"></p>
+<p>直接编译跑一下。发现还是卡顿，但是明显比以前好很多了，看console输出比较频繁，应该是机器人太多了，减少机器人个数，同时增加机器人更新时间。<br>修改<code>\configs\modules\playerbots.conf</code> 文件：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">AiPlayerbot.RandomBotUpdateInterval = 60</span><br><span class="line"># Random bot count</span><br><span class="line">AiPlayerbot.MinRandomBots = 50</span><br><span class="line">AiPlayerbot.MaxRandomBots = 50</span><br><span class="line">AiPlayerbot.RandomBotMinLevel = 1</span><br><span class="line">AiPlayerbot.RandomBotMaxLevel = 80</span><br></pre></td></tr></table></figure>
+<p>之后重启尝试一下，的确不卡了。 但是有个新问题，机器人怎么控制？！这里官方建议使用插件 <a target="_blank" rel="noopener" href="https://github.com/liyunfan1223/unbot-addon">unbot-addon</a><br>ps. 最后我是和 <a target="_blank" rel="noopener" href="https://github.com/whipowill/wow-addon-playerbots">wow-addon-playerbots</a> 一起使用的。</p>
+<h2 id="插件修改"><a href="#插件修改" class="headerlink" title="插件修改"></a>插件修改</h2><p><code>unbot-addon</code> 在点击按钮的时候总是会报<code>lua</code>脚本错误，仔细看下是下面的<code>InspectFrame</code>为<code>nil</code></p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">CommandUnBotSetting</span><span class="params">(index)</span></span></span><br><span class="line">	UnBotHideAllSubFrame();</span><br><span class="line">	UnBotCloseAllBagsFrame();</span><br><span class="line">	OnlineFrame:Hide();</span><br><span class="line">	NPCFrame:Hide();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> ( InspectFrame:IsShown()) <span class="keyword">then</span></span><br><span class="line">		DisplayInfomation(<span class="string">&quot;InspectFrame_Show &quot;</span>..UnitName(InspectFrame.unit)..<span class="string">&quot;, Name &quot;</span>..InspectFrame:GetName());</span><br><span class="line">	<span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>直接改成下面代码</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (InspectFrame <span class="keyword">and</span> InspectFrame:IsShown()) <span class="keyword">then</span></span><br><span class="line">    DisplayInfomation(<span class="string">&quot;InspectFrame_Show &quot;</span>..UnitName(InspectFrame.unit)..<span class="string">&quot;, Name &quot;</span>..InspectFrame:GetName());</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>然后是这个函数被作者注释掉了，但是却还有引用:</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">InspectFrame_Show</span><span class="params">(unit)</span></span></span><br><span class="line">    HideUIPanel(InspectFrame);</span><br><span class="line">    <span class="keyword">if</span> ( CanInspect(unit, <span class="literal">true</span>) ) <span class="keyword">then</span></span><br><span class="line">        NotifyInspect(unit);</span><br><span class="line">        InspectFrame.unit = unit;</span><br><span class="line">        InspectSwitchTabs(<span class="number">1</span>);</span><br><span class="line">        ShowUIPanel(InspectFrame);</span><br><span class="line">        InspectFrame_UpdateTalentTab();</span><br><span class="line">        DisplayInfomation(<span class="string">&quot;InspectFrame_Show &quot;</span>..UnitName(unit));</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>这里起初我也不太懂，但是如果只是把调用点全部去除的话 查看机器人装备的功能就失效了。这时候就只能祭出我正常多年的<strong>魔兽世界编程宝典 - World of Warcraft Programming: A Guide and Reference for Creating WoW Addons</strong><br>同时也全局搜索了下现有的多玩插件与大脚插件相关内容，发现这个<code>InspectFrame</code> 其实就是<strong>装备查看的UI框架</strong>。同时在多玩中的<code>DuowanMove</code> 插件发现了这些框架是按需加载的</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">local</span> Blizzard_LoadOnDemand = &#123;</span><br><span class="line">	[<span class="string">&quot;Blizzard_InspectUI&quot;</span>] = &#123;<span class="string">&quot;InspectFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_GuildBankUI&quot;</span>] = &#123;<span class="string">&quot;GuildBankFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_TradeSkillUI&quot;</span>] = &#123;<span class="string">&quot;TradeSkillFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_ItemSocketingUI&quot;</span>] = &#123;<span class="string">&quot;ItemSocketingFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_BarbershopUI&quot;</span>] = &#123;<span class="string">&quot;BarberShopFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_GlyphUI&quot;</span>] = &#123;<span class="string">&quot;SpellBookFrame&quot;</span>, <span class="string">&quot;GlyphFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_MacroUI&quot;</span>] = &#123;<span class="string">&quot;MacroFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_AchievementUI&quot;</span>] = &#123;<span class="string">&quot;AchievementFrame&quot;</span>, <span class="string">&quot;AchievementFrameHeader&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_TalentUI&quot;</span>] = &#123;<span class="string">&quot;PlayerTalentFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_Calendar&quot;</span>] = &#123;<span class="string">&quot;CalendarFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_TrainerUI&quot;</span>] = &#123;<span class="string">&quot;ClassTrainerFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_BindingUI&quot;</span>] = &#123;<span class="string">&quot;KeyBindingFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_AuctionUI&quot;</span>] = &#123;<span class="string">&quot;AuctionFrame&quot;</span>&#125;,</span><br><span class="line">	[<span class="string">&quot;Blizzard_TimeManager&quot;</span>] = &#123;<span class="string">&quot;TimeManagerFrame&quot;</span>&#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> <span class="function"><span class="keyword">function</span> <span class="title">checkBlizzLoaded</span><span class="params">()</span></span></span><br><span class="line">    <span class="keyword">for</span> a, t <span class="keyword">in</span> <span class="built_in">pairs</span>(Blizzard_LoadOnDemand) <span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> (IsAddOnLoaded(a)) <span class="keyword">then</span></span><br><span class="line">            SetMoveHandler(<span class="built_in">_G</span>[t[<span class="number">1</span>]], <span class="built_in">_G</span>[t[<span class="number">2</span>]]);</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>这里有一个函数成为了破局点<code>IsAddOnLoaded(a)</code>。 这个函数在编程脚本中是可以直接搜索到到</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">IsAddOnLoaded</span><br><span class="line">    Returns whether an addon is currently loaded.</span><br><span class="line">    loaded = IsAddOnLoaded(“name“) or IsAddOnLoaded(index)</span><br><span class="line">Arguments:</span><br><span class="line">    name—Name of an addon (name of the addon’s folder and TOC file, not the Title found in the TOC) (string)</span><br><span class="line">    index—Index of an addon in the addon list (between 1 and GetNumAddOns()) (number)</span><br><span class="line">Returns:</span><br><span class="line">    loaded—1 if the addon is loaded; otherwise nil (1nil)</span><br></pre></td></tr></table></figure>
+<p>这里是判断这个组件有没有被加载，继续搜索会发现一个叫做 <code>LoadAddOn</code> 的函数，这个是主动加载插件的。所以这里修改一下插件代码：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">InspectFrame_Show</span><span class="params">(unit)</span></span></span><br><span class="line">	<span class="keyword">if</span>(InspectFrame) <span class="keyword">then</span></span><br><span class="line">		DoInspectFrameShow(unit);</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">if</span>( IsAddOnLoaded(<span class="string">&quot;Blizzard_InspectUI&quot;</span>) == <span class="literal">nil</span>) <span class="keyword">then</span></span><br><span class="line">			<span class="keyword">local</span> <span class="built_in">loaded</span>, reason = LoadAddOn(<span class="string">&quot;Blizzard_InspectUI&quot;</span>);</span><br><span class="line">			<span class="keyword">if</span>( <span class="built_in">loaded</span> == <span class="literal">nil</span>) <span class="keyword">then</span></span><br><span class="line">				DisplayInfomation(<span class="string">&quot;窗口初始化失败：&quot;</span>..reason);</span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				DoInspectFrameShow(unit);</span><br><span class="line">			<span class="keyword">end</span></span><br><span class="line">		<span class="keyword">end</span></span><br><span class="line">	<span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">DoInspectFrameShow</span><span class="params">(unit)</span></span></span><br><span class="line">	<span class="keyword">if</span>(InspectFrame) <span class="keyword">then</span></span><br><span class="line">		HideUIPanel(InspectFrame);</span><br><span class="line">		<span class="keyword">if</span> ( CanInspect(unit, <span class="literal">true</span>) ) <span class="keyword">then</span></span><br><span class="line">			NotifyInspect(unit);</span><br><span class="line">			InspectFrame.unit = unit;</span><br><span class="line">			InspectSwitchTabs(<span class="number">1</span>);</span><br><span class="line">			ShowUIPanel(InspectFrame);</span><br><span class="line">			InspectFrame_UpdateTalentTab();</span><br><span class="line">			DisplayInfomation(<span class="string">&quot;InspectFrame_Show &quot;</span>..UnitName(unit));</span><br><span class="line">		<span class="keyword">end</span>	</span><br><span class="line">	<span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>在没有加载的时候手动加载一下即可。 自此，<code>PlayerBots</code> 版本的<code>AzerothCore</code>就可以畅玩了，同时也给插件作者提个<a target="_blank" rel="noopener" href="https://github.com/liyunfan1223/unbot-addon/pull/2/commits/dddc6446ab3696d56d04e2d93b2d5aa105fba312">PR</a> 。</p>
+<p><img src="/res/20231002215602.png" alt="20231002215602.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/fun/" rel="tag"># fun</a>
+              <a href="/tags/wow/" rel="tag"># wow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/09/29/fun/20230930-trinitycore-add-object/" rel="prev" title="TrinityCore 指定位置增加铁砧">
+      <i class="fa fa-chevron-left"></i> TrinityCore 指定位置增加铁砧
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/10/08/fun/20231000-azerothcore-addnpc/" rel="next" title="AzerothCore 新增NPC">
+      AzerothCore 新增NPC <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">1.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6%E4%BF%AE%E6%94%B9"><span class="nav-number">2.</span> <span class="nav-text">插件修改</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">232</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">113</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
