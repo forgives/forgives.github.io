@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="公司的使用的dubbo没有配置dubbo admin，调试不方便。准备本地搭建一个，但是nacos一直连接不上。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DubboAdmin 注册nacos 失败问题">
+<meta property="og:url" content="https://forgives.github.io/2024/10/16/java/20241016-nacos-grpc-connect/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="公司的使用的dubbo没有配置dubbo admin，调试不方便。准备本地搭建一个，但是nacos一直连接不上。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-10-16T11:17:00.000Z">
+<meta property="article:modified_time" content="2024-10-16T12:15:41.363Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="nacos">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2024/10/16/java/20241016-nacos-grpc-connect/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>DubboAdmin 注册nacos 失败问题 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2024/10/16/java/20241016-nacos-grpc-connect/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DubboAdmin 注册nacos 失败问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-16 19:17:00 / 修改时间：20:15:41" itemprop="dateCreated datePublished" datetime="2024-10-16T19:17:00+08:00">2024-10-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>公司的使用的dubbo没有配置dubbo admin，调试不方便。准备本地搭建一个，但是nacos一直连接不上。</p>
+<span id="more"></span>  
+
+<p>dubbo admin的注册中心配置的连接地址是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admin.registry.address=nacos://xxx.com:80?group=DEFAULT_GROUP&amp;namespace=public</span><br></pre></td></tr></table></figure>
+<p>用的是80端口，做了集群的负载均衡，80端口映射成了8848端口。通过debug源码发现，<br><code>com.alibaba.nacos.common.remote.client.grpc.GrpcClient#connectToServer</code>是在使用grpc连接nacos。具体分析的如下：</p>
+<p>首先dubbo-admin中的 <code>DubboConfigApplicationListener</code> 实现了 <code>ApplicationListener</code> 接口，在 <code>onApplicationEvent</code> 方法中初始化了dubbo的配置Bean</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onApplicationEvent</span><span class="params">(DubboConfigInitEvent event)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (nullSafeEquals(applicationContext, event.getSource())) &#123;</span><br><span class="line">        <span class="comment">// It&#x27;s expected to be notified at org.springframework.context.support.AbstractApplicationContext.registerListeners(),</span></span><br><span class="line">        <span class="comment">// before loading non-lazy singleton beans. At this moment, all BeanFactoryPostProcessor have been processed,</span></span><br><span class="line">        <span class="keyword">if</span> (initialized.compareAndSet(<span class="literal">false</span>, <span class="literal">true</span>)) &#123;</span><br><span class="line">            initDubboConfigBeans();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>后续调用到了<br><code>org.apache.dubbo.config.deploy.DefaultApplicationDeployer#initialize</code> 方法进行初始化。</p>
+<p>其中核心在<code>startConfigCenter();</code> 方法中，后续一系列调用在<code>createDynamicConfiguration</code>方法中创建了 <code>NacosDynamicConfiguration</code>。<br><code>NacosDynamicConfiguration</code> 的构造函数中，调用了 <code>buildConfigService</code> 方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">NacosDynamicConfiguration(URL url, ApplicationModel applicationModel) &#123;</span><br><span class="line">    <span class="built_in">this</span>.nacosProperties = buildNacosProperties(url);</span><br><span class="line">    <span class="built_in">this</span>.configService = buildConfigService(url);</span><br><span class="line">    <span class="built_in">this</span>.watchListenerMap = <span class="keyword">new</span> <span class="title class_">ConcurrentHashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="built_in">this</span>.applicationModel = applicationModel;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 <code>buildConfigService</code> 中来获取服务状态。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">serverStatus</span> <span class="operator">=</span> tmpConfigServices.getServerStatus();</span><br></pre></td></tr></table></figure>
+<p>最终在<br><code>com.alibaba.nacos.client.config.impl.ClientWorker.ConfigRpcTransportClient#ensureRpcClient</code>中初始化了 <code>rpcClient</code>。<br>而初始化的代码是在<code>ScheduledExecutorService clientEventExecutor</code> 中独立开线程实现的。<br>我们可以直接看<br><code>this.reconnect(reconnectContext.serverInfo, reconnectContext.onRequestFail);</code> 方法的实现。<br>这就回到了我们最初提到的<br><code>com.alibaba.nacos.common.remote.client.grpc.GrpcClient#connectToServer</code> 方法，在这里初始化了端口 <code>port</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> serverInfo.getServerPort() + <span class="built_in">this</span>.rpcPortOffset();</span><br></pre></td></tr></table></figure>
+<p>这里的端口是设置的服务端口增加了固定的偏移量。 serverInfo.getServerPort() 设置的是80， 而<code>this.rpcPortOffset()</code>默认是 1000 （<code>SDK_GRPC_PORT_DEFAULT_OFFSET</code>）。<br>随后调用<code>Response response = this.serverCheck(serverInfo.getServerIp(), port, newChannelStubTemp);</code>连接 nacos。</p>
+<p>所以问题就清晰了，nacos 中的grpc端口其实是配置的端口加了一定的偏移量，而做了负载均衡的 nacos 只转发了http的端口（80-&gt;8848），而缺少了（1080-&gt;9848）的逻辑，所以导致grpc连接不上。</p>
+<hr>
+<p>调用栈：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">connectToServer:330, GrpcClient (com.alibaba.nacos.common.remote.client.grpc)</span><br><span class="line">reconnect:506, RpcClient (com.alibaba.nacos.common.remote.client)</span><br><span class="line">lambda$start$2:344, RpcClient (com.alibaba.nacos.common.remote.client)</span><br><span class="line">run:-1, RpcClient$$Lambda$803/0x0000007801505b28 (com.alibaba.nacos.common.remote.client)</span><br><span class="line">call:539, Executors$RunnableAdapter (java.util.concurrent)</span><br><span class="line">run$$$capture:264, FutureTask (java.util.concurrent)</span><br><span class="line">run:-1, FutureTask (java.util.concurrent)</span><br><span class="line"> - Async stack trace</span><br><span class="line">&lt;init&gt;:151, FutureTask (java.util.concurrent)</span><br><span class="line">&lt;init&gt;:215, ScheduledThreadPoolExecutor$ScheduledFutureTask (java.util.concurrent)</span><br><span class="line">schedule:561, ScheduledThreadPoolExecutor (java.util.concurrent)</span><br><span class="line">submit:715, ScheduledThreadPoolExecutor (java.util.concurrent)</span><br><span class="line">start:281, RpcClient (com.alibaba.nacos.common.remote.client)</span><br><span class="line">ensureRpcClient:1000, ClientWorker$ConfigRpcTransportClient (com.alibaba.nacos.client.config.impl)</span><br><span class="line">getOneRunningClient:1147, ClientWorker$ConfigRpcTransportClient (com.alibaba.nacos.client.config.impl)</span><br><span class="line">isHealthServer:1193, ClientWorker$ConfigRpcTransportClient (com.alibaba.nacos.client.config.impl)</span><br><span class="line">isHealthServer:568, ClientWorker (com.alibaba.nacos.client.config.impl)</span><br><span class="line">getServerStatus:244, NacosConfigService (com.alibaba.nacos.client.config)</span><br><span class="line">buildConfigService:111, NacosDynamicConfiguration (org.apache.dubbo.configcenter.support.nacos)</span><br><span class="line">&lt;init&gt;:98, NacosDynamicConfiguration (org.apache.dubbo.configcenter.support.nacos)</span><br><span class="line">createDynamicConfiguration:46, NacosDynamicConfigurationFactory (org.apache.dubbo.configcenter.support.nacos)</span><br><span class="line">lambda$getDynamicConfiguration$0:39, AbstractDynamicConfigurationFactory (org.apache.dubbo.common.config.configcenter)</span><br><span class="line">computeIfAbsent:1708, ConcurrentHashMap (java.util.concurrent)</span><br><span class="line">computeIfAbsent:58, ConcurrentHashMapUtils (org.apache.dubbo.common.utils)</span><br><span class="line">getDynamicConfiguration:39, AbstractDynamicConfigurationFactory (org.apache.dubbo.common.config.configcenter)</span><br><span class="line">getDynamicConfiguration:886, DefaultApplicationDeployer (org.apache.dubbo.config.deploy)</span><br><span class="line">prepareEnvironment:825, DefaultApplicationDeployer (org.apache.dubbo.config.deploy)</span><br><span class="line">startConfigCenter:297, DefaultApplicationDeployer (org.apache.dubbo.config.deploy)</span><br><span class="line">initialize:217, DefaultApplicationDeployer (org.apache.dubbo.config.deploy)</span><br><span class="line">prepare:570, DefaultModuleDeployer (org.apache.dubbo.config.deploy)</span><br><span class="line">initDubboConfigBeans:73, DubboConfigApplicationListener (org.apache.dubbo.config.spring.context)</span><br><span class="line">onApplicationEvent:59, DubboConfigApplicationListener (org.apache.dubbo.config.spring.context)</span><br><span class="line">onApplicationEvent:37, DubboConfigApplicationListener (org.apache.dubbo.config.spring.context)</span><br><span class="line">doInvokeListener:172, SimpleApplicationEventMulticaster (org.springframework.context.event)</span><br><span class="line">invokeListener:165, SimpleApplicationEventMulticaster (org.springframework.context.event)</span><br><span class="line">multicastEvent:139, SimpleApplicationEventMulticaster (org.springframework.context.event)</span><br><span class="line">multicastEvent:127, SimpleApplicationEventMulticaster (org.springframework.context.event)</span><br><span class="line">registerListeners:842, AbstractApplicationContext (org.springframework.context.support)</span><br><span class="line">refresh:548, AbstractApplicationContext (org.springframework.context.support)</span><br><span class="line">refresh:143, ServletWebServerApplicationContext (org.springframework.boot.web.servlet.context)</span><br><span class="line">refresh:755, SpringApplication (org.springframework.boot)</span><br><span class="line">refresh:747, SpringApplication (org.springframework.boot)</span><br><span class="line">refreshContext:402, SpringApplication (org.springframework.boot)</span><br><span class="line">run:312, SpringApplication (org.springframework.boot)</span><br><span class="line">run:1247, SpringApplication (org.springframework.boot)</span><br><span class="line">run:1236, SpringApplication (org.springframework.boot)</span><br><span class="line">main:34, DubboAdminApplication (org.apache.dubbo.admin)</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/nacos/" rel="tag"># nacos</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/10/12/note/20241012-git-pre-commit/" rel="prev" title="自用 pre-commit">
+      <i class="fa fa-chevron-left"></i> 自用 pre-commit
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/10/25/linux/20241025-install-mint/" rel="next" title="Install Linux Mint">
+      Install Linux Mint <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">247</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">120</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

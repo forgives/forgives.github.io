@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="基于哈希的消息认证码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HMAC 基于哈希的消息认证码">
+<meta property="og:url" content="https://forgives.github.io/2025/02/20/note/20250220-hmac/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="基于哈希的消息认证码">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-20T03:09:00.000Z">
+<meta property="article:modified_time" content="2025-02-20T03:09:47.988Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="mac">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2025/02/20/note/20250220-hmac/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>HMAC 基于哈希的消息认证码 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2025/02/20/note/20250220-hmac/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          HMAC 基于哈希的消息认证码
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-02-20 11:09:00 / 修改时间：11:09:47" itemprop="dateCreated datePublished" datetime="2025-02-20T11:09:00+08:00">2025-02-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>基于哈希的消息认证码</p>
+<span id="more"></span>
+
+
+<h2 id="MAC"><a href="#MAC" class="headerlink" title="MAC"></a>MAC</h2><h3 id="1-Mac-的命名含义与背景"><a href="#1-Mac-的命名含义与背景" class="headerlink" title="1. Mac 的命名含义与背景"></a>1. <strong>Mac 的命名含义与背景</strong></h3><ul>
+<li><strong>命名含义</strong>：<br><code>Mac</code> 是 <strong>Message Authentication Code（消息认证码）</strong> 的缩写，用于验证数据的完整性和真实性。它通过结合密钥和消息生成一个短小的认证码，确保消息未被篡改且来源可信。</li>
+<li><strong>背景</strong>：<br>在密码学中，MAC 是一种对称密钥技术（如 HMAC 算法）。Java 提供 <code>javax.crypto.Mac</code> 类作为标准 API，封装了 MAC 算法的实现，使开发者无需关注底层细节即可使用 HMAC-SHA256 等常见算法。</li>
+</ul>
+<h3 id="2-javax-crypto-Mac-类的作用"><a href="#2-javax-crypto-Mac-类的作用" class="headerlink" title="2. javax.crypto.Mac 类的作用"></a>2. <strong>javax.crypto.Mac 类的作用</strong></h3><p><code>Mac</code> 类的主要功能是：</p>
+<ul>
+<li><strong>数据完整性验证</strong>：确保传输或存储的数据未被篡改。</li>
+<li><strong>身份认证</strong>：验证消息来源的合法性（只有拥有密钥的实体才能生成有效的 MAC）。</li>
+<li><strong>应用场景</strong>：API 请求签名、安全通信（如 HTTPS）、文件校验等。</li>
+</ul>
+<h3 id="3-核心方法"><a href="#3-核心方法" class="headerlink" title="3. 核心方法"></a>3. <strong>核心方法</strong></h3><p>以下是 <code>Mac</code> 类的关键方法及其作用：</p>
+<h4 id="a-初始化方法"><a href="#a-初始化方法" class="headerlink" title="a. 初始化方法"></a>a. <strong>初始化方法</strong></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">init</span><span class="params">(SecretKey key)</span>  </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：用密钥初始化 MAC 实例。</li>
+<li><strong>注意</strong>：必须先调用此方法才能使用 <code>update()</code> 或 <code>doFinal()</code>。</li>
+<li><strong>示例</strong>：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SecretKey</span> <span class="variable">key</span> <span class="operator">=</span> KeyGenerator.getInstance(<span class="string">&quot;HmacSHA256&quot;</span>).generateKey();</span><br><span class="line"><span class="type">Mac</span> <span class="variable">mac</span> <span class="operator">=</span> Mac.getInstance(<span class="string">&quot;HmacSHA256&quot;</span>);</span><br><span class="line">mac.init(key);</span><br></pre></td></tr></table></figure>
+
+<h4 id="b-数据输入方法"><a href="#b-数据输入方法" class="headerlink" title="b. 数据输入方法"></a>b. <strong>数据输入方法</strong></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">update</span><span class="params">(<span class="type">byte</span>[] input)</span>  </span><br><span class="line"><span class="keyword">void</span> <span class="title function_">update</span><span class="params">(<span class="type">byte</span>[] input, <span class="type">int</span> offset, <span class="type">int</span> len)</span>  </span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：向 MAC 添加待处理的数据。支持分多次输入（如大文件的分块处理）。</li>
+<li><strong>示例</strong>：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span>[] dataPart1 = <span class="string">&quot;Hello&quot;</span>.getBytes();</span><br><span class="line"><span class="type">byte</span>[] dataPart2 = <span class="string">&quot;World&quot;</span>.getBytes();</span><br><span class="line">mac.update(dataPart1);</span><br><span class="line">mac.update(dataPart2);</span><br></pre></td></tr></table></figure>
+
+<h4 id="c-生成-MAC-值"><a href="#c-生成-MAC-值" class="headerlink" title="c. 生成 MAC 值"></a>c. <strong>生成 MAC 值</strong></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span>[] doFinal()  </span><br><span class="line"><span class="type">byte</span>[] doFinal(<span class="type">byte</span>[] input)  </span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：完成 MAC 计算并返回结果。调用后 <code>Mac</code> 对象会被重置，需重新初始化。</li>
+<li><strong>示例</strong>：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span>[] macResult = mac.doFinal();  <span class="comment">// 处理已通过 update() 添加的数据</span></span><br><span class="line"><span class="comment">// 或一步处理全部数据</span></span><br><span class="line"><span class="type">byte</span>[] macResult = mac.doFinal(<span class="string">&quot;HelloWorld&quot;</span>.getBytes());</span><br></pre></td></tr></table></figure>
+
+<h4 id="d-获取算法实例"><a href="#d-获取算法实例" class="headerlink" title="d. 获取算法实例"></a>d. <strong>获取算法实例</strong></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> Mac <span class="title function_">getInstance</span><span class="params">(String algorithm)</span>  </span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：根据算法名称（如 <code>HmacSHA256</code>）创建 <code>Mac</code> 实例。</li>
+<li><strong>示例</strong>：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Mac</span> <span class="variable">mac</span> <span class="operator">=</span> Mac.getInstance(<span class="string">&quot;HmacSHA256&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="e-其他辅助方法"><a href="#e-其他辅助方法" class="headerlink" title="e. 其他辅助方法"></a>e. <strong>其他辅助方法</strong></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">String <span class="title function_">getAlgorithm</span><span class="params">()</span>  </span><br><span class="line"><span class="type">int</span> <span class="title function_">getMacLength</span><span class="params">()</span>  </span><br><span class="line"><span class="keyword">void</span> <span class="title function_">reset</span><span class="params">()</span>  </span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>作用</strong>：<ul>
+<li><code>getAlgorithm()</code>：返回当前 MAC 算法的名称。</li>
+<li><code>getMacLength()</code>：返回 MAC 值的字节长度。</li>
+<li><code>reset()</code>：重置对象到初始化后的状态，可复用对象避免重复创建。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="使用流程示例"><a href="#使用流程示例" class="headerlink" title="使用流程示例"></a><strong>使用流程示例</strong></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 生成密钥</span></span><br><span class="line"><span class="type">SecretKey</span> <span class="variable">key</span> <span class="operator">=</span> KeyGenerator.getInstance(<span class="string">&quot;HmacSHA256&quot;</span>).generateKey();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 创建 Mac 实例</span></span><br><span class="line"><span class="type">Mac</span> <span class="variable">mac</span> <span class="operator">=</span> Mac.getInstance(<span class="string">&quot;HmacSHA256&quot;</span>);</span><br><span class="line">mac.init(key);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 输入数据</span></span><br><span class="line">mac.update(<span class="string">&quot;Hello&quot;</span>.getBytes());</span><br><span class="line">mac.update(<span class="string">&quot;World&quot;</span>.getBytes());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 4. 生成 MAC</span></span><br><span class="line"><span class="type">byte</span>[] macResult = mac.doFinal();</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="关键注意事项"><a href="#关键注意事项" class="headerlink" title="关键注意事项"></a><strong>关键注意事项</strong></h3><ol>
+<li><strong>密钥管理</strong>：MAC 的安全性依赖于密钥的保密性，需妥善存储（如使用硬件安全模块 HSM）。</li>
+<li><strong>算法选择</strong>：优先选择 HMAC-SHA256 等强算法，避免 MD5 或 SHA1 等弱算法。</li>
+<li><strong>线程安全</strong>：<code>Mac</code> &#x3D;&#x3D;实例非线程安全&#x3D;&#x3D;，需避免多线程共享同一实例。</li>
+</ol>
+<h2 id="HMAC"><a href="#HMAC" class="headerlink" title="HMAC"></a>HMAC</h2><p>HMAC 算法的全名是 <strong>Hash-based Message Authentication Code</strong>，即<strong>基于哈希的消息认证码</strong>。</p>
+<h3 id="什么是-HMAC？"><a href="#什么是-HMAC？" class="headerlink" title="什么是 HMAC？"></a>什么是 HMAC？</h3><p>HMAC 是一种通过结合<strong>加密哈希函数</strong>（如 SHA-256、SHA-1 等）和<strong>密钥</strong>来生成消息认证码的算法。它主要用于验证消息的完整性和真实性，确保消息在传输过程中没有被篡改，并且确实来自预期的发送方。</p>
+<h3 id="HMAC-的工作原理"><a href="#HMAC-的工作原理" class="headerlink" title="HMAC 的工作原理"></a>HMAC 的工作原理</h3><p>HMAC 使用一个密钥和一个哈希函数来计算消息的认证码。其基本过程如下：</p>
+<ol>
+<li><p><strong>输入</strong>：</p>
+<ul>
+<li>消息（Message）：需要验证完整性的数据。</li>
+<li>密钥（Key）：只有通信双方知道的秘密密钥。</li>
+<li>哈希函数（Hash Function）：如 SHA-256、SHA-1 等。</li>
+</ul>
+</li>
+<li><p><strong>计算</strong>：</p>
+<ul>
+<li>HMAC 使用密钥对消息进行两次哈希运算，确保即使攻击者知道哈希函数，也无法伪造消息认证码。</li>
+<li>公式表示为：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HMAC(K, m) = H((K&#x27; ⊕ opad) || H((K&#x27; ⊕ ipad) || m))</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>K</code>：密钥。</li>
+<li><code>m</code>：消息。</li>
+<li><code>H</code>：哈希函数。</li>
+<li><code>K&#39;</code>：经过填充或截断后的密钥。</li>
+<li><code>opad</code> 和 <code>ipad</code>：固定的位模式（外填充和内填充）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>输出</strong>：</p>
+<ul>
+<li>生成固定长度的 HMAC 值，通常与所使用的哈希函数的输出长度相同（例如，使用 SHA-256 时，输出长度为 256 位）。</li>
+</ul>
+</li>
+</ol>
+<h3 id="HMAC-的特点"><a href="#HMAC-的特点" class="headerlink" title="HMAC 的特点"></a>HMAC 的特点</h3><ol>
+<li><p><strong>安全性</strong>：</p>
+<ul>
+<li>HMAC 的安全性依赖于底层的哈希函数和密钥的保密性。</li>
+<li>即使攻击者知道哈希函数，只要密钥保密，攻击者无法伪造有效的 HMAC。</li>
+</ul>
+</li>
+<li><p><strong>完整性验证</strong>：</p>
+<ul>
+<li>接收方可以使用相同的密钥和哈希函数重新计算 HMAC，并与接收到的 HMAC 进行比较。如果两者一致，则说明消息未被篡改。</li>
+</ul>
+</li>
+<li><p><strong>广泛使用</strong>：</p>
+<ul>
+<li>HMAC 被广泛应用于各种安全协议和系统中，例如：<ul>
+<li><strong>API 请求签名</strong>：用于验证请求的合法性和完整性。</li>
+<li><strong>数据存储</strong>：保护存储数据的完整性。</li>
+<li><strong>网络通信</strong>：如 TLS&#x2F;SSL 中的握手过程。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="示例：HMAC-SHA256"><a href="#示例：HMAC-SHA256" class="headerlink" title="示例：HMAC-SHA256"></a>示例：HMAC-SHA256</h3><p>HMAC 可以与不同的哈希函数结合使用，常见的组合包括：</p>
+<ul>
+<li><strong>HMAC-SHA1</strong> （不推荐）</li>
+<li><strong>HMAC-SHA256</strong></li>
+<li><strong>HMAC-MD5</strong>（虽然 MD5 已不再推荐使用）</li>
+</ul>
+<p>例如，使用 HMAC-SHA256 时，算法会生成一个 256 位（32 字节）的哈希值。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>HMAC 的全称是 <strong>Hash-based Message Authentication Code</strong>，它是一种基于哈希函数的消息认证机制，能够有效保证消息的完整性和真实性。 HMAC 广泛应用于现代密码学和网络安全领域，尤其是在需要验证数据来源和完整性的场景中。</p>
+<h2 id="VS-MessageDigest"><a href="#VS-MessageDigest" class="headerlink" title="VS MessageDigest"></a>VS MessageDigest</h2><p><code>javax.crypto.Mac</code> 和 <code>javax.crypto.MessageDigest</code> 是 Java 中处理数据完整性和认证的两大核心类，但两者在功能、安全性和应用场景上有显著区别。以下是详细对比：</p>
+<h3 id="1-核心功能差异"><a href="#1-核心功能差异" class="headerlink" title="1. 核心功能差异"></a><strong>1. 核心功能差异</strong></h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>javax.crypto.Mac</code></th>
+<th><code>javax.crypto.MessageDigest</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>定义</strong></td>
+<td>基于密钥的 <strong>消息认证码（MAC）</strong> 生成工具</td>
+<td>无密钥的 <strong>消息摘要（哈希）</strong> 生成工具</td>
+</tr>
+<tr>
+<td><strong>算法示例</strong></td>
+<td><code>HmacSHA256</code>、<code>HmacSHA1</code></td>
+<td><code>SHA-256</code>、<code>MD5</code></td>
+</tr>
+<tr>
+<td><strong>密钥依赖</strong></td>
+<td>必须使用密钥初始化（<code>SecretKey</code>）</td>
+<td>无需密钥</td>
+</tr>
+<tr>
+<td><strong>输出目的</strong></td>
+<td>验证数据完整性和来源真实性（防篡改+认证）</td>
+<td>仅验证数据完整性（防篡改）</td>
+</tr>
+</tbody></table>
+<h3 id="2-安全性对比"><a href="#2-安全性对比" class="headerlink" title="2. 安全性对比"></a><strong>2. 安全性对比</strong></h3><ul>
+<li><p><strong><code>Mac</code> 的优势</strong></p>
+<ul>
+<li>通过密钥增强安全性，攻击者无法伪造哈希值（需同时破解密钥和哈希算法），适用于需要验证数据来源的场景（如 API 签名）。</li>
+<li>支持 HMAC 结构（如 <code>HmacSHA256</code>），结合哈希算法（SHA-256）和密钥，抗碰撞性更强。</li>
+</ul>
+</li>
+<li><p><strong><code>MessageDigest</code> 的局限</strong></p>
+<ul>
+<li>仅生成普通哈希值，无密钥保护。攻击者可篡改数据后重新生成相同哈希值（如文件替换攻击），无法验证数据来源。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-使用场景"><a href="#3-使用场景" class="headerlink" title="3. 使用场景"></a><strong>3. 使用场景</strong></h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th><code>Mac</code> 适用性</th>
+<th><code>MessageDigest</code> 适用性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>API 签名</strong></td>
+<td>✔️ 生成带密钥的签名（如 JWT）</td>
+<td>❌ 无法验证请求来源</td>
+</tr>
+<tr>
+<td><strong>密码存储</strong></td>
+<td>❌ 需结合 PBKDF2 等算法更安全</td>
+<td>✔️ 可用于简单哈希（需加盐）</td>
+</tr>
+<tr>
+<td><strong>文件完整性校验</strong></td>
+<td>✔️ 需确保文件未被篡改且来源可信（如软件分发）</td>
+<td>✔️ 仅校验文件是否被修改（如下载文件校验）</td>
+</tr>
+<tr>
+<td><strong>数据传输认证</strong></td>
+<td>✔️ 保护传输数据（如 HTTPS 握手阶段）</td>
+<td>❌ 无法防止中间人篡改</td>
+</tr>
+</tbody></table>
+<h3 id="4-代码实现差异"><a href="#4-代码实现差异" class="headerlink" title="4. 代码实现差异"></a><strong>4. 代码实现差异</strong></h3><h4 id="1-Mac-使用流程"><a href="#1-Mac-使用流程" class="headerlink" title="(1) Mac 使用流程"></a><strong>(1) <code>Mac</code> 使用流程</strong></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 初始化密钥</span></span><br><span class="line"><span class="type">SecretKeySpec</span> <span class="variable">key</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SecretKeySpec</span>(<span class="string">&quot;secret&quot;</span>.getBytes(), <span class="string">&quot;HmacSHA256&quot;</span>);</span><br><span class="line"><span class="comment">// 2. 创建 Mac 实例并初始化</span></span><br><span class="line"><span class="type">Mac</span> <span class="variable">mac</span> <span class="operator">=</span> Mac.getInstance(<span class="string">&quot;HmacSHA256&quot;</span>);</span><br><span class="line">mac.init(key);</span><br><span class="line"><span class="comment">// 3. 计算 MAC 值</span></span><br><span class="line"><span class="type">byte</span>[] macResult = mac.doFinal(<span class="string">&quot;data&quot;</span>.getBytes());</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>关键步骤</strong>：必须通过 <code>init()</code> 设置密钥。</li>
+</ul>
+<h4 id="2-MessageDigest-使用流程"><a href="#2-MessageDigest-使用流程" class="headerlink" title="(2) MessageDigest 使用流程"></a><strong>(2) <code>MessageDigest</code> 使用流程</strong></h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 创建 MessageDigest 实例</span></span><br><span class="line"><span class="type">MessageDigest</span> <span class="variable">md</span> <span class="operator">=</span> MessageDigest.getInstance(<span class="string">&quot;SHA-256&quot;</span>);</span><br><span class="line"><span class="comment">// 2. 计算哈希值</span></span><br><span class="line"><span class="type">byte</span>[] hash = md.digest(<span class="string">&quot;data&quot;</span>.getBytes());</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>无密钥参与</strong>，直接处理数据。</li>
+</ul>
+<h3 id="5-安全性建议"><a href="#5-安全性建议" class="headerlink" title="5. 安全性建议"></a><strong>5. 安全性建议</strong></h3><ul>
+<li><p>**优先选择 <code>Mac</code>**：<br>在需要验证数据来源的场景（如 API 调用、敏感数据传输），务必使用 <code>Mac</code> 结合强算法（如 <code>HmacSHA256</code>）。</p>
+</li>
+<li><p><strong>避免弱算法</strong>：</p>
+<ul>
+<li><code>MessageDigest</code> 避免使用 <code>MD5</code> 或 <code>SHA-1</code>（已被破解）。</li>
+<li><code>Mac</code> 避免使用 <code>HmacMD5</code> 或 <code>HmacSHA1</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a><strong>总结</strong></h3><table>
+<thead>
+<tr>
+<th><strong>维度</strong></th>
+<th><code>Mac</code></th>
+<th><code>MessageDigest</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>核心能力</strong></td>
+<td>数据完整性 + 来源认证</td>
+<td>仅数据完整性</td>
+</tr>
+<tr>
+<td><strong>密钥依赖</strong></td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td><strong>典型用途</strong></td>
+<td>签名、安全传输</td>
+<td>文件校验、密码哈希（需加盐）</td>
+</tr>
+<tr>
+<td><strong>安全性</strong></td>
+<td>高（密钥 + 哈希双重保护）</td>
+<td>低（仅哈希）</td>
+</tr>
+</tbody></table>
+<p><strong>建议</strong>：根据场景选择工具——需要身份验证时用 <code>Mac</code>，只需完整性校验时用 <code>MessageDigest</code>（但需注意算法强度）。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>Java的代码实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.commons.codec.binary.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.crypto.Mac;</span><br><span class="line"><span class="keyword">import</span> javax.crypto.spec.SecretKeySpec;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 签名工具类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SignUtil</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Charset</span> <span class="variable">DEFAULT_ENCODING</span> <span class="operator">=</span> Charset.forName(<span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">sign</span><span class="params">(String content, String secret)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">Mac</span> <span class="variable">hmacSha256</span> <span class="operator">=</span> Mac.getInstance(<span class="string">&quot;HmacSHA256&quot;</span>);</span><br><span class="line">            <span class="type">byte</span>[] keyBytes = secret.getBytes(DEFAULT_ENCODING);</span><br><span class="line">            hmacSha256.init(<span class="keyword">new</span> <span class="title class_">SecretKeySpec</span>(keyBytes, <span class="number">0</span>, keyBytes.length, <span class="string">&quot;HmacSHA256&quot;</span>));</span><br><span class="line"></span><br><span class="line">            <span class="type">byte</span>[] hash = hmacSha256.doFinal(content.getBytes(DEFAULT_ENCODING));</span><br><span class="line">            <span class="keyword">return</span> Base64.encodeBase64String(hash);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>依赖库 (<code>Base64.encodeBase64String(hash)</code>)</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>commons-codec<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-codec<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.14<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mac/" rel="tag"># mac</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/02/16/fun/20250216-search-ollama-servers/" rel="prev" title="公网 Ollama 服务搜索">
+      <i class="fa fa-chevron-left"></i> 公网 Ollama 服务搜索
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/03/06/java/20250306-caffeine-cache/" rel="next" title="SpringBoot 集成 Caffeine Cache">
+      SpringBoot 集成 Caffeine Cache <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MAC"><span class="nav-number">1.</span> <span class="nav-text">MAC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Mac-%E7%9A%84%E5%91%BD%E5%90%8D%E5%90%AB%E4%B9%89%E4%B8%8E%E8%83%8C%E6%99%AF"><span class="nav-number">1.1.</span> <span class="nav-text">1. Mac 的命名含义与背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-javax-crypto-Mac-%E7%B1%BB%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">2. javax.crypto.Mac 类的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.</span> <span class="nav-text">3. 核心方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-%E5%88%9D%E5%A7%8B%E5%8C%96%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.1.</span> <span class="nav-text">a. 初始化方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-%E6%95%B0%E6%8D%AE%E8%BE%93%E5%85%A5%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.2.</span> <span class="nav-text">b. 数据输入方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#c-%E7%94%9F%E6%88%90-MAC-%E5%80%BC"><span class="nav-number">1.3.3.</span> <span class="nav-text">c. 生成 MAC 值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#d-%E8%8E%B7%E5%8F%96%E7%AE%97%E6%B3%95%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.3.4.</span> <span class="nav-text">d. 获取算法实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#e-%E5%85%B6%E4%BB%96%E8%BE%85%E5%8A%A9%E6%96%B9%E6%B3%95"><span class="nav-number">1.3.5.</span> <span class="nav-text">e. 其他辅助方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.4.</span> <span class="nav-text">使用流程示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">1.5.</span> <span class="nav-text">关键注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HMAC"><span class="nav-number">2.</span> <span class="nav-text">HMAC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-HMAC%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">什么是 HMAC？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HMAC-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.2.</span> <span class="nav-text">HMAC 的工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HMAC-%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">2.3.</span> <span class="nav-text">HMAC 的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9AHMAC-SHA256"><span class="nav-number">2.4.</span> <span class="nav-text">示例：HMAC-SHA256</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VS-MessageDigest"><span class="nav-number">3.</span> <span class="nav-text">VS MessageDigest</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E5%B7%AE%E5%BC%82"><span class="nav-number">3.1.</span> <span class="nav-text">1. 核心功能差异</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%89%E5%85%A8%E6%80%A7%E5%AF%B9%E6%AF%94"><span class="nav-number">3.2.</span> <span class="nav-text">2. 安全性对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">3.3.</span> <span class="nav-text">3. 使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%E5%B7%AE%E5%BC%82"><span class="nav-number">3.4.</span> <span class="nav-text">4. 代码实现差异</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Mac-%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">3.4.1.</span> <span class="nav-text">(1) Mac 使用流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-MessageDigest-%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">3.4.2.</span> <span class="nav-text">(2) MessageDigest 使用流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%AE%89%E5%85%A8%E6%80%A7%E5%BB%BA%E8%AE%AE"><span class="nav-number">3.5.</span> <span class="nav-text">5. 安全性建议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">3.6.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">实现</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">247</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">120</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

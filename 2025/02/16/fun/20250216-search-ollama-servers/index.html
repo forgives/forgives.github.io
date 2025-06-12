@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="很多 Ollama 服务部署在公网却没有安全机制，可以利用这一点白嫖资源。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="公网 Ollama 服务搜索">
+<meta property="og:url" content="https://forgives.github.io/2025/02/16/fun/20250216-search-ollama-servers/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="很多 Ollama 服务部署在公网却没有安全机制，可以利用这一点白嫖资源。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-02-16T07:15:00.000Z">
+<meta property="article:modified_time" content="2025-02-16T07:22:25.330Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="ai">
+<meta property="article:tag" content="fun">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2025/02/16/fun/20250216-search-ollama-servers/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>公网 Ollama 服务搜索 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2025/02/16/fun/20250216-search-ollama-servers/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          公网 Ollama 服务搜索
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2025-02-16 15:15:00 / 修改时间：15:22:25" itemprop="dateCreated datePublished" datetime="2025-02-16T15:15:00+08:00">2025-02-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AI/" itemprop="url" rel="index"><span itemprop="name">AI</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>很多 Ollama 服务部署在公网却没有安全机制，可以利用这一点白嫖资源。</p>
+<span id="more"></span>
+
+<h2 id="利用方式"><a href="#利用方式" class="headerlink" title="利用方式"></a>利用方式</h2><p><code>fofa.info</code> 中搜索</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">port=&quot;11434&quot; &amp;&amp; status_code=&quot;200&quot; &amp;&amp; body=&quot;Ollama&quot; &amp;&amp; region=&quot;TW&quot;</span><br></pre></td></tr></table></figure>
+<p>上面的 <code>body</code> 和 <code>region</code> 是细化搜索，可以不加。</p>
+<p>点击结果旁边的链接图标打开链接地址，如果出现: <code>Ollama is running</code> 说明可用。在可用地址后面拼上 <code>/api/tags</code> 查看部署的模型。</p>
+<p>得到的 <code>http://xxx.xxx.xxx.xxx:11434/</code> 就是可用地址。</p>
+<p><code>fofa.info</code> 支持导出，导出一份结果直接扫描一遍：</p>
+<h2 id="扫描程序"><a href="#扫描程序" class="headerlink" title="扫描程序"></a>扫描程序</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;</span><br><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSONArray;</span><br><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSONObject;</span><br><span class="line"><span class="keyword">import</span> okhttp3.OkHttpClient;</span><br><span class="line"><span class="keyword">import</span> okhttp3.Request;</span><br><span class="line"><span class="keyword">import</span> okhttp3.Response;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OllamaChecker</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">OkHttpClient</span> <span class="variable">httpClient</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">OkHttpClient</span>.Builder()</span><br><span class="line">            .connectTimeout(<span class="number">2</span>, TimeUnit.SECONDS) <span class="comment">// 连接超时</span></span><br><span class="line">            .readTimeout(<span class="number">2</span>, TimeUnit.SECONDS)    <span class="comment">// 读取超时</span></span><br><span class="line">            .writeTimeout(<span class="number">2</span>, TimeUnit.SECONDS)   <span class="comment">// 写入超时</span></span><br><span class="line">            .build();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">INPUT_FILE</span> <span class="operator">=</span> <span class="string">&quot;/Users/xxx/202502161353.csv&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">OUTPUT_FILE</span> <span class="operator">=</span> <span class="string">&quot;/Users/xxx/202502161353.txt&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, InterruptedException &#123;</span><br><span class="line">        <span class="comment">// 读取 CSV 文件，获取所有 URL</span></span><br><span class="line">        List&lt;String&gt; urls = readUrlsFromCsv(INPUT_FILE);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建线程池</span></span><br><span class="line">        <span class="type">ExecutorService</span> <span class="variable">executorService</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">16</span>);</span><br><span class="line">        List&lt;Future&lt;Result&gt;&gt; futures = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 提交任务到线程池</span></span><br><span class="line">        <span class="keyword">for</span> (String url : urls) &#123;</span><br><span class="line">            futures.add(executorService.submit(<span class="keyword">new</span> <span class="title class_">UrlProcessor</span>(url)));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 收集结果</span></span><br><span class="line">        List&lt;String&gt; results = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> futures.size();</span><br><span class="line">        <span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (Future&lt;Result&gt; future : futures) &#123;</span><br><span class="line">            index++;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="type">Result</span> <span class="variable">result</span> <span class="operator">=</span> future.get();</span><br><span class="line">                <span class="keyword">if</span> (result.models != <span class="literal">null</span> &amp;&amp; !result.models.isEmpty()) &#123;</span><br><span class="line">                    results.add(result.url + <span class="string">&quot; &quot;</span> + result.models);</span><br><span class="line">                    System.out.println(<span class="string">&quot;[&quot;</span> + index + <span class="string">&quot;/&quot;</span> + count + <span class="string">&quot;]check url: &quot;</span> + result.url + <span class="string">&quot;, models: &quot;</span> + result.models);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 关闭线程池</span></span><br><span class="line">        executorService.shutdown();</span><br><span class="line">        executorService.awaitTermination(<span class="number">1</span>, TimeUnit.MINUTES);</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;check url done. save result...&quot;</span>);</span><br><span class="line">        <span class="comment">// 写入结果到文件</span></span><br><span class="line">        writeResultsToFile(results, OUTPUT_FILE);</span><br><span class="line">        System.out.println(<span class="string">&quot;save result done. exit.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title function_">readUrlsFromCsv</span><span class="params">(String fileName)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        List&lt;String&gt; urls = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        <span class="keyword">try</span> (<span class="type">BufferedReader</span> <span class="variable">reader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">FileReader</span>(fileName))) &#123;</span><br><span class="line">            String line;</span><br><span class="line">            <span class="keyword">while</span> ((line = reader.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                String[] columns = line.split(<span class="string">&quot;,&quot;</span>);</span><br><span class="line">                <span class="keyword">if</span> (columns.length &gt;= <span class="number">6</span>) &#123;</span><br><span class="line">                    <span class="type">String</span> <span class="variable">link</span> <span class="operator">=</span> columns[<span class="number">5</span>].trim();</span><br><span class="line">                    <span class="keyword">if</span> (link.startsWith(<span class="string">&quot;http&quot;</span>)) &#123;</span><br><span class="line">                        urls.add(link);</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> urls;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">writeResultsToFile</span><span class="params">(List&lt;String&gt; results, String fileName)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="keyword">try</span> (<span class="type">BufferedWriter</span> <span class="variable">writer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedWriter</span>(<span class="keyword">new</span> <span class="title class_">FileWriter</span>(fileName))) &#123;</span><br><span class="line">            <span class="keyword">for</span> (String result : results) &#123;</span><br><span class="line">                writer.write(result);</span><br><span class="line">                writer.newLine();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">UrlProcessor</span> <span class="keyword">implements</span> <span class="title class_">Callable</span>&lt;Result&gt; &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> String url;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">UrlProcessor</span><span class="params">(String url)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.url = url;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> Result <span class="title function_">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">fullUrl</span> <span class="operator">=</span> url + <span class="string">&quot;/api/tags&quot;</span>;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="type">String</span> <span class="variable">jsonResponse</span> <span class="operator">=</span> sendHttpRequest(fullUrl);</span><br><span class="line"></span><br><span class="line">                <span class="type">JSONObject</span> <span class="variable">jsonObject</span> <span class="operator">=</span> JSON.parseObject(jsonResponse);</span><br><span class="line">                <span class="type">JSONArray</span> <span class="variable">modelsArray</span> <span class="operator">=</span> jsonObject.getJSONArray(<span class="string">&quot;models&quot;</span>);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (modelsArray != <span class="literal">null</span> &amp;&amp; !modelsArray.isEmpty()) &#123;</span><br><span class="line">                    <span class="type">StringBuilder</span> <span class="variable">modelsBuilder</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">                    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; modelsArray.size(); i++) &#123;</span><br><span class="line">                        <span class="type">JSONObject</span> <span class="variable">model</span> <span class="operator">=</span> modelsArray.getJSONObject(i);</span><br><span class="line">                        <span class="keyword">if</span> (i &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                            modelsBuilder.append(<span class="string">&quot;,&quot;</span>);</span><br><span class="line">                        &#125;</span><br><span class="line">                        modelsBuilder.append(model.getString(<span class="string">&quot;model&quot;</span>));</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Result</span>(url, modelsBuilder.toString());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;invalid url: &quot;</span> + fullUrl);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Result</span>(url, <span class="literal">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> String <span class="title function_">sendHttpRequest</span><span class="params">(String url)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="type">Request</span> <span class="variable">request</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Request</span>.Builder().url(url).build();</span><br><span class="line">            <span class="keyword">try</span> (<span class="type">Response</span> <span class="variable">response</span> <span class="operator">=</span> httpClient.newCall(request).execute()) &#123;</span><br><span class="line">                <span class="keyword">if</span> (response.isSuccessful() &amp;&amp; response.body() != <span class="literal">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> response.body().string();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IOException</span>(<span class="string">&quot;Unexpected code &quot;</span> + response);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Result</span> &#123;</span><br><span class="line">        String url;</span><br><span class="line">        String models;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">Result</span><span class="params">(String url, String models)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.url = url;</span><br><span class="line">            <span class="built_in">this</span>.models = models;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="FOFA"><a href="#FOFA" class="headerlink" title="FOFA"></a>FOFA</h2><p>FOFA 是一个网络空间搜索引擎，可以帮助用户快速发现和定位互联网上的资产。它的查询语法类似于常见的搜索引擎语法，但针对网络设备、服务、漏洞等信息进行了优化。以下是 FOFA 查询语法的一些基本用法和示例：</p>
+<hr>
+<h3 id="1-基本语法"><a href="#1-基本语法" class="headerlink" title="1. 基本语法"></a><strong>1. 基本语法</strong></h3><p>FOFA 的查询语法主要基于键值对的形式，支持多种字段的组合查询。</p>
+<h4 id="常见字段"><a href="#常见字段" class="headerlink" title="常见字段"></a><strong>常见字段</strong></h4><ul>
+<li><code>host</code>: 搜索特定主机或域名。</li>
+<li><code>ip</code>: 搜索特定 IP 地址或 IP 段。</li>
+<li><code>port</code>: 搜索特定端口。</li>
+<li><code>protocol</code>: 搜索协议类型（如 HTTP、HTTPS、FTP 等）。</li>
+<li><code>banner</code>: 搜索服务返回的 Banner 信息。</li>
+<li><code>title</code>: 搜索网页标题。</li>
+<li><code>header</code>: 搜索 HTTP 响应头内容。</li>
+<li><code>body</code>: 搜索网页正文内容。</li>
+<li><code>cert</code>: 搜索 SSL&#x2F;TLS 证书信息。</li>
+<li><code>country</code>: 搜索国家（使用国家代码，如 CN 表示中国）。</li>
+<li><code>region</code>: 搜索地区。</li>
+<li><code>city</code>: 搜索城市。</li>
+<li><code>org</code>: 搜索组织名称。</li>
+<li><code>server</code>: 搜索服务器类型（如 Apache、Nginx 等）。</li>
+<li><code>icp</code>: 搜索 ICP 备案号。</li>
+</ul>
+<hr>
+<h3 id="2-查询语法示例"><a href="#2-查询语法示例" class="headerlink" title="2. 查询语法示例"></a><strong>2. 查询语法示例</strong></h3><h4 id="单字段查询"><a href="#单字段查询" class="headerlink" title="单字段查询"></a><strong>单字段查询</strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">title=&quot;登录页面&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索网页标题中包含“登录页面”的结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip=&quot;192.168.1.1&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索指定 IP 地址的结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">port=&quot;8080&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索开放了 8080 端口的设备。</p>
+<hr>
+<h4 id="多字段组合查询"><a href="#多字段组合查询" class="headerlink" title="多字段组合查询"></a><strong>多字段组合查询</strong></h4><p>可以使用 <code>&amp;&amp;</code>（与）、<code>||</code>（或）、<code>!=</code>（不等于）等逻辑运算符进行组合查询。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip=&quot;192.168.1.1&quot; &amp;&amp; port=&quot;80&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索 IP 地址为 <code>192.168.1.1</code> 且开放了 80 端口的设备。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">title=&quot;管理后台&quot; || title=&quot;Admin Panel&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索网页标题中包含“管理后台”或“Admin Panel”的结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">country=&quot;CN&quot; &amp;&amp; protocol=&quot;https&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索位于中国且使用 HTTPS 协议的服务。</p>
+<hr>
+<h4 id="模糊匹配"><a href="#模糊匹配" class="headerlink" title="模糊匹配"></a><strong>模糊匹配</strong></h4><p>可以使用通配符或正则表达式进行模糊匹配。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">title=&quot;*登录*&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索网页标题中包含“登录”关键字的结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">body=&quot;password&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索网页正文中包含“password”的结果。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">banner=&quot;/Apache.*Server/&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索 Banner 中包含“Apache”后跟任意字符再接“Server”的结果。</p>
+<hr>
+<h4 id="排除条件"><a href="#排除条件" class="headerlink" title="排除条件"></a><strong>排除条件</strong></h4><p>使用 <code>!=</code> 或 <code>-</code> 排除某些条件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip=&quot;192.168.1.1&quot; &amp;&amp; port!=&quot;22&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索 IP 地址为 <code>192.168.1.1</code> 但不开放 22 端口的设备。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">country=&quot;CN&quot; -city=&quot;北京&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索位于中国但不在北京的设备。</p>
+<hr>
+<h4 id="IP-段查询"><a href="#IP-段查询" class="headerlink" title="IP 段查询"></a><strong>IP 段查询</strong></h4><p>支持 CIDR 表示法和范围表示法。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip=&quot;192.168.1.0/24&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索 <code>192.168.1.0</code> 到 <code>192.168.1.255</code> 范围内的所有 IP。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip=&quot;192.168.1.1-192.168.1.100&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索从 <code>192.168.1.1</code> 到 <code>192.168.1.100</code> 的 IP 地址。</p>
+<hr>
+<h4 id="高级查询"><a href="#高级查询" class="headerlink" title="高级查询"></a><strong>高级查询</strong></h4><p>结合多个字段和逻辑运算符实现复杂查询。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(country=&quot;US&quot; || country=&quot;CN&quot;) &amp;&amp; (port=&quot;443&quot; || port=&quot;80&quot;) &amp;&amp; server=&quot;nginx&quot;</span><br></pre></td></tr></table></figure>
+<p>解释：搜索位于美国或中国，开放了 443 或 80 端口，并且使用 Nginx 作为服务器的结果。</p>
+<hr>
+<h3 id="3-注意事项"><a href="#3-注意事项" class="headerlink" title="3. 注意事项"></a><strong>3. 注意事项</strong></h3><ol>
+<li><strong>字段区分大小写</strong>：部分字段（如 <code>title</code>、<code>body</code>）可能对大小写敏感。</li>
+<li><strong>特殊字符转义</strong>：如果查询中包含特殊字符（如双引号），需要使用反斜杠 <code>\</code> 进行转义。</li>
+<li><strong>结果数量限制</strong>：免费用户可能有查询结果数量的限制，付费用户可以解锁更多功能。</li>
+<li><strong>合法合规</strong>：使用 FOFA 时，请确保遵守相关法律法规，避免非法用途。</li>
+</ol>
+<hr>
+<p>通过以上语法，您可以灵活地利用 FOFA 进行网络资产的搜索和分析。如果您有更具体的需求或问题，欢迎进一步提问！</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ai/" rel="tag"># ai</a>
+              <a href="/tags/fun/" rel="tag"># fun</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/01/01/book/20250101-zssn/" rel="prev" title="《置身事内》">
+      <i class="fa fa-chevron-left"></i> 《置身事内》
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/02/20/note/20250220-hmac/" rel="next" title="HMAC 基于哈希的消息认证码">
+      HMAC 基于哈希的消息认证码 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">利用方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%AB%E6%8F%8F%E7%A8%8B%E5%BA%8F"><span class="nav-number">2.</span> <span class="nav-text">扫描程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FOFA"><span class="nav-number">3.</span> <span class="nav-text">FOFA</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="nav-number">3.1.</span> <span class="nav-text">1. 基本语法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E5%AD%97%E6%AE%B5"><span class="nav-number">3.1.1.</span> <span class="nav-text">常见字段</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%9F%A5%E8%AF%A2%E8%AF%AD%E6%B3%95%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.2.</span> <span class="nav-text">2. 查询语法示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E5%AD%97%E6%AE%B5%E6%9F%A5%E8%AF%A2"><span class="nav-number">3.2.1.</span> <span class="nav-text">单字段查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E5%AD%97%E6%AE%B5%E7%BB%84%E5%90%88%E6%9F%A5%E8%AF%A2"><span class="nav-number">3.2.2.</span> <span class="nav-text">多字段组合查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E7%B3%8A%E5%8C%B9%E9%85%8D"><span class="nav-number">3.2.3.</span> <span class="nav-text">模糊匹配</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%92%E9%99%A4%E6%9D%A1%E4%BB%B6"><span class="nav-number">3.2.4.</span> <span class="nav-text">排除条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IP-%E6%AE%B5%E6%9F%A5%E8%AF%A2"><span class="nav-number">3.2.5.</span> <span class="nav-text">IP 段查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E6%9F%A5%E8%AF%A2"><span class="nav-number">3.2.6.</span> <span class="nav-text">高级查询</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">3.3.</span> <span class="nav-text">3. 注意事项</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">247</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">120</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
