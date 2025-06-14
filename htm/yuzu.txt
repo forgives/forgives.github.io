@@ -2,8 +2,7 @@
 
 JUST FOR FUN :)
 
-https://github.com/aidanmcb1/Yuzu
+New Project:
 
-https://github.com/aidanmcb1/Citra
-
-New Project: https://suyu.dev/
+- https://suyu.dev/
+- https://git.citron-emu.org/
