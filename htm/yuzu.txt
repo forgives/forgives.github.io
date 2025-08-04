@@ -1,8 +1,7 @@
-# Yuzu && Citra
+# Yuzu
 
 JUST FOR FUN :)
 
 New Project:
 
 - https://suyu.dev/
-- https://git.citron-emu.org/
