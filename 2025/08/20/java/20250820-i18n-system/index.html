@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="多语言平台架构设计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多语言平台架构设计">
+<meta property="og:url" content="https://forgives.github.io/2025/08/20/java/20250820-i18n-system/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="多语言平台架构设计">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://forgives.github.io/res/2025082502.png">
+<meta property="og:image" content="https://forgives.github.io/res/2025082501.png">
+<meta property="og:image" content="https://forgives.github.io/res/2025082503.png">
+<meta property="article:published_time" content="2025-08-20T07:47:39.000Z">
+<meta property="article:modified_time" content="2025-09-25T06:26:07.235Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="i8n">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://forgives.github.io/res/2025082502.png">
+
+<link rel="canonical" href="https://forgives.github.io/2025/08/20/java/20250820-i18n-system/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>多语言平台架构设计 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2025/08/20/java/20250820-i18n-system/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          多语言平台架构设计
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-20 15:47:39" itemprop="dateCreated datePublished" datetime="2025-08-20T15:47:39+08:00">2025-08-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-09-25 14:26:07" itemprop="dateModified" datetime="2025-09-25T14:26:07+08:00">2025-09-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>多语言平台架构设计</p>
+<span id="more"></span>
+
+<h2 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h2><p>国际化（Internationalization，简称i18n）,目的是为了更好的提供本地化的服务。</p>
+<p>概念</p>
+<ul>
+<li>参考语言 Reference，其他语种依据参考语言做翻译</li>
+<li>模糊翻译的概念 Fuzzy Translation，参考语言有变动后，其他语言翻译设标志位</li>
+</ul>
+<p>输出</p>
+<ul>
+<li>app 文件(Android&#x2F;ios的 xml)</li>
+<li>web 文件（json5）</li>
+<li>nacos （json）</li>
+<li>api （支持CI&#x2F;CD拉取）</li>
+<li>dubbo （模板的渲染）</li>
+</ul>
+<p>类型</p>
+<ul>
+<li>静态 （android&#x2F;iso&#x2F;h5&#x2F;服务端等）</li>
+<li>动态 （服务端）</li>
+</ul>
+<p>模型</p>
+<ul>
+<li>应用 app（神眸&#x2F; cinmoor&#x2F; sensforge &#x2F; open-platform）</li>
+<li>模块 module（可选， app&#x2F;web 端使用：云相册模块、直播模块 ）</li>
+<li>标识 key 应用下的唯一标识，业务自定义，可以理解为标识code</li>
+<li>参考语言 reference 多语言的参考语言、本位语言，翻译是基于此语言做其他新增语言翻译。应用维度</li>
+<li>语种标识  [_language_code_]-[_country_code_]</li>
+</ul>
+<p><img src="/res/2025082502.png" alt="image.png"></p>
+<p>流程</p>
+<ol>
+<li>管理员新建应用(app)，确定参考语言(reference)</li>
+<li>管理员做初始化，导入 key 和对应的 参考语言（支持增量，参考语言覆盖需要确认）</li>
+<li>新建多语言版本（继承上个发布版本），新增语种（可选）。</li>
+<li>翻译内容输入<ol>
+<li><strong>直接页面编辑</strong></li>
+<li><strong>导出模板之后翻译再导入</strong></li>
+<li>大模型翻译</li>
+</ol>
+</li>
+<li>翻译内容输出<ol>
+<li><strong>导出xml&#x2F;json&#x2F;excel文件</strong></li>
+<li>导出到nacos中</li>
+<li>Api接口输出</li>
+<li>dubbo接口按key 模板渲染输出</li>
+</ol>
+</li>
+</ol>
+<p><img src="/res/2025082501.png" alt="image.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">        actor p as 客户</span><br><span class="line">        participant a as saas</span><br><span class="line">        participant d as 二方</span><br><span class="line">        participant n as nacos</span><br><span class="line">		</span><br><span class="line">        p-&gt;&gt;a: 新建app、设置参考语言</span><br><span class="line">        p-&gt;&gt;a: 上传初始化（key+参考语言）</span><br><span class="line">        p-&gt;&gt;a: 新建版本</span><br><span class="line">        p-&gt;&gt;a: 新建语种</span><br><span class="line">        p-&gt;&gt;p: 执行翻译</span><br><span class="line">        p-&gt;&gt;a: 上传、编辑翻译</span><br><span class="line">        p-&gt;&gt;a: 发布</span><br><span class="line">        a-&gt;&gt;p: 导出文本</span><br><span class="line">        p-&gt;&gt;d: 导入文件</span><br><span class="line">        a-&gt;&gt;n: 刷新配置</span><br><span class="line">        d-&gt;&gt;a: 拉取翻译</span><br></pre></td></tr></table></figure>
+
+<p>版本状态<br>限制：只能导出最新发布版本。<br><img src="/res/2025082503.png" alt="image.png"></p>
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><h3 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h3><p>tb_i18n_app</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>主键</td>
+<td></td>
+</tr>
+<tr>
+<td>app_code</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>biz_type</td>
+<td>业务类型</td>
+<td></td>
+</tr>
+<tr>
+<td>reference</td>
+<td>参考语言</td>
+<td>en</td>
+</tr>
+<tr>
+<td>remark</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>manager</td>
+<td>管理员</td>
+<td>[]</td>
+</tr>
+<tr>
+<td>lang</td>
+<td>语言种类</td>
+<td>语言种类 [“zh-CN”,”en-US”]</td>
+</tr>
+<tr>
+<td>module</td>
+<td>模块列表</td>
+<td>[]</td>
+</tr>
+<tr>
+<td>version_count</td>
+<td>保留版本数</td>
+<td>默认是 2</td>
+</tr>
+<tr>
+<td>publish_version</td>
+<td>发布版本</td>
+<td></td>
+</tr>
+<tr>
+<td>latest_version</td>
+<td>最新版本</td>
+<td></td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE `tb_i18n_app` (</span><br><span class="line">  `id` bigint(20) unsigned NOT NULL COMMENT &#x27;id&#x27;,</span><br><span class="line">  `gmt_create` datetime NOT NULL COMMENT &#x27;创建时间&#x27;,</span><br><span class="line">  `gmt_modified` datetime DEFAULT NULL COMMENT &#x27;修改时间&#x27;,</span><br><span class="line">  `app_code` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT &#x27;应用标识&#x27;,</span><br><span class="line">  `biz_type` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT &#x27;业务类型&#x27;,</span><br><span class="line">  `reference` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT &#x27;参考语种&#x27;,</span><br><span class="line">  `remark` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT &#x27;备注&#x27;,</span><br><span class="line">  `manager` json NOT NULL COMMENT &#x27;管理员&#x27;,</span><br><span class="line">  `lang` json DEFAULT NULL COMMENT &#x27;语种&#x27;,</span><br><span class="line">  `module` json DEFAULT NULL COMMENT &#x27;模块&#x27;,</span><br><span class="line">  `version_count` int(10) unsigned DEFAULT NULL COMMENT &#x27;保留版本&#x27;,</span><br><span class="line">  `publish_version` bigint(20) unsigned DEFAULT NULL COMMENT &#x27;发布版本&#x27;,</span><br><span class="line">  `latest_version` bigint(20) unsigned DEFAULT NULL COMMENT &#x27;最新版本&#x27;,</span><br><span class="line">  PRIMARY KEY (`id`),</span><br><span class="line">  UNIQUE KEY `tb_i18n_app_unique` (`app_code`)</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;</span><br></pre></td></tr></table></figure>
+
+<h3 id="翻译"><a href="#翻译" class="headerlink" title="翻译"></a>翻译</h3><p>key</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>app_id</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>module</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>key</td>
+<td><strong>大小写敏感</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>type</td>
+<td>text&#x2F;json</td>
+<td></td>
+</tr>
+<tr>
+<td>remark</td>
+<td>说明</td>
+<td></td>
+</tr>
+<tr>
+<td>message</td>
+<td>错误提示信息</td>
+<td></td>
+</tr>
+<tr>
+<td>version_id</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE `tb_i18n_key` (</span><br><span class="line">  `id` bigint(20) unsigned NOT NULL COMMENT &#x27;id&#x27;,</span><br><span class="line">  `gmt_create` datetime NOT NULL COMMENT &#x27;创建时间&#x27;,</span><br><span class="line">  `gmt_modified` datetime DEFAULT NULL COMMENT &#x27;修改时间&#x27;,</span><br><span class="line">  `app_id` bigint(20) unsigned NOT NULL COMMENT &#x27;应用ID&#x27;,</span><br><span class="line">  `module` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT &#x27;模块&#x27;,</span><br><span class="line">  `key` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT &#x27;key&#x27;,</span><br><span class="line">  `type` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT &#x27;类型&#x27;,</span><br><span class="line">  `remark` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT &#x27;备注&#x27;,</span><br><span class="line">  `message` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,</span><br><span class="line">  `version_id` bigint(20) unsigned NOT NULL COMMENT &#x27;版本ID&#x27;,</span><br><span class="line">  PRIMARY KEY (`id`),</span><br><span class="line">  UNIQUE KEY `tb_i18n_key_uniq` (`app_id`,`version_id`,`key`) USING BTREE</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;</span><br></pre></td></tr></table></figure>
+
+<p>content</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>key_id</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>lang_code</td>
+<td>语言</td>
+<td>cn&#x2F;en</td>
+</tr>
+<tr>
+<td>content</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>fuzzy</td>
+<td></td>
+<td>1.  0</td>
+</tr>
+<tr>
+<td>version</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE `tb_i18n_content` (</span><br><span class="line">  `id` bigint(20) unsigned NOT NULL COMMENT &#x27;id&#x27;,</span><br><span class="line">  `gmt_create` datetime NOT NULL COMMENT &#x27;创建时间&#x27;,</span><br><span class="line">  `gmt_modified` datetime DEFAULT NULL COMMENT &#x27;修改时间&#x27;,</span><br><span class="line">  `key_id` bigint(20) unsigned NOT NULL COMMENT &#x27;keyid&#x27;,</span><br><span class="line">  `lang` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT &#x27;语种&#x27;,</span><br><span class="line">  `content` text COLLATE utf8mb4_unicode_ci,</span><br><span class="line">  `fuzzy` int(10) unsigned DEFAULT NULL,</span><br><span class="line">  PRIMARY KEY (`id`),</span><br><span class="line">  UNIQUE KEY `tb_i18n_content_key_uniq` (`key_id`,`lang`) USING BTREE</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;</span><br></pre></td></tr></table></figure>
+
+<h3 id="版本"><a href="#版本" class="headerlink" title="版本"></a>版本</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>app_id</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>version</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>name</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>remark</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>status</td>
+<td></td>
+<td>0-开发中 1-已发布 2-提测</td>
+</tr>
+<tr>
+<td>published_by</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>published_at</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>archived</td>
+<td>归档</td>
+<td>直接静态化存储到oss</td>
+</tr>
+<tr>
+<td>archived_key</td>
+<td>归档key</td>
+<td></td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE `tb_i18n_version` (</span><br><span class="line">  `id` bigint(20) unsigned NOT NULL COMMENT &#x27;id&#x27;,</span><br><span class="line">  `gmt_create` datetime NOT NULL COMMENT &#x27;创建时间&#x27;,</span><br><span class="line">  `gmt_modified` datetime DEFAULT NULL COMMENT &#x27;修改时间&#x27;,</span><br><span class="line">  `app_id` bigint(20) unsigned NOT NULL COMMENT &#x27;appid&#x27;,</span><br><span class="line">  `version` bigint(20) unsigned NOT NULL COMMENT &#x27;版本&#x27;,</span><br><span class="line">  `remark` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT &#x27;备注&#x27;,</span><br><span class="line">  `status` int(10) unsigned DEFAULT NULL COMMENT &#x27;状态 0-开发中 1-已发布 2-提测&#x27;,</span><br><span class="line">  `published_by` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,</span><br><span class="line">  `published_at` datetime DEFAULT NULL,</span><br><span class="line">  `archived` tinyint(3) unsigned DEFAULT NULL COMMENT &#x27;是否归档 1-已归档&#x27;,</span><br><span class="line">  `archived_key` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT &#x27;归档Key&#x27;,</span><br><span class="line">  PRIMARY KEY (`id`),</span><br><span class="line">  UNIQUE KEY `tb_i18n_version_app_id_IDX` (`app_id`,`version`) USING BTREE</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;</span><br></pre></td></tr></table></figure>
+
+<h2 id="发布校验"><a href="#发布校验" class="headerlink" title="发布校验"></a>发布校验</h2><p>版本发布前需要做完整的校验逻辑</p>
+<h2 id="节奏"><a href="#节奏" class="headerlink" title="节奏"></a>节奏</h2><ol>
+<li>框架与静态资源支持</li>
+<li>大模型翻译支持</li>
+<li>动态实时模板渲染支持</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p>当前成熟商业化产品</p>
+<p><a target="_blank" rel="noopener" href="https://lokalise.com/">https://lokalise.com/</a></p>
+<p><a target="_blank" rel="noopener" href="https://poeditor.com/">https://poeditor.com/</a></p>
+<p><a target="_blank" rel="noopener" href="https://weblate.org/zh-hans/">https://weblate.org/zh-hans/</a></p>
+<p>Language Codes<br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes">https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes</a></p>
+<p>Country Codes<br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes">https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/i8n/" rel="tag"># i8n</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/08/14/algo/20250814-dijkstra/" rel="prev" title="dijkstra">
+      <i class="fa fa-chevron-left"></i> dijkstra
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/10/16/java/20251016-thirdparty-login/" rel="next" title="谷歌、评估三方登录接入">
+      谷歌、评估三方登录接入 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.</span> <span class="nav-text">设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BF%BB%E8%AF%91"><span class="nav-number">2.2.</span> <span class="nav-text">翻译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%88%E6%9C%AC"><span class="nav-number">2.3.</span> <span class="nav-text">版本</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%91%E5%B8%83%E6%A0%A1%E9%AA%8C"><span class="nav-number">3.</span> <span class="nav-text">发布校验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8A%82%E5%A5%8F"><span class="nav-number">4.</span> <span class="nav-text">节奏</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">254</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">124</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

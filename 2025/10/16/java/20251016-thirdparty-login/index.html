@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="三方登录架构设计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="谷歌、评估三方登录接入">
+<meta property="og:url" content="https://forgives.github.io/2025/10/16/java/20251016-thirdparty-login/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="三方登录架构设计">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://forgives.github.io/res/2025101601.png">
+<meta property="article:published_time" content="2025-10-16T05:59:39.000Z">
+<meta property="article:modified_time" content="2025-10-17T06:12:25.347Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://forgives.github.io/res/2025101601.png">
+
+<link rel="canonical" href="https://forgives.github.io/2025/10/16/java/20251016-thirdparty-login/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>谷歌、评估三方登录接入 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2025/10/16/java/20251016-thirdparty-login/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          谷歌、评估三方登录接入
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-10-16 13:59:39" itemprop="dateCreated datePublished" datetime="2025-10-16T13:59:39+08:00">2025-10-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 14:12:25" itemprop="dateModified" datetime="2025-10-17T14:12:25+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>三方登录架构设计</p>
+<span id="more"></span>
+
+<h2 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h2><p>整体流程<br><img src="/res/2025101601.png" alt="2025101601.png"></p>
+<p>核心流程<br>App端获取到三方的idToken传递给服务端换取 access_token和 refresh_token<br>接口返回同 验证码登录</p>
+<p>idToken客户端的获取逻辑<br>谷歌</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">GoogleSignInAccount</span> <span class="variable">account</span> <span class="operator">=</span> task.getResult(ApiException.class);</span><br><span class="line"><span class="type">String</span> <span class="variable">idToken</span> <span class="operator">=</span> account.getIdToken(); <span class="comment">// 发送给后端验证</span></span><br></pre></td></tr></table></figure>
+<p>苹果<br><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/authenticationservices/asauthorizationappleidcredential/identitytoken">https://developer.apple.com/documentation/authenticationservices/asauthorizationappleidcredential/identitytoken</a></p>
+<h3 id="核心接口"><a href="#核心接口" class="headerlink" title="核心接口"></a>核心接口</h3><p><code>/thirdparty_login</code></p>
+<p>入参</p>
+<ul>
+<li>idToken App端必传</li>
+<li>authCode 非必传，idToken 取不到的时候传入（web端使用）</li>
+<li>source 来源，哪一方获取的token （服务端校验使用）<ul>
+<li>google</li>
+<li>apple</li>
+</ul>
+</li>
+</ul>
+<p>出参</p>
+<ul>
+<li>code</li>
+<li>message</li>
+<li>data 通用返回，同 验证码登录、一键登录等接口<ul>
+<li>accessToken</li>
+<li>refreshToken</li>
+<li>expire</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;code&quot;: 0,</span><br><span class="line">    &quot;message&quot;: &quot;成功&quot;,</span><br><span class="line">    &quot;data&quot;: &#123;</span><br><span class="line">        &quot;accessToken&quot;: &quot;xxx&quot;,</span><br><span class="line">        &quot;refreshToken&quot;: &quot;xxx&quot;,</span><br><span class="line">        &quot;expire&quot;: 86400,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="表结构"><a href="#表结构" class="headerlink" title="表结构"></a>表结构</h2><p><code>tb_thirdparty_user</code></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>gmt_create</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>gmt_modified</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>sub</td>
+<td>三方唯一标识</td>
+<td></td>
+</tr>
+<tr>
+<td>type</td>
+<td>三方类型</td>
+<td></td>
+</tr>
+<tr>
+<td>email</td>
+<td>邮箱</td>
+<td></td>
+</tr>
+<tr>
+<td>name</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>locale</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>status</td>
+<td>状态</td>
+<td>1-已绑定 0-未绑定 -1-删除</td>
+</tr>
+<tr>
+<td>bind_at</td>
+<td>绑定时间</td>
+<td></td>
+</tr>
+</tbody></table>
+<h2 id="参考代码"><a href="#参考代码" class="headerlink" title="参考代码"></a>参考代码</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ThirdPartyAuthService</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Value(&quot;$&#123;thirdparty.login.google.android.client-id:xxx&#125;&quot;)</span></span><br><span class="line">  <span class="keyword">private</span> String googleAndroidClientId;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Value(&quot;$&#123;thirdparty.login.google.ios.client-id:xxx&#125;&quot;)</span></span><br><span class="line">  <span class="keyword">private</span> String googleIosClientId;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Value(&quot;$&#123;thirdparty.login.apple.ios.client-id:xxx&#125;&quot;)</span></span><br><span class="line">  <span class="keyword">private</span> String appleIosClientId;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 因为客户端sdk版本较低，这里改成使用web端的client-id</span></span><br><span class="line">  <span class="keyword">private</span> <span class="type">String</span> <span class="variable">googleWebClientId</span> <span class="operator">=</span> <span class="string">&quot;xxx&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">APPLE_ISSUER</span> <span class="operator">=</span> <span class="string">&quot;https://appleid.apple.com&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">APPLE_KEYS_URL</span> <span class="operator">=</span> <span class="string">&quot;https://appleid.apple.com/auth/keys&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">final</span> Cache&lt;String, List&lt;JWK&gt;&gt; jwkCache = Caffeine.newBuilder()</span><br><span class="line">          .expireAfterWrite(Duration.ofHours(<span class="number">6</span>)) <span class="comment">// 所有 key 的值 6 小时后过期</span></span><br><span class="line">          .maximumSize(<span class="number">5</span>)</span><br><span class="line">          .build();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">APPLE_KEYS_CACHE_KEY</span> <span class="operator">=</span> <span class="string">&quot;apple_keys_cache&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 全局唯一</span></span><br><span class="line">  <span class="type">GoogleIdTokenVerifier</span> <span class="variable">googleIdTokenVerifier</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@PostConstruct</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">    googleIdTokenVerifier = <span class="keyword">new</span> <span class="title class_">GoogleIdTokenVerifier</span>.Builder(</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">NetHttpTransport</span>(),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">GsonFactory</span>())</span><br><span class="line">            .setAudience(Lists.newArrayList(googleAndroidClientId, googleIosClientId, googleWebClientId)) <span class="comment">// 验证 Audience</span></span><br><span class="line">            .build();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> ThirdpartyUserProfile <span class="title function_">getUserProfile</span><span class="params">(ThirdpartyLoginRequest loginRequest)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (loginRequest == <span class="literal">null</span> || StringUtils.isAnyBlank(loginRequest.getSource(), loginRequest.getIdToken())) &#123;</span><br><span class="line">      log.warn(<span class="string">&quot;getUserProfile invalid parameter: &#123;&#125;&quot;</span>, JSON.toJSONString(loginRequest));</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">ThirdpartyTypeEnum</span> <span class="variable">thirdpartyTypeEnum</span> <span class="operator">=</span> ThirdpartyTypeEnum.of(loginRequest.getSource());</span><br><span class="line">    <span class="keyword">if</span> (thirdpartyTypeEnum == <span class="literal">null</span>) &#123;</span><br><span class="line">      log.warn(<span class="string">&quot;getUserProfile invalid source: &#123;&#125;&quot;</span>, JSON.toJSONString(loginRequest));</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">switch</span> (thirdpartyTypeEnum) &#123;</span><br><span class="line">      <span class="keyword">case</span> google:</span><br><span class="line">        <span class="keyword">return</span> getGoogleUserProfile(loginRequest);</span><br><span class="line">      <span class="keyword">case</span> apple:</span><br><span class="line">        <span class="keyword">return</span> getAppleUserProfile(loginRequest);</span><br><span class="line">      <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> ThirdpartyUserProfile <span class="title function_">getGoogleUserProfile</span><span class="params">(ThirdpartyLoginRequest loginRequest)</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">idTokenString</span> <span class="operator">=</span> loginRequest.getIdToken();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (googleIdTokenVerifier == <span class="literal">null</span>) &#123;</span><br><span class="line">        init();</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="type">GoogleIdToken</span> <span class="variable">idToken</span> <span class="operator">=</span> googleIdTokenVerifier.verify(idTokenString);</span><br><span class="line">      <span class="keyword">if</span> (idToken == <span class="literal">null</span>) &#123;</span><br><span class="line">        log.warn(<span class="string">&quot;getGoogleUserProfile invalid idToken: &#123;&#125;&quot;</span>, JSON.toJSONString(idTokenString));</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MyThrowException</span>(ExceptionEnum.INVALID_AUTH_TOKEN);</span><br><span class="line">      &#125;</span><br><span class="line">      GoogleIdToken.<span class="type">Payload</span> <span class="variable">payload</span> <span class="operator">=</span> idToken.getPayload();</span><br><span class="line">      <span class="type">String</span> <span class="variable">subject</span> <span class="operator">=</span> payload.getSubject();</span><br><span class="line">      <span class="type">String</span> <span class="variable">email</span> <span class="operator">=</span> payload.getEmail();</span><br><span class="line">      <span class="type">Boolean</span> <span class="variable">emailVerified</span> <span class="operator">=</span> payload.getEmailVerified();</span><br><span class="line">      <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> (String) payload.get(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">      <span class="type">String</span> <span class="variable">picture</span> <span class="operator">=</span> (String) payload.get(<span class="string">&quot;picture&quot;</span>);</span><br><span class="line"></span><br><span class="line">      <span class="type">ThirdpartyUserProfile</span> <span class="variable">profile</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ThirdpartyUserProfile</span>();</span><br><span class="line">      profile.setEmail(email);</span><br><span class="line">      profile.setEmailVerified(emailVerified);</span><br><span class="line">      profile.setSub(subject);</span><br><span class="line">      profile.setName(name);</span><br><span class="line">      profile.setPicture(picture);</span><br><span class="line">      profile.setLocale((String) payload.get(<span class="string">&quot;locale&quot;</span>));</span><br><span class="line">      profile.setGivenName((String) payload.get(<span class="string">&quot;given_name&quot;</span>));</span><br><span class="line">      profile.setFamilyName((String) payload.get(<span class="string">&quot;family_name&quot;</span>));</span><br><span class="line">      profile.setType(ThirdpartyTypeEnum.google.name());</span><br><span class="line">      <span class="keyword">return</span> profile;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      log.error(<span class="string">&quot;getGoogleUserProfile verify idToken: &#123;&#125;, error:&quot;</span>, JSON.toJSONString(idTokenString), e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> ThirdpartyUserProfile <span class="title function_">getAppleUserProfile</span><span class="params">(ThirdpartyLoginRequest loginRequest)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">String</span> <span class="variable">idTokenString</span> <span class="operator">=</span> loginRequest.getIdToken();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="type">SignedJWT</span> <span class="variable">signedJWT</span> <span class="operator">=</span> SignedJWT.parse(idTokenString);</span><br><span class="line">      <span class="type">String</span> <span class="variable">kid</span> <span class="operator">=</span> signedJWT.getHeader().getKeyID();</span><br><span class="line">      <span class="type">JWSVerifier</span> <span class="variable">verifier</span> <span class="operator">=</span> getAppleVerifier(kid, <span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (!signedJWT.verify(verifier)) &#123;</span><br><span class="line">        <span class="comment">// 非缓存在试一次</span></span><br><span class="line">        verifier = getAppleVerifier(kid, <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">if</span> (!signedJWT.verify(verifier)) &#123;</span><br><span class="line">          log.warn(<span class="string">&quot;invalid identityToken: &#123;&#125;&quot;</span>, idTokenString);</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MyThrowException</span>(ExceptionEnum.INVALID_AUTH_TOKEN);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="type">JWTClaimsSet</span> <span class="variable">claims</span> <span class="operator">=</span> signedJWT.getJWTClaimsSet();</span><br><span class="line">      <span class="keyword">if</span> (!APPLE_ISSUER.equals(claims.getIssuer())) &#123;</span><br><span class="line">        log.warn(<span class="string">&quot;invalid identityToken: &#123;&#125;, wrong issuer:&#123;&#125;&quot;</span>, idTokenString, claims.getIssuer());</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MyThrowException</span>(ExceptionEnum.INVALID_AUTH_TOKEN);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (!claims.getAudience().contains(appleIosClientId)) &#123;</span><br><span class="line">        log.warn(<span class="string">&quot;invalid identityToken: &#123;&#125;, wrong audiences:&#123;&#125;&quot;</span>, idTokenString, JSON.toJSONString(claims.getAudience()));</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MyThrowException</span>(ExceptionEnum.INVALID_AUTH_TOKEN);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (claims.getExpirationTime() != <span class="literal">null</span> &amp;&amp; <span class="keyword">new</span> <span class="title class_">Date</span>().after(claims.getExpirationTime())) &#123;</span><br><span class="line">        log.warn(<span class="string">&quot;invalid identityToken: &#123;&#125;, expiration time:&#123;&#125;&quot;</span>, idTokenString, claims.getExpirationTime().getTime());</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MyThrowException</span>(ExceptionEnum.INVALID_AUTH_TOKEN);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      Map&lt;String, Object&gt; claimsMap = claims.getClaims();</span><br><span class="line"></span><br><span class="line">      <span class="type">String</span> <span class="variable">subject</span> <span class="operator">=</span> claims.getSubject();</span><br><span class="line">      <span class="type">String</span> <span class="variable">email</span> <span class="operator">=</span> (String) claimsMap.get(<span class="string">&quot;email&quot;</span>);</span><br><span class="line">      <span class="type">Object</span> <span class="variable">emailVerifiedObj</span> <span class="operator">=</span> claimsMap.get(<span class="string">&quot;email_verified&quot;</span>);</span><br><span class="line">      <span class="type">Boolean</span> <span class="variable">emailVerified</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">      <span class="keyword">if</span> (emailVerifiedObj != <span class="literal">null</span>) &#123;</span><br><span class="line">        emailVerified = Boolean.valueOf(String.valueOf(emailVerifiedObj));</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="type">Boolean</span> <span class="variable">isPrimaryEmail</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">      <span class="type">Object</span> <span class="variable">isPrimaryObj</span> <span class="operator">=</span> claimsMap.get(<span class="string">&quot;is_private_email&quot;</span>);</span><br><span class="line">      <span class="keyword">if</span> (isPrimaryObj != <span class="literal">null</span>) &#123;</span><br><span class="line">        isPrimaryEmail = Boolean.valueOf(String.valueOf(isPrimaryObj));</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="type">ThirdpartyUserProfile</span> <span class="variable">profile</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ThirdpartyUserProfile</span>();</span><br><span class="line">      profile.setEmail(email);</span><br><span class="line">      profile.setEmailVerified(emailVerified);</span><br><span class="line">      profile.setPrivateEmail(isPrimaryEmail);</span><br><span class="line">      profile.setSub(subject);</span><br><span class="line">      profile.setType(ThirdpartyTypeEnum.apple.name());</span><br><span class="line">      <span class="keyword">return</span> profile;</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      log.error(<span class="string">&quot;getAppleUserProfile verify idToken: &#123;&#125;, error:&quot;</span>, JSON.toJSONString(idTokenString), e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> JWSVerifier <span class="title function_">getAppleVerifier</span><span class="params">(String kid, <span class="type">boolean</span> useCache)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      List&lt;JWK&gt; jwks = useCache ? getApplePublicJwksFromCache() : getApplePublicJwks();</span><br><span class="line">      <span class="type">JWK</span> <span class="variable">applePublicJwk</span> <span class="operator">=</span> jwks.stream()</span><br><span class="line">              .filter(k -&gt; k.getKeyID().equals(kid))</span><br><span class="line">              .findFirst()</span><br><span class="line">              .orElse(<span class="literal">null</span>);</span><br><span class="line">      <span class="keyword">if</span> (applePublicJwk == <span class="literal">null</span>) &#123;</span><br><span class="line">        log.warn(<span class="string">&quot;get jwk failed, kid: &#123;&#125;&quot;</span>, kid);</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MyThrowException</span>(ExceptionEnum.SERVICE_INTERVAL);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="type">RSAPublicKey</span> <span class="variable">publicKey</span> <span class="operator">=</span> ((RSAKey) applePublicJwk).toRSAPublicKey();</span><br><span class="line">      <span class="type">JWSVerifier</span> <span class="variable">verifier</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">RSASSAVerifier</span>(publicKey);</span><br><span class="line">      <span class="keyword">return</span> verifier;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      log.error(<span class="string">&quot;getAppleVerifier error: &quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">MyThrowException</span>(ExceptionEnum.SERVICE_INTERVAL);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> List&lt;JWK&gt; <span class="title function_">getApplePublicJwks</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="type">JWKSet</span> <span class="variable">jwkSet</span> <span class="operator">=</span> JWKSet.load(<span class="keyword">new</span> <span class="title class_">URL</span>(APPLE_KEYS_URL));</span><br><span class="line">      List&lt;JWK&gt; jwks = jwkSet.getKeys();</span><br><span class="line">      <span class="keyword">if</span> (!CollectionUtils.isEmpty(jwks)) &#123;</span><br><span class="line">        jwkCache.put(APPLE_KEYS_CACHE_KEY, jwks);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> jwks;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      log.error(<span class="string">&quot;getApplePublicJwks error: &quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> Collections.emptyList();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">private</span> List&lt;JWK&gt; <span class="title function_">getApplePublicJwksFromCache</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      List&lt;JWK&gt; jwks = jwkCache.getIfPresent(APPLE_KEYS_CACHE_KEY);</span><br><span class="line">      <span class="keyword">if</span> (CollectionUtils.isEmpty(jwks)) &#123;</span><br><span class="line">        jwks = getApplePublicJwks();</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> jwks;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      log.error(<span class="string">&quot;getApplePublicJwks error: &quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> Collections.emptyList();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><h3 id="google"><a href="#google" class="headerlink" title="google"></a>google</h3><p>Credential Manager 说明<br><a target="_blank" rel="noopener" href="https://developer.android.google.cn/identity/sign-in/credential-manager?hl=zh-cn">https://developer.android.google.cn/identity/sign-in/credential-manager?hl=zh-cn</a></p>
+<p>一键登录的官方流程<br><a target="_blank" rel="noopener" href="https://developer.android.com/identity/sign-in/credential-manager-siwg?hl=zh-cn">https://developer.android.com/identity/sign-in/credential-manager-siwg?hl=zh-cn</a></p>
+<p>说明<br><a target="_blank" rel="noopener" href="https://developers.google.com/identity/siwg">https://developers.google.com/identity/siwg</a></p>
+<p>后端校验 idToken<br><a target="_blank" rel="noopener" href="https://developers.google.com/identity/sign-in/android/backend-auth?hl=zh-cn">https://developers.google.com/identity/sign-in/android/backend-auth?hl=zh-cn</a><br><a target="_blank" rel="noopener" href="https://developers.google.com/identity/sign-in/ios/backend-auth?hl=zh-cn">https://developers.google.com/identity/sign-in/ios/backend-auth?hl=zh-cn</a><br><a target="_blank" rel="noopener" href="https://developers.google.com/identity/gsi/web/guides/verify-google-id-token?hl=zh-cn">https://developers.google.com/identity/gsi/web/guides/verify-google-id-token?hl=zh-cn</a></p>
+<p>源代码<br><a target="_blank" rel="noopener" href="https://github.com/googleapis/google-api-java-client/blob/main/google-api-client/src/main/java/com/google/api/client/googleapis/auth/oauth2/GoogleIdTokenVerifier.java">https://github.com/googleapis/google-api-java-client/blob/main/google-api-client/src/main/java/com/google/api/client/googleapis/auth/oauth2/GoogleIdTokenVerifier.java</a></p>
+<p>android 接入<br><a target="_blank" rel="noopener" href="https://developer.android.com/identity/sign-in/credential-manager-siwg?hl=zh-cn">https://developer.android.com/identity/sign-in/credential-manager-siwg?hl=zh-cn</a></p>
+<p>最终获取到 <code>googleIdTokenCredential.getIdToken()</code>传递给服务端</p>
+<p>ios接入<br><a target="_blank" rel="noopener" href="https://developers.google.com/identity/sign-in/ios/start-integrating?hl=zh-cn">https://developers.google.com/identity/sign-in/ios/start-integrating?hl=zh-cn</a></p>
+<p>最终可以获取到 <code>let idToken = user.idToken</code>传递给服务端</p>
+<p>google payload模型 <a target="_blank" rel="noopener" href="https://developers.google.com/identity/sign-in/android/backend-auth#java">参考</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  // These six fields are included in all Google ID Tokens.</span><br><span class="line">  &quot;iss&quot;: &quot;https://accounts.google.com&quot;,</span><br><span class="line">  &quot;sub&quot;: &quot;110169484474386276334&quot;,</span><br><span class="line">  &quot;azp&quot;: &quot;1008719970978-hb24n2dstb40o45d4feuo2ukqmcc6381.apps.googleusercontent.com&quot;,</span><br><span class="line">  &quot;aud&quot;: &quot;1008719970978-hb24n2dstb40o45d4feuo2ukqmcc6381.apps.googleusercontent.com&quot;,</span><br><span class="line">  &quot;iat&quot;: &quot;1433978353&quot;,</span><br><span class="line">  &quot;exp&quot;: &quot;1433981953&quot;,</span><br><span class="line"></span><br><span class="line">  // These seven fields are only included when the user has granted the &quot;profile&quot; and</span><br><span class="line">  // &quot;email&quot; OAuth scopes to the application.</span><br><span class="line">  &quot;email&quot;: &quot;testuser@gmail.com&quot;,</span><br><span class="line">  &quot;email_verified&quot;: &quot;true&quot;,</span><br><span class="line">  &quot;name&quot; : &quot;Test User&quot;,</span><br><span class="line">  &quot;picture&quot;: &quot;https://lh4.googleusercontent.com/-kYgzyAWpZzJ/ABCDEFGHI/AAAJKLMNOP/tIXL9Ir44LE/s99-c/photo.jpg&quot;,</span><br><span class="line">  &quot;given_name&quot;: &quot;Test&quot;,</span><br><span class="line">  &quot;family_name&quot;: &quot;User&quot;,</span><br><span class="line">  &quot;locale&quot;: &quot;en&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="apple"><a href="#apple" class="headerlink" title="apple"></a>apple</h3><p>对接文档<br><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/signinwithapple/">https://developer.apple.com/documentation/signinwithapple/</a></p>
+<p>ios对接<br><a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/signinwithapple/authenticating-users-with-sign-in-with-apple?utm_source=chatgpt.com">https://developer.apple.com/documentation/signinwithapple/authenticating-users-with-sign-in-with-apple?utm_source=chatgpt.com</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/08/20/java/20250820-i18n-system/" rel="prev" title="多语言平台架构设计">
+      <i class="fa fa-chevron-left"></i> 多语言平台架构设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/11/23/crack/20251123-freehost-aesjs-python/" rel="next" title="FreeHost AES.js Python 实现">
+      FreeHost AES.js Python 实现 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.</span> <span class="nav-text">设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%8E%A5%E5%8F%A3"><span class="nav-number">1.1.</span> <span class="nav-text">核心接口</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A8%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">表结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">参考代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#google"><span class="nav-number">4.1.</span> <span class="nav-text">google</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#apple"><span class="nav-number">4.2.</span> <span class="nav-text">apple</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="https://cbu01.alicdn.com/cms/upload/2016/600/239/2932006_509044107.jpg">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">254</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">27</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">124</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
