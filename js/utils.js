@@ -136,10 +136,11 @@ NexT.utils = {
   registerScrollPercent: function() {
     var THRESHOLD = 50;
     var backToTop = document.querySelector('.back-to-top');
+    var backToHome = document.querySelector('.back-to-home');
     var readingProgressBar = document.querySelector('.reading-progress-bar');
     // For init back to top in sidebar if page was scrolled after page refresh.
     window.addEventListener('scroll', () => {
-      if (backToTop || readingProgressBar) {
+      if (backToTop || backToHome || readingProgressBar) {
         var docHeight = document.querySelector('.container').offsetHeight;
         var winHeight = window.innerHeight;
         var contentVisibilityHeight = docHeight > winHeight ? docHeight - winHeight : document.body.scrollHeight - winHeight;
@@ -147,6 +148,9 @@ NexT.utils = {
         if (backToTop) {
           backToTop.classList.toggle('back-to-top-on', window.scrollY > THRESHOLD);
           backToTop.querySelector('span').innerText = Math.round(scrollPercent) + '%';
+        }
+        if (backToHome) {
+          backToHome.classList.toggle('back-to-home-on', window.scrollY > THRESHOLD);
         }
         if (readingProgressBar) {
           readingProgressBar.style.width = scrollPercent.toFixed(2) + '%';
