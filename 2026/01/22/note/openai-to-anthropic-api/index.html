@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一个通用的API代理服务，将Anthropic&#x2F;Claude API请求转换为OpenAI Chat Completions格式并转发到任何OpenAI兼容的上游服务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="claude-proxy 技术方案总结">
+<meta property="og:url" content="https://forgives.github.io/2026/01/22/note/openai-to-anthropic-api/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="一个通用的API代理服务，将Anthropic&#x2F;Claude API请求转换为OpenAI Chat Completions格式并转发到任何OpenAI兼容的上游服务">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-22T08:30:00.000Z">
+<meta property="article:modified_time" content="2026-01-22T07:54:16.119Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="Go">
+<meta property="article:tag" content="API">
+<meta property="article:tag" content="代理">
+<meta property="article:tag" content="协议转换">
+<meta property="article:tag" content="OpenAI">
+<meta property="article:tag" content="Anthropic">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/01/22/note/openai-to-anthropic-api/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>claude-proxy 技术方案总结 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/01/22/note/openai-to-anthropic-api/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          claude-proxy 技术方案总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-01-22 16:30:00" itemprop="dateCreated datePublished" datetime="2026-01-22T16:30:00+08:00">2026-01-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="claude-proxy-技术方案"><a href="#claude-proxy-技术方案" class="headerlink" title="claude-proxy 技术方案"></a>claude-proxy 技术方案</h1><h2 id="项目概述"><a href="#项目概述" class="headerlink" title="项目概述"></a>项目概述</h2><p><a target="_blank" rel="noopener" href="https://github.com/forgives/claude-proxy">claude-proxy</a> 是一个通用的 API 代理服务，实现了 <strong>Anthropic Messages API</strong> 与 <strong>OpenAI Chat Completions API</strong> 之间的双向协议转换。该代理允许使用 Anthropic API 格式的客户端（如 Claude Code CLI）无缝对接任何 OpenAI 兼容的上游服务。</p>
+<h3 id="核心特性"><a href="#核心特性" class="headerlink" title="核心特性"></a>核心特性</h3><ul>
+<li><strong>双向协议转换</strong>: Anthropic Messages API ↔ OpenAI Chat Completions API</li>
+<li><strong>多提供商支持</strong>: 可配置多个上游服务，每个独立的 API 密钥和模型映射</li>
+<li><strong>模型 ID 映射</strong>: 客户端模型 ID（<code>id</code>）映射到上游远程 ID（<code>remote_id</code>）</li>
+<li><strong>流式响应支持</strong>: 实时 SSE 事件转换</li>
+<li><strong>工具调用支持</strong>: 双向函数调用转换</li>
+<li><strong>零依赖</strong>: 仅使用 Go 标准库，无外部依赖</li>
+</ul>
+<h2 id="技术栈"><a href="#技术栈" class="headerlink" title="技术栈"></a>技术栈</h2><ul>
+<li><strong>Go 1.x</strong> - 编程语言</li>
+<li><strong>net&#x2F;http</strong> - HTTP 服务器和客户端</li>
+<li><strong>encoding&#x2F;json</strong> - JSON 编解码</li>
+<li><strong>crypto&#x2F;subtle</strong> - 安全的密钥比较</li>
+</ul>
+<h2 id="项目架构"><a href="#项目架构" class="headerlink" title="项目架构"></a>项目架构</h2><h3 id="整体设计"><a href="#整体设计" class="headerlink" title="整体设计"></a>整体设计</h3><p>项目采用单文件架构（<code>main.go</code>），所有功能模块集中在一个文件中，便于部署和维护：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">claude-proxy/</span><br><span class="line">├── main.go          # 主程序文件</span><br><span class="line">├── config.json      # 配置文件</span><br><span class="line">├── README.md        # 项目文档</span><br><span class="line">└── CLAUDE.md        # Claude Code 指导文档</span><br></pre></td></tr></table></figure>
+
+<h3 id="请求处理流程"><a href="#请求处理流程" class="headerlink" title="请求处理流程"></a>请求处理流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">客户端请求 → 入站验证 → 协议转换 → 上游转发 → 响应转换 → 返回客户端</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p><strong>入站请求处理</strong> (<code>handleMessages</code>)</p>
+<ul>
+<li>接收 Anthropic Messages API 格式请求</li>
+<li>可选的入站身份验证（通过 <code>ak</code> 配置）</li>
+<li>解码请求体并验证模型 ID</li>
+</ul>
+</li>
+<li><p><strong>协议转换</strong> (<code>convertAnthropicToOpenAI</code>)</p>
+<ul>
+<li>将 Anthropic 消息格式转换为 OpenAI 格式</li>
+<li>处理系统消息、用户&#x2F;助手消息、工具调用和图像</li>
+<li>映射内容块到 OpenAI 消息部分</li>
+</ul>
+</li>
+<li><p><strong>上游请求</strong> (<code>doUpstreamJSON</code> 或 <code>proxyStream</code>)</p>
+<ul>
+<li>构建上游 URL: <code>&#123;base_url&#125;/v1/chat/completions</code></li>
+<li>添加 <code>Authorization: Bearer &lt;api_key&gt;</code> 头</li>
+<li>非流式：读取完整响应</li>
+<li>流式：实时代理 SSE 事件</li>
+</ul>
+</li>
+<li><p><strong>响应转换</strong> (<code>convertOpenAIToAnthropic</code>)</p>
+<ul>
+<li>将 OpenAI 响应转回 Anthropic 格式</li>
+<li>映射结束原因：<code>stop</code> → <code>end_turn</code>, <code>length</code> → <code>max_tokens</code>, <code>tool_calls</code> → <code>tool_use</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="核心模块"><a href="#核心模块" class="headerlink" title="核心模块"></a>核心模块</h2><h3 id="配置管理-loadConfig"><a href="#配置管理-loadConfig" class="headerlink" title="配置管理 (loadConfig)"></a>配置管理 (<code>loadConfig</code>)</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> fileConfig <span class="keyword">struct</span> &#123;</span><br><span class="line">    AK                        <span class="type">string</span>           <span class="string">`json:&quot;ak&quot;`</span></span><br><span class="line">    Port                      <span class="type">int</span>              <span class="string">`json:&quot;port&quot;`</span></span><br><span class="line">    UpstreamTimeoutSeconds    <span class="type">int</span>              <span class="string">`json:&quot;upstream_timeout_seconds&quot;`</span></span><br><span class="line">    LogBodyMaxChars           <span class="type">int</span>              <span class="string">`json:&quot;log_body_max_chars&quot;`</span></span><br><span class="line">    LogStreamTextPreviewChars <span class="type">int</span>              <span class="string">`json:&quot;log_stream_text_preview_chars&quot;`</span></span><br><span class="line">    DefaultModelID            <span class="type">string</span>           <span class="string">`json:&quot;default_model_id&quot;`</span></span><br><span class="line">    LogFile                   <span class="type">string</span>           <span class="string">`json:&quot;logfile&quot;`</span></span><br><span class="line">    Providers                 []providerConfig <span class="string">`json:&quot;providers&quot;`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> providerConfig <span class="keyword">struct</span> &#123;</span><br><span class="line">    BaseURL <span class="type">string</span>        <span class="string">`json:&quot;base_url&quot;`</span></span><br><span class="line">    APIKey  <span class="type">string</span>        <span class="string">`json:&quot;api_key&quot;`</span></span><br><span class="line">    Models  []modelConfig <span class="string">`json:&quot;models&quot;`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> modelConfig <span class="keyword">struct</span> &#123;</span><br><span class="line">    ID          <span class="type">string</span> <span class="string">`json:&quot;id&quot;`</span></span><br><span class="line">    DisplayName <span class="type">string</span> <span class="string">`json:&quot;display_name&quot;`</span></span><br><span class="line">    RemoteID    <span class="type">string</span> <span class="string">`json:&quot;remote_id&quot;`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>配置示例</strong>:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;ak&quot;</span><span class="punctuation">:</span> <span class="string">&quot;your-proxy-api-key&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;port&quot;</span><span class="punctuation">:</span> <span class="number">8888</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;upstream_timeout_seconds&quot;</span><span class="punctuation">:</span> <span class="number">300</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;log_body_max_chars&quot;</span><span class="punctuation">:</span> <span class="number">4096</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;log_stream_text_preview_chars&quot;</span><span class="punctuation">:</span> <span class="number">256</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;providers&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;base_url&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://api.example.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;api_key&quot;</span><span class="punctuation">:</span> <span class="string">&quot;your-upstream-api-key&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;models&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;glm&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;display_name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;glm4.7&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;remote_id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;deepseek-chat&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="模型映射"><a href="#模型映射" class="headerlink" title="模型映射"></a>模型映射</h3><p>启动时构建 <code>modelMap</code>，将客户端请求的模型 ID 映射到上游服务的远程 ID：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> modelMapping <span class="keyword">struct</span> &#123;</span><br><span class="line">    ProviderIndex <span class="type">int</span></span><br><span class="line">    RemoteID      <span class="type">string</span></span><br><span class="line">    DisplayName   <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 启动时构建</span></span><br><span class="line">modelMap := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]modelMapping)</span><br><span class="line"><span class="keyword">for</span> i, p := <span class="keyword">range</span> fc.Providers &#123;</span><br><span class="line">    <span class="keyword">for</span> _, m := <span class="keyword">range</span> p.Models &#123;</span><br><span class="line">        remoteID := m.RemoteID</span><br><span class="line">        <span class="keyword">if</span> remoteID == <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">            remoteID = m.ID</span><br><span class="line">        &#125;</span><br><span class="line">        modelMap[m.ID] = modelMapping&#123;</span><br><span class="line">            ProviderIndex: i,</span><br><span class="line">            RemoteID:      remoteID,</span><br><span class="line">            DisplayName:   m.DisplayName,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="协议转换模块"><a href="#协议转换模块" class="headerlink" title="协议转换模块"></a>协议转换模块</h3><h4 id="Anthropic-→-OpenAI-请求转换"><a href="#Anthropic-→-OpenAI-请求转换" class="headerlink" title="Anthropic → OpenAI 请求转换"></a>Anthropic → OpenAI 请求转换</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">convertAnthropicToOpenAI</span><span class="params">(req *anthropicMessageRequest)</span></span> (openaiChatCompletionRequest, <span class="type">error</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> messages []any</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理系统消息</span></span><br><span class="line">    <span class="keyword">if</span> sys := strings.TrimSpace(extractSystemText(req.System)); sys != <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">        messages = <span class="built_in">append</span>(messages, <span class="keyword">map</span>[<span class="type">string</span>]any&#123;</span><br><span class="line">            <span class="string">&quot;role&quot;</span>:    <span class="string">&quot;system&quot;</span>,</span><br><span class="line">            <span class="string">&quot;content&quot;</span>: sys,</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 转换消息</span></span><br><span class="line">    <span class="keyword">for</span> _, m := <span class="keyword">range</span> req.Messages &#123;</span><br><span class="line">        <span class="keyword">switch</span> m.Role &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&quot;user&quot;</span>:</span><br><span class="line">            userMsgs, err := convertAnthropicUserBlocksToOpenAIMessages(blocks)</span><br><span class="line">            messages = <span class="built_in">append</span>(messages, userMsgs...)</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&quot;assistant&quot;</span>:</span><br><span class="line">            assistantMsg, err := convertAnthropicAssistantBlocksToOpenAIMessage(blocks)</span><br><span class="line">            messages = <span class="built_in">append</span>(messages, assistantMsg)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> openaiChatCompletionRequest&#123;</span><br><span class="line">        Model:       req.Model,</span><br><span class="line">        Messages:    messages,</span><br><span class="line">        MaxTokens:   req.MaxTokens,</span><br><span class="line">        Temperature: req.Temperature,</span><br><span class="line">        Stream:      req.Stream,</span><br><span class="line">        Tools:       convertTools(req.Tools),</span><br><span class="line">        ToolChoice:  convertToolChoice(req.ToolChoice),</span><br><span class="line">    &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="OpenAI-→-Anthropic-响应转换"><a href="#OpenAI-→-Anthropic-响应转换" class="headerlink" title="OpenAI → Anthropic 响应转换"></a>OpenAI → Anthropic 响应转换</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">convertOpenAIToAnthropic</span><span class="params">(resp openaiChatCompletionResponse)</span></span> anthropicMessageResponse &#123;</span><br><span class="line">    content := <span class="built_in">make</span>([]any, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(resp.Choices) &gt; <span class="number">0</span> &#123;</span><br><span class="line">        ch := resp.Choices[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 文本内容</span></span><br><span class="line">        <span class="keyword">if</span> ch.Message.Content != <span class="literal">nil</span> &amp;&amp; *ch.Message.Content != <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">            content = <span class="built_in">append</span>(content, <span class="keyword">map</span>[<span class="type">string</span>]any&#123;</span><br><span class="line">                <span class="string">&quot;type&quot;</span>: <span class="string">&quot;text&quot;</span>,</span><br><span class="line">                <span class="string">&quot;text&quot;</span>: *ch.Message.Content,</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 工具调用</span></span><br><span class="line">        <span class="keyword">for</span> _, tc := <span class="keyword">range</span> ch.Message.ToolCalls &#123;</span><br><span class="line">            content = <span class="built_in">append</span>(content, <span class="keyword">map</span>[<span class="type">string</span>]any&#123;</span><br><span class="line">                <span class="string">&quot;type&quot;</span>:  <span class="string">&quot;tool_use&quot;</span>,</span><br><span class="line">                <span class="string">&quot;id&quot;</span>:    tc.ID,</span><br><span class="line">                <span class="string">&quot;name&quot;</span>:  tc.Function.Name,</span><br><span class="line">                <span class="string">&quot;input&quot;</span>: parseArguments(tc.Function.Arguments),</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> anthropicMessageResponse&#123;</span><br><span class="line">        ID:           resp.ID,</span><br><span class="line">        Type:         <span class="string">&quot;message&quot;</span>,</span><br><span class="line">        Role:         <span class="string">&quot;assistant&quot;</span>,</span><br><span class="line">        Model:        resp.Model,</span><br><span class="line">        Content:      content,</span><br><span class="line">        StopReason:   mapFinishReason(finishReason),</span><br><span class="line">        Usage:        buildUsage(resp.Usage),</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="流式响应处理-proxyStream"><a href="#流式响应处理-proxyStream" class="headerlink" title="流式响应处理 (proxyStream)"></a>流式响应处理 (<code>proxyStream</code>)</h3><p>流式处理实时转换 OpenAI SSE 事件到 Anthropic 格式：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">proxyStream</span><span class="params">(w http.ResponseWriter, r *http.Request, cfg *serverConfig, reqID <span class="type">string</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    openaiReq openaiChatCompletionRequest, upstreamURL <span class="type">string</span>, apiKey <span class="type">string</span>)</span></span> <span class="type">error</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置 SSE 响应头</span></span><br><span class="line">    w.Header().Set(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;text/event-stream&quot;</span>)</span><br><span class="line">    w.Header().Set(<span class="string">&quot;Cache-Control&quot;</span>, <span class="string">&quot;no-cache&quot;</span>)</span><br><span class="line">    w.Header().Set(<span class="string">&quot;Connection&quot;</span>, <span class="string">&quot;keep-alive&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 发送 message_start 事件</span></span><br><span class="line">    encoder(<span class="string">&quot;message_start&quot;</span>, <span class="keyword">map</span>[<span class="type">string</span>]any&#123;</span><br><span class="line">        <span class="string">&quot;type&quot;</span>: <span class="string">&quot;message_start&quot;</span>,</span><br><span class="line">        <span class="string">&quot;message&quot;</span>: <span class="keyword">map</span>[<span class="type">string</span>]any&#123;</span><br><span class="line">            <span class="string">&quot;id&quot;</span>:      messageID,</span><br><span class="line">            <span class="string">&quot;role&quot;</span>:    <span class="string">&quot;assistant&quot;</span>,</span><br><span class="line">            <span class="string">&quot;content&quot;</span>: []any&#123;&#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 读取 OpenAI SSE 流</span></span><br><span class="line">    reader := bufio.NewReader(upResp.Body)</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        line, err := reader.ReadString(<span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> strings.HasPrefix(line, <span class="string">&quot;data:&quot;</span>) &#123;</span><br><span class="line">            data := strings.TrimPrefix(line, <span class="string">&quot;data:&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> data == <span class="string">&quot;[DONE]&quot;</span> &#123;</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> chunk openaiChatCompletionChunk</span><br><span class="line">            json.Unmarshal([]<span class="type">byte</span>(data), &amp;chunk)</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 转换并发送 Anthropic 事件</span></span><br><span class="line">            <span class="keyword">if</span> delta.Content != <span class="literal">nil</span> &#123;</span><br><span class="line">                encoder(<span class="string">&quot;content_block_delta&quot;</span>, <span class="keyword">map</span>[<span class="type">string</span>]any&#123;</span><br><span class="line">                    <span class="string">&quot;type&quot;</span>:  <span class="string">&quot;content_block_delta&quot;</span>,</span><br><span class="line">                    <span class="string">&quot;delta&quot;</span>: <span class="keyword">map</span>[<span class="type">string</span>]any&#123;<span class="string">&quot;type&quot;</span>: <span class="string">&quot;text_delta&quot;</span>, <span class="string">&quot;text&quot;</span>: *delta.Content&#125;,</span><br><span class="line">                &#125;)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 发送 message_stop 事件</span></span><br><span class="line">    encoder(<span class="string">&quot;message_stop&quot;</span>, <span class="keyword">map</span>[<span class="type">string</span>]any&#123;<span class="string">&quot;type&quot;</span>: <span class="string">&quot;message_stop&quot;</span>&#125;)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="认证模块"><a href="#认证模块" class="headerlink" title="认证模块"></a>认证模块</h3><h4 id="入站认证-checkInboundAuth"><a href="#入站认证-checkInboundAuth" class="headerlink" title="入站认证 (checkInboundAuth)"></a>入站认证 (<code>checkInboundAuth</code>)</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">checkInboundAuth</span><span class="params">(r *http.Request, expected <span class="type">string</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">    <span class="comment">// 支持 Authorization: Bearer &lt;token&gt;</span></span><br><span class="line">    auth := strings.TrimSpace(r.Header.Get(<span class="string">&quot;Authorization&quot;</span>))</span><br><span class="line">    <span class="keyword">if</span> strings.HasPrefix(strings.ToLower(auth), <span class="string">&quot;bearer &quot;</span>) &#123;</span><br><span class="line">        got := strings.TrimSpace(auth[<span class="built_in">len</span>(<span class="string">&quot;bearer &quot;</span>):])</span><br><span class="line">        <span class="keyword">return</span> subtle.ConstantTimeCompare([]<span class="type">byte</span>(got), []<span class="type">byte</span>(expected)) == <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 支持 x-api-key: &lt;token&gt;</span></span><br><span class="line">    <span class="keyword">if</span> got := strings.TrimSpace(r.Header.Get(<span class="string">&quot;x-api-key&quot;</span>)); got != <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> subtle.ConstantTimeCompare([]<span class="type">byte</span>(got), []<span class="type">byte</span>(expected)) == <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="上游认证"><a href="#上游认证" class="headerlink" title="上游认证"></a>上游认证</h4><p>始终使用配置的 <code>api_key</code> 发送 <code>Authorization: Bearer &lt;api_key&gt;</code> 头到上游服务。</p>
+<h3 id="日志和清理"><a href="#日志和清理" class="headerlink" title="日志和清理"></a>日志和清理</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sanitizeOpenAIRequest</span><span class="params">(req openaiChatCompletionRequest)</span></span> openaiChatCompletionRequest &#123;</span><br><span class="line">    <span class="comment">// 隐藏 base64 图像数据</span></span><br><span class="line">    <span class="keyword">if</span> strings.HasPrefix(url, <span class="string">&quot;data:&quot;</span>) &#123;</span><br><span class="line">        iu[<span class="string">&quot;url&quot;</span>] = <span class="string">&quot;data:&lt;redacted&gt;&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> req</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">logForwardedRequest</span><span class="params">(reqID <span class="type">string</span>, cfg *serverConfig, anthropicReq, openaiReq, upstreamURL)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 记录请求摘要（截断长字符串）</span></span><br><span class="line">    log.Printf(<span class="string">&quot;[%s] inbound summary=%s&quot;</span>, reqID, mustJSONTrunc(inSummary, cfg.logBodyMax))</span><br><span class="line">    log.Printf(<span class="string">&quot;[%s] forward body=%s&quot;</span>, reqID, mustJSONTrunc(out, cfg.logBodyMax))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="API-端点"><a href="#API-端点" class="headerlink" title="API 端点"></a>API 端点</h2><h3 id="GET-v1-models"><a href="#GET-v1-models" class="headerlink" title="GET &#x2F;v1&#x2F;models"></a>GET &#x2F;v1&#x2F;models</h3><p>返回配置文件中定义的可用模型列表（Anthropic 格式）。</p>
+<p><strong>请求示例</strong>:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -sS http://127.0.0.1:8888/v1/models \</span><br><span class="line">  -H <span class="string">&#x27;Authorization: Bearer your-proxy-api-key&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>响应格式</strong>:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;object&quot;</span><span class="punctuation">:</span> <span class="string">&quot;list&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;glm&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;object&quot;</span><span class="punctuation">:</span> <span class="string">&quot;model&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;created&quot;</span><span class="punctuation">:</span> <span class="number">1234567890</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;display_name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;glm4.7&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="POST-v1-messages"><a href="#POST-v1-messages" class="headerlink" title="POST &#x2F;v1&#x2F;messages"></a>POST &#x2F;v1&#x2F;messages</h3><p>发送消息到上游服务。</p>
+<p><strong>非流式请求示例</strong>:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">curl -sS http://127.0.0.1:8888/v1/messages \</span><br><span class="line">  -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">  -H <span class="string">&#x27;Authorization: Bearer your-proxy-api-key&#x27;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">    &quot;model&quot;: &quot;glm&quot;,</span></span><br><span class="line"><span class="string">    &quot;max_tokens&quot;: 256,</span></span><br><span class="line"><span class="string">    &quot;messages&quot;: [&#123;&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;hello&quot;&#125;]</span></span><br><span class="line"><span class="string">  &#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>流式请求示例</strong>:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">curl -N http://127.0.0.1:8888/v1/messages \</span><br><span class="line">  -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">  -H <span class="string">&#x27;Authorization: Bearer your-proxy-api-key&#x27;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">    &quot;model&quot;: &quot;glm&quot;,</span></span><br><span class="line"><span class="string">    &quot;max_tokens&quot;: 256,</span></span><br><span class="line"><span class="string">    &quot;stream&quot;: true,</span></span><br><span class="line"><span class="string">    &quot;messages&quot;: [&#123;&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;hello&quot;&#125;]</span></span><br><span class="line"><span class="string">  &#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="GET-status"><a href="#GET-status" class="headerlink" title="GET &#x2F;status"></a>GET &#x2F;status</h3><p>健康检查端点。</p>
+<p><strong>响应</strong>:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="string">&quot;claude-proxy&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;health&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ok&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="部署方案"><a href="#部署方案" class="headerlink" title="部署方案"></a>部署方案</h2><h3 id="环境要求"><a href="#环境要求" class="headerlink" title="环境要求"></a>环境要求</h3><ul>
+<li>Go 1.x</li>
+<li>无外部依赖</li>
+</ul>
+<h3 id="本地运行"><a href="#本地运行" class="headerlink" title="本地运行"></a>本地运行</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用默认配置 config.json</span></span><br><span class="line">go run .</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定配置文件路径</span></span><br><span class="line">CONFIG_PATH=/path/to/config.json go run .</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>标准编译：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go build -o claude-proxy .</span><br></pre></td></tr></table></figure>
+
+<p>跨平台编译：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Linux AMD64</span></span><br><span class="line">GOOS=linux GOARCH=amd64 go build -trimpath -ldflags <span class="string">&quot;-s -w&quot;</span> -o dist/claude-proxy_linux_amd64 .</span><br><span class="line"></span><br><span class="line"><span class="comment"># Windows AMD64</span></span><br><span class="line">GOOS=windows GOARCH=amd64 go build -trimpath -ldflags <span class="string">&quot;-s -w&quot;</span> -o dist/claude-proxy_windows_amd64.exe .</span><br><span class="line"></span><br><span class="line"><span class="comment"># macOS ARM64</span></span><br><span class="line">GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags <span class="string">&quot;-s -w&quot;</span> -o dist/claude-proxy_darwin_arm64 .</span><br></pre></td></tr></table></figure>
+
+<h3 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h3><ul>
+<li><code>CONFIG_PATH</code> - 配置文件路径（默认：<code>config.json</code>）</li>
+</ul>
+<h3 id="生产部署"><a href="#生产部署" class="headerlink" title="生产部署"></a>生产部署</h3><ol>
+<li>编辑 <code>config.json</code> 配置上游服务和 API 密钥</li>
+<li>编译对应平台的二进制文件</li>
+<li>运行服务：<code>./claude-proxy</code></li>
+<li>使用 systemd 或 supervisor 管理进程（可选）</li>
+</ol>
+<h2 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h2><h3 id="与-Claude-Code-CLI-集成"><a href="#与-Claude-Code-CLI-集成" class="headerlink" title="与 Claude Code CLI 集成"></a>与 Claude Code CLI 集成</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置环境变量</span></span><br><span class="line"><span class="built_in">export</span> ANTHROPIC_BASE_URL=http://localhost:8888</span><br><span class="line"><span class="built_in">export</span> ANTHROPIC_AUTH_TOKEN=your-proxy-api-key</span><br><span class="line"><span class="built_in">export</span> ANTHROPIC_DEFAULT_HAIKU_MODEL=glm</span><br><span class="line"><span class="built_in">export</span> ANTHROPIC_DEFAULT_SONNET_MODEL=glm</span><br><span class="line"><span class="built_in">export</span> ANTHROPIC_DEFAULT_OPUS_MODEL=glm</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动 Claude Code</span></span><br><span class="line">claude</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置说明"><a href="#配置说明" class="headerlink" title="配置说明"></a>配置说明</h3><p><strong>字段说明</strong>:</p>
+<ul>
+<li><code>ak</code> (可选): 入站认证密钥</li>
+<li><code>port</code> (可选): 服务器端口，默认 <code>8888</code></li>
+<li><code>default_model_id</code> (可选): 默认模型 ID</li>
+<li><code>upstream_timeout_seconds</code> (可选): 上游请求超时时间，默认 <code>300</code></li>
+<li><code>log_body_max_chars</code> (可选): 日志最大字符数，默认 <code>4096</code>（设为 <code>0</code> 禁用）</li>
+<li><code>log_stream_text_preview_chars</code> (可选): 流式响应预览字符数，默认 <code>256</code>（设为 <code>0</code> 禁用）</li>
+<li><code>logfile</code> (可选): 日志文件路径</li>
+<li><code>providers</code> (必需): 上游服务提供商数组<ul>
+<li><code>base_url</code> (必需): 上游服务基础 URL</li>
+<li><code>api_key</code> (必需): 上游 API 密钥</li>
+<li><code>models</code> (必需): 模型配置数组<ul>
+<li><code>id</code> (必需): 客户端使用的模型标识符</li>
+<li><code>display_name</code> (可选): 显示名称</li>
+<li><code>remote_id</code> (可选): 发送到上游的模型 ID（默认与 <code>id</code> 相同）</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>重要</strong>: 请勿将真实的 API 密钥提交到版本控制系统。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="项目优势"><a href="#项目优势" class="headerlink" title="项目优势"></a>项目优势</h3><ol>
+<li><strong>零依赖</strong>: 仅使用 Go 标准库，编译后无外部依赖，部署简单</li>
+<li><strong>轻量级</strong>: 单文件实现，代码清晰易懂</li>
+<li><strong>高性能</strong>: 原生 HTTP 实现，支持 HTTP&#x2F;2 和连接复用</li>
+<li><strong>灵活性</strong>: 支持多提供商、模型映射、流式响应</li>
+<li><strong>安全性</strong>: 使用常量时间比较防止时序攻击，支持密钥脱敏日志</li>
+</ol>
+<h3 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h3><ul>
+<li>将 Anthropic API 客户端连接到 OpenAI 兼容服务</li>
+<li>统一多个上游服务的 API 接口</li>
+<li>模型 ID 映射和转换</li>
+<li>本地开发和测试环境</li>
+</ul>
+<h3 id="已知限制"><a href="#已知限制" class="headerlink" title="已知限制"></a>已知限制</h3><ul>
+<li>流式转换仅支持文本 delta 和工具调用 delta</li>
+<li>其他 Anthropic 内容块类型（如 thinking blocks）未完全实现</li>
+<li><code>/v1/models</code> 端点返回配置中的静态列表，不从上游服务获取</li>
+<li>请求&#x2F;响应体会被记录，需注意日志中可能包含敏感信息</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Go/" rel="tag"># Go</a>
+              <a href="/tags/API/" rel="tag"># API</a>
+              <a href="/tags/%E4%BB%A3%E7%90%86/" rel="tag"># 代理</a>
+              <a href="/tags/%E5%8D%8F%E8%AE%AE%E8%BD%AC%E6%8D%A2/" rel="tag"># 协议转换</a>
+              <a href="/tags/OpenAI/" rel="tag"># OpenAI</a>
+              <a href="/tags/Anthropic/" rel="tag"># Anthropic</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/01/22/book/the-effective-executive/" rel="prev" title="《卓有成效的管理者》">
+      <i class="fa fa-chevron-left"></i> 《卓有成效的管理者》
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/02/25/book/Finite-And-Infinite-Games/" rel="next" title="《有限与无限的游戏》">
+      《有限与无限的游戏》 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#claude-proxy-%E6%8A%80%E6%9C%AF%E6%96%B9%E6%A1%88"><span class="nav-number">1.</span> <span class="nav-text">claude-proxy 技术方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%A6%82%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">项目概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7"><span class="nav-number">1.1.1.</span> <span class="nav-text">核心特性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E6%A0%88"><span class="nav-number">1.2.</span> <span class="nav-text">技术栈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84"><span class="nav-number">1.3.</span> <span class="nav-text">项目架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.3.1.</span> <span class="nav-text">整体设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="nav-number">1.3.2.</span> <span class="nav-text">请求处理流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9D%97"><span class="nav-number">1.4.</span> <span class="nav-text">核心模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86-loadConfig"><span class="nav-number">1.4.1.</span> <span class="nav-text">配置管理 (loadConfig)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E6%98%A0%E5%B0%84"><span class="nav-number">1.4.2.</span> <span class="nav-text">模型映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E8%AE%AE%E8%BD%AC%E6%8D%A2%E6%A8%A1%E5%9D%97"><span class="nav-number">1.4.3.</span> <span class="nav-text">协议转换模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Anthropic-%E2%86%92-OpenAI-%E8%AF%B7%E6%B1%82%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.4.3.1.</span> <span class="nav-text">Anthropic → OpenAI 请求转换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OpenAI-%E2%86%92-Anthropic-%E5%93%8D%E5%BA%94%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.4.3.2.</span> <span class="nav-text">OpenAI → Anthropic 响应转换</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E5%BC%8F%E5%93%8D%E5%BA%94%E5%A4%84%E7%90%86-proxyStream"><span class="nav-number">1.4.4.</span> <span class="nav-text">流式响应处理 (proxyStream)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A4%E8%AF%81%E6%A8%A1%E5%9D%97"><span class="nav-number">1.4.5.</span> <span class="nav-text">认证模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%A5%E7%AB%99%E8%AE%A4%E8%AF%81-checkInboundAuth"><span class="nav-number">1.4.5.1.</span> <span class="nav-text">入站认证 (checkInboundAuth)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8A%E6%B8%B8%E8%AE%A4%E8%AF%81"><span class="nav-number">1.4.5.2.</span> <span class="nav-text">上游认证</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E5%92%8C%E6%B8%85%E7%90%86"><span class="nav-number">1.4.6.</span> <span class="nav-text">日志和清理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-%E7%AB%AF%E7%82%B9"><span class="nav-number">1.5.</span> <span class="nav-text">API 端点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GET-v1-models"><span class="nav-number">1.5.1.</span> <span class="nav-text">GET &#x2F;v1&#x2F;models</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#POST-v1-messages"><span class="nav-number">1.5.2.</span> <span class="nav-text">POST &#x2F;v1&#x2F;messages</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GET-status"><span class="nav-number">1.5.3.</span> <span class="nav-text">GET &#x2F;status</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88"><span class="nav-number">1.6.</span> <span class="nav-text">部署方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E8%A6%81%E6%B1%82"><span class="nav-number">1.6.1.</span> <span class="nav-text">环境要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E8%BF%90%E8%A1%8C"><span class="nav-number">1.6.2.</span> <span class="nav-text">本地运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">1.6.3.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">1.6.4.</span> <span class="nav-text">环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E9%83%A8%E7%BD%B2"><span class="nav-number">1.6.5.</span> <span class="nav-text">生产部署</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"><span class="nav-number">1.7.</span> <span class="nav-text">使用说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E-Claude-Code-CLI-%E9%9B%86%E6%88%90"><span class="nav-number">1.7.1.</span> <span class="nav-text">与 Claude Code CLI 集成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E"><span class="nav-number">1.7.2.</span> <span class="nav-text">配置说明</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.8.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E4%BC%98%E5%8A%BF"><span class="nav-number">1.8.1.</span> <span class="nav-text">项目优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.8.2.</span> <span class="nav-text">适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%B2%E7%9F%A5%E9%99%90%E5%88%B6"><span class="nav-number">1.8.3.</span> <span class="nav-text">已知限制</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">262</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">138</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

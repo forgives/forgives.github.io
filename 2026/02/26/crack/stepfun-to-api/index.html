@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="某网站 Chat2API">
+<meta property="og:type" content="article">
+<meta property="og:title" content="某网站 Chat2API">
+<meta property="og:url" content="https://forgives.github.io/2026/02/26/crack/stepfun-to-api/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="某网站 Chat2API">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-02-26T06:06:00.000Z">
+<meta property="article:modified_time" content="2026-02-26T06:24:45.111Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="api">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/02/26/crack/stepfun-to-api/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>某网站 Chat2API | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/02/26/crack/stepfun-to-api/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          某网站 Chat2API
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-02-26 14:06:00" itemprop="dateCreated datePublished" datetime="2026-02-26T14:06:00+08:00">2026-02-26</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <!-- more -->
+<p>某网站是一个 AI 对话平台，提供了类似 ChatGPT 的对话能力。通过抓包分析，发现其 API 使用 gRPC-Web 协议进行通信，于是用 Python 实现了一个完整的客户端，并提供了 OpenAI 协议兼容的 HTTP 服务。</p>
+<h2 id="gRPC-Web-简介"><a href="#gRPC-Web-简介" class="headerlink" title="gRPC-Web 简介"></a>gRPC-Web 简介</h2><p>gRPC-Web 是 gRPC 在浏览器端的实现，允许 Web 应用直接调用 gRPC 服务，无需通过 HTTP&#x2F;JSON 中间层。</p>
+<h3 id="为什么用-gRPC-Web"><a href="#为什么用-gRPC-Web" class="headerlink" title="为什么用 gRPC-Web"></a>为什么用 gRPC-Web</h3><p>相比传统的 REST API，gRPC-Web 有以下优势：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>REST API</th>
+<th>gRPC-Web</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>序列化</td>
+<td>JSON (文本)</td>
+<td>Protobuf (二进制)</td>
+</tr>
+<tr>
+<td>数据大小</td>
+<td>较大</td>
+<td>较小 (节省 30-50%)</td>
+</tr>
+<tr>
+<td>解析速度</td>
+<td>慢</td>
+<td>快</td>
+</tr>
+<tr>
+<td>类型安全</td>
+<td>弱</td>
+<td>强 (Protobuf Schema)</td>
+</tr>
+<tr>
+<td>流式支持</td>
+<td>SSE&#x2F;WebSocket</td>
+<td>原生支持</td>
+</tr>
+</tbody></table>
+<h3 id="gRPC-Web-协议格式"><a href="#gRPC-Web-协议格式" class="headerlink" title="gRPC-Web 协议格式"></a>gRPC-Web 协议格式</h3><p>gRPC-Web 的请求体采用特殊的二进制格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+-------------------+----------------------+----------------------+</span><br><span class="line">| 压缩标志 (1字节)  | 消息长度 (4字节)     | 消息体 (N字节)        |</span><br><span class="line">| 0x00 = 未压缩     | 大端序整数           | JSON 或 Protobuf      |</span><br><span class="line">| 0x01 = 压缩       |                      |                      |</span><br><span class="line">+-------------------+----------------------+----------------------+</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例：</strong> 假设消息体是 <code>&#123;&quot;hello&quot;: &quot;world&quot;&#125;</code> (17 字节)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">00 00 00 00 11 7B 22 68 65 6C 6C 6F 22 3A 20 22 77 6F 72 6C 64 22 7D</span><br><span class="line">^^  ^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span><br><span class="line">未压缩  长度=17                     &#123;&quot;hello&quot;: &quot;world&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="gRPC-Web-vs-原生-gRPC"><a href="#gRPC-Web-vs-原生-gRPC" class="headerlink" title="gRPC-Web vs 原生 gRPC"></a>gRPC-Web vs 原生 gRPC</h3><table>
+<thead>
+<tr>
+<th>方面</th>
+<th>原生 gRPC</th>
+<th>gRPC-Web</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>传输协议</td>
+<td>HTTP&#x2F;2</td>
+<td>HTTP&#x2F;1.1 或 HTTP&#x2F;2</td>
+</tr>
+<tr>
+<td>浏览器支持</td>
+<td>需要代理</td>
+<td>原生支持</td>
+</tr>
+<tr>
+<td>双向流</td>
+<td>支持</td>
+<td>仅服务端流</td>
+</tr>
+<tr>
+<td>压缩</td>
+<td>内置</td>
+<td>需手动处理</td>
+</tr>
+</tbody></table>
+<h2 id="抓包分析过程"><a href="#抓包分析过程" class="headerlink" title="抓包分析过程"></a>抓包分析过程</h2><h3 id="第一步：观察网络请求"><a href="#第一步：观察网络请求" class="headerlink" title="第一步：观察网络请求"></a>第一步：观察网络请求</h3><p>打开浏览器访问 <a target="_blank" rel="noopener" href="https://www.xxx.com,登录后打开开发者工具/">https://www.xxx.com，登录后打开开发者工具</a> (F12)：</p>
+<ol>
+<li>切换到 Network (网络) 标签</li>
+<li>在输入框发送一条消息</li>
+<li>观察出现的网络请求</li>
+</ol>
+<p>发现了几个关键请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">POST /api/agent/capy.agent.v1.AgentService/CreateChatSession</span><br><span class="line">POST /api/agent/capy.agent.v1.AgentService/ChatStream</span><br></pre></td></tr></table></figure>
+
+<p>从 URL 路径可以看出：</p>
+<ul>
+<li>使用了 gRPC 服务 (<code>capy.agent.v1.AgentService</code>)</li>
+<li>方法名采用 PascalCase (<code>CreateChatSession</code>, <code>ChatStream</code>)</li>
+</ul>
+<h3 id="第二步：分析请求头"><a href="#第二步：分析请求头" class="headerlink" title="第二步：分析请求头"></a>第二步：分析请求头</h3><p>查看 <code>ChatStream</code> 请求的 Request Headers：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/api/agent/capy.agent.v1.AgentService/ChatStream</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>www.target.com</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/connect+json</span><br><span class="line"><span class="attribute">connect-protocol-version</span><span class="punctuation">: </span>1</span><br><span class="line"><span class="attribute">oasis-appid</span><span class="punctuation">: </span>10200</span><br><span class="line"><span class="attribute">oasis-language</span><span class="punctuation">: </span>zh</span><br><span class="line"><span class="attribute">oasis-platform</span><span class="punctuation">: </span>web</span><br><span class="line"><span class="attribute">x-waf-client-type</span><span class="punctuation">: </span>fetch_sdk</span><br><span class="line"><span class="attribute">Cookie</span><span class="punctuation">: </span>Oasis-Webid=xxx; Oasis-Token=xxx</span><br></pre></td></tr></table></figure>
+
+<p>关键发现：</p>
+<ul>
+<li><code>Content-Type: application/connect+json</code> - 这是 gRPC-Web 的 Content-Type</li>
+<li><code>connect-protocol-version: 1</code> - Connect 协议版本标识</li>
+<li><code>oasis-appid</code> &#x2F; <code>oasis-language</code> &#x2F; <code>oasis-platform</code> - 业务自定义头</li>
+</ul>
+<h3 id="第三步：解析请求体"><a href="#第三步：解析请求体" class="headerlink" title="第三步：解析请求体"></a>第三步：解析请求体</h3><p>在 Chrome DevTools 中，请求体显示为二进制：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">00000000: 00 00 00 00 5f 7b 22 6d  65 73 73 61 67 65 22 3a  ..._&#123;&quot;message&quot;:</span><br><span class="line">00000010: 7b 22 63 68 61 74 53 65  73 73 69 6f 6e 49 64 22  &#123;&quot;chatSessionId&quot;</span><br><span class="line">00000020: 3a 22 78 78 78 22 2c 22  63 6f 6e 74 65 6e 74 22  :&quot;xxx&quot;,&quot;content&quot;</span><br><span class="line">00000030: 3a 7b 22 75 73 65 72 4d  65 73 73 61 67 65 22 3a  :&#123;&quot;userMessage&quot;:</span><br><span class="line">00000040: 7b 22 71 61 22 3a 7b 22  63 6f 6e 74 65 6e 74 22  &#123;&quot;qa&quot;:&#123;&quot;content&quot;</span><br><span class="line">00000050: 3a 22 e4 bd a0 e5 a5  bd  5c 6e 22 7d 7d 7d 2c 22  :&quot;你好\n&quot;&#125;&#125;&#125;,&quot;config&quot;</span><br><span class="line">00000060: 3a 7b 22 6d 6f 64 65 6c  22 3a 22 73 74 65 70 2d  :&#123;&quot;model&quot;:&quot;step-</span><br><span class="line">00000070: 61 75 74 6f 22 2c 22 65  6e 61 62 6c 65 52 65 61  auto&quot;,&quot;enableRea</span><br><span class="line">00000080: 73 6f 6e 69 6e 67 22 3a  74 72 75 65 7d 7d         soning&quot;:true&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>解析结构：</p>
+<ul>
+<li><code>00</code> - 压缩标志 (未压缩)</li>
+<li><code>00 00 00 5f</code> - 消息长度 (大端序，&#x3D; 95 字节)</li>
+<li>后续是 JSON 内容</li>
+</ul>
+<p>手动提取 JSON (跳过前 5 字节)：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;chatSessionId&quot;</span><span class="punctuation">:</span> <span class="string">&quot;xxx&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;userMessage&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;qa&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;你好\n&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;config&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;model&quot;</span><span class="punctuation">:</span> <span class="string">&quot;step-auto&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;enableReasoning&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="第四步：分析响应体"><a href="#第四步：分析响应体" class="headerlink" title="第四步：分析响应体"></a>第四步：分析响应体</h3><p>响应类型是 <code>text/event-stream</code>，即 SSE (Server-Sent Events)：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">data: &#123;&quot;data&quot;:&#123;&quot;event&quot;:&#123;&quot;startEvent&quot;:&#123;&quot;messageId&quot;:&quot;msg_xxx&quot;&#125;&#125;&#125;&#125;</span><br><span class="line"></span><br><span class="line">data: &#123;&quot;data&quot;:&#123;&quot;event&quot;:&#123;&quot;reasoningEvent&quot;:&#123;&quot;text&quot;:&quot;用户问好...&quot;&#125;&#125;&#125;&#125;</span><br><span class="line"></span><br><span class="line">data: &#123;&quot;data&quot;:&#123;&quot;event&quot;:&#123;&quot;textEvent&quot;:&#123;&quot;text&quot;:&quot;你好！我是...&quot;&#125;&#125;&#125;&#125;</span><br><span class="line"></span><br><span class="line">data: &#123;&quot;data&quot;:&#123;&quot;event&quot;:&#123;&quot;finishEvent&quot;:&#123;&#125;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但实际上在 Network 面板看到的是原始字节：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">00000000: 00 00 00 00 5f 7b 22 64  61 74 61 22 3a 7b 22 65  ..._&#123;&quot;data&quot;:&#123;&quot;e</span><br><span class="line">00000010: 76 65 6e 74 22 3a 7b 22  73 74 61 72 74 45 76 65  vent&quot;:&#123;&quot;startEve</span><br><span class="line">00000020: 6e 74 22 3a 7b 22 6d 65  73 73 61 67 65 49 64 22  nt&quot;:&#123;&quot;messageId&quot;</span><br><span class="line">00000030: 3a 22 6d 73 67 5f 78 78  78 22 7d 7d 7d 7d        :&quot;msg_xxx&quot;&#125;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每个 SSE 事件都带有 5 字节前缀，格式与请求相同。</p>
+<h3 id="第五步：获取认证信息"><a href="#第五步：获取认证信息" class="headerlink" title="第五步：获取认证信息"></a>第五步：获取认证信息</h3><p>在 Application &gt; Cookies 中找到关键 Cookie：</p>
+<table>
+<thead>
+<tr>
+<th>Cookie</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Oasis-Token</code></td>
+<td>访问令牌，格式：<code>accessToken...refreshToken</code></td>
+</tr>
+<tr>
+<td><code>Oasis-Webid</code></td>
+<td>会话标识，UUID 格式</td>
+</tr>
+</tbody></table>
+<p><code>Oasis-Token</code> 分析：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&lt;refreshToken&gt;</span><br><span class="line"> ^                                        ^</span><br><span class="line"> |                                        |</span><br><span class="line"> accessToken (JWT)                        分隔符</span><br></pre></td></tr></table></figure>
+
+<p>JWT 解码后的 payload：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;sub&quot;</span><span class="punctuation">:</span> <span class="string">&quot;user_123&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;exp&quot;</span><span class="punctuation">:</span> <span class="number">1740000000</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;iat&quot;</span><span class="punctuation">:</span> <span class="number">1739996400</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="API-端点总结"><a href="#API-端点总结" class="headerlink" title="API 端点总结"></a>API 端点总结</h3><p>主要的 API 端点：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">POST https://www.target.com/api/agent/capy.agent.v1.AgentService/CreateChatSession</span><br><span class="line">POST https://www.target.com/api/agent/capy.agent.v1.AgentService/ChatStream</span><br><span class="line">POST https://www.target.com/api/agent/capy.agent.v1.AgentService/ListChatSessions</span><br></pre></td></tr></table></figure>
+
+<h3 id="请求格式"><a href="#请求格式" class="headerlink" title="请求格式"></a>请求格式</h3><p>创建会话的请求体：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;chatSessionId&quot;</span><span class="punctuation">:</span> <span class="string">&quot;xxx&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;userMessage&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;qa&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                    <span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;你好\n&quot;</span></span><br><span class="line">                <span class="punctuation">&#125;</span></span><br><span class="line">            <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;config&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;model&quot;</span><span class="punctuation">:</span> <span class="string">&quot;step-auto&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;enableReasoning&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="响应格式"><a href="#响应格式" class="headerlink" title="响应格式"></a>响应格式</h3><p>SSE 流式响应，每个事件带有长度前缀：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[5字节长度前缀]&#123;&quot;data&quot;:&#123;&quot;event&quot;:&#123;&quot;startEvent&quot;:&#123;...&#125;&#125;&#125;&#125;</span><br><span class="line">[5字节长度前缀]&#123;&quot;data&quot;:&#123;&quot;event&quot;:&#123;&quot;reasoningEvent&quot;:&#123;&quot;text&quot;:&quot;...&quot;&#125;&#125;&#125;&#125;</span><br><span class="line">[5字节长度前缀]&#123;&quot;data&quot;:&#123;&quot;event&quot;:&#123;&quot;textEvent&quot;:&#123;&quot;text&quot;:&quot;...&quot;&#125;&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Python-客户端实现"><a href="#Python-客户端实现" class="headerlink" title="Python 客户端实现"></a>Python 客户端实现</h2><h3 id="构建二进制请求体"><a href="#构建二进制请求体" class="headerlink" title="构建二进制请求体"></a>构建二进制请求体</h3><p>这是实现的关键部分。我们需要按照 gRPC-Web 格式组装请求：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_build_grpc_web_body</span>(<span class="params">payload: <span class="built_in">dict</span></span>) -&gt; <span class="built_in">bytes</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    构建 gRPC-Web 格式的请求体</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    格式: [压缩标志(1字节)][消息长度(4字节大端序)][消息体]</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 1. 将字典转为 JSON 字符串</span></span><br><span class="line">    json_str = json.dumps(payload, ensure_ascii=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2. 编码为 UTF-8 字节</span></span><br><span class="line">    json_bytes = json_str.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 3. 计算消息长度</span></span><br><span class="line">    message_length = <span class="built_in">len</span>(json_bytes)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 4. 组装二进制数据</span></span><br><span class="line">    <span class="comment">#    bytes([0]) = 压缩标志 0x00 (未压缩)</span></span><br><span class="line">    <span class="comment">#    message_length.to_bytes(4, &#x27;big&#x27;) = 4字节大端序长度</span></span><br><span class="line">    data_bytes = <span class="built_in">bytes</span>([<span class="number">0</span>]) + message_length.to_bytes(<span class="number">4</span>, <span class="string">&#x27;big&#x27;</span>) + json_bytes</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> data_bytes</span><br></pre></td></tr></table></figure>
+
+<p><strong>调试示例：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试代码</span></span><br><span class="line">payload = &#123;<span class="string">&quot;hello&quot;</span>: <span class="string">&quot;world&quot;</span>&#125;</span><br><span class="line">result = _build_grpc_web_body(payload)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印十六进制</span></span><br><span class="line"><span class="built_in">print</span>(result.<span class="built_in">hex</span>())</span><br><span class="line"><span class="comment"># 输出: 000000000f7b2268656c6c6f223a22776f726c64227d</span></span><br><span class="line"><span class="comment"># 解析:</span></span><br><span class="line"><span class="comment">#   00           - 压缩标志 (未压缩)</span></span><br><span class="line"><span class="comment">#   0000000f     - 长度 = 15</span></span><br><span class="line"><span class="comment">#   7b...7d      - &#123;&quot;hello&quot;:&quot;world&quot;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="解析-SSE-响应流"><a href="#解析-SSE-响应流" class="headerlink" title="解析 SSE 响应流"></a>解析 SSE 响应流</h3><p>响应流的解析比较复杂，需要处理多种事件类型：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">parse_sse_line</span>(<span class="params">line: <span class="built_in">bytes</span></span>) -&gt; <span class="built_in">dict</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    解析 SSE 行，处理长度前缀</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    输入示例: b&#x27;\x00\x00\x00\x1a&#123;&quot;data&quot;:&#123;&quot;event&quot;:&#123;...&#125;&#125;&#125;&#x27;</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    offset = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 读取 5 字节前缀</span></span><br><span class="line">    <span class="keyword">if</span> offset + <span class="number">5</span> &gt; <span class="built_in">len</span>(line):</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">&quot;Invalid line format&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 检查压缩标志 (应该是 0x00)</span></span><br><span class="line">    <span class="keyword">if</span> line[offset] != <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">f&quot;Unsupported compression flag: <span class="subst">&#123;line[offset]&#125;</span>&quot;</span>)</span><br><span class="line">    offset += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 读取消息长度 (大端序)</span></span><br><span class="line">    msg_len = <span class="built_in">int</span>.from_bytes(line[offset:offset+<span class="number">4</span>], <span class="string">&#x27;big&#x27;</span>)</span><br><span class="line">    offset += <span class="number">4</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 读取 JSON 数据</span></span><br><span class="line">    <span class="keyword">if</span> offset + msg_len &gt; <span class="built_in">len</span>(line):</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">&quot;Message length mismatch&quot;</span>)</span><br><span class="line"></span><br><span class="line">    json_bytes = line[offset:offset+msg_len]</span><br><span class="line">    json_str = json_bytes.decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> json.loads(json_str)</span><br></pre></td></tr></table></figure>
+
+<p><strong>事件类型映射：</strong></p>
+<table>
+<thead>
+<tr>
+<th>事件类型</th>
+<th>说明</th>
+<th>示例数据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>startEvent</code></td>
+<td>对话开始</td>
+<td><code>&#123;&quot;messageId&quot;: &quot;msg_xxx&quot;&#125;</code></td>
+</tr>
+<tr>
+<td><code>reasoningEvent</code></td>
+<td>AI 思考过程</td>
+<td><code>&#123;&quot;text&quot;: &quot;用户问好...&quot;&#125;</code></td>
+</tr>
+<tr>
+<td><code>textEvent</code></td>
+<td>正式回答</td>
+<td><code>&#123;&quot;text&quot;: &quot;你好！我是...&quot;&#125;</code></td>
+</tr>
+<tr>
+<td><code>finishEvent</code></td>
+<td>对话结束</td>
+<td><code>&#123;&#125;</code></td>
+</tr>
+<tr>
+<td><code>errorEvent</code></td>
+<td>错误信息</td>
+<td><code>&#123;&quot;code&quot;: 500, &quot;message&quot;: &quot;...&quot;&#125;</code></td>
+</tr>
+</tbody></table>
+<h3 id="核心-API-类"><a href="#核心-API-类" class="headerlink" title="核心 API 类"></a>核心 API 类</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> Iterator, <span class="type">Optional</span>, <span class="type">Dict</span>, <span class="type">Union</span>, <span class="type">Literal</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">StreamChunk</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;流式响应块&quot;&quot;&quot;</span></span><br><span class="line">    <span class="built_in">type</span>: <span class="type">Literal</span>[<span class="string">&quot;start&quot;</span>, <span class="string">&quot;reasoning&quot;</span>, <span class="string">&quot;content&quot;</span>, <span class="string">&quot;end&quot;</span>, <span class="string">&quot;error&quot;</span>]</span><br><span class="line">    data: <span class="type">Union</span>[<span class="built_in">str</span>, <span class="type">Dict</span>]</span><br><span class="line">    message_id: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TargetAPI</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot; API 客户端&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    BASE_URL = <span class="string">&quot;https://www.target.com/api/agent&quot;</span></span><br><span class="line">    SERVICE = <span class="string">&quot;capy.agent.v1.AgentService&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, oasis_token: <span class="built_in">str</span>, oasis_webid: <span class="built_in">str</span>, oasis_appid: <span class="built_in">str</span> = <span class="string">&quot;10200&quot;</span></span>):</span><br><span class="line">        self.oasis_token = oasis_token</span><br><span class="line">        self.oasis_webid = oasis_webid</span><br><span class="line">        self.oasis_appid = oasis_appid</span><br><span class="line">        self.session = requests.Session()</span><br><span class="line">        self._setup_headers()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_setup_headers</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;设置请求头&quot;&quot;&quot;</span></span><br><span class="line">        self.session.headers.update(&#123;</span><br><span class="line">            <span class="string">&quot;User-Agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 ...&quot;</span>,</span><br><span class="line">            <span class="string">&quot;connect-protocol-version&quot;</span>: <span class="string">&quot;1&quot;</span>,</span><br><span class="line">            <span class="string">&quot;oasis-appid&quot;</span>: self.oasis_appid,</span><br><span class="line">            <span class="string">&quot;oasis-language&quot;</span>: <span class="string">&quot;zh&quot;</span>,</span><br><span class="line">            <span class="string">&quot;oasis-platform&quot;</span>: <span class="string">&quot;web&quot;</span>,</span><br><span class="line">            <span class="string">&quot;x-waf-client-type&quot;</span>: <span class="string">&quot;fetch_sdk&quot;</span>,</span><br><span class="line">        &#125;)</span><br><span class="line">        cookie = <span class="string">f&quot;Oasis-Webid=<span class="subst">&#123;self.oasis_webid&#125;</span>; Oasis-Token=<span class="subst">&#123;self.oasis_token&#125;</span>&quot;</span></span><br><span class="line">        self.session.headers[<span class="string">&quot;Cookie&quot;</span>] = cookie</span><br></pre></td></tr></table></figure>
+
+<h3 id="流式对话实现"><a href="#流式对话实现" class="headerlink" title="流式对话实现"></a>流式对话实现</h3><p>完整的流式对话处理流程：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">chat_stream</span>(<span class="params"></span></span><br><span class="line"><span class="params">    self,</span></span><br><span class="line"><span class="params">    chat_session_id: <span class="built_in">str</span>,</span></span><br><span class="line"><span class="params">    content: <span class="built_in">str</span>,</span></span><br><span class="line"><span class="params">    model: <span class="built_in">str</span> = <span class="string">&quot;step-auto&quot;</span>,</span></span><br><span class="line"><span class="params">    enable_reasoning: <span class="built_in">bool</span> = <span class="literal">True</span>,</span></span><br><span class="line"><span class="params"></span>) -&gt; Iterator[StreamChunk]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    流式对话</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    处理流程:</span></span><br><span class="line"><span class="string">    1. 构建 gRPC-Web 格式请求体</span></span><br><span class="line"><span class="string">    2. 发送 POST 请求</span></span><br><span class="line"><span class="string">    3. 逐行解析 SSE 响应</span></span><br><span class="line"><span class="string">    4. 根据事件类型生成 StreamChunk</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    url = <span class="string">f&quot;<span class="subst">&#123;self.BASE_URL&#125;</span>/<span class="subst">&#123;self.SERVICE&#125;</span>/ChatStream&quot;</span></span><br><span class="line">    headers = &#123;**self.session.headers, <span class="string">&quot;content-type&quot;</span>: <span class="string">&quot;application/connect+json&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构建请求体</span></span><br><span class="line">    payload = &#123;</span><br><span class="line">        <span class="string">&quot;message&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;chatSessionId&quot;</span>: chat_session_id,</span><br><span class="line">            <span class="string">&quot;content&quot;</span>: &#123;</span><br><span class="line">                <span class="string">&quot;userMessage&quot;</span>: &#123;</span><br><span class="line">                    <span class="string">&quot;qa&quot;</span>: &#123;<span class="string">&quot;content&quot;</span>: content + <span class="string">&quot;\n&quot;</span>&#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">&quot;config&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;model&quot;</span>: model,</span><br><span class="line">            <span class="string">&quot;enableReasoning&quot;</span>: enable_reasoning</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 转换为 gRPC-Web 二进制格式</span></span><br><span class="line">    json_bytes = json.dumps(payload, ensure_ascii=<span class="literal">False</span>).encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    data_bytes = <span class="built_in">bytes</span>([<span class="number">0</span>]) + <span class="built_in">len</span>(json_bytes).to_bytes(<span class="number">4</span>, <span class="string">&#x27;big&#x27;</span>) + json_bytes</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 发送请求并获取流式响应</span></span><br><span class="line">    response = self.session.post(url, headers=headers, data=data_bytes, stream=<span class="literal">True</span>)</span><br><span class="line">    response.raise_for_status()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 逐行解析 SSE 响应</span></span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> response.iter_lines():</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> line:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="comment"># 跳过 5 字节前缀，解析 JSON</span></span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(line) &gt; <span class="number">5</span>:</span><br><span class="line">                json_bytes = line[<span class="number">5</span>:]</span><br><span class="line">                json_str = json_bytes.decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">                data = json.loads(json_str)</span><br><span class="line"></span><br><span class="line">                <span class="comment"># 根据事件类型分发处理</span></span><br><span class="line">                <span class="keyword">yield</span> <span class="keyword">from</span> self._process_event(data)</span><br><span class="line">        <span class="keyword">except</span> (json.JSONDecodeError, UnicodeDecodeError):</span><br><span class="line">            <span class="keyword">continue</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="事件处理器"><a href="#事件处理器" class="headerlink" title="事件处理器"></a>事件处理器</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_process_event</span>(<span class="params">self, data: <span class="type">Dict</span></span>) -&gt; Iterator[StreamChunk]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;处理SSE事件数据，根据事件类型生成对应的 StreamChunk&quot;&quot;&quot;</span></span><br><span class="line">    event_data = data.get(<span class="string">&quot;data&quot;</span>, &#123;&#125;)</span><br><span class="line">    event = event_data.get(<span class="string">&quot;event&quot;</span>, &#123;&#125;)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理开始事件</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;startEvent&quot;</span> <span class="keyword">in</span> event:</span><br><span class="line">        start = event[<span class="string">&quot;startEvent&quot;</span>]</span><br><span class="line">        <span class="keyword">yield</span> StreamChunk(</span><br><span class="line">            <span class="built_in">type</span>=<span class="string">&quot;start&quot;</span>,</span><br><span class="line">            data=start,</span><br><span class="line">            message_id=start.get(<span class="string">&quot;messageId&quot;</span>)</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理推理事件 (AI 思考过程)</span></span><br><span class="line">    <span class="keyword">elif</span> <span class="string">&quot;reasoningEvent&quot;</span> <span class="keyword">in</span> event:</span><br><span class="line">        text = event[<span class="string">&quot;reasoningEvent&quot;</span>].get(<span class="string">&quot;text&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> text:</span><br><span class="line">            <span class="keyword">yield</span> StreamChunk(<span class="built_in">type</span>=<span class="string">&quot;reasoning&quot;</span>, data=&#123;<span class="string">&quot;text&quot;</span>: text&#125;)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理消息事件 (正式回答)</span></span><br><span class="line">    <span class="keyword">elif</span> <span class="string">&quot;message&quot;</span> <span class="keyword">in</span> event:</span><br><span class="line">        msg = event[<span class="string">&quot;message&quot;</span>]</span><br><span class="line">        text = msg.get(<span class="string">&quot;content&quot;</span>, &#123;&#125;).get(<span class="string">&quot;assistantMessage&quot;</span>, &#123;&#125;).get(<span class="string">&quot;qa&quot;</span>, &#123;&#125;).get(<span class="string">&quot;content&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> text:</span><br><span class="line">            <span class="keyword">yield</span> StreamChunk(<span class="built_in">type</span>=<span class="string">&quot;content&quot;</span>, data=&#123;<span class="string">&quot;text&quot;</span>: text&#125;, message_id=msg.get(<span class="string">&quot;messageId&quot;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理文本事件 (另一种回答格式)</span></span><br><span class="line">    <span class="keyword">elif</span> <span class="string">&quot;textEvent&quot;</span> <span class="keyword">in</span> event:</span><br><span class="line">        text = event[<span class="string">&quot;textEvent&quot;</span>].get(<span class="string">&quot;text&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> text:</span><br><span class="line">            <span class="keyword">yield</span> StreamChunk(<span class="built_in">type</span>=<span class="string">&quot;content&quot;</span>, data=&#123;<span class="string">&quot;text&quot;</span>: text&#125;)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理结束事件</span></span><br><span class="line">    <span class="keyword">elif</span> <span class="string">&quot;doneEvent&quot;</span> <span class="keyword">in</span> event <span class="keyword">or</span> <span class="string">&quot;messageDoneEvent&quot;</span> <span class="keyword">in</span> event <span class="keyword">or</span> <span class="string">&quot;finishEvent&quot;</span> <span class="keyword">in</span> event:</span><br><span class="line">        <span class="keyword">yield</span> StreamChunk(<span class="built_in">type</span>=<span class="string">&quot;end&quot;</span>, data=&#123;&#125;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Token-刷新机制"><a href="#Token-刷新机制" class="headerlink" title="Token 刷新机制"></a>Token 刷新机制</h2><p>Oasis-Token 有过期时间，需要自动刷新。Token 格式为 <code>accessToken...refreshToken</code>。</p>
+<h3 id="JWT-解析"><a href="#JWT-解析" class="headerlink" title="JWT 解析"></a>JWT 解析</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_check_token_expired</span>(<span class="params">self</span>) -&gt; <span class="built_in">bool</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    检查 Token 是否过期</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    JWT 格式: header.payload.signature</span></span><br><span class="line"><span class="string">    我们只需要解析 payload 部分</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># Token 格式: accessToken...refreshToken</span></span><br><span class="line">        parts = self.oasis_token.split(<span class="string">&quot;...&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(parts) &lt; <span class="number">2</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">        access_token = parts[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># JWT: header.payload.signature</span></span><br><span class="line">        <span class="comment"># 取第二段 (payload)</span></span><br><span class="line">        payload_b64 = access_token.split(<span class="string">&quot;.&quot;</span>)[<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 添加 Base64 padding</span></span><br><span class="line">        padding = <span class="number">4</span> - <span class="built_in">len</span>(payload_b64) % <span class="number">4</span></span><br><span class="line">        payload_b64 += <span class="string">&quot;=&quot;</span> * padding</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Base64 解码</span></span><br><span class="line">        payload_bytes = base64.b64decode(payload_b64)</span><br><span class="line">        payload = json.loads(payload_bytes.decode(<span class="string">&#x27;utf-8&#x27;</span>))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 获取过期时间 (Unix timestamp)</span></span><br><span class="line">        exp = payload.get(<span class="string">&quot;exp&quot;</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 提前 60 秒刷新，避免临界点问题</span></span><br><span class="line">        current_time = <span class="built_in">int</span>(time.time())</span><br><span class="line">        is_expired = exp &lt; current_time + <span class="number">60</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_expired:</span><br><span class="line">            logger.warning(<span class="string">f&quot;Token 即将过期: exp=<span class="subst">&#123;exp&#125;</span>, current=<span class="subst">&#123;current_time&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> is_expired</span><br><span class="line"></span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        logger.error(<span class="string">f&quot;检查 Token 过期失败: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>JWT Payload 示例：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;sub&quot;</span><span class="punctuation">:</span> <span class="string">&quot;user_123456&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;exp&quot;</span><span class="punctuation">:</span> <span class="number">1740585600</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;iat&quot;</span><span class="punctuation">:</span> <span class="number">1740582000</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;iss&quot;</span><span class="punctuation">:</span> <span class="string">&quot;target.com&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Token-刷新请求"><a href="#Token-刷新请求" class="headerlink" title="Token 刷新请求"></a>Token 刷新请求</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_refresh_token</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    刷新 Token</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    调用刷新接口，获取新的 accessToken 和 refreshToken</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        logger.info(<span class="string">&quot;开始刷新 Token...&quot;</span>)</span><br><span class="line"></span><br><span class="line">        url = <span class="string">&quot;https://www.target.com/passport/proto.api.passport.v1.PassportService/RefreshToken&quot;</span></span><br><span class="line">        headers = &#123;</span><br><span class="line">            **self.session.headers,</span><br><span class="line">            <span class="string">&quot;content-type&quot;</span>: <span class="string">&quot;application/json&quot;</span>,</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 刷新接口不需要请求体，Token 从 Cookie 中获取</span></span><br><span class="line">        response = requests.post(url, headers=headers, json=&#123;&#125;)</span><br><span class="line">        response.raise_for_status()</span><br><span class="line"></span><br><span class="line">        data = response.json()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 解析新 Token</span></span><br><span class="line">        access_token = data.get(<span class="string">&quot;accessToken&quot;</span>, &#123;&#125;).get(<span class="string">&quot;raw&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line">        refresh_token = data.get(<span class="string">&quot;refreshToken&quot;</span>, &#123;&#125;).get(<span class="string">&quot;raw&quot;</span>, <span class="string">&quot;&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> access_token <span class="keyword">or</span> <span class="keyword">not</span> refresh_token:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;刷新 Token 响应格式错误&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 拼接新 Token</span></span><br><span class="line">        new_token = <span class="string">f&quot;<span class="subst">&#123;access_token&#125;</span>...<span class="subst">&#123;refresh_token&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">f&quot;Token 刷新成功&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 更新 Token</span></span><br><span class="line">        self.oasis_token = new_token</span><br><span class="line">        self._setup_headers()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 触发回调（如果有）</span></span><br><span class="line">        <span class="keyword">if</span> self.on_token_refresh:</span><br><span class="line">            self.on_token_refresh(new_token)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        logger.error(<span class="string">f&quot;刷新 Token 失败: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">raise</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="自动刷新机制"><a href="#自动刷新机制" class="headerlink" title="自动刷新机制"></a>自动刷新机制</h3><p>在每次 API 调用前检查 Token 是否过期：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_ensure_token_valid</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    确保 Token 有效，如果即将过期则自动刷新</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> self._check_token_expired():</span><br><span class="line">        self._refresh_token()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chat_stream</span>(<span class="params">self, chat_session_id: <span class="built_in">str</span>, content: <span class="built_in">str</span>, model: <span class="built_in">str</span> = <span class="string">&quot;step-auto&quot;</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;流式对话 - 调用前检查 Token&quot;&quot;&quot;</span></span><br><span class="line">    self._ensure_token_valid()  <span class="comment"># &lt;-- 自动检查并刷新</span></span><br><span class="line"></span><br><span class="line">    url = <span class="string">f&quot;<span class="subst">&#123;self.BASE_URL&#125;</span>/<span class="subst">&#123;self.SERVICE&#125;</span>/ChatStream&quot;</span></span><br><span class="line">    <span class="comment"># ... 继续处理</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="OpenAI-兼容接口"><a href="#OpenAI-兼容接口" class="headerlink" title="OpenAI 兼容接口"></a>OpenAI 兼容接口</h2><p>为了方便集成，实现 OpenAI 协议兼容接口：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">OpenAIResponse</span>:</span><br><span class="line">    <span class="built_in">id</span>: <span class="built_in">str</span></span><br><span class="line">    <span class="built_in">object</span>: <span class="built_in">str</span></span><br><span class="line">    created: <span class="built_in">int</span></span><br><span class="line">    model: <span class="built_in">str</span></span><br><span class="line">    choices: <span class="type">List</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">OpenAICompatibleAPI</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">create_chat_completion</span>(<span class="params">self, model, messages, stream=<span class="literal">False</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;OpenAI 兼容的聊天补全&quot;&quot;&quot;</span></span><br><span class="line">        chat_session_id = self._get_or_create_session()</span><br><span class="line">        content = messages[-<span class="number">1</span>][<span class="string">&quot;content&quot;</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> stream:</span><br><span class="line">            <span class="keyword">return</span> self._chat_completion_stream(chat_session_id, content, model)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self._chat_completion_sync(chat_session_id, content, model)</span><br></pre></td></tr></table></figure>
+
+<h2 id="HTTP-API-Server"><a href="#HTTP-API-Server" class="headerlink" title="HTTP API Server"></a>HTTP API Server</h2><p>基于 FastAPI 提供 HTTP 服务：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI</span><br><span class="line"><span class="keyword">from</span> fastapi.responses <span class="keyword">import</span> StreamingResponse</span><br><span class="line"></span><br><span class="line">app = FastAPI(title=<span class="string">&quot;Target API Server&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/v1/chat/completions&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">create_chat_completion</span>(<span class="params">request: ChatCompletionRequest</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;OpenAI 兼容的聊天补全接口&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> request.stream:</span><br><span class="line">        <span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">stream_generator</span>():</span><br><span class="line">            <span class="keyword">for</span> chunk <span class="keyword">in</span> api_client.chat_stream(...):</span><br><span class="line">                <span class="comment"># 转换为 OpenAI SSE 格式</span></span><br><span class="line">                <span class="keyword">yield</span> <span class="string">f&quot;data: <span class="subst">&#123;json.dumps(chunk)&#125;</span>\n\n&quot;</span></span><br><span class="line">            <span class="keyword">yield</span> <span class="string">&quot;data: [DONE]\n\n&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> StreamingResponse(stream_generator(), media_type=<span class="string">&quot;text/event-stream&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 非流式</span></span><br><span class="line">    response = openai_api.create_chat_completion(...)</span><br><span class="line">    <span class="keyword">return</span> openai_api.to_openai_dict(response)</span><br></pre></td></tr></table></figure>
+
+<p>启动服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python target_api_server.py</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">uvicorn target_api_server:app --host 0.0.0.0 --port 8000</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h2><h3 id="直接使用客户端"><a href="#直接使用客户端" class="headerlink" title="直接使用客户端"></a>直接使用客户端</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> target_api <span class="keyword">import</span> TargetAPI</span><br><span class="line"></span><br><span class="line">api = TargetAPI(</span><br><span class="line">    oasis_token=<span class="string">&quot;your_token&quot;</span>,</span><br><span class="line">    oasis_webid=<span class="string">&quot;your_webid&quot;</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建会话</span></span><br><span class="line">session = api.create_chat_session()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 流式对话</span></span><br><span class="line"><span class="keyword">for</span> chunk <span class="keyword">in</span> api.chat_stream(</span><br><span class="line">    chat_session_id=session.chat_session_id,</span><br><span class="line">    content=<span class="string">&quot;你好，请介绍一下自己&quot;</span>,</span><br><span class="line">    model=<span class="string">&quot;step-auto&quot;</span>,</span><br><span class="line">    enable_reasoning=<span class="literal">True</span>,</span><br><span class="line">):</span><br><span class="line">    <span class="keyword">if</span> chunk.<span class="built_in">type</span> == <span class="string">&quot;reasoning&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;[思考] <span class="subst">&#123;chunk.data[<span class="string">&#x27;text&#x27;</span>]&#125;</span>&quot;</span>, end=<span class="string">&quot;&quot;</span>, flush=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">elif</span> chunk.<span class="built_in">type</span> == <span class="string">&quot;content&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>(chunk.data[<span class="string">&#x27;text&#x27;</span>], end=<span class="string">&quot;&quot;</span>, flush=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">elif</span> chunk.<span class="built_in">type</span> == <span class="string">&quot;end&quot;</span>:</span><br><span class="line">        <span class="built_in">print</span>()</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用-OpenAI-SDK"><a href="#使用-OpenAI-SDK" class="headerlink" title="使用 OpenAI SDK"></a>使用 OpenAI SDK</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI</span><br><span class="line"></span><br><span class="line">client = OpenAI(</span><br><span class="line">    base_url=<span class="string">&quot;http://localhost:8000/v1&quot;</span>,</span><br><span class="line">    api_key=<span class="string">&quot;unused&quot;</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">response = client.chat.completions.create(</span><br><span class="line">    model=<span class="string">&quot;step-auto&quot;</span>,</span><br><span class="line">    messages=[&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;],</span><br><span class="line">    stream=<span class="literal">True</span>,</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> chunk <span class="keyword">in</span> response:</span><br><span class="line">    content = chunk.choices[<span class="number">0</span>].delta.content</span><br><span class="line">    <span class="keyword">if</span> content:</span><br><span class="line">        <span class="built_in">print</span>(content, end=<span class="string">&quot;&quot;</span>, flush=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用-curl"><a href="#使用-curl" class="headerlink" title="使用 curl"></a>使用 curl</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 非流式</span></span><br><span class="line">curl http://localhost:8000/v1/chat/completions \</span><br><span class="line">  -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">    &quot;model&quot;: &quot;step-auto&quot;,</span></span><br><span class="line"><span class="string">    &quot;messages&quot;: [&#123;&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你好&quot;&#125;]</span></span><br><span class="line"><span class="string">  &#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 流式</span></span><br><span class="line">curl http://localhost:8000/v1/chat/completions \</span><br><span class="line">  -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">    &quot;model&quot;: &quot;step-auto&quot;,</span></span><br><span class="line"><span class="string">    &quot;messages&quot;: [&#123;&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你好&quot;&#125;],</span></span><br><span class="line"><span class="string">    &quot;stream&quot;: true</span></span><br><span class="line"><span class="string">  &#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-web">gRPC-Web Protocol</a> - gRPC-Web 协议规范</li>
+<li><a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events">Server-Sent Events</a> - MDN SSE 文档</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+              <a href="/tags/api/" rel="tag"># api</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/02/25/book/Finite-And-Infinite-Games/" rel="prev" title="《有限与无限的游戏》">
+      <i class="fa fa-chevron-left"></i> 《有限与无限的游戏》
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/02/26/crack/pow-checkin-crack/" rel="next" title="逆向某站PoW签到逻辑">
+      逆向某站PoW签到逻辑 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#gRPC-Web-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">gRPC-Web 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8-gRPC-Web"><span class="nav-number">1.1.</span> <span class="nav-text">为什么用 gRPC-Web</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gRPC-Web-%E5%8D%8F%E8%AE%AE%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">gRPC-Web 协议格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gRPC-Web-vs-%E5%8E%9F%E7%94%9F-gRPC"><span class="nav-number">1.3.</span> <span class="nav-text">gRPC-Web vs 原生 gRPC</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">抓包分析过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E8%A7%82%E5%AF%9F%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82"><span class="nav-number">2.1.</span> <span class="nav-text">第一步：观察网络请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E5%88%86%E6%9E%90%E8%AF%B7%E6%B1%82%E5%A4%B4"><span class="nav-number">2.2.</span> <span class="nav-text">第二步：分析请求头</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E8%A7%A3%E6%9E%90%E8%AF%B7%E6%B1%82%E4%BD%93"><span class="nav-number">2.3.</span> <span class="nav-text">第三步：解析请求体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E5%88%86%E6%9E%90%E5%93%8D%E5%BA%94%E4%BD%93"><span class="nav-number">2.4.</span> <span class="nav-text">第四步：分析响应体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9A%E8%8E%B7%E5%8F%96%E8%AE%A4%E8%AF%81%E4%BF%A1%E6%81%AF"><span class="nav-number">2.5.</span> <span class="nav-text">第五步：获取认证信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#API-%E7%AB%AF%E7%82%B9%E6%80%BB%E7%BB%93"><span class="nav-number">2.6.</span> <span class="nav-text">API 端点总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.7.</span> <span class="nav-text">请求格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.8.</span> <span class="nav-text">响应格式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">Python 客户端实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E4%BA%8C%E8%BF%9B%E5%88%B6%E8%AF%B7%E6%B1%82%E4%BD%93"><span class="nav-number">3.1.</span> <span class="nav-text">构建二进制请求体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90-SSE-%E5%93%8D%E5%BA%94%E6%B5%81"><span class="nav-number">3.2.</span> <span class="nav-text">解析 SSE 响应流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83-API-%E7%B1%BB"><span class="nav-number">3.3.</span> <span class="nav-text">核心 API 类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%81%E5%BC%8F%E5%AF%B9%E8%AF%9D%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.4.</span> <span class="nav-text">流式对话实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E5%99%A8"><span class="nav-number">3.5.</span> <span class="nav-text">事件处理器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Token-%E5%88%B7%E6%96%B0%E6%9C%BA%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">Token 刷新机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JWT-%E8%A7%A3%E6%9E%90"><span class="nav-number">4.1.</span> <span class="nav-text">JWT 解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Token-%E5%88%B7%E6%96%B0%E8%AF%B7%E6%B1%82"><span class="nav-number">4.2.</span> <span class="nav-text">Token 刷新请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%88%B7%E6%96%B0%E6%9C%BA%E5%88%B6"><span class="nav-number">4.3.</span> <span class="nav-text">自动刷新机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OpenAI-%E5%85%BC%E5%AE%B9%E6%8E%A5%E5%8F%A3"><span class="nav-number">5.</span> <span class="nav-text">OpenAI 兼容接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-API-Server"><span class="nav-number">6.</span> <span class="nav-text">HTTP API Server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-number">7.</span> <span class="nav-text">使用示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">7.1.</span> <span class="nav-text">直接使用客户端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-OpenAI-SDK"><span class="nav-number">7.2.</span> <span class="nav-text">使用 OpenAI SDK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-curl"><span class="nav-number">7.3.</span> <span class="nav-text">使用 curl</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">8.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">262</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">138</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
