@@ -41,7 +41,7 @@
 <meta property="og:image" content="https://cdn.poizon.com/ctoo/012810/WechatIMG51.jpeg">
 <meta property="og:image" content="https://cdn.poizon.com/ctoo/012810/WechatIMG52.jpeg">
 <meta property="article:published_time" content="2023-06-05T11:53:00.000Z">
-<meta property="article:modified_time" content="2024-08-23T13:34:54.371Z">
+<meta property="article:modified_time" content="2026-02-28T06:25:31.387Z">
 <meta property="article:author" content="lianhui.klh">
 <meta property="article:tag" content="database">
 <meta property="article:tag" content="mysql">
@@ -365,9 +365,9 @@
 <p><img src="https://cdn.poizon.com/ctoo/012810/WechatIMG52.jpeg"></p>
 <p>结论：最终事务 A 的第二次查询，只能查询出 id&#x3D;1 的这条数据。这和事务 A 的第一次查询的结果是一样的，因此没有出现幻读现象，所以说在 MySQL 的可重复读隔离级别下，不存在幻读问题。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这里介绍了 MVCC 在 READ COMMITTD 、 REPEATABLE READ 这两种隔离级别的事务在执行快照读操作时访问记录的版本链的过程。这样使不同事务的 读 - 写 、 写 - 读 操作并发执行，从而提升系统性能。</p>
-<p>核心点在于 ReadView 的原理， READ COMMITTD 、 REPEATABLE READ 这两个隔离级别的一个很大不同就是生成 ReadView 的时机不同：</p>
+<p>核心点在于 ReadView 的原理，READ COMMITTED、REPEATABLE READ 这两个隔离级别的一个很大不同就是生成 ReadView 的时机不同：</p>
 <ul>
-<li>READ COMMITTD 在每一次进行普通 SELECT 操作前都会生成一个 ReadView</li>
+<li>READ COMMITTED 在每一次进行普通 SELECT 操作前都会生成一个 ReadView</li>
 <li>REPEATABLE READ 只在第一次进行普通 SELECT 操作前生成一个 ReadView，之后的查询操作都重复使用这个 ReadView 就好了</li>
 </ul>
 <p>说明：之前说执行 DELETE 语句或者更新主键的 UPDATE 语句并不会立即把对应的记录完全从页面中删除，而是执行一个所谓的 delete mark 操作，相当于只是对记录打上了一个删除标志位，这主要就是为 MVCC 服务的。</p>
@@ -480,7 +480,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">262</span>
+          <span class="site-state-item-count">263</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -491,7 +491,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">138</span>
+        <span class="site-state-item-count">142</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

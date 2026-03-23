@@ -28,7 +28,7 @@
 <meta property="og:description" content="CLIProxyAPI 的使用">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-01-19T03:32:00.000Z">
-<meta property="article:modified_time" content="2026-01-19T05:39:17.115Z">
+<meta property="article:modified_time" content="2026-02-28T06:08:45.418Z">
 <meta property="article:author" content="lianhui.klh">
 <meta property="article:tag" content="ai">
 <meta property="article:tag" content="tool">
@@ -209,7 +209,7 @@
 <li>Base URL 填写 <code>https://integrate.api.nvidia.com/v1</code></li>
 <li>模型添加 <code>z-ai/glm4.7</code> 和 <code>minimaxai/minimax-m2.1</code></li>
 <li>API Key 填写 <code>nvapi-</code> 开头的密钥</li>
-<li>配置管理中 payload 新增<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">payload:</span><br><span class="line">  override:</span><br><span class="line">    - models:</span><br><span class="line">        - name: &quot;z-ai/glm4.7&quot;</span><br><span class="line">          protocol: &quot;openai&quot;</span><br><span class="line">        - name: &quot;minimaxai/minimax-m2.1&quot;</span><br><span class="line">          protocol: &quot;openai&quot;</span><br><span class="line">      params:</span><br><span class="line">        &quot;reasoning_effort&quot;: &quot;high&quot;</span><br></pre></td></tr></table></figure></li>
+<li>配置管理中 payload 新增<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">payload:</span></span><br><span class="line">  <span class="attr">override:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">models:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">&quot;z-ai/glm4.7&quot;</span></span><br><span class="line">          <span class="attr">protocol:</span> <span class="string">&quot;openai&quot;</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">&quot;minimaxai/minimax-m2.1&quot;</span></span><br><span class="line">          <span class="attr">protocol:</span> <span class="string">&quot;openai&quot;</span></span><br><span class="line">      <span class="attr">params:</span></span><br><span class="line">        <span class="attr">&quot;reasoning_effort&quot;:</span> <span class="string">&quot;high&quot;</span></span><br></pre></td></tr></table></figure></li>
 </ol>
 <p>这样配置就配置好了。</p>
 <ol start="6">
@@ -316,7 +316,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">262</span>
+          <span class="site-state-item-count">263</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -327,7 +327,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">138</span>
+        <span class="site-state-item-count">142</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
