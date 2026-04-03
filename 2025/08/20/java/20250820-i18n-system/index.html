@@ -253,7 +253,23 @@
 </li>
 </ol>
 <p><img src="/res/2025082501.png" alt="image.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">        actor p as 客户</span><br><span class="line">        participant a as saas</span><br><span class="line">        participant d as 二方</span><br><span class="line">        participant n as nacos</span><br><span class="line">		</span><br><span class="line">        p-&gt;&gt;a: 新建app、设置参考语言</span><br><span class="line">        p-&gt;&gt;a: 上传初始化（key+参考语言）</span><br><span class="line">        p-&gt;&gt;a: 新建版本</span><br><span class="line">        p-&gt;&gt;a: 新建语种</span><br><span class="line">        p-&gt;&gt;p: 执行翻译</span><br><span class="line">        p-&gt;&gt;a: 上传、编辑翻译</span><br><span class="line">        p-&gt;&gt;a: 发布</span><br><span class="line">        a-&gt;&gt;p: 导出文本</span><br><span class="line">        p-&gt;&gt;d: 导入文件</span><br><span class="line">        a-&gt;&gt;n: 刷新配置</span><br><span class="line">        d-&gt;&gt;a: 拉取翻译</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+        actor p as 客户
+        participant a as saas
+        participant d as 二方
+        participant n as nacos
+        
+        p->>a: 新建app、设置参考语言
+        p->>a: 上传初始化（key+参考语言）
+        p->>a: 新建版本
+        p->>a: 新建语种
+        p->>p: 执行翻译
+        p->>a: 上传、编辑翻译
+        p->>a: 发布
+        a->>p: 导出文本
+        p->>d: 导入文件
+        a->>n: 刷新配置
+        d->>a: 拉取翻译</pre>
 
 <p>版本状态<br>限制：只能导出最新发布版本。<br><img src="/res/2025082503.png" alt="image.png"></p>
 <h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><h3 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h3><p>tb_i18n_app</p>
@@ -575,7 +591,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">266</span>
+          <span class="site-state-item-count">265</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -586,7 +602,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">147</span>
+        <span class="site-state-item-count">146</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
