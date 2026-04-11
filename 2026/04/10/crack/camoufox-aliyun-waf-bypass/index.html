@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="记录使用 Camoufox 反检测浏览器绕过阿里云 WAF 的完整实战过程，涵盖 TLS 指纹伪装、浏览器行为模拟、混合引擎策略和防封控机制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Camoufox 绕过阿里云 WAF 实战">
+<meta property="og:url" content="https://forgives.github.io/2026/04/10/crack/camoufox-aliyun-waf-bypass/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="记录使用 Camoufox 反检测浏览器绕过阿里云 WAF 的完整实战过程，涵盖 TLS 指纹伪装、浏览器行为模拟、混合引擎策略和防封控机制。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-10T13:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-10T13:00:00.000Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="逆向">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="WAF">
+<meta property="article:tag" content="Camoufox">
+<meta property="article:tag" content="浏览器指纹">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/04/10/crack/camoufox-aliyun-waf-bypass/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Camoufox 绕过阿里云 WAF 实战 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/04/10/crack/camoufox-aliyun-waf-bypass/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Camoufox 绕过阿里云 WAF 实战
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-04-10 21:00:00" itemprop="dateCreated datePublished" datetime="2026-04-10T21:00:00+08:00">2026-04-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="0x00-背景"><a href="#0x00-背景" class="headerlink" title="0x00 背景"></a>0x00 背景</h1><p>通义千问（chat.qwen.ai）部署了阿里云 WAF（Web Application Firewall），对 API 请求进行多维检测。直接用 HTTP 客户端请求会被拦截，返回 403 或 WAF 拦截页面。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 普通 HTTP 请求会被 WAF 拦截</span></span><br><span class="line"><span class="keyword">import</span> httpx</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">with</span> httpx.AsyncClient() <span class="keyword">as</span> client:</span><br><span class="line">    resp = <span class="keyword">await</span> client.get(<span class="string">&quot;https://chat.qwen.ai/api/v1/auths/&quot;</span>)</span><br><span class="line">    <span class="comment"># 返回 403 Forbidden 或包含 aliyun_waf 的拦截页面</span></span><br></pre></td></tr></table></figure>
+
+<p>本文记录如何使用 Camoufox 反检测浏览器绕过阿里云 WAF，实现稳定的 API 调用。</p>
+<h1 id="0x01-阿里云-WAF-检测机制"><a href="#0x01-阿里云-WAF-检测机制" class="headerlink" title="0x01 阿里云 WAF 检测机制"></a>0x01 阿里云 WAF 检测机制</h1><p>阿里云 WAF 不是单一维度的检测，而是多信号联合判断。理解它的检测维度，才能有针对性地绕过。</p>
+<h2 id="检测维度"><a href="#检测维度" class="headerlink" title="检测维度"></a>检测维度</h2><table>
+<thead>
+<tr>
+<th>检测维度</th>
+<th>说明</th>
+<th>拦截依据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>TLS 指纹</strong></td>
+<td>检测 TLS 握手中的 Cipher Suite、扩展顺序等特征</td>
+<td>Python httpx &#x2F; requests 的 TLS 指纹与浏览器完全不同</td>
+</tr>
+<tr>
+<td><strong>HTTP 头指纹</strong></td>
+<td>User-Agent、Accept-Language、sec-ch-ua 等头信息的一致性</td>
+<td>缺少浏览器特有头或头信息组合异常</td>
+</tr>
+<tr>
+<td><strong>行为特征</strong></td>
+<td>请求频率、时间间隔、Cookie 变化模式</td>
+<td>请求间隔过于均匀或过快</td>
+</tr>
+<tr>
+<td><strong>JavaScript 执行</strong></td>
+<td>检测是否支持 JS 执行、Canvas 指纹等</td>
+<td>纯 HTTP 客户端无法执行 JS 挑战</td>
+</tr>
+<tr>
+<td><strong>Cookie 完整性</strong></td>
+<td>验证 Cookie 生成路径和签名</td>
+<td>缺少 WAF 通过 JS 设置的验证 Cookie</td>
+</tr>
+</tbody></table>
+<h2 id="为什么传统方案失效"><a href="#为什么传统方案失效" class="headerlink" title="为什么传统方案失效"></a>为什么传统方案失效</h2><p>传统方案通常用 <code>curl_cffi</code> 或 <code>tls-client</code> 模拟 Chrome TLS 指纹：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> curl_cffi.requests <span class="keyword">import</span> AsyncSession</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">with</span> AsyncSession(impersonate=<span class="string">&quot;chrome124&quot;</span>) <span class="keyword">as</span> client:</span><br><span class="line">    resp = <span class="keyword">await</span> client.get(<span class="string">&quot;https://chat.qwen.ai/api/v1/auths/&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这种方式能解决 TLS 指纹问题，但解决不了：</p>
+<ol>
+<li><strong>JS 挑战验证</strong>：WAF 可能下发 JS 挑战，纯 HTTP 客户端无法执行</li>
+<li><strong>Cookie 生成链</strong>：某些 Cookie 是 WAF 通过 JS 动态生成并签名的，手动构造无法通过验证</li>
+<li><strong>行为模式</strong>：即使 TLS 和头信息都对了，请求时间模式仍然暴露自动化特征</li>
+</ol>
+<h1 id="0x02-Camoufox-简介"><a href="#0x02-Camoufox-简介" class="headerlink" title="0x02 Camoufox 简介"></a>0x02 Camoufox 简介</h1><p>Camoufox 是基于 Firefox 的反检测无头浏览器，专为绕过浏览器指纹检测设计。</p>
+<h2 id="核心特性"><a href="#核心特性" class="headerlink" title="核心特性"></a>核心特性</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>指纹伪装</strong></td>
+<td>完全模拟真实 Firefox 浏览器指纹，包括 Canvas、WebGL、AudioContext</td>
+</tr>
+<tr>
+<td><strong>人类化行为</strong></td>
+<td>自动添加随机延迟，模拟真实用户操作节奏</td>
+</tr>
+<tr>
+<td><strong>反自动化检测</strong></td>
+<td>隐藏 <code>navigator.webdriver</code> 等自动化标志</td>
+</tr>
+<tr>
+<td><strong>真实 TLS 指纹</strong></td>
+<td>使用 Firefox 真实 TLS 实现，指纹完全合法</td>
+</tr>
+<tr>
+<td><strong>字体指纹</strong></td>
+<td>根据配置的 OS 生成对应字体列表</td>
+</tr>
+</tbody></table>
+<h2 id="与-Playwright-Selenium-的区别"><a href="#与-Playwright-Selenium-的区别" class="headerlink" title="与 Playwright &#x2F; Selenium 的区别"></a>与 Playwright &#x2F; Selenium 的区别</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Camoufox</th>
+<th>Playwright + Firefox</th>
+<th>Selenium + Chrome</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>navigator.webdriver</code></td>
+<td>隐藏</td>
+<td>可被检测</td>
+<td>可被检测</td>
+</tr>
+<tr>
+<td>TLS 指纹</td>
+<td>真实 Firefox</td>
+<td>真实 Firefox</td>
+<td>真实 Chrome</td>
+</tr>
+<tr>
+<td>Canvas 指纹</td>
+<td>随机化</td>
+<td>原始</td>
+<td>原始</td>
+</tr>
+<tr>
+<td>人类化延迟</td>
+<td>内置</td>
+<td>需手动实现</td>
+<td>需手动实现</td>
+</tr>
+<tr>
+<td>反检测能力</td>
+<td>高</td>
+<td>中</td>
+<td>低</td>
+</tr>
+</tbody></table>
+<h1 id="0x03-架构设计"><a href="#0x03-架构设计" class="headerlink" title="0x03 架构设计"></a>0x03 架构设计</h1><p>整体采用混合引擎架构，结合浏览器引擎的稳定性和 HTTP 引擎的速度：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────────────────┐</span><br><span class="line">│                       qwen2API Gateway                       │</span><br><span class="line">├──────────────────────────────────────────────────────────────┤</span><br><span class="line">│                                                              │</span><br><span class="line">│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐   │</span><br><span class="line">│  │   Browser    │  │    HTTPX     │  │     Hybrid       │   │</span><br><span class="line">│  │   Engine     │  │   Engine     │  │     Engine       │   │</span><br><span class="line">│  │ (Camoufox)   │  │ (curl_cffi)  │  │ (Browser+HTTPX)  │   │</span><br><span class="line">│  └──────┬───────┘  └──────┬───────┘  └────────┬─────────┘   │</span><br><span class="line">│         │                  │                   │             │</span><br><span class="line">│         └──────────────────┼───────────────────┘             │</span><br><span class="line">│                            ▼                                 │</span><br><span class="line">│                ┌───────────────────────┐                      │</span><br><span class="line">│                │   chat.qwen.ai API    │                      │</span><br><span class="line">│                │   (Aliyun WAF)        │                      │</span><br><span class="line">│                └───────────────────────┘                      │</span><br><span class="line">└──────────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>路由策略：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>首选引擎</th>
+<th>回退引擎</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>API 调用 (api_call)</td>
+<td>HTTPX（速度快）</td>
+<td>Browser（WAF 拦截时回退）</td>
+</tr>
+<tr>
+<td>流式请求 (fetch_chat)</td>
+<td>Browser（成功率高）</td>
+<td>HTTPX（浏览器失败时回退）</td>
+</tr>
+</tbody></table>
+<h1 id="0x04-Camoufox-配置与指纹伪装"><a href="#0x04-Camoufox-配置与指纹伪装" class="headerlink" title="0x04 Camoufox 配置与指纹伪装"></a>0x04 Camoufox 配置与指纹伪装</h1><h2 id="浏览器配置"><a href="#浏览器配置" class="headerlink" title="浏览器配置"></a>浏览器配置</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">_CAMOUFOX_OPTS = &#123;</span><br><span class="line">    <span class="string">&quot;headless&quot;</span>: <span class="literal">True</span>,               <span class="comment"># 无头模式运行</span></span><br><span class="line">    <span class="string">&quot;humanize&quot;</span>: <span class="literal">True</span>,               <span class="comment"># 启用人类化延迟</span></span><br><span class="line">    <span class="string">&quot;i_know_what_im_doing&quot;</span>: <span class="literal">True</span>,   <span class="comment"># 确认了解风险</span></span><br><span class="line">    <span class="string">&quot;os&quot;</span>: <span class="string">&quot;windows&quot;</span>,                <span class="comment"># 操作系统指纹</span></span><br><span class="line">    <span class="string">&quot;locale&quot;</span>: <span class="string">&quot;zh-CN&quot;</span>,              <span class="comment"># 语言区域</span></span><br><span class="line">    <span class="string">&quot;firefox_user_prefs&quot;</span>: &#123;</span><br><span class="line">        <span class="comment"># 软件 WebRender（服务器无 GPU）</span></span><br><span class="line">        <span class="string">&quot;gfx.webrender.software&quot;</span>: <span class="literal">True</span>,</span><br><span class="line">        <span class="string">&quot;media.hardware-video-decoding.enabled&quot;</span>: <span class="literal">False</span>,</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 启用缓存，更像真实用户</span></span><br><span class="line">        <span class="string">&quot;browser.cache.disk.enable&quot;</span>: <span class="literal">True</span>,</span><br><span class="line">        <span class="string">&quot;browser.cache.memory.enable&quot;</span>: <span class="literal">True</span>,</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 关闭干扰弹窗</span></span><br><span class="line">        <span class="string">&quot;app.update.auto&quot;</span>: <span class="literal">False</span>,</span><br><span class="line">        <span class="string">&quot;browser.shell.checkDefaultBrowser&quot;</span>: <span class="literal">False</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="关键参数解析"><a href="#关键参数解析" class="headerlink" title="关键参数解析"></a>关键参数解析</h2><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>值</th>
+<th>反检测原理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>humanize</code></td>
+<td><code>True</code></td>
+<td>自动添加随机延迟，避免请求时间模式被识别为机器人</td>
+</tr>
+<tr>
+<td><code>os</code></td>
+<td><code>&quot;windows&quot;</code></td>
+<td>统一 OS 指纹，避免 TLS 指纹与 User-Agent 不一致</td>
+</tr>
+<tr>
+<td><code>locale</code></td>
+<td><code>&quot;zh-CN&quot;</code></td>
+<td>模拟中国用户，与 chat.qwen.ai 目标用户群体匹配</td>
+</tr>
+<tr>
+<td><code>browser.cache.*</code></td>
+<td><code>True</code></td>
+<td>真实用户浏览器有缓存行为，无缓存是自动化特征</td>
+</tr>
+<tr>
+<td><code>gfx.webrender.software</code></td>
+<td><code>True</code></td>
+<td>服务器无 GPU，用软件渲染替代完全禁用（完全禁用是自动化特征）</td>
+</tr>
+</tbody></table>
+<h2 id="为什么-OS-指纹必须统一"><a href="#为什么-OS-指纹必须统一" class="headerlink" title="为什么 OS 指纹必须统一"></a>为什么 OS 指纹必须统一</h2><p>这是一个容易被忽略的细节。TLS 握手过程中，客户端会发送 User-Agent 相关的扩展信息。如果配置了 <code>os: &quot;windows&quot;</code> 但 TLS 指纹显示是 Linux，WAF 就能识别出不一致。</p>
+<p>Camoufox 的 <code>os</code> 参数不只是设置 <code>navigator.platform</code>，它会联动调整：</p>
+<ul>
+<li>TLS 指纹中的相关扩展</li>
+<li><code>navigator.userAgent</code> 字符串</li>
+<li>字体列表（Windows 字体 vs Linux 字体）</li>
+<li>屏幕分辨率和 DPI</li>
+</ul>
+<h1 id="0x05-页面池管理"><a href="#0x05-页面池管理" class="headerlink" title="0x05 页面池管理"></a>0x05 页面池管理</h1><h2 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h2><p>每次请求都创建新页面会带来两个问题：资源消耗大、指纹暴露多。页面池复用是更好的方案。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">BrowserEngine</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, pool_size: <span class="built_in">int</span> = <span class="number">3</span>, base_url: <span class="built_in">str</span> = <span class="string">&quot;https://chat.qwen.ai&quot;</span></span>):</span><br><span class="line">        self.pool_size = pool_size</span><br><span class="line">        self.base_url = base_url</span><br><span class="line">        self._browser = <span class="literal">None</span></span><br><span class="line">        self._pages: asyncio.Queue = asyncio.Queue()  <span class="comment"># 页面池</span></span><br><span class="line">        self._ready = asyncio.Event()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">_init_pages</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;初始化页面池&quot;&quot;&quot;</span></span><br><span class="line">        log.info(<span class="string">f&quot;[Browser] 正在初始化 <span class="subst">&#123;self.pool_size&#125;</span> 个并发渲染引擎页面...&quot;</span>)</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(self.pool_size):</span><br><span class="line">            page = <span class="keyword">await</span> self._browser.new_page()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 设置视口大小</span></span><br><span class="line">            <span class="keyword">await</span> page.set_viewport_size(&#123;<span class="string">&quot;width&quot;</span>: <span class="number">1920</span>, <span class="string">&quot;height&quot;</span>: <span class="number">1080</span>&#125;)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 预加载目标站点，建立会话</span></span><br><span class="line">            <span class="keyword">await</span> page.goto(</span><br><span class="line">                self.base_url,</span><br><span class="line">                wait_until=<span class="string">&quot;domcontentloaded&quot;</span>,</span><br><span class="line">                timeout=<span class="number">60000</span></span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">            <span class="keyword">await</span> asyncio.sleep(<span class="number">0.5</span>)</span><br><span class="line">            self._pages.put_nowait(page)</span><br><span class="line">            log.info(<span class="string">f&quot;  [Browser] Page <span class="subst">&#123;i+<span class="number">1</span>&#125;</span>/<span class="subst">&#123;self.pool_size&#125;</span> ready&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="关键设计"><a href="#关键设计" class="headerlink" title="关键设计"></a>关键设计</h2><ol>
+<li><strong>页面池复用</strong>：避免每次请求创建新页面，减少资源消耗和指纹暴露</li>
+<li><strong>预加载站点</strong>：提前访问 chat.qwen.ai，建立 Cookie 和会话状态</li>
+<li><strong>视口设置</strong>：1920x1080 模拟真实桌面浏览器分辨率</li>
+<li><strong>异步队列</strong>：用 <code>asyncio.Queue</code> 管理页面，天然支持并发获取和归还</li>
+</ol>
+<h2 id="页面刷新与恢复"><a href="#页面刷新与恢复" class="headerlink" title="页面刷新与恢复"></a>页面刷新与恢复</h2><p>当 JS 执行出错时，页面状态可能损坏。此时需要刷新页面恢复会话状态：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">_refresh_page</span>(<span class="params">self, page</span>):</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">await</span> asyncio.wait_for(</span><br><span class="line">            page.goto(self.base_url, wait_until=<span class="string">&quot;domcontentloaded&quot;</span>),</span><br><span class="line">            timeout=<span class="number">20000</span>,</span><br><span class="line">        )</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">_refresh_page_and_return</span>(<span class="params">self, page</span>):</span><br><span class="line">    <span class="keyword">await</span> self._refresh_page(page)</span><br><span class="line">    self._pages.put_nowait(page)</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>api_call</code> 中，根据执行结果决定是直接归还还是刷新后归还：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> needs_refresh:</span><br><span class="line">    asyncio.create_task(self._refresh_page_and_return(page))</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    self._pages.put_nowait(page)</span><br></pre></td></tr></table></figure>
+
+<p>注意刷新操作是异步的（<code>create_task</code>），不阻塞当前请求的返回。</p>
+<h1 id="0x06-JS-注入执行-Fetch"><a href="#0x06-JS-注入执行-Fetch" class="headerlink" title="0x06 JS 注入执行 Fetch"></a>0x06 JS 注入执行 Fetch</h1><p>这是绕过 WAF 的核心手段。不在 Python 端直接发 HTTP 请求，而是在浏览器 JS 上下文中执行 <code>fetch</code>。</p>
+<h2 id="普通-API-调用"><a href="#普通-API-调用" class="headerlink" title="普通 API 调用"></a>普通 API 调用</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">JS_FETCH = (</span><br><span class="line">    <span class="string">&quot;async (args) =&gt; &#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;const opts=&#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;method:args.method,&quot;</span></span><br><span class="line">    <span class="string">&quot;headers:&#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;&#x27;Content-Type&#x27;:&#x27;application/json&#x27;,&quot;</span></span><br><span class="line">    <span class="string">&quot;&#x27;Authorization&#x27;:&#x27;Bearer &#x27;+args.token&quot;</span></span><br><span class="line">    <span class="string">&quot;&#125;&quot;</span></span><br><span class="line">    <span class="string">&quot;&#125;;&quot;</span></span><br><span class="line">    <span class="string">&quot;if(args.body)opts.body=JSON.stringify(args.body);&quot;</span></span><br><span class="line">    <span class="string">&quot;const res=await fetch(args.url,opts);&quot;</span></span><br><span class="line">    <span class="string">&quot;const text=await res.text();&quot;</span></span><br><span class="line">    <span class="string">&quot;return&#123;status:res.status,body:text&#125;;&quot;</span></span><br><span class="line">    <span class="string">&quot;&#125;&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h2 id="流式响应处理"><a href="#流式响应处理" class="headerlink" title="流式响应处理"></a>流式响应处理</h2><p>SSE 流式响应的处理更复杂。由于 Camoufox 的 <code>expose_function</code> 跨语言回调有限制，采用在 JS 中完整收取流后一次性返回的方案：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">JS_STREAM_FULL = (</span><br><span class="line">    <span class="string">&quot;async (args) =&gt; &#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;const ctrl=new AbortController();&quot;</span></span><br><span class="line">    <span class="string">&quot;const tmr=setTimeout(()=&gt;ctrl.abort(),1800000);&quot;</span>  <span class="comment"># 30分钟超时</span></span><br><span class="line">    <span class="string">&quot;try&#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;const res=await fetch(args.url,&#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;method:&#x27;POST&#x27;,&quot;</span></span><br><span class="line">    <span class="string">&quot;headers:&#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;&#x27;Content-Type&#x27;:&#x27;application/json&#x27;,&quot;</span></span><br><span class="line">    <span class="string">&quot;&#x27;Authorization&#x27;:&#x27;Bearer &#x27;+args.token&quot;</span></span><br><span class="line">    <span class="string">&quot;&#125;,&quot;</span></span><br><span class="line">    <span class="string">&quot;body:JSON.stringify(args.payload),&quot;</span></span><br><span class="line">    <span class="string">&quot;signal:ctrl.signal&quot;</span></span><br><span class="line">    <span class="string">&quot;&#125;);&quot;</span></span><br><span class="line">    <span class="string">&quot;if(!res.ok)&#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;const t=await res.text();clearTimeout(tmr);&quot;</span></span><br><span class="line">    <span class="string">&quot;return&#123;status:res.status,body:t.substring(0,2000)&#125;;&quot;</span></span><br><span class="line">    <span class="string">&quot;&#125;&quot;</span></span><br><span class="line">    <span class="string">&quot;const rdr=res.body.getReader();&quot;</span></span><br><span class="line">    <span class="string">&quot;const dec=new TextDecoder();&quot;</span></span><br><span class="line">    <span class="string">&quot;let body=&#x27;&#x27;;&quot;</span></span><br><span class="line">    <span class="string">&quot;while(true)&#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;const&#123;done,value&#125;=await rdr.read();&quot;</span></span><br><span class="line">    <span class="string">&quot;if(done)break;&quot;</span></span><br><span class="line">    <span class="string">&quot;body+=dec.decode(value,&#123;stream:true&#125;);&quot;</span></span><br><span class="line">    <span class="string">&quot;&#125;&quot;</span></span><br><span class="line">    <span class="string">&quot;clearTimeout(tmr);&quot;</span></span><br><span class="line">    <span class="string">&quot;return&#123;status:res.status,body:body&#125;;&quot;</span></span><br><span class="line">    <span class="string">&quot;&#125;catch(e)&#123;&quot;</span></span><br><span class="line">    <span class="string">&quot;clearTimeout(tmr);&quot;</span></span><br><span class="line">    <span class="string">&quot;return&#123;status:0,body:&#x27;JS error: &#x27;+e.message&#125;;&quot;</span></span><br><span class="line">    <span class="string">&quot;&#125;&#125;&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h2 id="为什么在浏览器中执行-fetch"><a href="#为什么在浏览器中执行-fetch" class="headerlink" title="为什么在浏览器中执行 fetch"></a>为什么在浏览器中执行 fetch</h2><p>这是整个方案的关键决策，原因有四：</p>
+<ol>
+<li><strong>Cookie 自动携带</strong>：浏览器自动管理 Cookie，无需手动处理 WAF 通过 JS 设置的验证 Cookie</li>
+<li><strong>TLS 指纹一致</strong>：使用 Firefox 真实 TLS 实现，指纹完全合法，与页面访问时的 TLS 指纹一致</li>
+<li><strong>JavaScript 环境完整</strong>：支持 WAF 的 JS 挑战验证，浏览器上下文中有完整的 DOM 和 JS 运行时</li>
+<li><strong>请求来源合法</strong>：从 chat.qwen.ai 域内发起 fetch，满足 Same-Origin 策略，Referer 和 Origin 头自然正确</li>
+</ol>
+<h1 id="0x07-请求抖动与防封控"><a href="#0x07-请求抖动与防封控" class="headerlink" title="0x07 请求抖动与防封控"></a>0x07 请求抖动与防封控</h1><h2 id="请求抖动"><a href="#请求抖动" class="headerlink" title="请求抖动"></a>请求抖动</h2><p>均匀的请求间隔是自动化最明显的特征之一。添加随机抖动模拟真实用户：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_request_jitter_seconds</span>() -&gt; <span class="built_in">float</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;生成随机请求延迟&quot;&quot;&quot;</span></span><br><span class="line">    low = <span class="built_in">max</span>(<span class="number">0</span>, settings.REQUEST_JITTER_MIN_MS)    <span class="comment"># 默认 120ms</span></span><br><span class="line">    high = <span class="built_in">max</span>(low, settings.REQUEST_JITTER_MAX_MS)  <span class="comment"># 默认 360ms</span></span><br><span class="line">    <span class="keyword">return</span> random.uniform(low, high) / <span class="number">1000.0</span></span><br></pre></td></tr></table></figure>
+
+<p>在每次 API 调用前添加抖动：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> asyncio.sleep(_request_jitter_seconds())</span><br></pre></td></tr></table></figure>
+
+<h2 id="账号最小间隔"><a href="#账号最小间隔" class="headerlink" title="账号最小间隔"></a>账号最小间隔</h2><p>单账号请求间隔过短会触发限流：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">min_interval = settings.ACCOUNT_MIN_INTERVAL_MS / <span class="number">1000.0</span>  <span class="comment"># 默认 1200ms</span></span><br><span class="line">wait_s = <span class="built_in">max</span>(<span class="number">0.0</span>, (acc.last_request_started + min_interval) - now)</span><br><span class="line"><span class="keyword">if</span> wait_s &gt; <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">await</span> asyncio.sleep(wait_s)</span><br></pre></td></tr></table></figure>
+
+<h2 id="限流冷却策略"><a href="#限流冷却策略" class="headerlink" title="限流冷却策略"></a>限流冷却策略</h2><p>被限流后采用指数退避，避免持续触发：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">mark_rate_limited</span>(<span class="params">self, acc, cooldown=<span class="literal">None</span>, error_message=<span class="string">&quot;&quot;</span></span>):</span><br><span class="line">    acc.rate_limit_strikes += <span class="number">1</span></span><br><span class="line">    base = cooldown <span class="keyword">or</span> settings.RATE_LIMIT_BASE_COOLDOWN  <span class="comment"># 600s</span></span><br><span class="line">    dynamic = <span class="built_in">min</span>(</span><br><span class="line">        settings.RATE_LIMIT_MAX_COOLDOWN,  <span class="comment"># 最大 3600s</span></span><br><span class="line">        <span class="built_in">int</span>(base * (<span class="number">2</span> ** <span class="built_in">max</span>(<span class="number">0</span>, acc.rate_limit_strikes - <span class="number">1</span>)))</span><br><span class="line">    )</span><br><span class="line">    dynamic += <span class="built_in">int</span>(_jitter_seconds())  <span class="comment"># 添加抖动</span></span><br><span class="line">    acc.rate_limited_until = time.time() + dynamic</span><br></pre></td></tr></table></figure>
+
+<p>退避时间表：</p>
+<table>
+<thead>
+<tr>
+<th>触发次数</th>
+<th>冷却时间</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>第 1 次</td>
+<td>~600s</td>
+</tr>
+<tr>
+<td>第 2 次</td>
+<td>~1200s</td>
+</tr>
+<tr>
+<td>第 3 次</td>
+<td>~2400s</td>
+</tr>
+<tr>
+<td>第 N 次</td>
+<td>~3600s（上限）</td>
+</tr>
+</tbody></table>
+<h2 id="并发控制"><a href="#并发控制" class="headerlink" title="并发控制"></a>并发控制</h2><p>单账号最大并发设为 1，避免同一账号的多个请求同时到达 WAF：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># account_pool.py</span></span><br><span class="line">MAX_INFLIGHT = <span class="number">1</span>  <span class="comment"># 单账号最大并发</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="0x08-混合引擎与-WAF-检测"><a href="#0x08-混合引擎与-WAF-检测" class="headerlink" title="0x08 混合引擎与 WAF 检测"></a>0x08 混合引擎与 WAF 检测</h1><h2 id="WAF-拦截识别"><a href="#WAF-拦截识别" class="headerlink" title="WAF 拦截识别"></a>WAF 拦截识别</h2><p>WAF 拦截的响应有几种典型特征：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">should_fallback = (</span><br><span class="line">    status == <span class="number">0</span>                           <span class="comment"># 网络错误</span></span><br><span class="line">    <span class="keyword">or</span> status <span class="keyword">in</span> (<span class="number">401</span>, <span class="number">403</span>, <span class="number">429</span>)          <span class="comment"># 认证/限流错误</span></span><br><span class="line">    <span class="keyword">or</span> <span class="string">&quot;waf&quot;</span> <span class="keyword">in</span> body_text                 <span class="comment"># WAF 拦截标识</span></span><br><span class="line">    <span class="keyword">or</span> <span class="string">&quot;&lt;!doctype&quot;</span> <span class="keyword">in</span> body_text           <span class="comment"># HTML 响应（WAF 拦截页）</span></span><br><span class="line">    <span class="keyword">or</span> <span class="string">&quot;forbidden&quot;</span> <span class="keyword">in</span> body_text           <span class="comment"># 禁止访问</span></span><br><span class="line">    <span class="keyword">or</span> <span class="string">&quot;unauthorized&quot;</span> <span class="keyword">in</span> body_text        <span class="comment"># 未授权</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>关键判断逻辑：</p>
+<ul>
+<li><code>&quot;waf&quot; in body_text</code>：阿里云 WAF 拦截页面通常包含 <code>aliyun_waf</code> 关键字</li>
+<li><code>&quot;&lt;!doctype&quot; in body_text</code>：正常 API 返回 JSON，返回 HTML 说明被拦截</li>
+<li><code>status in (401, 403, 429)</code>：这些状态码在正常 API 调用中不应出现</li>
+</ul>
+<h2 id="混合引擎路由"><a href="#混合引擎路由" class="headerlink" title="混合引擎路由"></a>混合引擎路由</h2><p>API 调用优先走 HTTPX（速度快），WAF 拦截时回退到 Browser：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">api_call</span>(<span class="params">self, method, path, token, body=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="comment"># 首先尝试 HTTPX</span></span><br><span class="line">    result = <span class="keyword">await</span> self.httpx_engine.api_call(method, path, token, body)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> should_fallback:</span><br><span class="line">        log.warning(<span class="string">&quot;[HybridEngine] api_call 回退到 browser&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">await</span> self.browser_engine.api_call(method, path, token, body)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+
+<p>流式请求优先走 Browser（成功率高），失败时回退到 HTTPX：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">fetch_chat</span>(<span class="params">self, token, chat_id, payload, buffered=<span class="literal">False</span></span>):</span><br><span class="line">    saw_success = <span class="literal">False</span></span><br><span class="line">    browser_error = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">async</span> <span class="keyword">for</span> item <span class="keyword">in</span> self.browser_engine.fetch_chat(token, chat_id, payload):</span><br><span class="line">            <span class="comment"># 检测 WAF 拦截</span></span><br><span class="line">            <span class="keyword">if</span> is_hard_failure <span class="keyword">and</span> <span class="keyword">not</span> saw_success:</span><br><span class="line">                browser_error = item</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            <span class="keyword">yield</span> item</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 回退到 HTTPX</span></span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">for</span> item <span class="keyword">in</span> self.httpx_engine.fetch_chat(token, chat_id, payload):</span><br><span class="line">        <span class="keyword">yield</span> item</span><br></pre></td></tr></table></figure>
+
+<h2 id="WAF-容错处理"><a href="#WAF-容错处理" class="headerlink" title="WAF 容错处理"></a>WAF 容错处理</h2><p>在 Token 验证环节，遇到 WAF 拦截时不直接判定 Token 无效，而是放行交给底层浏览器引擎处理：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># qwen_client.py</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;aliyun_waf&quot;</span> <span class="keyword">in</span> resp.text.lower() <span class="keyword">or</span> <span class="string">&quot;&lt;!doctype&quot;</span> <span class="keyword">in</span> resp.text.lower():</span><br><span class="line">    log.info(<span class="string">&quot;[verify_token] 遇到 WAF 拦截页面，放行交给底层无头浏览器引擎处理。&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># auth_resolver.py</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    data = resp.json()</span><br><span class="line">    <span class="keyword">return</span> data.get(<span class="string">&quot;role&quot;</span>) == <span class="string">&quot;user&quot;</span></span><br><span class="line"><span class="keyword">except</span> Exception:</span><br><span class="line">    txt = resp.text.lower()</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;aliyun_waf&#x27;</span> <span class="keyword">in</span> txt <span class="keyword">or</span> <span class="string">&#x27;&lt;!doctype&#x27;</span> <span class="keyword">in</span> txt  <span class="comment"># WAF 拦截时假定 token 有效</span></span><br></pre></td></tr></table></figure>
+
+<p>这个设计很重要：WAF 拦截不等于 Token 失效，如果误判会导致健康的 Token 被踢出账号池。</p>
+<h1 id="0x09-curl-cffi-HTTPX-引擎"><a href="#0x09-curl-cffi-HTTPX-引擎" class="headerlink" title="0x09 curl_cffi HTTPX 引擎"></a>0x09 curl_cffi HTTPX 引擎</h1><p>作为 Browser 引擎的补充，HTTPX 引擎用 <code>curl_cffi</code> 模拟 Chrome TLS 指纹，速度快但 WAF 绕过能力有限。</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">_HEADERS = &#123;</span><br><span class="line">    <span class="string">&quot;User-Agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 &quot;</span></span><br><span class="line">                  <span class="string">&quot;(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Accept&quot;</span>: <span class="string">&quot;application/json, text/plain, */*&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Accept-Language&quot;</span>: <span class="string">&quot;zh-CN,zh;q=0.9,en;q=0.8&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Referer&quot;</span>: <span class="string">&quot;https://chat.qwen.ai/&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Origin&quot;</span>: <span class="string">&quot;https://chat.qwen.ai&quot;</span>,</span><br><span class="line">    <span class="string">&quot;sec-ch-ua&quot;</span>: <span class="string">&#x27;&quot;Chromium&quot;;v=&quot;124&quot;, &quot;Google Chrome&quot;;v=&quot;124&quot;, &quot;Not-A.Brand&quot;;v=&quot;99&quot;&#x27;</span>,</span><br><span class="line">    <span class="string">&quot;sec-ch-ua-mobile&quot;</span>: <span class="string">&quot;?0&quot;</span>,</span><br><span class="line">    <span class="string">&quot;sec-ch-ua-platform&quot;</span>: <span class="string">&#x27;&quot;Windows&quot;&#x27;</span>,</span><br><span class="line">    <span class="string">&quot;sec-fetch-dest&quot;</span>: <span class="string">&quot;empty&quot;</span>,</span><br><span class="line">    <span class="string">&quot;sec-fetch-mode&quot;</span>: <span class="string">&quot;cors&quot;</span>,</span><br><span class="line">    <span class="string">&quot;sec-fetch-site&quot;</span>: <span class="string">&quot;same-origin&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">_IMPERSONATE = <span class="string">&quot;chrome124&quot;</span>  <span class="comment"># curl_cffi 使用 Chrome 124 TLS 指纹</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="两种引擎对比"><a href="#两种引擎对比" class="headerlink" title="两种引擎对比"></a>两种引擎对比</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Camoufox (Browser)</th>
+<th>curl_cffi (HTTPX)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>TLS 指纹</strong></td>
+<td>Firefox 真实指纹</td>
+<td>Chrome 模拟指纹</td>
+</tr>
+<tr>
+<td><strong>JavaScript</strong></td>
+<td>完整支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td><strong>Cookie 管理</strong></td>
+<td>自动处理</td>
+<td>手动处理</td>
+</tr>
+<tr>
+<td><strong>资源消耗</strong></td>
+<td>高（内存 200MB+）</td>
+<td>低（内存 10MB）</td>
+</tr>
+<tr>
+<td><strong>启动速度</strong></td>
+<td>慢（2-5 秒）</td>
+<td>快（毫秒级）</td>
+</tr>
+<tr>
+<td><strong>WAF 绕过</strong></td>
+<td>高成功率</td>
+<td>中等成功率</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>WAF 严格、高频调用</td>
+<td>WAF 宽松、低频测试</td>
+</tr>
+</tbody></table>
+<h1 id="0x0A-HTTPX-与-Camoufox-协作机制"><a href="#0x0A-HTTPX-与-Camoufox-协作机制" class="headerlink" title="0x0A HTTPX 与 Camoufox 协作机制"></a>0x0A HTTPX 与 Camoufox 协作机制</h1><p>混合引擎不是简单的”一个不行换另一个”，而是一套有明确优先级和回退逻辑的协作体系。两种引擎各有所长，协作的关键在于”什么场景用谁、什么时候切换、切换后怎么恢复”。</p>
+<h2 id="为什么需要两个引擎"><a href="#为什么需要两个引擎" class="headerlink" title="为什么需要两个引擎"></a>为什么需要两个引擎</h2><p>单一引擎无法同时满足速度和稳定性：</p>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>Camoufox</th>
+<th>curl_cffi</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>快速响应（&lt; 100ms）</td>
+<td>不行，页面池获取 + JS 执行需要 200ms+</td>
+<td>可以，毫秒级建立连接</td>
+</tr>
+<tr>
+<td>绕过 WAF</td>
+<td>高成功率</td>
+<td>中等成功率，可能被 JS 挑战拦截</td>
+</tr>
+<tr>
+<td>流式 SSE</td>
+<td>需要完整收取后返回，延迟高</td>
+<td>原生支持逐块流式，首字延迟低</td>
+</tr>
+<tr>
+<td>资源占用</td>
+<td>200MB+ 内存</td>
+<td>10MB 内存</td>
+</tr>
+<tr>
+<td>并发能力</td>
+<td>受页面池大小限制（默认 3）</td>
+<td>几乎无上限</td>
+</tr>
+</tbody></table>
+<p>所以核心思路是：<strong>能用快的就用快的，被拦了再用稳的</strong>。</p>
+<h2 id="启动顺序"><a href="#启动顺序" class="headerlink" title="启动顺序"></a>启动顺序</h2><p>HybridEngine 启动时，先启动 HTTPX 再启动 Browser：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">start</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="comment"># 第一步：启动 HTTPX（毫秒级，立即可用）</span></span><br><span class="line">    <span class="keyword">await</span> self.httpx_engine.start()</span><br><span class="line">    <span class="comment"># 第二步：启动 Browser（需要下载/启动 Firefox，2-5 秒）</span></span><br><span class="line">    <span class="keyword">await</span> self.browser_engine.start()</span><br></pre></td></tr></table></figure>
+
+<p>这个顺序有讲究：HTTPX 启动几乎是瞬时的，Browser 启动需要下载浏览器内核、初始化页面池。先启动 HTTPX 可以让系统尽早进入可用状态，Browser 在后台完成初始化。</p>
+<h2 id="两种请求类型的协作策略"><a href="#两种请求类型的协作策略" class="headerlink" title="两种请求类型的协作策略"></a>两种请求类型的协作策略</h2><h3 id="api-call：HTTPX-优先，Browser-兜底"><a href="#api-call：HTTPX-优先，Browser-兜底" class="headerlink" title="api_call：HTTPX 优先，Browser 兜底"></a>api_call：HTTPX 优先，Browser 兜底</h3><p><code>api_call</code> 用于非流式的 API 调用（如创建会话、验证 Token），这类请求对速度敏感，WAF 拦截概率相对低。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">客户端请求 api_call</span><br><span class="line">        │</span><br><span class="line">        ▼</span><br><span class="line">  ┌─────────────┐</span><br><span class="line">  │  HTTPX 引擎  │  ← 首选：速度快（&lt; 100ms）</span><br><span class="line">  └──────┬──────┘</span><br><span class="line">         │</span><br><span class="line">    响应是否正常？</span><br><span class="line">    ├── 是 → 直接返回</span><br><span class="line">    └── 否（WAF 拦截 / 403 / 429）</span><br><span class="line">            │</span><br><span class="line">            ▼</span><br><span class="line">    ┌──────────────┐</span><br><span class="line">    │ Browser 引擎  │  ← 兜底：在浏览器 JS 中重新执行 fetch</span><br><span class="line">    └──────┬───────┘</span><br><span class="line">           │</span><br><span class="line">           ▼</span><br><span class="line">        返回结果</span><br></pre></td></tr></table></figure>
+
+<p>完整代码逻辑：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">api_call</span>(<span class="params">self, method, path, token, body=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="comment"># 1. 先走 HTTPX</span></span><br><span class="line">    result = <span class="keyword">await</span> self.httpx_engine.api_call(method, path, token, body)</span><br><span class="line">    status = result.get(<span class="string">&quot;status&quot;</span>)</span><br><span class="line">    body_text = (result.get(<span class="string">&quot;body&quot;</span>) <span class="keyword">or</span> <span class="string">&quot;&quot;</span>).lower()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2. 判断是否需要回退</span></span><br><span class="line">    should_fallback = (</span><br><span class="line">        status == <span class="number">0</span>                       <span class="comment"># 网络错误（DNS/连接失败）</span></span><br><span class="line">        <span class="keyword">or</span> status <span class="keyword">in</span> (<span class="number">401</span>, <span class="number">403</span>, <span class="number">429</span>)      <span class="comment"># 认证/权限/限流</span></span><br><span class="line">        <span class="keyword">or</span> <span class="string">&quot;waf&quot;</span> <span class="keyword">in</span> body_text             <span class="comment"># WAF 拦截标识</span></span><br><span class="line">        <span class="keyword">or</span> <span class="string">&quot;&lt;!doctype&quot;</span> <span class="keyword">in</span> body_text       <span class="comment"># 返回 HTML 而非 JSON</span></span><br><span class="line">        <span class="keyword">or</span> <span class="string">&quot;forbidden&quot;</span> <span class="keyword">in</span> body_text       <span class="comment"># 禁止访问</span></span><br><span class="line">        <span class="keyword">or</span> <span class="string">&quot;unauthorized&quot;</span> <span class="keyword">in</span> body_text    <span class="comment"># 未授权</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 3. 回退到 Browser</span></span><br><span class="line">    <span class="keyword">if</span> should_fallback:</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">await</span> self.browser_engine.api_call(method, path, token, body)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+
+<p>为什么 api_call 优先 HTTPX：</p>
+<ol>
+<li><strong>速度</strong>：创建会话等操作对延迟敏感，HTTPX 毫秒级响应 vs Browser 200ms+</li>
+<li><strong>频率</strong>：这类请求 WAF 拦截概率低，大多数时候 HTTPX 就够了</li>
+<li><strong>资源</strong>：不占用浏览器页面池，把宝贵的页面留给流式请求</li>
+</ol>
+<h3 id="fetch-chat：Browser-优先，HTTPX-兜底"><a href="#fetch-chat：Browser-优先，HTTPX-兜底" class="headerlink" title="fetch_chat：Browser 优先，HTTPX 兜底"></a>fetch_chat：Browser 优先，HTTPX 兜底</h3><p><code>fetch_chat</code> 用于流式对话请求，这是核心业务路径。WAF 对这类高频 POST 请求拦截更严格，Browser 的成功率远高于 HTTPX。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">客户端请求 fetch_chat</span><br><span class="line">        │</span><br><span class="line">        ▼</span><br><span class="line">  ┌──────────────┐</span><br><span class="line">  │ Browser 引擎  │  ← 首选：WAF 绕过成功率高</span><br><span class="line">  └──────┬───────┘</span><br><span class="line">         │</span><br><span class="line">   是否收到有效数据？</span><br><span class="line">   ├── 是（status=200/streamed）→ 持续 yield 数据</span><br><span class="line">   └── 否（WAF 拦截 / JS 错误 / 超时）</span><br><span class="line">           │</span><br><span class="line">           ▼</span><br><span class="line">   ┌─────────────┐</span><br><span class="line">   │  HTTPX 引擎  │  ← 兜底：Chrome TLS 指纹直连</span><br><span class="line">   └──────┬──────┘</span><br><span class="line">          │</span><br><span class="line">          ▼</span><br><span class="line">       返回结果</span><br></pre></td></tr></table></figure>
+
+<p>完整代码逻辑：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">fetch_chat</span>(<span class="params">self, token, chat_id, payload, buffered=<span class="literal">False</span></span>):</span><br><span class="line">    saw_success = <span class="literal">False</span>    <span class="comment"># 是否已经收到过有效数据</span></span><br><span class="line">    browser_error = <span class="literal">None</span>   <span class="comment"># 浏览器引擎的错误信息</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">async</span> <span class="keyword">for</span> item <span class="keyword">in</span> self.browser_engine.fetch_chat(token, chat_id, payload):</span><br><span class="line">            status = item.get(<span class="string">&quot;status&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 收到有效数据，标记成功并继续</span></span><br><span class="line">            <span class="keyword">if</span> status <span class="keyword">in</span> (<span class="string">&quot;streamed&quot;</span>, <span class="number">200</span>):</span><br><span class="line">                saw_success = <span class="literal">True</span></span><br><span class="line">                <span class="keyword">yield</span> item</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 判断是否是硬性失败</span></span><br><span class="line">            body_text = (item.get(<span class="string">&quot;body&quot;</span>) <span class="keyword">or</span> <span class="string">&quot;&quot;</span>).lower()</span><br><span class="line">            is_hard_failure = (</span><br><span class="line">                status <span class="keyword">in</span> (<span class="number">401</span>, <span class="number">403</span>, <span class="number">429</span>)</span><br><span class="line">                <span class="keyword">or</span> <span class="string">&quot;waf&quot;</span> <span class="keyword">in</span> body_text</span><br><span class="line">                <span class="keyword">or</span> <span class="string">&quot;&lt;!doctype&quot;</span> <span class="keyword">in</span> body_text</span><br><span class="line">                <span class="keyword">or</span> <span class="string">&quot;forbidden&quot;</span> <span class="keyword">in</span> body_text</span><br><span class="line">                <span class="keyword">or</span> <span class="string">&quot;unauthorized&quot;</span> <span class="keyword">in</span> body_text</span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 硬性失败且还没收到过数据 → 回退</span></span><br><span class="line">            <span class="keyword">if</span> is_hard_failure <span class="keyword">and</span> <span class="keyword">not</span> saw_success:</span><br><span class="line">                browser_error = item</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 浏览器引擎自身错误（evaluate 失败等）→ 回退</span></span><br><span class="line">            <span class="keyword">if</span> status == <span class="number">0</span> <span class="keyword">and</span> <span class="keyword">not</span> saw_success:</span><br><span class="line">                browser_error = item</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">yield</span> item</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 浏览器引擎正常完成，直接返回</span></span><br><span class="line">        <span class="keyword">if</span> browser_error <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="comment"># 已经收到过数据就不回退了，直接返回</span></span><br><span class="line">        <span class="keyword">if</span> saw_success:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        browser_error = &#123;<span class="string">&quot;status&quot;</span>: <span class="number">0</span>, <span class="string">&quot;body&quot;</span>: <span class="built_in">str</span>(e)&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 回退到 HTTPX</span></span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">for</span> item <span class="keyword">in</span> self.httpx_engine.fetch_chat(token, chat_id, payload):</span><br><span class="line">        <span class="keyword">yield</span> item</span><br></pre></td></tr></table></figure>
+
+<p>为什么 fetch_chat 优先 Browser：</p>
+<ol>
+<li><strong>WAF 严格</strong>：流式 POST 是 WAF 重点监控对象，HTTPX 很容易被拦</li>
+<li><strong>Cookie 完整</strong>：Browser 页面池中已预加载 chat.qwen.ai，Cookie 和会话状态完整</li>
+<li><strong>JS 挑战</strong>：WAF 可能下发 JS 挑战，只有 Browser 能自动处理</li>
+</ol>
+<h2 id="关键设计：saw-success-防止误回退"><a href="#关键设计：saw-success-防止误回退" class="headerlink" title="关键设计：saw_success 防止误回退"></a>关键设计：saw_success 防止误回退</h2><p><code>saw_success</code> 是一个很重要的状态标志。它的作用是防止”已经收到部分数据后又回退”导致数据重复。</p>
+<p>考虑这个场景：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Browser 引擎开始流式返回</span><br><span class="line">  → 收到 chunk 1 ✅ (saw_success = True)</span><br><span class="line">  → 收到 chunk 2 ✅</span><br><span class="line">  → 收到 chunk 3 时 WAF 突然拦截</span><br></pre></td></tr></table></figure>
+
+<p>如果没有 <code>saw_success</code>，系统会回退到 HTTPX 重新请求，导致：</p>
+<ol>
+<li>chunk 1 和 chunk 2 已经返回给客户端</li>
+<li>HTTPX 重新请求会从头开始，chunk 1 和 chunk 2 重复返回</li>
+</ol>
+<p>有了 <code>saw_success</code>，一旦已经成功返回过数据，即使后续出错也不再回退，避免数据重复。</p>
+<h2 id="回退触发条件"><a href="#回退触发条件" class="headerlink" title="回退触发条件"></a>回退触发条件</h2><table>
+<thead>
+<tr>
+<th>条件</th>
+<th align="center">api_call 中</th>
+<th align="center">fetch_chat 中</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status == 0</code></td>
+<td align="center">触发回退</td>
+<td align="center">触发回退</td>
+<td>网络错误 &#x2F; JS 执行失败</td>
+</tr>
+<tr>
+<td><code>status in (401, 403, 429)</code></td>
+<td align="center">触发回退</td>
+<td align="center">触发回退</td>
+<td>认证&#x2F;权限&#x2F;限流</td>
+</tr>
+<tr>
+<td><code>&quot;waf&quot; in body</code></td>
+<td align="center">触发回退</td>
+<td align="center">触发回退</td>
+<td>WAF 拦截标识</td>
+</tr>
+<tr>
+<td><code>&quot;&lt;!doctype&quot; in body</code></td>
+<td align="center">触发回退</td>
+<td align="center">触发回退</td>
+<td>返回 HTML 拦截页</td>
+</tr>
+<tr>
+<td><code>&quot;forbidden&quot; in body</code></td>
+<td align="center">触发回退</td>
+<td align="center">触发回退</td>
+<td>禁止访问</td>
+</tr>
+<tr>
+<td><code>&quot;unauthorized&quot; in body</code></td>
+<td align="center">触发回退</td>
+<td align="center">触发回退</td>
+<td>未授权</td>
+</tr>
+</tbody></table>
+<p>注意 <code>fetch_chat</code> 多了一个隐含条件：<strong>只有 <code>saw_success == False</code> 时才回退</strong>。已经成功返回过数据就不再切换引擎。</p>
+<h2 id="完整请求链路"><a href="#完整请求链路" class="headerlink" title="完整请求链路"></a>完整请求链路</h2><p>从客户端请求到最终响应，完整的调用链路如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">客户端请求 → v1_chat.py</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">QwenClient.chat_stream_events_with_retry()</span><br><span class="line">    │</span><br><span class="line">    ├── AccountPool.acquire_wait()  ← 获取可用账号</span><br><span class="line">    ├── 本地节流检查（最小间隔 1200ms）</span><br><span class="line">    │</span><br><span class="line">    ├── QwenClient.create_chat()    ← 创建会话</span><br><span class="line">    │       │</span><br><span class="line">    │       ▼</span><br><span class="line">    │   HybridEngine.api_call()     ← HTTPX 优先，Browser 兜底</span><br><span class="line">    │       ├── HTTPX: curl_cffi POST /api/v2/chats/new</span><br><span class="line">    │       └── Browser: page.evaluate(JS_FETCH)</span><br><span class="line">    │</span><br><span class="line">    └── Engine.fetch_chat()         ← 发送对话请求</span><br><span class="line">            │</span><br><span class="line">            ▼</span><br><span class="line">        HybridEngine.fetch_chat()   ← Browser 优先，HTTPX 兜底</span><br><span class="line">            ├── Browser: page.evaluate(JS_STREAM_FULL)</span><br><span class="line">            │   └── 在 Firefox JS 上下文中 fetch → 完整收取 SSE → 一次性返回</span><br><span class="line">            └── HTTPX: curl_cffi stream POST /api/v2/chat/completions</span><br><span class="line">                └── 逐块流式返回 SSE chunks</span><br></pre></td></tr></table></figure>
+
+<h2 id="两种引擎的-SSE-流式差异"><a href="#两种引擎的-SSE-流式差异" class="headerlink" title="两种引擎的 SSE 流式差异"></a>两种引擎的 SSE 流式差异</h2><p>Browser 和 HTTPX 处理 SSE 流的方式完全不同，这是协作中最需要注意的差异：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Browser (Camoufox)</th>
+<th>HTTPX (curl_cffi)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>流式方式</strong></td>
+<td>JS 中完整收取后一次性返回</td>
+<td>原生逐块流式</td>
+</tr>
+<tr>
+<td><strong>首字延迟</strong></td>
+<td>高（需等整个流收完）</td>
+<td>低（收到第一块就返回）</td>
+</tr>
+<tr>
+<td><strong>内存占用</strong></td>
+<td>整个响应体在 JS 内存中</td>
+<td>逐块处理，内存友好</td>
+</tr>
+<tr>
+<td><strong>超时控制</strong></td>
+<td>JS 内 30 分钟 AbortController</td>
+<td>curl_cffi 1800s timeout</td>
+</tr>
+<tr>
+<td><strong>错误处理</strong></td>
+<td>JS try&#x2F;catch → 返回 status:0</td>
+<td>Python except → yield status:0</td>
+</tr>
+<tr>
+<td><strong>数据格式</strong></td>
+<td><code>&#123;&quot;status&quot;: 200, &quot;body&quot;: &quot;完整SSE文本&quot;&#125;</code></td>
+<td><code>&#123;&quot;status&quot;: &quot;streamed&quot;, &quot;chunk&quot;: &quot;单块文本&quot;&#125;</code></td>
+</tr>
+</tbody></table>
+<p>Browser 的 <code>JS_STREAM_FULL</code> 在 JS 中完整收取 SSE 流后一次性返回 body，这是因为 Camoufox 的 <code>expose_function</code> 跨语言回调有限制，无法像 Playwright 那样方便地从 JS 回调到 Python。所以选择了”先收完再传”的方案。</p>
+<p>HTTPX 则利用 curl_cffi 的原生流式能力，逐块 yield，首字延迟更低。</p>
+<h2 id="协作中的状态感知"><a href="#协作中的状态感知" class="headerlink" title="协作中的状态感知"></a>协作中的状态感知</h2><p>HybridEngine 暴露了 <code>status()</code> 方法，让上层能感知两个引擎的实时状态：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">status</span>(<span class="params">self</span>) -&gt; <span class="built_in">dict</span>:</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="string">&quot;started&quot;</span>: self._started,</span><br><span class="line">        <span class="string">&quot;mode&quot;</span>: <span class="string">&quot;hybrid&quot;</span>,</span><br><span class="line">        <span class="string">&quot;stream_via&quot;</span>: <span class="string">&quot;browser_first&quot;</span>,     <span class="comment"># 流式请求走 browser 优先</span></span><br><span class="line">        <span class="string">&quot;api_via&quot;</span>: <span class="string">&quot;httpx_first&quot;</span>,          <span class="comment"># API 调用走 httpx 优先</span></span><br><span class="line">        <span class="string">&quot;browser_started&quot;</span>: ...,            <span class="comment"># 浏览器引擎是否启动</span></span><br><span class="line">        <span class="string">&quot;httpx_started&quot;</span>: ...,              <span class="comment"># HTTPX 引擎是否启动</span></span><br><span class="line">        <span class="string">&quot;pool_size&quot;</span>: ...,                  <span class="comment"># 页面池大小</span></span><br><span class="line">        <span class="string">&quot;free_pages&quot;</span>: ...,                 <span class="comment"># 当前空闲页面数</span></span><br><span class="line">        <span class="string">&quot;queue&quot;</span>: ...,                      <span class="comment"># 等待页面的请求数</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>free_pages</code> 和 <code>queue</code> 是关键指标：</p>
+<ul>
+<li><code>free_pages == 0</code>：所有页面都在使用中，后续 Browser 请求会排队等待</li>
+<li><code>queue &gt; 0</code>：有请求在等待页面，系统可能过载</li>
+</ul>
+<p>当 Browser 引擎过载时，虽然不会自动切换到 HTTPX，但上层可以通过这个状态做降级决策。</p>
+<h1 id="0x0B-自动登录与凭证自愈"><a href="#0x0B-自动登录与凭证自愈" class="headerlink" title="0x0B 自动登录与凭证自愈"></a>0x0B 自动登录与凭证自愈</h1><p>Camoufox 不仅用于 API 调用，还用于自动登录和账号激活。</p>
+<h2 id="自动注册流程"><a href="#自动注册流程" class="headerlink" title="自动注册流程"></a>自动注册流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐</span><br><span class="line">│ 生成临时邮箱  │───▶│ 填写注册表单  │───▶│ 轮询验证邮件  │───▶│ 完成账号激活  │</span><br><span class="line">└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>核心实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">register_qwen_account</span>() -&gt; <span class="type">Optional</span>[Account]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;自动注册千问账号&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">with</span> _AsyncMailClient() <span class="keyword">as</span> mail_client:</span><br><span class="line">        <span class="comment"># 1. 生成临时邮箱</span></span><br><span class="line">        email = <span class="keyword">await</span> mail_client.generate_email()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 2. 使用 Camoufox 打开注册页面</span></span><br><span class="line">        <span class="keyword">async</span> <span class="keyword">with</span> _new_browser() <span class="keyword">as</span> browser:</span><br><span class="line">            page = <span class="keyword">await</span> browser.new_page()</span><br><span class="line">            <span class="keyword">await</span> page.goto(<span class="string">f&quot;<span class="subst">&#123;BASE_URL&#125;</span>/auth?action=signup&quot;</span>, wait_until=<span class="string">&quot;domcontentloaded&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 3. 填写注册表单</span></span><br><span class="line">            <span class="keyword">await</span> name_input.fill(username)</span><br><span class="line">            <span class="keyword">await</span> email_input.fill(email)</span><br><span class="line">            <span class="keyword">await</span> pwd_input.fill(password)</span><br><span class="line">            <span class="keyword">await</span> confirm_input.fill(password)</span><br><span class="line">            <span class="keyword">await</span> checkbox.click()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 4. 提交注册</span></span><br><span class="line">            <span class="keyword">await</span> submit.click()</span><br><span class="line">            <span class="keyword">await</span> asyncio.sleep(<span class="number">6</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 5. 获取 Token</span></span><br><span class="line">            token = <span class="keyword">await</span> page.evaluate(<span class="string">&quot;localStorage.getItem(&#x27;token&#x27;)&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 6. 如果需要邮件验证，轮询验证链接</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> token:</span><br><span class="line">                verify_link = <span class="keyword">await</span> mail_client.get_verify_link(timeout_sec=<span class="number">300</span>)</span><br><span class="line">                <span class="keyword">if</span> verify_link:</span><br><span class="line">                    <span class="keyword">await</span> page.goto(verify_link)</span><br><span class="line">                    token = <span class="keyword">await</span> page.evaluate(<span class="string">&quot;localStorage.getItem(&#x27;token&#x27;)&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="凭证自愈"><a href="#凭证自愈" class="headerlink" title="凭证自愈"></a>凭证自愈</h2><p>当 Token 失效时，自动尝试刷新或重新登录：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">auto_heal_account</span>(<span class="params">self, acc</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;自动修复失效账号&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 1. 尝试刷新 Token</span></span><br><span class="line">    new_token = <span class="keyword">await</span> self._try_refresh_token(acc)</span><br><span class="line">    <span class="keyword">if</span> new_token:</span><br><span class="line">        acc.token = new_token</span><br><span class="line">        acc.invalid = <span class="literal">False</span></span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2. 刷新失败，尝试重新登录</span></span><br><span class="line">    new_token = <span class="keyword">await</span> self._try_login(acc.email, acc.password)</span><br><span class="line">    <span class="keyword">if</span> new_token:</span><br><span class="line">        acc.token = new_token</span><br><span class="line">        acc.invalid = <span class="literal">False</span></span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 3. 登录也失败，标记为彻底失效</span></span><br><span class="line">    log.error(<span class="string">f&quot;[AuthResolver] 账号 <span class="subst">&#123;acc.email&#125;</span> 无法自愈&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="0x0C-Docker-部署注意事项"><a href="#0x0C-Docker-部署注意事项" class="headerlink" title="0x0C Docker 部署注意事项"></a>0x0C Docker 部署注意事项</h1><p>Camoufox 在 Docker 中运行需要额外配置。</p>
+<h2 id="系统依赖"><a href="#系统依赖" class="headerlink" title="系统依赖"></a>系统依赖</h2><p>Firefox 运行需要大量系统库：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apt-get update &amp;&amp; apt-get install -y \</span></span><br><span class="line"><span class="language-bash">    libx11-xcb1 libx11-6 libxcb1 libxrandr2 \</span></span><br><span class="line"><span class="language-bash">    libxcomposite1 libxdamage1 libxfixes3 \</span></span><br><span class="line"><span class="language-bash">    libgtk-3-0 libasound2 libnss3 libnspr4 \</span></span><br><span class="line"><span class="language-bash">    libdbus-glib-1-2 libxt6 libatk1.0-0 \</span></span><br><span class="line"><span class="language-bash">    &amp;&amp; <span class="built_in">rm</span> -rf /var/lib/apt/lists/*</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="浏览器内核下载"><a href="#浏览器内核下载" class="headerlink" title="浏览器内核下载"></a>浏览器内核下载</h2><p>构建时需要下载 Camoufox 浏览器内核：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RUN</span><span class="language-bash"> python -m camoufox fetch</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="共享内存"><a href="#共享内存" class="headerlink" title="共享内存"></a>共享内存</h2><p>Firefox 需要足够的共享内存，默认 64MB 不够用：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker-compose.yml</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="attr">qwen2api:</span></span><br><span class="line">    <span class="attr">shm_size:</span> <span class="string">256m</span></span><br></pre></td></tr></table></figure>
+
+<p>如果共享内存不足，Firefox 会崩溃或行为异常。</p>
+<h2 id="推荐生产配置"><a href="#推荐生产配置" class="headerlink" title="推荐生产配置"></a>推荐生产配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ENGINE_MODE=hybrid</span><br><span class="line">BROWSER_POOL_SIZE=2</span><br><span class="line">MAX_INFLIGHT=1</span><br><span class="line">ACCOUNT_MIN_INTERVAL_MS=1200</span><br><span class="line">REQUEST_JITTER_MIN_MS=120</span><br><span class="line">REQUEST_JITTER_MAX_MS=360</span><br></pre></td></tr></table></figure>
+
+<h1 id="0x0D-反检测机制汇总"><a href="#0x0D-反检测机制汇总" class="headerlink" title="0x0D 反检测机制汇总"></a>0x0D 反检测机制汇总</h1><table>
+<thead>
+<tr>
+<th>机制</th>
+<th>代码位置</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>请求抖动</td>
+<td><code>browser_engine.py</code></td>
+<td>120-360ms 随机延迟</td>
+</tr>
+<tr>
+<td>账号最小间隔</td>
+<td><code>account_pool.py</code></td>
+<td>1200ms 同账号最小请求间隔</td>
+</tr>
+<tr>
+<td>人类化行为</td>
+<td><code>browser_engine.py</code></td>
+<td>Camoufox <code>humanize=True</code></td>
+</tr>
+<tr>
+<td>TLS 指纹</td>
+<td><code>httpx_engine.py</code></td>
+<td>curl_cffi <code>impersonate=&quot;chrome124&quot;</code></td>
+</tr>
+<tr>
+<td>浏览器指纹</td>
+<td><code>browser_engine.py</code></td>
+<td>Camoufox 完整 Firefox 指纹</td>
+</tr>
+<tr>
+<td>WAF 回退</td>
+<td><code>hybrid_engine.py</code></td>
+<td>检测 WAF 拦截自动切换引擎</td>
+</tr>
+<tr>
+<td>页面池复用</td>
+<td><code>browser_engine.py</code></td>
+<td>保持会话状态，避免重复认证</td>
+</tr>
+<tr>
+<td>并发控制</td>
+<td><code>account_pool.py</code></td>
+<td>单账号最大并发 1</td>
+</tr>
+<tr>
+<td>限流冷却</td>
+<td><code>account_pool.py</code></td>
+<td>指数退避冷却（600s 基础，最大 3600s）</td>
+</tr>
+<tr>
+<td>凭证自愈</td>
+<td><code>auth_resolver.py</code></td>
+<td>自动刷新 Token + 自动激活</td>
+</tr>
+<tr>
+<td>WAF 容错</td>
+<td><code>qwen_client.py</code></td>
+<td>WAF 拦截时不误判 Token 无效</td>
+</tr>
+</tbody></table>
+<h1 id="0x0E-总结"><a href="#0x0E-总结" class="headerlink" title="0x0E 总结"></a>0x0E 总结</h1><h2 id="核心思路"><a href="#核心思路" class="headerlink" title="核心思路"></a>核心思路</h2><p>绕过阿里云 WAF 的核心不是”伪造某个特征”，而是”让请求完全从真实浏览器环境中发出”。</p>
+<p>传统方案的思路是：用 HTTP 客户端模拟浏览器的各个特征（TLS 指纹、HTTP 头、Cookie）。但 WAF 的检测是多维联合的，只要有一个维度对不上就会被拦截。</p>
+<p>Camoufox 方案的思路是：直接在真实浏览器中执行请求。浏览器本身就是最完美的”模拟器”，不存在特征不一致的问题。</p>
+<h2 id="技术要点"><a href="#技术要点" class="headerlink" title="技术要点"></a>技术要点</h2><ol>
+<li><strong>JS 注入 Fetch</strong>：在浏览器 JS 上下文中执行 <code>fetch</code>，Cookie、TLS、Origin 全部自然正确</li>
+<li><strong>页面池复用</strong>：保持会话状态，避免重复触发 WAF 验证</li>
+<li><strong>混合引擎</strong>：HTTPX 速度快但可能被拦，Browser 稳定但资源消耗大，两者互补</li>
+<li><strong>请求抖动</strong>：打破自动化请求的时间规律</li>
+<li><strong>WAF 容错</strong>：WAF 拦截不等于 Token 失效，避免误杀健康账号</li>
+</ol>
+<h2 id="一句话概括"><a href="#一句话概括" class="headerlink" title="一句话概括"></a>一句话概括</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">不是伪造浏览器特征，而是让浏览器自己发请求。</span><br></pre></td></tr></table></figure>
+
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://camoufox.com/">Camoufox 官方文档</a> - 反检测浏览器</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/lexiforest/curl_cffi">curl_cffi</a> - TLS 指纹模拟库</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/YuJunZhiXue/qwen2API">qwen2API 项目</a> - 通义千问 API 转换网关</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%80%86%E5%90%91/" rel="tag"># 逆向</a>
+              <a href="/tags/Python/" rel="tag"># Python</a>
+              <a href="/tags/WAF/" rel="tag"># WAF</a>
+              <a href="/tags/Camoufox/" rel="tag"># Camoufox</a>
+              <a href="/tags/%E6%B5%8F%E8%A7%88%E5%99%A8%E6%8C%87%E7%BA%B9/" rel="tag"># 浏览器指纹</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/04/03/note/20260403-ecc-and-rsa/" rel="prev" title="ECC 与 RSA：椭圆曲线密码学的优势与原理">
+      <i class="fa fa-chevron-left"></i> ECC 与 RSA：椭圆曲线密码学的优势与原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/04/11/book/202604011-poyaofu/" rel="next" title="《破窑赋》">
+      《破窑赋》 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0x00-%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">0x00 背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x01-%E9%98%BF%E9%87%8C%E4%BA%91-WAF-%E6%A3%80%E6%B5%8B%E6%9C%BA%E5%88%B6"><span class="nav-number">2.</span> <span class="nav-text">0x01 阿里云 WAF 检测机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A3%80%E6%B5%8B%E7%BB%B4%E5%BA%A6"><span class="nav-number">2.1.</span> <span class="nav-text">检测维度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%A0%E7%BB%9F%E6%96%B9%E6%A1%88%E5%A4%B1%E6%95%88"><span class="nav-number">2.2.</span> <span class="nav-text">为什么传统方案失效</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x02-Camoufox-%E7%AE%80%E4%BB%8B"><span class="nav-number">3.</span> <span class="nav-text">0x02 Camoufox 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7"><span class="nav-number">3.1.</span> <span class="nav-text">核心特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E-Playwright-Selenium-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">3.2.</span> <span class="nav-text">与 Playwright &#x2F; Selenium 的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x03-%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.</span> <span class="nav-text">0x03 架构设计</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x04-Camoufox-%E9%85%8D%E7%BD%AE%E4%B8%8E%E6%8C%87%E7%BA%B9%E4%BC%AA%E8%A3%85"><span class="nav-number">5.</span> <span class="nav-text">0x04 Camoufox 配置与指纹伪装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">5.1.</span> <span class="nav-text">浏览器配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%8F%82%E6%95%B0%E8%A7%A3%E6%9E%90"><span class="nav-number">5.2.</span> <span class="nav-text">关键参数解析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-OS-%E6%8C%87%E7%BA%B9%E5%BF%85%E9%A1%BB%E7%BB%9F%E4%B8%80"><span class="nav-number">5.3.</span> <span class="nav-text">为什么 OS 指纹必须统一</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x05-%E9%A1%B5%E9%9D%A2%E6%B1%A0%E7%AE%A1%E7%90%86"><span class="nav-number">6.</span> <span class="nav-text">0x05 页面池管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF"><span class="nav-number">6.1.</span> <span class="nav-text">设计思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E8%AE%BE%E8%AE%A1"><span class="nav-number">6.2.</span> <span class="nav-text">关键设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B5%E9%9D%A2%E5%88%B7%E6%96%B0%E4%B8%8E%E6%81%A2%E5%A4%8D"><span class="nav-number">6.3.</span> <span class="nav-text">页面刷新与恢复</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x06-JS-%E6%B3%A8%E5%85%A5%E6%89%A7%E8%A1%8C-Fetch"><span class="nav-number">7.</span> <span class="nav-text">0x06 JS 注入执行 Fetch</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%99%AE%E9%80%9A-API-%E8%B0%83%E7%94%A8"><span class="nav-number">7.1.</span> <span class="nav-text">普通 API 调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E5%BC%8F%E5%93%8D%E5%BA%94%E5%A4%84%E7%90%86"><span class="nav-number">7.2.</span> <span class="nav-text">流式响应处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E6%89%A7%E8%A1%8C-fetch"><span class="nav-number">7.3.</span> <span class="nav-text">为什么在浏览器中执行 fetch</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x07-%E8%AF%B7%E6%B1%82%E6%8A%96%E5%8A%A8%E4%B8%8E%E9%98%B2%E5%B0%81%E6%8E%A7"><span class="nav-number">8.</span> <span class="nav-text">0x07 请求抖动与防封控</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E6%8A%96%E5%8A%A8"><span class="nav-number">8.1.</span> <span class="nav-text">请求抖动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%A6%E5%8F%B7%E6%9C%80%E5%B0%8F%E9%97%B4%E9%9A%94"><span class="nav-number">8.2.</span> <span class="nav-text">账号最小间隔</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%90%E6%B5%81%E5%86%B7%E5%8D%B4%E7%AD%96%E7%95%A5"><span class="nav-number">8.3.</span> <span class="nav-text">限流冷却策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6"><span class="nav-number">8.4.</span> <span class="nav-text">并发控制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x08-%E6%B7%B7%E5%90%88%E5%BC%95%E6%93%8E%E4%B8%8E-WAF-%E6%A3%80%E6%B5%8B"><span class="nav-number">9.</span> <span class="nav-text">0x08 混合引擎与 WAF 检测</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#WAF-%E6%8B%A6%E6%88%AA%E8%AF%86%E5%88%AB"><span class="nav-number">9.1.</span> <span class="nav-text">WAF 拦截识别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E5%BC%95%E6%93%8E%E8%B7%AF%E7%94%B1"><span class="nav-number">9.2.</span> <span class="nav-text">混合引擎路由</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WAF-%E5%AE%B9%E9%94%99%E5%A4%84%E7%90%86"><span class="nav-number">9.3.</span> <span class="nav-text">WAF 容错处理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x09-curl-cffi-HTTPX-%E5%BC%95%E6%93%8E"><span class="nav-number">10.</span> <span class="nav-text">0x09 curl_cffi HTTPX 引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">10.1.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E5%BC%95%E6%93%8E%E5%AF%B9%E6%AF%94"><span class="nav-number">10.2.</span> <span class="nav-text">两种引擎对比</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x0A-HTTPX-%E4%B8%8E-Camoufox-%E5%8D%8F%E4%BD%9C%E6%9C%BA%E5%88%B6"><span class="nav-number">11.</span> <span class="nav-text">0x0A HTTPX 与 Camoufox 协作机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%A4%E4%B8%AA%E5%BC%95%E6%93%8E"><span class="nav-number">11.1.</span> <span class="nav-text">为什么需要两个引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E9%A1%BA%E5%BA%8F"><span class="nav-number">11.2.</span> <span class="nav-text">启动顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E8%AF%B7%E6%B1%82%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%8D%8F%E4%BD%9C%E7%AD%96%E7%95%A5"><span class="nav-number">11.3.</span> <span class="nav-text">两种请求类型的协作策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#api-call%EF%BC%9AHTTPX-%E4%BC%98%E5%85%88%EF%BC%8CBrowser-%E5%85%9C%E5%BA%95"><span class="nav-number">11.3.1.</span> <span class="nav-text">api_call：HTTPX 优先，Browser 兜底</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fetch-chat%EF%BC%9ABrowser-%E4%BC%98%E5%85%88%EF%BC%8CHTTPX-%E5%85%9C%E5%BA%95"><span class="nav-number">11.3.2.</span> <span class="nav-text">fetch_chat：Browser 优先，HTTPX 兜底</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E8%AE%BE%E8%AE%A1%EF%BC%9Asaw-success-%E9%98%B2%E6%AD%A2%E8%AF%AF%E5%9B%9E%E9%80%80"><span class="nav-number">11.4.</span> <span class="nav-text">关键设计：saw_success 防止误回退</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E9%80%80%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6"><span class="nav-number">11.5.</span> <span class="nav-text">回退触发条件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E8%AF%B7%E6%B1%82%E9%93%BE%E8%B7%AF"><span class="nav-number">11.6.</span> <span class="nav-text">完整请求链路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E5%BC%95%E6%93%8E%E7%9A%84-SSE-%E6%B5%81%E5%BC%8F%E5%B7%AE%E5%BC%82"><span class="nav-number">11.7.</span> <span class="nav-text">两种引擎的 SSE 流式差异</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%8F%E4%BD%9C%E4%B8%AD%E7%9A%84%E7%8A%B6%E6%80%81%E6%84%9F%E7%9F%A5"><span class="nav-number">11.8.</span> <span class="nav-text">协作中的状态感知</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x0B-%E8%87%AA%E5%8A%A8%E7%99%BB%E5%BD%95%E4%B8%8E%E5%87%AD%E8%AF%81%E8%87%AA%E6%84%88"><span class="nav-number">12.</span> <span class="nav-text">0x0B 自动登录与凭证自愈</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E6%B3%A8%E5%86%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">12.1.</span> <span class="nav-text">自动注册流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%AD%E8%AF%81%E8%87%AA%E6%84%88"><span class="nav-number">12.2.</span> <span class="nav-text">凭证自愈</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x0C-Docker-%E9%83%A8%E7%BD%B2%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">13.</span> <span class="nav-text">0x0C Docker 部署注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E4%BE%9D%E8%B5%96"><span class="nav-number">13.1.</span> <span class="nav-text">系统依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8F%E8%A7%88%E5%99%A8%E5%86%85%E6%A0%B8%E4%B8%8B%E8%BD%BD"><span class="nav-number">13.2.</span> <span class="nav-text">浏览器内核下载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98"><span class="nav-number">13.3.</span> <span class="nav-text">共享内存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E7%94%9F%E4%BA%A7%E9%85%8D%E7%BD%AE"><span class="nav-number">13.4.</span> <span class="nav-text">推荐生产配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x0D-%E5%8F%8D%E6%A3%80%E6%B5%8B%E6%9C%BA%E5%88%B6%E6%B1%87%E6%80%BB"><span class="nav-number">14.</span> <span class="nav-text">0x0D 反检测机制汇总</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x0E-%E6%80%BB%E7%BB%93"><span class="nav-number">15.</span> <span class="nav-text">0x0E 总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%80%9D%E8%B7%AF"><span class="nav-number">15.1.</span> <span class="nav-text">核心思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E8%A6%81%E7%82%B9"><span class="nav-number">15.2.</span> <span class="nav-text">技术要点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E5%8F%A5%E8%AF%9D%E6%A6%82%E6%8B%AC"><span class="nav-number">15.3.</span> <span class="nav-text">一句话概括</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">15.4.</span> <span class="nav-text">Reference</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">267</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">149</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

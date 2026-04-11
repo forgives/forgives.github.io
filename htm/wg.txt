@@ -837,13 +837,13 @@ select_dns() {
 		echo "   5) Quad9"
 		echo "   6) AliDNS"
 		echo "   7) Custom"
-		read -rp "DNS server [2]: " dns
+		read -rp "DNS server [6]: " dns
 		until [[ -z "$dns" || "$dns" =~ ^[1-7]$ ]]; do
 			echo "$dns: invalid selection."
-			read -rp "DNS server [2]: " dns
+			read -rp "DNS server [6]: " dns
 		done
 	else
-		dns=2
+		dns=6
 	fi
 		# DNS
 	case "$dns" in
@@ -858,7 +858,7 @@ select_dns() {
 			# Extract nameservers and provide them in the required format
 			dns=$(grep -v '^#\|^;' "$resolv_conf" | grep '^nameserver' | grep -v '127.0.0.53' | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}' | xargs | sed -e 's/ /, /g')
 		;;
-		2|"")
+		2)
 			dns="8.8.8.8, 8.8.4.4"
 		;;
 		3)
@@ -870,7 +870,7 @@ select_dns() {
 		5)
 			dns="9.9.9.9, 149.112.112.112"
 		;;
-		6)
+		6|"")
 			dns="223.5.5.5, 223.6.6.6"
 		;;
 		7)

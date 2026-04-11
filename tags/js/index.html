@@ -180,7 +180,7 @@
 
       <div class="post-title">
           <a class="post-title-link" href="/2019/02/26/web/just-use-javascript/" itemprop="url">
-            <span itemprop="name">原生js替代JQuery</span>
+            <span itemprop="name">原生 js 替代 JQuery</span>
           </a>
       </div>
 
@@ -203,7 +203,7 @@
 
       <div class="post-title">
           <a class="post-title-link" href="/2013/10/21/web/date-to-long-js/" itemprop="url">
-            <span itemprop="name">Long日期类型转换脚本</span>
+            <span itemprop="name">Long 日期类型转换脚本</span>
           </a>
       </div>
 
@@ -283,18 +283,18 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">259</span>
+          <span class="site-state-item-count">267</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-count">33</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">134</span>
+        <span class="site-state-item-count">149</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -371,6 +371,19 @@
 
 
 
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
   

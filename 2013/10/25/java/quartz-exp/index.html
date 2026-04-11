@@ -221,8 +221,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2013/10/21/web/date-to-long-js/" rel="prev" title="Long日期类型转换脚本">
-      <i class="fa fa-chevron-left"></i> Long日期类型转换脚本
+    <a href="/2013/10/21/web/date-to-long-js/" rel="prev" title="Long 日期类型转换脚本">
+      <i class="fa fa-chevron-left"></i> Long 日期类型转换脚本
     </a></div>
       <div class="post-nav-item">
     <a href="/2013/11/06/db/oracle-inner-exception/" rel="next" title="oracle inner exception">
@@ -301,18 +301,18 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">259</span>
+          <span class="site-state-item-count">267</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">31</span>
+        <span class="site-state-item-count">33</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">134</span>
+        <span class="site-state-item-count">149</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -389,6 +389,19 @@
 
 
 
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
   
