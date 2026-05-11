@@ -697,7 +697,7 @@
 </ul>
 <p>当 Browser 引擎过载时，虽然不会自动切换到 HTTPX，但上层可以通过这个状态做降级决策。</p>
 <h1 id="0x0B-自动登录与凭证自愈"><a href="#0x0B-自动登录与凭证自愈" class="headerlink" title="0x0B 自动登录与凭证自愈"></a>0x0B 自动登录与凭证自愈</h1><p>Camoufox 不仅用于 API 调用，还用于自动登录和账号激活。</p>
-<h2 id="自动注册流程"><a href="#自动注册流程" class="headerlink" title="自动注册流程"></a>自动注册流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐</span><br><span class="line">│ 生成临时邮箱 │───▶│ 填写注册表单 │───▶│ 轮询验证邮件 │───▶│ 完成账号激活 │</span><br><span class="line">└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘</span><br></pre></td></tr></table></figure>
+<h2 id="自动注册流程"><a href="#自动注册流程" class="headerlink" title="自动注册流程"></a>自动注册流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐</span><br><span class="line">│ 生成临时邮箱  │───▶│ 填写注册表单  │───▶│ 轮询验证邮件  │───▶│ 完成账号激活  │</span><br><span class="line">└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘</span><br></pre></td></tr></table></figure>
 
 <p>核心实现：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">register_qwen_account</span>() -&gt; <span class="type">Optional</span>[Account]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;自动注册千问账号&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">with</span> _AsyncMailClient() <span class="keyword">as</span> mail_client:</span><br><span class="line">        <span class="comment"># 1. 生成临时邮箱</span></span><br><span class="line">        email = <span class="keyword">await</span> mail_client.generate_email()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 2. 使用 Camoufox 打开注册页面</span></span><br><span class="line">        <span class="keyword">async</span> <span class="keyword">with</span> _new_browser() <span class="keyword">as</span> browser:</span><br><span class="line">            page = <span class="keyword">await</span> browser.new_page()</span><br><span class="line">            <span class="keyword">await</span> page.goto(<span class="string">f&quot;<span class="subst">&#123;BASE_URL&#125;</span>/auth?action=signup&quot;</span>, wait_until=<span class="string">&quot;domcontentloaded&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 3. 填写注册表单</span></span><br><span class="line">            <span class="keyword">await</span> name_input.fill(username)</span><br><span class="line">            <span class="keyword">await</span> email_input.fill(email)</span><br><span class="line">            <span class="keyword">await</span> pwd_input.fill(password)</span><br><span class="line">            <span class="keyword">await</span> confirm_input.fill(password)</span><br><span class="line">            <span class="keyword">await</span> checkbox.click()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 4. 提交注册</span></span><br><span class="line">            <span class="keyword">await</span> submit.click()</span><br><span class="line">            <span class="keyword">await</span> asyncio.sleep(<span class="number">6</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 5. 获取 Token</span></span><br><span class="line">            token = <span class="keyword">await</span> page.evaluate(<span class="string">&quot;localStorage.getItem(&#x27;token&#x27;)&quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 6. 如果需要邮件验证，轮询验证链接</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> token:</span><br><span class="line">                verify_link = <span class="keyword">await</span> mail_client.get_verify_link(timeout_sec=<span class="number">300</span>)</span><br><span class="line">                <span class="keyword">if</span> verify_link:</span><br><span class="line">                    <span class="keyword">await</span> page.goto(verify_link)</span><br><span class="line">                    token = <span class="keyword">await</span> page.evaluate(<span class="string">&quot;localStorage.getItem(&#x27;token&#x27;)&quot;</span>)</span><br></pre></td></tr></table></figure>
@@ -797,7 +797,7 @@
 <h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://camoufox.com/">Camoufox 官方文档</a> - 反检测浏览器</li>
 <li><a target="_blank" rel="noopener" href="https://github.com/lexiforest/curl_cffi">curl_cffi</a> - TLS 指纹模拟库</li>
-<li><a target="_blank" rel="noopener" href="https://github.com/LLM-Red-Team/qwen-free-api">qwen2API 项目</a> - 通义千问 API 转换网关</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/YuJunZhiXue/qwen2API">qwen2API 项目</a> - 通义千问 API 转换网关</li>
 </ul>
 
     </div>
@@ -824,7 +824,10 @@
     <a href="/2026/04/03/note/20260403-ecc-and-rsa/" rel="prev" title="ECC 与 RSA：椭圆曲线密码学的优势与原理">
       <i class="fa fa-chevron-left"></i> ECC 与 RSA：椭圆曲线密码学的优势与原理
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2026/04/11/book/202604011-poyaofu/" rel="next" title="《破窑赋》">
+      《破窑赋》 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -899,7 +902,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">266</span>
+          <span class="site-state-item-count">268</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
