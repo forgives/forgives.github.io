@@ -1,0 +1,68 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "inbounds": [
+    {
+      "type": "vless",
+      "tag": "vless-ws",
+      "listen": "::",
+      "listen_port": 443,
+      "users": [
+        {
+          "uuid": "VLESS_WS_UUID"
+        }
+      ],
+      "transport": {
+        "type": "ws",
+        "path": "/VLESS_WS_PATH",
+        "headers": {
+          "Host": "CDN_DOMAIN"
+        }
+      },
+      "tls": {
+        "enabled": true,
+        "certificate_path": "/etc/sing-box/cert/fullchain.pem",
+        "key_path": "/etc/sing-box/cert/private.key"
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "vless-reality",
+      "listen": "::",
+      "listen_port": 8443,
+      "users": [
+        {
+          "uuid": "REALITY_UUID",
+          "flow": "xtls-rprx-vision"
+        }
+      ],
+      "tls": {
+        "enabled": true,
+        "server_name": "REALITY_TARGET_DOMAIN",
+        "reality": {
+          "enabled": true,
+          "handshake": {
+            "server": "REALITY_TARGET_DOMAIN",
+            "server_port": 443
+          },
+          "private_key": "REALITY_PRIVATE_KEY",
+          "short_id": [
+            "REALITY_SHORT_ID"
+          ]
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "block",
+      "tag": "block"
+    }
+  ]
+}

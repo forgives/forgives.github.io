@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="解析 Android XML 中的转义字符问题：从 Jsoup 到 Woodstox StAX">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解析 Android XML 中的转义字符问题：从 Jsoup 到 Woodstox StAX">
+<meta property="og:url" content="https://forgives.github.io/2026/05/15/java/20260515-android-xml-escape/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="解析 Android XML 中的转义字符问题：从 Jsoup 到 Woodstox StAX">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-05-15T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-15T02:01:36.163Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="xml">
+<meta property="article:tag" content="i18n">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/05/15/java/20260515-android-xml-escape/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>解析 Android XML 中的转义字符问题：从 Jsoup 到 Woodstox StAX | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/05/15/java/20260515-android-xml-escape/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          解析 Android XML 中的转义字符问题：从 Jsoup 到 Woodstox StAX
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-05-15 10:00:00" itemprop="dateCreated datePublished" datetime="2026-05-15T10:00:00+08:00">2026-05-15</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>解析 Android XML 中的转义字符问题：从 Jsoup 到 Woodstox StAX</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在多语言平台（i18n）中，需要解析 Android 的 XML 配置文件（<code>strings.xml</code>），提取 <code>&lt;string&gt;</code> 标签中的 <code>name</code> 属性和文本内容，用于导入翻译词条。Android XML 文件格式如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;snapgo_time_lapse_internal_20_s_des&quot;</span>&gt;</span>Dusk <span class="symbol">&amp;amp;</span> Dawn<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;snapgo_time_lapse_internal_30_s_des&quot;</span>&gt;</span>Dusk &#x27;&quot; Dawn <span class="symbol">&amp;lt;</span>  <span class="symbol">&amp;quot;</span> <span class="symbol">&amp;apos;</span>  <span class="symbol">&amp;lt;</span><span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>其中包含了 XML 预定义的转义实体：<code>&amp;amp;</code>、<code>&amp;lt;</code>、<code>&amp;gt;</code>、<code>&amp;quot;</code>、<code>&amp;apos;</code>。我们的需求是<strong>原样保留 XML 文件中的转义字符串</strong>，即 <code>&amp;amp;</code> 读出来就是 <code>&amp;amp;</code>，而不是被解码成 <code>&amp;</code>。</p>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><h3 id="方案一：Jsoup-e-text-—-转义被自动解码"><a href="#方案一：Jsoup-e-text-—-转义被自动解码" class="headerlink" title="方案一：Jsoup + e.text() — 转义被自动解码"></a>方案一：Jsoup + <code>e.text()</code> — 转义被自动解码</h3><p>最初的实现 <code>parseAppXmlDeprecated</code> 使用 Jsoup 的 XML Parser 解析，通过 <code>e.text()</code> 获取文本内容：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Result&lt;List&lt;KeyContentBO&gt;&gt; <span class="title function_">parseAppXmlDeprecated</span><span class="params">(MultipartFile file)</span> &#123;</span><br><span class="line">    <span class="type">Document</span> <span class="variable">doc</span> <span class="operator">=</span> Jsoup.parse(file.getInputStream(), <span class="string">&quot;UTF-8&quot;</span>, <span class="string">&quot;&quot;</span>,</span><br><span class="line">            org.jsoup.parser.Parser.xmlParser());</span><br><span class="line">    <span class="type">Elements</span> <span class="variable">elements</span> <span class="operator">=</span> doc.select(<span class="string">&quot;string&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (Element e : elements) &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> e.attr(<span class="string">&quot;name&quot;</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> e.text();  <span class="comment">// 问题所在</span></span><br><span class="line">        resultList.add(<span class="keyword">new</span> <span class="title class_">KeyContentBO</span>(name, value));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>问题</strong>：<code>e.text()</code> 会自动对 XML 实体进行解码：</p>
+<table>
+<thead>
+<tr>
+<th>XML 原文</th>
+<th><code>e.text()</code> 输出</th>
+<th>期望输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Dusk &amp;amp; Dawn</code></td>
+<td><code>Dusk &amp; Dawn</code></td>
+<td><code>Dusk &amp;amp; Dawn</code></td>
+</tr>
+<tr>
+<td><code>&amp;lt;</code></td>
+<td><code>&lt;</code></td>
+<td><code>&amp;lt;</code></td>
+</tr>
+<tr>
+<td><code>&amp;quot;</code></td>
+<td><code>&quot;</code></td>
+<td><code>&amp;quot;</code></td>
+</tr>
+<tr>
+<td><code>&amp;apos;</code></td>
+<td><code>&#39;</code></td>
+<td><code>&amp;apos;</code></td>
+</tr>
+</tbody></table>
+<p>转义信息丢失，导致导出时无法还原原始 XML 内容。</p>
+<h3 id="方案二：Jsoup-e-html-—-HTML-与-XML-的转义差异"><a href="#方案二：Jsoup-e-html-—-HTML-与-XML-的转义差异" class="headerlink" title="方案二：Jsoup + e.html() — HTML 与 XML 的转义差异"></a>方案二：Jsoup + <code>e.html()</code> — HTML 与 XML 的转义差异</h3><p>既然 <code>text()</code> 会解码，那使用 <code>e.html()</code> 获取原始 HTML 呢？</p>
+<p><strong>问题</strong>：Jsoup 本质上是一个 <strong>HTML 解析器</strong>，即使使用了 <code>Parser.xmlParser()</code>，在序列化时仍然遵循 HTML 的转义规则。HTML 和 XML 的转义规则存在关键差异：</p>
+<table>
+<thead>
+<tr>
+<th>实体</th>
+<th>XML 中</th>
+<th>HTML 中</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&amp;quot;</code></td>
+<td>合法实体，代表 <code>&quot;</code></td>
+<td>合法实体，代表 <code>&quot;</code></td>
+<td>两者一致</td>
+</tr>
+<tr>
+<td><code>&amp;apos;</code></td>
+<td>合法实体，代表 <code>&#39;</code></td>
+<td><strong>不合法</strong>，HTML 无此实体</td>
+<td><strong>关键差异</strong></td>
+</tr>
+</tbody></table>
+<p>在 HTML 规范中，<code>&amp;apos;</code> 不是预定义实体（HTML4 中未定义，HTML5 中虽有但行为不一致）。Jsoup 在 <code>html()</code> 输出时：</p>
+<ul>
+<li><code>&amp;amp;</code> → 保持 <code>&amp;amp;</code>（不会被二次转义）</li>
+<li><code>&amp;lt;</code> → 保持 <code>&amp;lt;</code></li>
+<li><code>&amp;quot;</code> → 可能被解码为 <code>&quot;</code>（因为 HTML 中 <code>&quot;</code> 在属性值外不需要转义）</li>
+<li><code>&amp;apos;</code> → 可能被解码为 <code>&#39;</code> 或保持原样，行为不确定</li>
+</ul>
+<p>这意味着 <code>html()</code> 也无法可靠地保留 XML 原始转义内容，且 HTML&#x2F;XML 的语义差异会导致不可预期的结果。</p>
+<h3 id="核心矛盾"><a href="#核心矛盾" class="headerlink" title="核心矛盾"></a>核心矛盾</h3><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>行为</th>
+<th>是否满足需求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>e.text()</code></td>
+<td>解码所有实体</td>
+<td>否，转义信息丢失</td>
+</tr>
+<tr>
+<td><code>e.html()</code></td>
+<td>按 HTML 规则处理，与 XML 有差异</td>
+<td>否，<code>&amp;apos;</code> 等处理不一致</td>
+</tr>
+</tbody></table>
+<p><strong>根本原因</strong>：Jsoup 是为 HTML 设计的解析器，其数据模型中存储的是解码后的文本，<code>text()</code> 和 <code>html()</code> 都是在解码后的数据上做序列化，无法获取 XML 源码中的原始文本。</p>
+<h2 id="解决方案：Woodstox-StAX-流式解析"><a href="#解决方案：Woodstox-StAX-流式解析" class="headerlink" title="解决方案：Woodstox StAX 流式解析"></a>解决方案：Woodstox StAX 流式解析</h2><h3 id="引入的库：Woodstox"><a href="#引入的库：Woodstox" class="headerlink" title="引入的库：Woodstox"></a>引入的库：Woodstox</h3><p><a target="_blank" rel="noopener" href="https://github.com/FasterXML/woodstox">Woodstox</a> 是一个高性能的开源 StAX（Streaming API for XML）实现，由 FasterXML 团队维护（与 Jackson 同一团队）。其核心特点：</p>
+<ul>
+<li><strong>StAX 流式解析</strong>：基于拉取（pull）模型的流式解析器，不同于 DOM 的全量加载，也不同于 SAX 的推送模型，由开发者按需驱动解析进度</li>
+<li><strong>低内存占用</strong>：不需要将整个 XML 文档构建为 DOM 树，适合处理大文件</li>
+<li><strong>精确的位置信息</strong>：<code>XMLStreamReader2.getLocation().getCharacterOffset()</code> 可以获取当前事件在原始文本中的字符偏移量，这是解决问题的关键能力</li>
+<li><strong>完整支持 XML 规范</strong>：严格遵循 XML 1.0&#x2F;1.1 规范，正确处理所有预定义实体，不会引入 HTML 语义</li>
+<li><strong>高性能</strong>：作为 StAX 参考实现之一，性能优于 DOM 解析方案</li>
+</ul>
+<p>Maven 依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.fasterxml.woodstox<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>woodstox-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>6.6.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h3><p>核心思路：<strong>不依赖解析器的文本提取，而是利用 StAX 的位置信息，直接从原始字符串中截取内容</strong>。</p>
+<ol>
+<li>将文件内容读取为原始字符串</li>
+<li>使用 StAX 流式解析器遍历 XML 事件</li>
+<li>遇到 <code>&lt;string&gt;</code> 开始标签时，记录 <code>name</code> 属性值，并通过 <code>getCharacterOffset()</code> 获取起始位置，再从原始字符串中找到 <code>&gt;</code> 的位置，确定内容起始偏移</li>
+<li>遇到 <code>&lt;/string&gt;</code> 结束标签时，通过 <code>getCharacterOffset()</code> 获取结束位置</li>
+<li>用 <code>content.substring(contentStartOffset, endTagOffset)</code> 直接截取原始字符串</li>
+</ol>
+<p>这样截取的是<strong>原始 XML 源码中的文本</strong>，所有转义实体都原样保留。</p>
+<h3 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Result&lt;List&lt;KeyContentBO&gt;&gt; <span class="title function_">parseAppXml</span><span class="params">(MultipartFile file)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">content</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(file.getBytes(), StandardCharsets.UTF_8);</span><br><span class="line">        <span class="type">WstxInputFactory</span> <span class="variable">factory</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">WstxInputFactory</span>();</span><br><span class="line">        <span class="type">XMLStreamReader2</span> <span class="variable">reader</span> <span class="operator">=</span> (XMLStreamReader2) factory</span><br><span class="line">                .createXMLStreamReader(<span class="keyword">new</span> <span class="title class_">StringReader</span>(content));</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">currentName</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">            <span class="type">int</span> <span class="variable">contentStartOffset</span> <span class="operator">=</span> -<span class="number">1</span>;</span><br><span class="line">            List&lt;KeyContentBO&gt; resultList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (reader.hasNext()) &#123;</span><br><span class="line">                <span class="type">int</span> <span class="variable">event</span> <span class="operator">=</span> reader.next();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (event == XMLStreamConstants.START_ELEMENT</span><br><span class="line">                        &amp;&amp; <span class="string">&quot;string&quot;</span>.equals(reader.getLocalName())) &#123;</span><br><span class="line">                    currentName = reader.getAttributeValue(<span class="literal">null</span>, <span class="string">&quot;name&quot;</span>);</span><br><span class="line">                    <span class="type">int</span> <span class="variable">startTagOffset</span> <span class="operator">=</span> reader.getLocation().getCharacterOffset();</span><br><span class="line">                    contentStartOffset = content.indexOf(<span class="string">&#x27;&gt;&#x27;</span>, startTagOffset) + <span class="number">1</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (event == XMLStreamConstants.END_ELEMENT</span><br><span class="line">                        &amp;&amp; <span class="string">&quot;string&quot;</span>.equals(reader.getLocalName())) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (currentName != <span class="literal">null</span> &amp;&amp; contentStartOffset &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="type">int</span> <span class="variable">endTagOffset</span> <span class="operator">=</span> reader.getLocation().getCharacterOffset();</span><br><span class="line">                        <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> content.substring(contentStartOffset, endTagOffset);</span><br><span class="line">                        <span class="keyword">if</span> (StringUtils.isNotBlank(currentName)) &#123;</span><br><span class="line">                            resultList.add(<span class="keyword">new</span> <span class="title class_">KeyContentBO</span>(currentName, value));</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    currentName = <span class="literal">null</span>;</span><br><span class="line">                    contentStartOffset = -<span class="number">1</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> Result.newInstance(resultList);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            reader.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        log.error(<span class="string">&quot;parseAppXml error, fallback to parseAppXmlDeprecated:&quot;</span>, e);</span><br><span class="line">        <span class="keyword">return</span> parseAppXmlDeprecated(file);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="关键代码解析"><a href="#关键代码解析" class="headerlink" title="关键代码解析"></a>关键代码解析</h3><p><strong>1. 获取内容起始偏移</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">startTagOffset</span> <span class="operator">=</span> reader.getLocation().getCharacterOffset();</span><br><span class="line">contentStartOffset = content.indexOf(<span class="string">&#x27;&gt;&#x27;</span>, startTagOffset) + <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>getCharacterOffset()</code> 返回的是 START_ELEMENT 事件的位置（指向 <code>&lt;string</code> 的 <code>&lt;</code>），而非内容开始位置。因此需要从该偏移开始找到 <code>&gt;</code>，加 1 即为内容的起始位置。</p>
+<p><strong>2. 获取内容结束偏移</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">endTagOffset</span> <span class="operator">=</span> reader.getLocation().getCharacterOffset();</span><br><span class="line"><span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> content.substring(contentStartOffset, endTagOffset);</span><br></pre></td></tr></table></figure>
+
+<p>END_ELEMENT 事件的位置指向 <code>&lt;/string&gt;</code> 的 <code>&lt;</code>，恰好就是内容的结束位置，可以直接用于 <code>substring</code>。</p>
+<p><strong>3. 兜底降级</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    log.error(<span class="string">&quot;parseAppXml error, fallback to parseAppXmlDeprecated:&quot;</span>, e);</span><br><span class="line">    <span class="keyword">return</span> parseAppXmlDeprecated(file);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果 StAX 解析失败（如格式错误的 XML），降级到 Jsoup 方案，保证可用性。</p>
+<h3 id="效果验证"><a href="#效果验证" class="headerlink" title="效果验证"></a>效果验证</h3><p>对于示例 XML：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;snapgo_time_lapse_internal_20_s_des&quot;</span>&gt;</span>Dusk <span class="symbol">&amp;amp;</span> Dawn<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;snapgo_time_lapse_internal_30_s_des&quot;</span>&gt;</span>Dusk &#x27;&quot; Dawn <span class="symbol">&amp;lt;</span>  <span class="symbol">&amp;quot;</span> <span class="symbol">&amp;apos;</span> <span class="symbol">&amp;lt;</span><span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>原方案 <code>e.text()</code></th>
+<th>新方案 substring</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>snapgo_time_lapse_internal_20_s_des</code></td>
+<td><code>Dusk &amp; Dawn</code></td>
+<td><code>Dusk &amp;amp; Dawn</code></td>
+</tr>
+<tr>
+<td><code>snapgo_time_lapse_internal_30_s_des</code></td>
+<td><code>Dusk &#39;&quot; Dawn &lt;  &quot; &#39; &lt;</code></td>
+<td><code>Dusk &#39;&quot; Dawn &amp;lt;  &amp;quot; &amp;apos; &amp;lt;</code></td>
+</tr>
+</tbody></table>
+<p>新方案完美保留了原始 XML 中的转义实体。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Jsoup (<code>text()</code>)</th>
+<th>Jsoup (<code>html()</code>)</th>
+<th>Woodstox StAX (substring)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>转义保留</td>
+<td>全部解码</td>
+<td>HTML 规则，与 XML 不一致</td>
+<td>原样保留</td>
+</tr>
+<tr>
+<td>内存占用</td>
+<td>DOM 全量加载</td>
+<td>DOM 全量加载</td>
+<td>流式，低内存</td>
+</tr>
+<tr>
+<td>HTML&#x2F;XML 兼容</td>
+<td>HTML 语义</td>
+<td>HTML 语义</td>
+<td>纯 XML 语义</td>
+</tr>
+<tr>
+<td>位置信息</td>
+<td>无</td>
+<td>无</td>
+<td>有 <code>getCharacterOffset()</code></td>
+</tr>
+</tbody></table>
+<p><strong>核心经验</strong>：当需要保留 XML 原始文本（含转义实体）时，不应依赖解析器的文本提取 API（它们都会做解码），而应利用 StAX 的位置信息从原始字符串中直接截取。Woodstox 的 <code>getCharacterOffset()</code> 是实现这一方案的关键能力。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/xml/" rel="tag"># xml</a>
+              <a href="/tags/i18n/" rel="tag"># i18n</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/05/11/note/20260511-vless-reality-probe-analysis/" rel="prev" title="VLESS/REALITY 协议探测原理：双 TLS 栈指纹差异分析">
+      <i class="fa fa-chevron-left"></i> VLESS/REALITY 协议探测原理：双 TLS 栈指纹差异分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/05/19/note/20260519-wireguard-dns/" rel="next" title="WireGuard 导致 DNS 失效问题复盘">
+      WireGuard 导致 DNS 失效问题复盘 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">问题分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E4%B8%80%EF%BC%9AJsoup-e-text-%E2%80%94-%E8%BD%AC%E4%B9%89%E8%A2%AB%E8%87%AA%E5%8A%A8%E8%A7%A3%E7%A0%81"><span class="nav-number">2.1.</span> <span class="nav-text">方案一：Jsoup + e.text() — 转义被自动解码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E4%BA%8C%EF%BC%9AJsoup-e-html-%E2%80%94-HTML-%E4%B8%8E-XML-%E7%9A%84%E8%BD%AC%E4%B9%89%E5%B7%AE%E5%BC%82"><span class="nav-number">2.2.</span> <span class="nav-text">方案二：Jsoup + e.html() — HTML 与 XML 的转义差异</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%9F%9B%E7%9B%BE"><span class="nav-number">2.3.</span> <span class="nav-text">核心矛盾</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%EF%BC%9AWoodstox-StAX-%E6%B5%81%E5%BC%8F%E8%A7%A3%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">解决方案：Woodstox StAX 流式解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E5%85%A5%E7%9A%84%E5%BA%93%EF%BC%9AWoodstox"><span class="nav-number">3.1.</span> <span class="nav-text">引入的库：Woodstox</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF"><span class="nav-number">3.2.</span> <span class="nav-text">解决思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81"><span class="nav-number">3.3.</span> <span class="nav-text">实现代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="nav-number">3.4.</span> <span class="nav-text">关键代码解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%88%E6%9E%9C%E9%AA%8C%E8%AF%81"><span class="nav-number">3.5.</span> <span class="nav-text">效果验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">271</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">155</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

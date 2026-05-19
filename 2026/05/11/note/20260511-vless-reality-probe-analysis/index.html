@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="从技术角度拆解 VLESS-cracker PoC 的探测逻辑，分析 VLESS&#x2F;REALITY 双 TLS 协议栈为何会产生可识别的指纹差异。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VLESS&#x2F;REALITY 协议探测原理：双 TLS 栈指纹差异分析">
+<meta property="og:url" content="https://forgives.github.io/2026/05/11/note/20260511-vless-reality-probe-analysis/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="从技术角度拆解 VLESS-cracker PoC 的探测逻辑，分析 VLESS&#x2F;REALITY 双 TLS 协议栈为何会产生可识别的指纹差异。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-05-11T10:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-12T01:55:15.397Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="reality">
+<meta property="article:tag" content="tls">
+<meta property="article:tag" content="vless">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/05/11/note/20260511-vless-reality-probe-analysis/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>VLESS/REALITY 协议探测原理：双 TLS 栈指纹差异分析 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/05/11/note/20260511-vless-reality-probe-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VLESS/REALITY 协议探测原理：双 TLS 栈指纹差异分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-05-11 18:00:00" itemprop="dateCreated datePublished" datetime="2026-05-11T18:00:00+08:00">2026-05-11</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近看到一个<a target="_blank" rel="noopener" href="https://github.com/Anonymous376c1d0cf28/VLESS-cracker">针对 VLESS&#x2F;REALITY 协议的主动探测 PoC</a>，技术思路挺有意思的。纯粹从技术层面拆解一下它的探测原理——核心问题是：为什么一个代理协议会被精准识别，以及识别的具体步骤是什么。</p>
+<!-- more -->
+
+<h2 id="一、漏洞的根因：双-TLS-协议栈"><a href="#一、漏洞的根因：双-TLS-协议栈" class="headerlink" title="一、漏洞的根因：双 TLS 协议栈"></a>一、漏洞的根因：双 TLS 协议栈</h2><p>VLESS&#x2F;REALITY 的架构设计用了一套”偷梁换柱”的方案：服务端同时运行两套 TLS 协议栈。</p>
+<ul>
+<li><strong>栈 A</strong>：VLESS 自身的 TLS 栈（xray-core 魔改的 TLS 实现），处理合法的代理流量</li>
+<li><strong>栈 B</strong>：伪装目标网站的 TLS 栈，当客户端无法通过验证时，流量被回落到真实的目标网站</li>
+</ul>
+<p>这个设计的初衷是好的——探测者连上来，发现是个正常网站，就走了。但问题在于：<strong>两套 TLS 栈对畸形数据的处理行为不可能完全一致</strong>。这就是指纹的来源。</p>
+<p>打个比方，你找人代班，你们俩长得再像，遇到突发情况的反应也不可能一模一样。审查者要做的，就是制造”突发情况”，然后观察反应差异。</p>
+<h2 id="二、探测的完整流程"><a href="#二、探测的完整流程" class="headerlink" title="二、探测的完整流程"></a>二、探测的完整流程</h2><p>PoC 的探测分为六个步骤，每一步都有明确的目的：</p>
+<h3 id="步骤-1：流量捕获"><a href="#步骤-1：流量捕获" class="headerlink" title="步骤 1：流量捕获"></a>步骤 1：流量捕获</h3><p>通过 libpcap 监听网卡，粗过滤抓取 TLS 1.3 的 ClientHello 消息。</p>
+<p><strong>目的</strong>：缩小探测范围。TLS 1.3 + 特定 SNI 模式是 VLESS&#x2F;REALITY 的典型特征，先从海量流量中筛出可疑目标。</p>
+<p><strong>实现细节</strong>：对 TCP 流进行重组（<code>append_stream</code>，处理乱序、重叠、间隙），在重组后的数据中查找 <code>content_type=0x16, handshake_type=0x01</code> 的 TLS 记录，提取 SNI、Session ID、ALPN 等字段。</p>
+<h3 id="步骤-2：A-组探测——重放原始-ClientHello"><a href="#步骤-2：A-组探测——重放原始-ClientHello" class="headerlink" title="步骤 2：A 组探测——重放原始 ClientHello"></a>步骤 2：A 组探测——重放原始 ClientHello</h3><p>将捕获到的原始 ClientHello 原封不动地重放给服务器。服务器识别出 Session ID 已见过（TLS 1.3 的 anti-replay 机制），但 VLESS 的防重放实现有漏洞——它只检查时间戳，在 <code>MaxDiffTime</code> 窗口内不拒绝重放。于是这个请求<strong>落入了 VLESS 自身的 TLS 栈（栈 A）</strong>。</p>
+<p>收到 ServerHello 后，立即向服务器发送 7 组精心构造的畸形 TLS 探针，记录每组探针的响应状态。</p>
+<p><strong>目的</strong>：获取栈 A 的指纹。</p>
+<h3 id="步骤-3：C-组探测——随机化-Session-ID-后重放"><a href="#步骤-3：C-组探测——随机化-Session-ID-后重放" class="headerlink" title="步骤 3：C 组探测——随机化 Session ID 后重放"></a>步骤 3：C 组探测——随机化 Session ID 后重放</h3><p>把原始 ClientHello 的 Session ID 替换为随机值，再次发送。由于 Session ID 变了，VLESS 无法将其关联到已有会话，请求<strong>被回落到伪装网站的 TLS 栈（栈 B）</strong>。</p>
+<p>等待 1 秒后（<code>-d</code> 参数控制），同样发送 7 组探针，记录响应状态。</p>
+<p><strong>目的</strong>：获取栈 B 的指纹。</p>
+<h3 id="步骤-4：指纹比对"><a href="#步骤-4：指纹比对" class="headerlink" title="步骤 4：指纹比对"></a>步骤 4：指纹比对</h3><p>将 A 组和 C 组的指纹逐一比较。如果所有探针的响应状态完全一致，说明只有一套 TLS 栈在响应，是正常服务器；如果不一致，说明存在两套 TLS 栈，判定为 VLESS&#x2F;REALITY。</p>
+<p><strong>目的</strong>：通过差异确认双栈的存在。</p>
+<h3 id="步骤-5：报告过滤"><a href="#步骤-5：报告过滤" class="headerlink" title="步骤 5：报告过滤"></a>步骤 5：报告过滤</h3><p>这是 PoC 为了降低误报加的一层过滤。只有当 A 组指纹恰好匹配 xray-core 的预期特征 <code>[TIMEOUT, ALERT, ALERT, ALERT, ALERT, ALERT, ALERT]</code> 时，才输出检测报告。其他类型的 MISMATCH 会被抑制（suppressed）。</p>
+<p><strong>目的</strong>：减少假阳性。大型网站的负载均衡也可能导致不同后端的 TLS 栈不一致，但那种不一致是随机的、不稳定的，而 VLESS 的不一致是确定性的、可重复的。硬编码预期指纹就是只认 xray-core 的确定性特征。</p>
+<h3 id="步骤-6：用户溯源"><a href="#步骤-6：用户溯源" class="headerlink" title="步骤 6：用户溯源"></a>步骤 6：用户溯源</h3><p>如果探测成功，最初被抓取到 ClientHello 的源 IP 就是 VLESS 协议的使用者。</p>
+<p><strong>目的</strong>：从”发现可疑服务器”升级到”定位具体用户”。</p>
+<h2 id="三、7-组探针的设计逻辑"><a href="#三、7-组探针的设计逻辑" class="headerlink" title="三、7 组探针的设计逻辑"></a>三、7 组探针的设计逻辑</h2><p>探针是整个方案的关键。每组探针都是一段畸形的 TLS 记录，目的是触发不同 TLS 实现在错误处理上的行为差异。</p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>内容</th>
+<th>构造方式</th>
+<th>测试目的</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>14 03 03 00 01 01</code> ×3</td>
+<td>3 个连续的 TLS 1.2 Close Notify</td>
+<td>正常栈会立即关闭连接，魔改栈可能容忍</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>17 99 99 00 10</code></td>
+<td>Application Data，版本号 0x9999</td>
+<td>版本号非法，不同栈的处理策略不同</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>17 03 03 42 00</code></td>
+<td>Application Data，长度字段 0x4200</td>
+<td>超大长度声明，不同栈的缓冲处理不同</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>14 03 03 00 02 01 01</code></td>
+<td>Alert，负载长度 2 字节</td>
+<td>非标准 Alert 负载，解析逻辑可能不同</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>14 03 03 00 01 02</code></td>
+<td>Alert，描述码为 2（fatal）</td>
+<td>非常见警告码，错误映射可能不同</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>14 03 01 00 01 01</code></td>
+<td>TLS 1.0 版本的 Alert</td>
+<td>协议版本降级，兼容性处理不同</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>14 03 03 00 05 01 01 01 01 01</code></td>
+<td>Alert，5 字节超长负载</td>
+<td>负载长度异常，解析边界处理不同</td>
+</tr>
+</tbody></table>
+<p>核心思路：<strong>TLS 规范定义了正确行为，但对错误输入的处理是实现定义的（implementation-defined）</strong>。不同 TLS 库（Go 标准库 vs xray-core 魔改版）在遇到这些畸形记录时，有的返回 Alert，有的直接断开，有的超时无响应——这些差异就构成了指纹。</p>
+<h2 id="四、响应分类机制"><a href="#四、响应分类机制" class="headerlink" title="四、响应分类机制"></a>四、响应分类机制</h2><p>探针发出后，PoC 将服务器的响应分为四类：</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>含义</th>
+<th>判定条件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ALERT</td>
+<td>收到 TLS Alert</td>
+<td>缓冲区中出现 <code>type=0x15</code> 的记录，或加密 Alert（<code>type=0x17, len=19</code>）</td>
+</tr>
+<tr>
+<td>FIN</td>
+<td>TCP 正常关闭</td>
+<td><code>recv()</code> 返回 0</td>
+</tr>
+<tr>
+<td>RST</td>
+<td>TCP 异常断开</td>
+<td><code>recv()</code> 返回 ECONNRESET</td>
+</tr>
+<tr>
+<td>TIMEOUT</td>
+<td>4 秒内无响应</td>
+<td>超时</td>
+</tr>
+</tbody></table>
+<p>每组探针产生一个状态值，7 组探针产生一个长度为 7 的指纹序列。A 组和 C 组各一个序列，直接逐位比较。</p>
+<h2 id="五、为什么这个漏洞难以彻底修复"><a href="#五、为什么这个漏洞难以彻底修复" class="headerlink" title="五、为什么这个漏洞难以彻底修复"></a>五、为什么这个漏洞难以彻底修复</h2><p>漏洞报告里提到了两种修补思路，但都认为无法根治：</p>
+<p><strong>思路一：行为模拟，抹平差异</strong></p>
+<p>让 VLESS 的 TLS 栈在处理畸形数据时，完全模拟目标网站的行为。但问题是：目标网站用的是哪个 TLS 库？什么版本？什么配置？这些你控制不了。而且探针可以无限构造——7 组不够就 70 组，还可以结合时序分析。这是打地鼠，永远打不完。</p>
+<p><strong>思路二：修复防重放漏洞</strong></p>
+<p>让 VLESS 在 <code>MaxDiffTime</code> 窗口内也拒绝重放的 ClientHello。这样 A 组探测就无法让请求落入 VLESS 自身的 TLS 栈。但审查者可以换策略：在原始 TCP 流中伪造帧插入探针，或者拦截真实客户端的连接来探测。防重放只能防住当前 PoC 的这一种触发方式，防不住变种。</p>
+<p><strong>根本问题</strong>：双 TLS 栈的架构设计本身就决定了差异的存在。只要两套栈不是同一个实现，就一定有行为差异。而 VLESS 不可能自己实现一个完整的 TLS 栈来替代伪装网站的栈——那样的话它就不是”伪装”了，它就是那个网站。</p>
+<h2 id="六、对-sing-box-的影响"><a href="#六、对-sing-box-的影响" class="headerlink" title="六、对 sing-box 的影响"></a>六、对 sing-box 的影响</h2><p>当前 PoC 的报告过滤是硬编码 xray-core 的指纹 <code>[TIMEOUT, ALERT×6]</code>。sing-box 的 VLESS&#x2F;REALITY 实现使用 Go 标准库的 <code>crypto/tls</code>，对同样 7 组探针的响应模式大概率与 xray-core 不同，所以当前 PoC 不会对 sing-box 触发报告。</p>
+<p>但这不意味着 sing-box 安全。漏洞的根因是双 TLS 栈架构，sing-box 同样存在。只要去掉报告过滤（所有 MISMATCH 都报告），或者针对 Go <code>crypto/tls</code> 的行为特征调整预期指纹，同样可以探测 sing-box。当前 PoC 只是在最后一道门上只认 xray-core 的脸，换把锁就能认别的脸。</p>
+<h2 id="七、技术启示"><a href="#七、技术启示" class="headerlink" title="七、技术启示"></a>七、技术启示</h2><ol>
+<li><p><strong>不要自己魔改标准协议</strong>。TLS 是经过几十年审查的成熟协议，任何非标准修改都可能引入不可预见的行为差异。这些差异在正常使用中看不出来，但在主动探测下会暴露无遗。</p>
+</li>
+<li><p><strong>复杂度是安全的敌人</strong>。VLESS 为了追求”完美伪装”堆砌了大量设计——REALITY、XTLS、Vision，每一层都增加了攻击面。相比之下，Trojan 这种”TLS in TLS”的简单方案，反而没有这种确定性的指纹。</p>
+</li>
+<li><p><strong>防重放不能只靠时间戳</strong>。TLS 1.3 规范要求服务端记录已使用的 ClientHello 哈希值来防重放，VLESS 只检查了时间窗口，这是一个低级错误。</p>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/reality/" rel="tag"># reality</a>
+              <a href="/tags/tls/" rel="tag"># tls</a>
+              <a href="/tags/vless/" rel="tag"># vless</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/05/11/note/20260511-md-to-html/" rel="prev" title="markdown 转 html 的 python 脚本">
+      <i class="fa fa-chevron-left"></i> markdown 转 html 的 python 脚本
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/05/15/java/20260515-android-xml-escape/" rel="next" title="解析 Android XML 中的转义字符问题：从 Jsoup 到 Woodstox StAX">
+      解析 Android XML 中的转义字符问题：从 Jsoup 到 Woodstox StAX <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%BC%8F%E6%B4%9E%E7%9A%84%E6%A0%B9%E5%9B%A0%EF%BC%9A%E5%8F%8C-TLS-%E5%8D%8F%E8%AE%AE%E6%A0%88"><span class="nav-number">1.</span> <span class="nav-text">一、漏洞的根因：双 TLS 协议栈</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%8E%A2%E6%B5%8B%E7%9A%84%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">二、探测的完整流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-1%EF%BC%9A%E6%B5%81%E9%87%8F%E6%8D%95%E8%8E%B7"><span class="nav-number">2.1.</span> <span class="nav-text">步骤 1：流量捕获</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-2%EF%BC%9AA-%E7%BB%84%E6%8E%A2%E6%B5%8B%E2%80%94%E2%80%94%E9%87%8D%E6%94%BE%E5%8E%9F%E5%A7%8B-ClientHello"><span class="nav-number">2.2.</span> <span class="nav-text">步骤 2：A 组探测——重放原始 ClientHello</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-3%EF%BC%9AC-%E7%BB%84%E6%8E%A2%E6%B5%8B%E2%80%94%E2%80%94%E9%9A%8F%E6%9C%BA%E5%8C%96-Session-ID-%E5%90%8E%E9%87%8D%E6%94%BE"><span class="nav-number">2.3.</span> <span class="nav-text">步骤 3：C 组探测——随机化 Session ID 后重放</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-4%EF%BC%9A%E6%8C%87%E7%BA%B9%E6%AF%94%E5%AF%B9"><span class="nav-number">2.4.</span> <span class="nav-text">步骤 4：指纹比对</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-5%EF%BC%9A%E6%8A%A5%E5%91%8A%E8%BF%87%E6%BB%A4"><span class="nav-number">2.5.</span> <span class="nav-text">步骤 5：报告过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4-6%EF%BC%9A%E7%94%A8%E6%88%B7%E6%BA%AF%E6%BA%90"><span class="nav-number">2.6.</span> <span class="nav-text">步骤 6：用户溯源</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%817-%E7%BB%84%E6%8E%A2%E9%92%88%E7%9A%84%E8%AE%BE%E8%AE%A1%E9%80%BB%E8%BE%91"><span class="nav-number">3.</span> <span class="nav-text">三、7 组探针的设计逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%93%8D%E5%BA%94%E5%88%86%E7%B1%BB%E6%9C%BA%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">四、响应分类机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B8%AA%E6%BC%8F%E6%B4%9E%E9%9A%BE%E4%BB%A5%E5%BD%BB%E5%BA%95%E4%BF%AE%E5%A4%8D"><span class="nav-number">5.</span> <span class="nav-text">五、为什么这个漏洞难以彻底修复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%AF%B9-sing-box-%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">6.</span> <span class="nav-text">六、对 sing-box 的影响</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E6%8A%80%E6%9C%AF%E5%90%AF%E7%A4%BA"><span class="nav-number">7.</span> <span class="nav-text">七、技术启示</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">271</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">33</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">155</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

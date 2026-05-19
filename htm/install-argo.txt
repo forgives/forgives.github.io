@@ -1,0 +1,1044 @@
+#!/bin/bash
+set -e
+
+WORK_DIR="${WORK_DIR:-$HOME/vless-argo}"
+PORT="${VPORT:-}"
+UUID="${UUID:-}"
+ARGO_DOMAIN="${AGN:-}"
+ARGO_AUTH="${AGK:-}"
+CF_IP="${CFIP:-}"
+RUN_MODE=""
+KERNEL=""
+ARGO_MODE=""
+CORE_BIN=""
+CORE_CONFIG=""
+INFO_FILE="$HOME/.vless-argo-info"
+
+select_mode() {
+    if [ -n "${MODE:-}" ]; then
+        case "$MODE" in
+            root) RUN_MODE="root" ;;
+            nonroot) RUN_MODE="nonroot" ;;
+            *) echo "错误：MODE 只能是 root 或 nonroot" >&2; exit 1 ;;
+        esac
+        return
+    fi
+    echo "请选择运行模式："
+    echo "  1) root 模式（默认）- 使用 systemd/OpenRC 服务管理，工作目录 \$HOME/vless-argo"
+    echo "  2) 非 root 模式 - 使用当前目录，nohup 方式启动"
+    echo ""
+    read -p "请输入选择 [1/2]（默认 1）: " choice
+    if [ -z "$choice" ]; then
+        choice=1
+        echo "未选择，默认使用 root 模式"
+    fi
+    case "$choice" in
+        1) RUN_MODE="root"; echo "已选择: root 模式" ;;
+        2) RUN_MODE="nonroot"; echo "已选择: 非 root 模式" ;;
+        *) RUN_MODE="root"; echo "无效选择，默认使用 root 模式" ;;
+    esac
+}
+
+select_kernel() {
+    if [ -n "${KERNEL_ENV:-}" ]; then
+        case "$KERNEL_ENV" in
+            singbox) KERNEL="singbox" ;;
+            xray) KERNEL="xray" ;;
+            *) echo "错误：KERNEL_ENV 只能是 singbox 或 xray" >&2; exit 1 ;;
+        esac
+        return
+    fi
+    echo ""
+    echo "请选择内核："
+    echo "  1) sing-box（默认）"
+    echo "  2) xray"
+    echo ""
+    read -p "请输入选择 [1/2]（默认 1）: " kchoice
+    if [ -z "$kchoice" ]; then
+        kchoice=1
+        echo "未选择，默认使用 sing-box 内核"
+    fi
+    case "$kchoice" in
+        1) KERNEL="singbox"; echo "已选择: sing-box 内核" ;;
+        2) KERNEL="xray"; echo "已选择: xray 内核" ;;
+        *) KERNEL="singbox"; echo "无效选择，默认使用 sing-box 内核" ;;
+    esac
+}
+
+select_argo_mode() {
+    if [ -n "$ARGO_DOMAIN" ] && [ -n "$ARGO_AUTH" ]; then
+        ARGO_MODE="custom"
+        echo "Argo Tunnel 模式: 自定义域名 (已通过环境变量配置)"
+        return
+    fi
+    if [ -n "${TUNNEL:-}" ]; then
+        case "$TUNNEL" in
+            test) ARGO_MODE="test" ;;
+            custom) ARGO_MODE="custom" ;;
+            *) echo "错误：TUNNEL 只能是 test 或 custom" >&2; exit 1 ;;
+        esac
+        if [ "$ARGO_MODE" = "custom" ]; then
+            if [ -z "$ARGO_AUTH" ]; then
+                read -p "请输入 Argo Tunnel Token (AGK): " ARGO_AUTH
+                if [ -z "$ARGO_AUTH" ]; then
+                    echo "错误：Token 不能为空" >&2; exit 1
+                fi
+            fi
+            if [ -z "$ARGO_DOMAIN" ]; then
+                read -p "请输入 Argo Tunnel 域名 (AGN): " ARGO_DOMAIN
+                if [ -z "$ARGO_DOMAIN" ]; then
+                    echo "错误：域名不能为空" >&2; exit 1
+                fi
+            fi
+        fi
+        return
+    fi
+    echo ""
+    echo "请选择 Argo Tunnel 模式："
+    echo "  1) 测试域名（默认）- 自动分配 trycloudflare.com 临时域名"
+    echo "  2) 自定义域名 - 使用 Cloudflare Token + 自定义域名"
+    echo ""
+    read -p "请输入选择 [1/2]（默认 1）: " achoice
+    if [ -z "$achoice" ]; then
+        achoice=1
+        echo "未选择，默认使用测试域名模式"
+    fi
+    case "$achoice" in
+        1) ARGO_MODE="test"; echo "已选择: 测试域名模式" ;;
+        2)
+            ARGO_MODE="custom"
+            read -p "请输入 Argo Tunnel Token (AGK): " ARGO_AUTH
+            if [ -z "$ARGO_AUTH" ]; then
+                echo "错误：Token 不能为空" >&2; exit 1
+            fi
+            read -p "请输入 Argo Tunnel 域名 (AGN): " ARGO_DOMAIN
+            if [ -z "$ARGO_DOMAIN" ]; then
+                echo "错误：域名不能为空" >&2; exit 1
+            fi
+            echo "已选择: 自定义域名模式 ($ARGO_DOMAIN)"
+            ;;
+        *) ARGO_MODE="test"; echo "无效选择，默认使用测试域名模式" ;;
+    esac
+}
+
+apply_kernel_vars() {
+    case "$KERNEL" in
+        singbox)
+            CORE_BIN="sing-box"
+            CORE_CONFIG="sb.json"
+            ;;
+        xray)
+            CORE_BIN="xray"
+            CORE_CONFIG="xray.json"
+            ;;
+    esac
+}
+
+save_install_info() {
+    cat > "$INFO_FILE" <<EOF
+RUN_MODE=${RUN_MODE}
+KERNEL=${KERNEL}
+ARGO_MODE=${ARGO_MODE}
+WORK_DIR=${WORK_DIR}
+EOF
+}
+
+load_install_info() {
+    if [ -f "$INFO_FILE" ]; then
+        while IFS='=' read -r key value; do
+            case "$key" in
+                RUN_MODE) RUN_MODE="$value" ;;
+                KERNEL) KERNEL="$value" ;;
+                ARGO_MODE) ARGO_MODE="$value" ;;
+                WORK_DIR) WORK_DIR="$value" ;;
+            esac
+        done < "$INFO_FILE"
+        apply_kernel_vars
+    fi
+}
+
+detect_arch() {
+    case "$(uname -m)" in
+        x86_64|amd64) echo "amd64" ;;
+        aarch64|arm64) echo "arm64" ;;
+        *) echo "错误：不支持 $(uname -m) 架构" >&2; exit 1 ;;
+    esac
+}
+
+download_singbox() {
+    local arch="$1"
+    local version
+    version=$(curl -sL https://api.github.com/repos/SagerNet/sing-box/releases/latest 2>/dev/null \
+        | grep '"tag_name"' | head -1 | sed -E 's/.*"v([^"]+)".*/\1/')
+    if [ -z "$version" ]; then
+        version=$(curl -sL https://data.jsdelivr.com/v1/package/gh/SagerNet/sing-box 2>/dev/null \
+            | grep -Eo '"[0-9.]+"' | head -1 | tr -d '"')
+    fi
+    if [ -z "$version" ]; then
+        echo "警告：无法获取最新版本号，使用默认版本 1.11.15"
+        version="1.11.15"
+    fi
+    echo "下载 sing-box v${version} (linux-${arch})..."
+    local url="https://github.com/SagerNet/sing-box/releases/download/v${version}/sing-box-${version}-linux-${arch}.tar.gz"
+    local tmp="/tmp/sing-box-$$.tar.gz"
+    (command -v curl >/dev/null 2>&1 && curl -Lo "$tmp" --retry 3 -# "$url") || \
+    (command -v wget >/dev/null 2>&1 && wget -O "$tmp" --tries=3 -q "$url")
+    if [ ! -f "$tmp" ] || [ ! -s "$tmp" ]; then
+        echo "错误：sing-box 下载失败" >&2; exit 1
+    fi
+    tar -xzf "$tmp" -C /tmp/ 2>/dev/null
+    local extracted_dir="/tmp/sing-box-${version}-linux-${arch}"
+    if [ -d "$extracted_dir" ]; then
+        cp "${extracted_dir}/sing-box" "$WORK_DIR/sing-box"
+    else
+        local found
+        found=$(find /tmp -maxdepth 1 -name "sing-box" -type f 2>/dev/null | head -1)
+        if [ -n "$found" ]; then
+            cp "$found" "$WORK_DIR/sing-box"
+        else
+            echo "错误：sing-box 解压失败" >&2; rm -f "$tmp"; exit 1
+        fi
+    fi
+    chmod +x "$WORK_DIR/sing-box"
+    rm -f "$tmp"
+    rm -rf "$extracted_dir" 2>/dev/null
+    local installed_ver
+    installed_ver=$("$WORK_DIR/sing-box" version 2>/dev/null | awk '/version/{print $NF}')
+    echo "sing-box v${installed_ver} 安装完成"
+}
+
+download_xray() {
+    local arch="$1"
+    if ! command -v unzip >/dev/null 2>&1; then
+        echo "错误：xray 下载需要 unzip，请先安装 unzip" >&2; exit 1
+    fi
+    local xray_arch
+    case "$arch" in
+        amd64) xray_arch="64" ;;
+        arm64) xray_arch="arm64-v8a" ;;
+        *) echo "错误：xray 不支持架构 $arch" >&2; exit 1 ;;
+    esac
+    local version
+    version=$(curl -sL https://api.github.com/repos/XTLS/Xray-core/releases/latest 2>/dev/null \
+        | grep '"tag_name"' | head -1 | sed -E 's/.*"v([^"]+)".*/\1/')
+    if [ -z "$version" ]; then
+        version=$(curl -sL https://data.jsdelivr.com/v1/package/gh/XTLS/Xray-core 2>/dev/null \
+            | grep -Eo '"[0-9.]+"' | head -1 | tr -d '"')
+    fi
+    if [ -z "$version" ]; then
+        echo "警告：无法获取最新版本号，使用默认版本 26.3.27"
+        version="26.3.27"
+    fi
+    echo "下载 xray v${version} (linux-${xray_arch})..."
+    local url="https://github.com/XTLS/Xray-core/releases/download/v${version}/Xray-linux-${xray_arch}.zip"
+    local tmp="/tmp/xray-$$.zip"
+    (command -v curl >/dev/null 2>&1 && curl -Lo "$tmp" --retry 3 -# "$url") || \
+    (command -v wget >/dev/null 2>&1 && wget -O "$tmp" --tries=3 -q "$url")
+    if [ ! -f "$tmp" ] || [ ! -s "$tmp" ]; then
+        echo "错误：xray 下载失败" >&2; exit 1
+    fi
+    local tmp_dir="/tmp/xray-$$"
+    mkdir -p "$tmp_dir"
+    unzip -o -q "$tmp" -d "$tmp_dir" 2>/dev/null
+    if [ -f "$tmp_dir/xray" ]; then
+        cp "$tmp_dir/xray" "$WORK_DIR/xray"
+    else
+        local found
+        found=$(find "$tmp_dir" -maxdepth 2 -name "xray" -type f 2>/dev/null | head -1)
+        if [ -n "$found" ]; then
+            cp "$found" "$WORK_DIR/xray"
+        else
+            echo "错误：xray 解压失败" >&2; rm -f "$tmp"; rm -rf "$tmp_dir"; exit 1
+        fi
+    fi
+    chmod +x "$WORK_DIR/xray"
+    rm -f "$tmp"
+    rm -rf "$tmp_dir"
+    local installed_ver
+    installed_ver=$("$WORK_DIR/xray" version 2>/dev/null | head -1 | awk '{print $NF}')
+    echo "xray v${installed_ver} 安装完成"
+}
+
+download_cloudflared() {
+    local arch="$1"
+    echo "下载 cloudflared (linux-${arch})..."
+    local url="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${arch}"
+    (command -v curl >/dev/null 2>&1 && curl -Lo "$WORK_DIR/cloudflared" --retry 3 -# "$url") || \
+    (command -v wget >/dev/null 2>&1 && wget -O "$WORK_DIR/cloudflared" --tries=3 -q "$url")
+    if [ ! -f "$WORK_DIR/cloudflared" ] || [ ! -s "$WORK_DIR/cloudflared" ]; then
+        echo "错误：cloudflared 下载失败" >&2; exit 1
+    fi
+    chmod +x "$WORK_DIR/cloudflared"
+    echo "cloudflared 安装完成"
+}
+
+generate_uuid() {
+    if [ -z "$UUID" ]; then
+        if [ -f "$WORK_DIR/uuid" ]; then
+            UUID=$(cat "$WORK_DIR/uuid")
+            echo "UUID: $UUID (复用已有)"
+            return
+        fi
+        case "$KERNEL" in
+            singbox) UUID=$("$WORK_DIR/sing-box" generate uuid) ;;
+            xray) UUID=$("$WORK_DIR/xray" uuid) ;;
+        esac
+    fi
+    echo "$UUID" > "$WORK_DIR/uuid"
+    echo "UUID: $UUID"
+}
+
+generate_port() {
+    if [ -z "$PORT" ]; then
+        if [ -f "$WORK_DIR/port" ]; then
+            PORT=$(cat "$WORK_DIR/port")
+            echo "本地监听端口: $PORT (复用已有)"
+            return
+        fi
+        local max_tries=10
+        local try=0
+        while [ "$try" -lt "$max_tries" ]; do
+            if command -v shuf >/dev/null 2>&1; then
+                PORT=$(shuf -i 10000-65535 -n 1)
+            else
+                PORT=$((RANDOM % 55536 + 10000))
+            fi
+            if ! ss -tlnp 2>/dev/null | grep -q ":${PORT} " && \
+               ! netstat -tlnp 2>/dev/null | grep -q ":${PORT} "; then
+                break
+            fi
+            try=$((try + 1))
+        done
+    fi
+    echo "$PORT" > "$WORK_DIR/port"
+    echo "本地监听端口: $PORT"
+}
+
+generate_singbox_config() {
+    local ws_path="/ws"
+    echo "$ws_path" > "$WORK_DIR/ws_path"
+
+    cat > "$WORK_DIR/sb.json" <<EOF
+{
+    "log": {
+        "disabled": false,
+        "level": "info",
+        "timestamp": true
+    },
+    "inbounds": [
+        {
+            "type": "vless",
+            "tag": "vless-ws-in",
+            "listen": "::",
+            "listen_port": ${PORT},
+            "users": [
+                {
+                    "uuid": "${UUID}"
+                }
+            ],
+            "transport": {
+                "type": "ws",
+                "path": "${ws_path}",
+                "max_early_data": 2048,
+                "early_data_header_name": "Sec-WebSocket-Protocol"
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "type": "direct",
+            "tag": "direct"
+        }
+    ],
+    "route": {
+        "rules": [
+            {
+                "action": "sniff"
+            }
+        ],
+        "final": "direct"
+    }
+}
+EOF
+    echo "sing-box 配置已生成: $WORK_DIR/sb.json"
+}
+
+generate_xray_config() {
+    local ws_path="/ws"
+    echo "$ws_path" > "$WORK_DIR/ws_path"
+
+    cat > "$WORK_DIR/xray.json" <<EOF
+{
+    "log": {
+        "loglevel": "info",
+        "access": "",
+        "error": ""
+    },
+    "inbounds": [
+        {
+            "port": ${PORT},
+            "listen": "::",
+            "protocol": "vless",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "${UUID}"
+                    }
+                ],
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "ws",
+                "wsSettings": {
+                    "path": "${ws_path}",
+                    "maxEarlyData": 2048,
+                    "earlyDataHeaderName": "Sec-WebSocket-Protocol"
+                }
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "freedom",
+            "settings": {}
+        }
+    ]
+}
+EOF
+    echo "xray 配置已生成: $WORK_DIR/xray.json"
+}
+
+generate_config() {
+    case "$KERNEL" in
+        singbox) generate_singbox_config ;;
+        xray) generate_xray_config ;;
+    esac
+}
+
+start_core() {
+    if [ "$RUN_MODE" = "nonroot" ]; then
+        nohup "$WORK_DIR/$CORE_BIN" run -c "$WORK_DIR/$CORE_CONFIG" >> "$WORK_DIR/run.log" 2>&1 &
+        echo "${CORE_BIN} 已通过 nohup 启动 (PID: $!)"
+        return
+    fi
+    if pidof systemd >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+        cat > /etc/systemd/system/vless-argo.service <<EOF
+[Unit]
+Description=VLESS-Argo ${CORE_BIN} service
+After=network.target
+[Service]
+Type=simple
+ExecStart=${WORK_DIR}/${CORE_BIN} run -c ${WORK_DIR}/${CORE_CONFIG}
+Restart=on-failure
+RestartSec=5s
+[Install]
+WantedBy=multi-user.target
+EOF
+        systemctl daemon-reload
+        systemctl enable vless-argo >/dev/null 2>&1
+        systemctl start vless-argo
+        echo "${CORE_BIN} 已通过 systemd 启动"
+    elif command -v rc-service >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+        cat > /etc/init.d/vless-argo <<EOF
+#!/sbin/openrc-run
+description="VLESS-Argo ${CORE_BIN} service"
+command="${WORK_DIR}/${CORE_BIN}"
+command_args="run -c ${WORK_DIR}/${CORE_CONFIG}"
+command_background=yes
+pidfile="/run/vless-argo.pid"
+depend() { need net; }
+EOF
+        chmod +x /etc/init.d/vless-argo
+        rc-update add vless-argo default >/dev/null 2>&1
+        rc-service vless-argo start
+        echo "${CORE_BIN} 已通过 OpenRC 启动"
+    else
+        nohup "$WORK_DIR/$CORE_BIN" run -c "$WORK_DIR/$CORE_CONFIG" >/dev/null 2>&1 &
+        echo "${CORE_BIN} 已通过 nohup 启动 (PID: $!)"
+    fi
+}
+
+setup_argo_tunnel() {
+    if [ "$ARGO_MODE" = "custom" ] && [ -n "$ARGO_AUTH" ]; then
+        echo "配置固定 Argo 隧道: $ARGO_DOMAIN"
+        echo "$ARGO_DOMAIN" > "$WORK_DIR/argo_domain.log"
+        echo "$ARGO_AUTH" > "$WORK_DIR/argo_token.log"
+        chmod 600 "$WORK_DIR/argo_token.log"
+
+        if [ "$RUN_MODE" = "nonroot" ]; then
+            nohup "$WORK_DIR/cloudflared" tunnel --no-autoupdate --edge-ip-version auto --protocol http2 run --token "$ARGO_AUTH" >> "$WORK_DIR/run.log" 2>&1 &
+            echo "Argo 固定隧道已通过 nohup 启动 (PID: $!)"
+        elif pidof systemd >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+            cat > /etc/systemd/system/argo-vless.service <<EOF
+[Unit]
+Description=Argo Tunnel for VLESS
+After=network.target
+[Service]
+Type=simple
+ExecStart=${WORK_DIR}/cloudflared tunnel --no-autoupdate --edge-ip-version auto --protocol http2 run --token ${ARGO_AUTH}
+Restart=on-failure
+RestartSec=5s
+[Install]
+WantedBy=multi-user.target
+EOF
+            systemctl daemon-reload
+            systemctl enable argo-vless >/dev/null 2>&1
+            systemctl start argo-vless
+            echo "Argo 固定隧道已通过 systemd 启动"
+        elif command -v rc-service >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+            cat > /etc/init.d/argo-vless <<EOF
+#!/sbin/openrc-run
+description="Argo Tunnel for VLESS"
+command="${WORK_DIR}/cloudflared"
+command_args="tunnel --no-autoupdate --edge-ip-version auto --protocol http2 run --token ${ARGO_AUTH}"
+pidfile="/run/argo-vless.pid"
+command_background=yes
+depend() { need net; }
+EOF
+            chmod +x /etc/init.d/argo-vless
+            rc-update add argo-vless default >/dev/null 2>&1
+            rc-service argo-vless start
+            echo "Argo 固定隧道已通过 OpenRC 启动"
+        else
+            nohup "$WORK_DIR/cloudflared" tunnel --no-autoupdate --edge-ip-version auto --protocol http2 run --token "$ARGO_AUTH" >/dev/null 2>&1 &
+            echo "Argo 固定隧道已通过 nohup 启动 (PID: $!)"
+        fi
+    else
+        echo "配置临时 Argo 隧道（自动分配 trycloudflare.com 域名）..."
+        local argo_log="$WORK_DIR/argo.log"
+        if [ "$RUN_MODE" = "nonroot" ]; then
+            argo_log="$WORK_DIR/run.log"
+        fi
+        nohup "$WORK_DIR/cloudflared" tunnel --url "http://localhost:${PORT}" --edge-ip-version auto --no-autoupdate --protocol http2 >> "$argo_log" 2>&1 &
+        local cfpid=$!
+        echo "cloudflared 已启动 (PID: $cfpid)"
+
+        echo "等待临时隧道域名分配（最多30秒）..."
+        local elapsed=0
+        local argodomain=""
+        while [ "$elapsed" -lt 30 ]; do
+            argodomain=$(grep -a 'trycloudflare.com' "$argo_log" 2>/dev/null \
+                | grep -oE 'https?://[a-zA-Z0-9.-]+\.trycloudflare\.com' \
+                | head -1 \
+                | sed 's|https\?://||')
+            [ -n "$argodomain" ] && break
+            sleep 1
+            elapsed=$((elapsed + 1))
+        done
+
+        if [ -n "$argodomain" ]; then
+            echo "$argodomain" > "$WORK_DIR/argo_domain.log"
+            echo "临时隧道域名: $argodomain"
+        else
+            echo "错误：临时隧道域名获取失败，请检查网络" >&2
+            exit 1
+        fi
+    fi
+}
+
+generate_vless_links() {
+    local argodomain
+    argodomain=$(cat "$WORK_DIR/argo_domain.log" 2>/dev/null)
+    if [ -z "$argodomain" ]; then
+        echo "错误：Argo 域名为空，无法生成连接串" >&2
+        return 1
+    fi
+
+    local ws_path
+    ws_path=$(cat "$WORK_DIR/ws_path" 2>/dev/null)
+
+    local cdnip1 cdnip2
+    if [ -n "$CF_IP" ]; then
+        set -- $CF_IP
+        cdnip1="$1"
+        cdnip2="${2:-$1}"
+    else
+        cdnip1="yg1.ygkkk.dpdns.org"
+        cdnip2="yg6.ygkkk.dpdns.org"
+    fi
+
+    rm -f "$WORK_DIR/vless_links.txt"
+
+    echo ""
+    echo "============================================================"
+    echo "  VLESS + WS + Argo 节点连接串"
+    echo "============================================================"
+    echo "内核:      ${CORE_BIN}"
+    echo "UUID:      $UUID"
+    echo "Argo域名:  $argodomain"
+    echo "WS路径:    $ws_path"
+    echo "本地端口:  $PORT"
+    echo "------------------------------------------------------------"
+
+    echo ""
+    echo ">>> TLS 节点（443系端口，客户端TLS连接到CF CDN）"
+    echo ""
+
+    local tls_ports="443 8443 2053 2083 2087 2096"
+    local tls_addrs="$cdnip1 yg2.ygkkk.dpdns.org yg3.ygkkk.dpdns.org yg4.ygkkk.dpdns.org yg5.ygkkk.dpdns.org [2606:4700::0]"
+
+    local i=1
+    for port in $tls_ports; do
+        local addr
+        addr=$(echo "$tls_addrs" | awk "{print \$$i}")
+        local link="vless://${UUID}@${addr}:${port}?encryption=none&type=ws&host=${argodomain}&path=${ws_path}&security=tls&sni=${argodomain}&fp=chrome#vl-ws-argo-${port}"
+        echo "  [端口${port}]"
+        echo "  ${link}"
+        echo "$link" >> "$WORK_DIR/vless_links.txt"
+        i=$((i + 1))
+    done
+
+    echo ""
+    echo ">>> 非TLS 节点（80系端口，客户端无TLS连接到CF CDN）"
+    echo ""
+
+    local nontls_ports="80 8080 8880 2052 2082 2086 2095"
+    local nontls_addrs="$cdnip2 yg7.ygkkk.dpdns.org yg8.ygkkk.dpdns.org yg9.ygkkk.dpdns.org yg10.ygkkk.dpdns.org yg11.ygkkk.dpdns.org [2400:cb00:2049::0]"
+
+    i=1
+    for port in $nontls_ports; do
+        local addr
+        addr=$(echo "$nontls_addrs" | awk "{print \$$i}")
+        local link="vless://${UUID}@${addr}:${port}?encryption=none&type=ws&host=${argodomain}&path=${ws_path}&security=none#vl-ws-argo-${port}"
+        echo "  [端口${port}]"
+        echo "  ${link}"
+        echo "$link" >> "$WORK_DIR/vless_links.txt"
+        i=$((i + 1))
+    done
+
+    echo ""
+    echo "============================================================"
+    echo "  共生成 13 条 VLESS 连接串"
+    echo "  已保存到: $WORK_DIR/vless_links.txt"
+    echo "============================================================"
+}
+
+do_stop() {
+    echo "正在停止服务..."
+
+    if [ "$RUN_MODE" != "nonroot" ] && pidof systemd >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+        systemctl stop argo-vless 2>/dev/null || true
+        systemctl stop vless-argo 2>/dev/null || true
+        echo "systemd 服务已停止"
+    elif [ "$RUN_MODE" != "nonroot" ] && command -v rc-service >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+        rc-service argo-vless stop 2>/dev/null || true
+        rc-service vless-argo stop 2>/dev/null || true
+        echo "OpenRC 服务已停止"
+    fi
+
+    local stopped=0
+    for P in /proc/[0-9]*; do
+        [ -L "$P/exe" ] || continue
+        local target
+        target=$(readlink -f "$P/exe" 2>/dev/null) || continue
+        case "$target" in
+            *"${WORK_DIR}/sing-box"|*"${WORK_DIR}/xray"|*"${WORK_DIR}/cloudflared")
+                kill "$(basename "$P")" 2>/dev/null && stopped=1
+                ;;
+        esac
+    done
+
+    sleep 1
+
+    for P in /proc/[0-9]*; do
+        [ -L "$P/exe" ] || continue
+        local target
+        target=$(readlink -f "$P/exe" 2>/dev/null) || continue
+        case "$target" in
+            *"${WORK_DIR}/sing-box"|*"${WORK_DIR}/xray"|*"${WORK_DIR}/cloudflared")
+                kill -9 "$(basename "$P")" 2>/dev/null || true
+                ;;
+        esac
+    done
+
+    if [ "$stopped" -eq 1 ]; then
+        echo "相关进程已终止"
+    else
+        echo "未发现运行中的相关进程"
+    fi
+
+    echo "停止完成"
+}
+
+do_start() {
+    if [ ! -f "$INFO_FILE" ]; then
+        echo "错误：未找到安装信息，请先运行安装" >&2
+        exit 1
+    fi
+
+    load_install_info
+
+    if [ "$RUN_MODE" = "nonroot" ]; then
+        WORK_DIR="$(pwd)"
+    fi
+
+    if [ ! -e "$WORK_DIR/${CORE_BIN}" ]; then
+        echo "错误：未找到内核程序 $WORK_DIR/${CORE_BIN}，请先运行安装" >&2
+        exit 1
+    fi
+
+    if [ ! -e "$WORK_DIR/cloudflared" ]; then
+        echo "错误：未找到 cloudflared，请先运行安装" >&2
+        exit 1
+    fi
+
+    if [ ! -e "$WORK_DIR/${CORE_CONFIG}" ]; then
+        echo "错误：未找到配置文件 $WORK_DIR/${CORE_CONFIG}，请先运行安装" >&2
+        exit 1
+    fi
+
+    if pgrep -f "$WORK_DIR/$CORE_BIN" >/dev/null 2>&1; then
+        echo "${CORE_BIN} 已在运行中，如需重启请使用: bash $0 restart"
+        exit 0
+    fi
+
+    PORT=$(cat "$WORK_DIR/port" 2>/dev/null)
+    UUID=$(cat "$WORK_DIR/uuid" 2>/dev/null)
+    if [ -z "$PORT" ] || [ -z "$UUID" ]; then
+        echo "错误：配置文件不完整（PORT=$PORT, UUID=$UUID），请先运行安装" >&2
+        exit 1
+    fi
+
+    if [ "$ARGO_MODE" = "custom" ]; then
+        ARGO_AUTH=$(cat "$WORK_DIR/argo_token.log" 2>/dev/null)
+        ARGO_DOMAIN=$(cat "$WORK_DIR/argo_domain.log" 2>/dev/null)
+        if [ -z "$ARGO_AUTH" ] || [ -z "$ARGO_DOMAIN" ]; then
+            echo "错误：自定义域名模式配置不完整（ARGO_DOMAIN=$ARGO_DOMAIN, ARGO_AUTH=$ARGO_AUTH），请先运行安装" >&2
+            exit 1
+        fi
+    fi
+
+    if [ "$RUN_MODE" = "nonroot" ]; then
+        : > "$WORK_DIR/run.log"
+    fi
+
+    echo "启动 ${CORE_BIN}..."
+    start_core
+    sleep 2
+
+    if [ "$RUN_MODE" = "nonroot" ]; then
+        if ! pgrep -f "$WORK_DIR/$CORE_BIN" >/dev/null 2>&1; then
+            echo "错误：${CORE_BIN} 启动失败，请检查 $WORK_DIR/run.log" >&2
+            exit 1
+        fi
+    elif pidof systemd >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+        if ! systemctl is-active --quiet vless-argo 2>/dev/null; then
+            echo "错误：${CORE_BIN} 服务启动失败，请执行 journalctl -u vless-argo 查看" >&2
+            exit 1
+        fi
+    elif command -v rc-service >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+        if ! rc-service vless-argo status >/dev/null 2>&1; then
+            echo "错误：${CORE_BIN} 服务启动失败" >&2
+            exit 1
+        fi
+    else
+        if ! pgrep -f "$WORK_DIR/$CORE_BIN" >/dev/null 2>&1; then
+            echo "错误：${CORE_BIN} 启动失败" >&2
+            exit 1
+        fi
+    fi
+
+    echo "启动 cloudflared..."
+    setup_argo_tunnel
+    generate_vless_links
+
+    echo ""
+    echo "============================================================"
+    echo "  启动完成！"
+    echo "  运行模式: $RUN_MODE"
+    echo "  内核:     ${CORE_BIN}"
+    echo "  工作目录: $WORK_DIR"
+    echo "  查看节点: bash $0 list"
+    echo "  停止服务: bash $0 stop"
+    echo "============================================================"
+}
+
+do_restart() {
+    echo "正在重启服务..."
+    do_stop
+    sleep 1
+    do_start
+}
+
+do_cleanup() {
+    echo "正在清理..."
+
+    for P in /proc/[0-9]*; do
+        [ -L "$P/exe" ] || continue
+        local target
+        target=$(readlink -f "$P/exe" 2>/dev/null) || continue
+        case "$target" in
+            *"${WORK_DIR}/sing-box"|*"${WORK_DIR}/xray"|*"${WORK_DIR}/cloudflared")
+                kill "$(basename "$P")" 2>/dev/null
+                ;;
+        esac
+    done
+
+    if [ "$RUN_MODE" != "nonroot" ]; then
+        if pidof systemd >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+            systemctl stop vless-argo argo-vless 2>/dev/null || true
+            systemctl disable vless-argo argo-vless 2>/dev/null || true
+            rm -f /etc/systemd/system/vless-argo.service /etc/systemd/system/argo-vless.service
+            systemctl daemon-reload 2>/dev/null
+        elif command -v rc-service >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+            rc-service vless-argo stop 2>/dev/null || true
+            rc-service argo-vless stop 2>/dev/null || true
+            rc-update del vless-argo default 2>/dev/null || true
+            rc-update del argo-vless default 2>/dev/null || true
+            rm -f /etc/init.d/vless-argo /etc/init.d/argo-vless
+        fi
+    fi
+
+    rm -rf "$WORK_DIR"
+    rm -f "$INFO_FILE"
+    echo "清理完成"
+}
+
+do_uninstall() {
+    do_cleanup
+    echo "卸载完成"
+    exit 0
+}
+
+do_reset() {
+    do_cleanup
+    echo ""
+    run_install
+}
+
+show_links() {
+    if [ ! -f "$WORK_DIR/vless_links.txt" ]; then
+        echo "未找到连接串文件，请先运行安装"
+        exit 1
+    fi
+    echo ""
+    echo "============================================================"
+    echo "  VLESS + WS + Argo 节点连接串"
+    echo "============================================================"
+    echo "内核:      ${CORE_BIN}"
+    echo "UUID:      $(cat $WORK_DIR/uuid)"
+    echo "Argo域名:  $(cat $WORK_DIR/argo_domain.log 2>/dev/null)"
+    echo "WS路径:    $(cat $WORK_DIR/ws_path 2>/dev/null)"
+    echo "本地端口:  $(cat $WORK_DIR/port 2>/dev/null)"
+    echo "------------------------------------------------------------"
+    cat "$WORK_DIR/vless_links.txt"
+    echo ""
+    echo "============================================================"
+}
+
+usage() {
+    echo "用法: $0 [命令]"
+    echo ""
+    echo "  (无参数)  安装并启动 VLESS+WS+Argo"
+    echo "  start    按已保存配置启动服务"
+    echo "  stop     停止服务（不删除文件）"
+    echo "  restart  重启服务（stop + start）"
+    echo "  list     显示节点连接串"
+    echo "  del      完整卸载（停止服务+删除所有文件）"
+    echo "  reset    完整卸载后重新安装"
+    echo ""
+    echo "环境变量:"
+    echo "  VPORT       本地监听端口（默认随机）"
+    echo "  UUID        VLESS 用户 UUID（默认自动生成）"
+    echo "  AGN         Argo 固定隧道域名"
+    echo "  AGK         Argo 固定隧道 Token"
+    echo "  CFIP        自定义 CDN 优选 IP（空格分隔两个，默认 yg*.ygkkk.dpdns.org）"
+    echo "  WORK_DIR    工作目录（默认 \$HOME/vless-argo，非root模式为当前目录）"
+    echo "  MODE        运行模式：root（默认）或 nonroot"
+    echo "  KERNEL_ENV  内核选择：singbox（默认）或 xray"
+    echo "  TUNNEL      Argo Tunnel 模式：test（默认）或 custom"
+    echo ""
+    echo "示例:"
+    echo "  # 临时隧道（自动分配域名，root模式，sing-box内核）"
+    echo "  bash $0"
+    echo ""
+    echo "  # 非 root 模式"
+    echo "  MODE=nonroot bash $0"
+    echo ""
+    echo "  # 使用 xray 内核"
+    echo "  KERNEL_ENV=xray bash $0"
+    echo ""
+    echo "  # 使用自定义域名隧道（交互输入 Token 和域名）"
+    echo "  TUNNEL=custom bash $0"
+    echo ""
+    echo "  # 固定隧道"
+    echo "  AGN=your.domain.com AGK=your-token bash $0"
+    echo ""
+    echo "  # 指定端口和UUID"
+    echo "  VPORT=10086 UUID=xxx-xxx-xxx bash $0"
+}
+
+run_install() {
+    select_mode
+    if [ "$RUN_MODE" = "nonroot" ]; then
+        WORK_DIR="$(pwd)"
+    fi
+
+    select_kernel
+    apply_kernel_vars
+    select_argo_mode
+
+    echo "============================================================"
+    echo "  VLESS + WS + Argo Tunnel 一键部署脚本"
+    echo "  内核: ${CORE_BIN}"
+    echo "============================================================"
+    echo ""
+    echo "运行模式: $RUN_MODE"
+    if [ "$ARGO_MODE" = "custom" ]; then
+        echo "Argo模式: 自定义域名 ($ARGO_DOMAIN)"
+    else
+        echo "Argo模式: 测试域名 (trycloudflare.com)"
+    fi
+    echo "架构说明:"
+    echo "  客户端 → CF CDN (TLS) → Argo Tunnel → cloudflared → localhost:PORT → ${CORE_BIN} (VLESS+WS, 无TLS)"
+    echo ""
+
+    local arch
+    arch=$(detect_arch)
+    echo "系统架构: $arch"
+    echo "工作目录: $WORK_DIR"
+    echo ""
+
+    mkdir -p "$WORK_DIR"
+
+    if [ "$RUN_MODE" = "nonroot" ]; then
+        : > "$WORK_DIR/run.log"
+    fi
+
+    if [ ! -e "$WORK_DIR/${CORE_BIN}" ]; then
+        case "$KERNEL" in
+            singbox) download_singbox "$arch" ;;
+            xray) download_xray "$arch" ;;
+        esac
+    else
+        local ver
+        case "$KERNEL" in
+            singbox)
+                ver=$("$WORK_DIR/sing-box" version 2>/dev/null | awk '/version/{print $NF}')
+                echo "sing-box v${ver} 已存在，跳过下载"
+                ;;
+            xray)
+                ver=$("$WORK_DIR/xray" version 2>/dev/null | head -1 | awk '{print $NF}')
+                echo "xray v${ver} 已存在，跳过下载"
+                ;;
+        esac
+    fi
+
+    generate_uuid
+    generate_port
+    generate_config
+    start_core
+    sleep 2
+
+    if [ "$RUN_MODE" = "nonroot" ]; then
+        if ! pgrep -f "$WORK_DIR/$CORE_BIN" >/dev/null 2>&1; then
+            echo "错误：${CORE_BIN} 启动失败，请检查 $WORK_DIR/run.log" >&2
+            exit 1
+        fi
+    elif pidof systemd >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+        if ! systemctl is-active --quiet vless-argo 2>/dev/null; then
+            echo "错误：${CORE_BIN} 服务启动失败，请执行 journalctl -u vless-argo 查看" >&2
+            exit 1
+        fi
+    elif command -v rc-service >/dev/null 2>&1 && [ "$EUID" -eq 0 ]; then
+        if ! rc-service vless-argo status >/dev/null 2>&1; then
+            echo "错误：${CORE_BIN} 服务启动失败" >&2
+            exit 1
+        fi
+    else
+        if ! pgrep -f "$WORK_DIR/$CORE_BIN" >/dev/null 2>&1; then
+            echo "错误：${CORE_BIN} 启动失败" >&2
+            exit 1
+        fi
+    fi
+
+    if [ ! -e "$WORK_DIR/cloudflared" ]; then
+        download_cloudflared "$arch"
+    else
+        echo "cloudflared 已存在，跳过下载"
+    fi
+
+    setup_argo_tunnel
+    generate_vless_links
+    save_install_info
+
+    echo ""
+    echo "============================================================"
+    echo "  部署完成！"
+    echo "  运行模式: $RUN_MODE"
+    echo "  内核:     ${CORE_BIN}"
+    echo "  工作目录: $WORK_DIR"
+    echo "  查看节点: bash $0 list"
+    echo "  停止服务: bash $0 stop"
+    echo "  重启服务: bash $0 restart"
+    echo "  卸载:     bash $0 del"
+    echo "============================================================"
+}
+
+main() {
+    echo "VLESS + WS + Argo Tunnel 一键部署脚本"
+    echo ""
+    echo "用法: bash $0 [命令]"
+    echo "  (无参数)  安装并启动"
+    echo "  start    按已保存配置启动"
+    echo "  stop     停止服务"
+    echo "  restart  重启服务"
+    echo "  list     显示节点连接串"
+    echo "  del      完整卸载"
+    echo "  reset    卸载后重新安装"
+    echo "  -h       查看详细帮助"
+    echo ""
+
+    case "${1:-}" in
+        list)
+            load_install_info
+            show_links
+            exit 0
+            ;;
+        stop)
+            load_install_info
+            if [ -z "$RUN_MODE" ]; then
+                select_mode
+                if [ "$RUN_MODE" = "nonroot" ]; then
+                    WORK_DIR="$(pwd)"
+                fi
+            fi
+            do_stop
+            exit 0
+            ;;
+        start)
+            do_start
+            exit 0
+            ;;
+        restart)
+            do_restart
+            exit 0
+            ;;
+        del)
+            load_install_info
+            if [ -z "$RUN_MODE" ]; then
+                select_mode
+                if [ "$RUN_MODE" = "nonroot" ]; then
+                    WORK_DIR="$(pwd)"
+                fi
+            fi
+            do_uninstall
+            ;;
+        reset)
+            load_install_info
+            if [ -z "$RUN_MODE" ]; then
+                select_mode
+                if [ "$RUN_MODE" = "nonroot" ]; then
+                    WORK_DIR="$(pwd)"
+                fi
+            fi
+            do_reset
+            exit 0
+            ;;
+        -h|--help) usage; exit 0 ;;
+    esac
+
+    run_install
+}
+
+main "$@"
