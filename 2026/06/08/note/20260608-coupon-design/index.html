@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="优惠券系统采用 模板 + 用户券 + 使用记录 + 生命周期事件 四层模型。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="优惠券系统设计">
+<meta property="og:url" content="https://forgives.github.io/2026/06/08/note/20260608-coupon-design/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="优惠券系统采用 模板 + 用户券 + 使用记录 + 生命周期事件 四层模型。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-08T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-08T11:09:39.872Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="design">
+<meta property="article:tag" content="coupon">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/06/08/note/20260608-coupon-design/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>优惠券系统设计 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/06/08/note/20260608-coupon-design/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          优惠券系统设计
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-08 10:00:00" itemprop="dateCreated datePublished" datetime="2026-06-08T10:00:00+08:00">2026-06-08</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>优惠券系统采用 <strong>模板 + 用户券 + 使用记录 + 生命周期事件</strong> 四层模型。</p>
+<span id="more"></span>
+
+<h2 id="整体模型关系"><a href="#整体模型关系" class="headerlink" title="整体模型关系"></a>整体模型关系</h2><pre class="mermaid">classDiagram
+    CouponTemplate "1" --> "N" UserCoupon: 生成
+    UserCoupon "1" --> "N" CouponEventLog: 记录
+    UserCoupon "1" --> "0..1" CouponUseRecord: 核销</pre>
+
+<p>职责划分：</p>
+<table>
+<thead>
+<tr>
+<th>实体</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CouponTemplate</td>
+<td>定义优惠券规则（满减、折扣、适用范围等）</td>
+</tr>
+<tr>
+<td>UserCoupon</td>
+<td>用户实际拥有的券，记录状态流转</td>
+</tr>
+<tr>
+<td>CouponUseRecord</td>
+<td>记录核销结果（实际优惠金额、实付金额）</td>
+</tr>
+<tr>
+<td>CouponEventLog</td>
+<td>记录整个生命周期事件，用于审计、排查、退款恢复</td>
+</tr>
+</tbody></table>
+<h2 id="CouponTemplate-优惠券模板"><a href="#CouponTemplate-优惠券模板" class="headerlink" title="CouponTemplate 优惠券模板"></a>CouponTemplate 优惠券模板</h2><h3 id="职责"><a href="#职责" class="headerlink" title="职责"></a>职责</h3><p>定义优惠券属性与规则。模板本身不能使用，用户领取后才生成用户券。</p>
+<p>类似：</p>
+<ul>
+<li>满100减20</li>
+<li>8折券</li>
+<li>云存储专用50元券</li>
+</ul>
+<h3 id="表结构"><a href="#表结构" class="headerlink" title="表结构"></a>表结构</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> coupon_template</span><br><span class="line">(</span><br><span class="line">    id                  <span class="type">BIGINT</span> <span class="keyword">PRIMARY</span> KEY ,</span><br><span class="line">    template_code       <span class="type">VARCHAR</span>(<span class="number">64</span>)    <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    template_name       <span class="type">VARCHAR</span>(<span class="number">128</span>)   <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    status              TINYINT        <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    coupon_type         <span class="type">VARCHAR</span>(<span class="number">32</span>)    <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    discount_amount     <span class="type">INT</span>            <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;固定减免金额（分），coupon_type=FIXED 时使用&#x27;</span>,</span><br><span class="line">    discount_rate       <span class="type">INT</span>            <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;折扣率（千分之），coupon_type=DISCOUNT 时使用，如 800=8折&#x27;</span>,</span><br><span class="line">    threshold_amount    <span class="type">INT</span>            <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;最低消费金额（分）&#x27;</span>,</span><br><span class="line">    max_discount_amount <span class="type">INT</span>            <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;最大优惠金额（分），折扣券封顶&#x27;</span>,</span><br><span class="line">    total_quantity      <span class="type">INT</span>            <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    issued_quantity     <span class="type">INT</span>            <span class="keyword">DEFAULT</span> <span class="number">0</span>,</span><br><span class="line">    budget_amount       <span class="type">INT</span>            <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;优惠预算上限（分）&#x27;</span>,</span><br><span class="line">    used_budget_amount  <span class="type">INT</span>            <span class="keyword">DEFAULT</span> <span class="number">0</span> COMMENT <span class="string">&#x27;已使用预算（分）&#x27;</span>,</span><br><span class="line">    valid_type          <span class="type">VARCHAR</span>(<span class="number">32</span>)    <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    valid_days          <span class="type">INT</span>            <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    valid_start_time    DATETIME       <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    valid_end_time      DATETIME       <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    claim_start_time    DATETIME       <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    claim_end_time      DATETIME       <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    goods_ids           JSON           <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;适用商品ID数组，NULL表示不限商品，如 [1001, 1002]&#x27;</span>,</span><br><span class="line">    platforms           JSON           <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;一期不做，默认全平台&#x27;</span>,</span><br><span class="line">    channels            JSON           <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;适用支付渠道，枚举数组：WECHAT、ALIPAY，NULL表示全渠道&#x27;</span>,</span><br><span class="line">    stackable           TINYINT        <span class="keyword">DEFAULT</span> <span class="number">0</span> COMMENT <span class="string">&#x27;一期不做，默认不可堆叠&#x27;</span>,</span><br><span class="line">    stack_rule          JSON           <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;一期不做，默认不可堆叠&#x27;</span>,</span><br><span class="line">    rule_json           JSON           <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    remark              <span class="type">VARCHAR</span>(<span class="number">500</span>)   <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    gmt_create          DATETIME       COMMENT <span class="string">&#x27;创建时间&#x27;</span>,</span><br><span class="line">    gmt_modified        DATETIME       COMMENT <span class="string">&#x27;更新时间&#x27;</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="字段说明"><a href="#字段说明" class="headerlink" title="字段说明"></a>字段说明</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>BIGINT</td>
+<td>主键</td>
+<td>雪花</td>
+</tr>
+<tr>
+<td>template_code</td>
+<td>VARCHAR(64)</td>
+<td>模板编码</td>
+<td>唯一标识，如 <code>CLOUD_50_OFF</code></td>
+</tr>
+<tr>
+<td>template_name</td>
+<td>VARCHAR(128)</td>
+<td>模板名称</td>
+<td>如”云存储50元优惠券”</td>
+</tr>
+<tr>
+<td>status</td>
+<td>TINYINT</td>
+<td>状态</td>
+<td>枚举：<code>0</code>&#x3D;草稿、<code>1</code>&#x3D;上线、<code>2</code>&#x3D;暂停、<code>3</code>&#x3D;下线、<code>4</code>&#x3D;删除，详见下方状态说明</td>
+</tr>
+<tr>
+<td>coupon_type</td>
+<td>VARCHAR(32)</td>
+<td>优惠类型</td>
+<td>枚举：<code>FIXED</code>&#x3D;固定减免、<code>DISCOUNT</code>&#x3D;折扣券</td>
+</tr>
+<tr>
+<td>discount_amount</td>
+<td>INT</td>
+<td>固定减免金额</td>
+<td>coupon_type&#x3D;FIXED 时使用，单位：分。如 2000 表示减20元。DISCOUNT 时为 NULL</td>
+</tr>
+<tr>
+<td>discount_rate</td>
+<td>INT</td>
+<td>折扣率</td>
+<td>coupon_type&#x3D;DISCOUNT 时使用，单位：千分之。如 800&#x3D;8折、850&#x3D;85折。FIXED 时为 NULL</td>
+</tr>
+<tr>
+<td>threshold_amount</td>
+<td>INT</td>
+<td>最低消费金额</td>
+<td>满减门槛，单位：分。如满100减20则填 10000</td>
+</tr>
+<tr>
+<td>max_discount_amount</td>
+<td>INT</td>
+<td>最大优惠金额</td>
+<td>折扣券封顶金额，单位：分。如8折最多减50元则填 5000</td>
+</tr>
+<tr>
+<td>total_quantity</td>
+<td>INT</td>
+<td>发行总量</td>
+<td>NULL 表示不限量</td>
+</tr>
+<tr>
+<td>issued_quantity</td>
+<td>INT</td>
+<td>已发放数量</td>
+<td>领取时累加</td>
+</tr>
+<tr>
+<td>budget_amount</td>
+<td>INT</td>
+<td>优惠预算上限</td>
+<td>单券种最大优惠金额预算，单位：分。NULL表示不限预算</td>
+</tr>
+<tr>
+<td>used_budget_amount</td>
+<td>INT</td>
+<td>已使用预算</td>
+<td>核销时累加优惠金额，单位：分。达到 budget_amount 时自动暂停发放</td>
+</tr>
+<tr>
+<td>valid_type</td>
+<td>VARCHAR(32)</td>
+<td>有效期类型</td>
+<td>枚举：<code>FIXED_DATE</code>&#x3D;固定时间范围、<code>AFTER_RECEIVE</code>&#x3D;领取后N天</td>
+</tr>
+<tr>
+<td>valid_days</td>
+<td>INT</td>
+<td>有效天数</td>
+<td>valid_type&#x3D;AFTER_RECEIVE 时必填，如30表示领取后30天</td>
+</tr>
+<tr>
+<td>valid_start_time</td>
+<td>DATETIME</td>
+<td>有效期开始</td>
+<td>valid_type&#x3D;FIXED_DATE 时必填</td>
+</tr>
+<tr>
+<td>valid_end_time</td>
+<td>DATETIME</td>
+<td>有效期结束</td>
+<td>valid_type&#x3D;FIXED_DATE 时必填</td>
+</tr>
+<tr>
+<td>claim_start_time</td>
+<td>DATETIME</td>
+<td>领取开始时间</td>
+<td>用户可领取的起始时间</td>
+</tr>
+<tr>
+<td>claim_end_time</td>
+<td>DATETIME</td>
+<td>领取结束时间</td>
+<td>用户可领取的截止时间，过期后不可领取</td>
+</tr>
+<tr>
+<td>goods_ids</td>
+<td>JSON</td>
+<td>适用商品</td>
+<td>商品ID数组，NULL表示不限商品，如 <code>[1001, 1002]</code></td>
+</tr>
+<tr>
+<td>platforms</td>
+<td>JSON</td>
+<td>适用平台</td>
+<td>一期不做，默认全平台。枚举数组：<code>IOS</code>、<code>ANDROID</code>、<code>WEB</code>、<code>MINI_PROGRAM</code>，NULL表示全平台</td>
+</tr>
+<tr>
+<td>channels</td>
+<td>JSON</td>
+<td>适用支付渠道</td>
+<td>枚举数组：<code>WECHAT</code>、<code>ALIPAY</code>，NULL表示全支付渠道</td>
+</tr>
+<tr>
+<td>stackable</td>
+<td>TINYINT</td>
+<td>是否可叠加</td>
+<td>一期不做，默认不可堆叠。<code>0</code>&#x3D;不可叠加（默认）、<code>1</code>&#x3D;可叠加</td>
+</tr>
+<tr>
+<td>stack_rule</td>
+<td>JSON</td>
+<td>叠加规则</td>
+<td>一期不做，默认不可堆叠。可叠加时的规则详情，如 <code>&#123;&quot;maxStackCount&quot;: 2, &quot;stackableTypes&quot;: [&quot;FIXED&quot;]&#125;</code></td>
+</tr>
+<tr>
+<td>rule_json</td>
+<td>JSON</td>
+<td>扩展规则</td>
+<td>自定义规则，如 <code>&#123;&quot;newUserOnly&quot;: true, &quot;maxReceiveCount&quot;: 1&#125;</code></td>
+</tr>
+<tr>
+<td>remark</td>
+<td>VARCHAR(500)</td>
+<td>备注</td>
+<td>运营备注</td>
+</tr>
+<tr>
+<td>gmt_create</td>
+<td>DATETIME</td>
+<td>创建时间</td>
+<td></td>
+</tr>
+<tr>
+<td>gmt_modified</td>
+<td>DATETIME</td>
+<td>更新时间</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="模板状态说明"><a href="#模板状态说明" class="headerlink" title="模板状态说明"></a>模板状态说明</h3><table>
+<thead>
+<tr>
+<th>枚举值</th>
+<th>状态名称</th>
+<th>说明</th>
+<th>可领取</th>
+<th>可下发</th>
+<th>已领取可消费</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0</code></td>
+<td>草稿</td>
+<td>编辑状态，模板尚未发布，仍在配置中。不能领取，已领取的不能消费</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>上线</td>
+<td>正式状态，模板已发布。用户可正常领取、系统可下发，已领取的券可正常消费</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>暂停</td>
+<td>因预算或发放量达到限制而自动&#x2F;手动暂停。不能领取、不能下发，但已领取的券仍可正常消费</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td>下线</td>
+<td>相对于上线状态，模板已下线。不能领取，已领取的券也不能消费</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>4</code></td>
+<td>删除</td>
+<td>模板已作废删除。不能领取，已领取的券也不能消费</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody></table>
+<h3 id="模板状态流转"><a href="#模板状态流转" class="headerlink" title="模板状态流转"></a>模板状态流转</h3><pre class="mermaid">graph LR
+    DRAFT[0 草稿] -->|上线| ONLINE[1 上线]
+    ONLINE -->|预算/发放量达限| PAUSED[2 暂停]
+    PAUSED -->|运营手动恢复| ONLINE
+    ONLINE -->|下线| OFFLINE[3 下线]
+    DRAFT -->|删除| DELETED[4 删除]
+    ONLINE -->|删除| DELETED
+    PAUSED -->|删除| DELETED
+    OFFLINE -->|删除| DELETED
+    OFFLINE -->|重新上线| ONLINE</pre>
+
+<h3 id="状态行为差异"><a href="#状态行为差异" class="headerlink" title="状态行为差异"></a>状态行为差异</h3><ul>
+<li><strong>草稿 → 上线</strong>：运营确认模板配置无误后手动上线，上线后用户才可见、可领取</li>
+<li><strong>上线 → 暂停</strong>：当 <code>used_budget_amount &gt;= budget_amount</code> 或 <code>issued_quantity &gt;= total_quantity</code> 时系统自动暂停；运营也可手动暂停</li>
+<li><strong>暂停 → 上线</strong>：运营调整预算&#x2F;发行量后手动恢复上线</li>
+<li><strong>上线&#x2F;暂停 → 下线</strong>：运营手动下线，不再接受新的领取请求，已领取的券也无法消费</li>
+<li><strong>下线 → 上线</strong>：运营可重新上线</li>
+<li><strong>任意 → 删除</strong>：软删除，逻辑上不再展示和生效</li>
+</ul>
+<h3 id="其他核心枚举"><a href="#其他核心枚举" class="headerlink" title="其他核心枚举"></a>其他核心枚举</h3><p><strong>coupon_type 优惠类型</strong></p>
+<table>
+<thead>
+<tr>
+<th>值</th>
+<th>含义</th>
+<th>使用的字段</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FIXED</td>
+<td>固定减免</td>
+<td>discount_amount</td>
+</tr>
+<tr>
+<td>DISCOUNT</td>
+<td>折扣券</td>
+<td>discount_rate + max_discount_amount</td>
+</tr>
+</tbody></table>
+<p><strong>valid_type 有效期类型</strong></p>
+<table>
+<thead>
+<tr>
+<th>值</th>
+<th>含义</th>
+<th>使用的字段</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FIXED_DATE</td>
+<td>固定时间范围</td>
+<td>valid_start_time + valid_end_time</td>
+</tr>
+<tr>
+<td>AFTER_RECEIVE</td>
+<td>领取后N天</td>
+<td>valid_days</td>
+</tr>
+</tbody></table>
+<h2 id="UserCoupon-用户券"><a href="#UserCoupon-用户券" class="headerlink" title="UserCoupon 用户券"></a>UserCoupon 用户券</h2><h3 id="职责-1"><a href="#职责-1" class="headerlink" title="职责"></a>职责</h3><p>表示用户实际拥有的一张券。例如张三领取了”满100减20”，则生成一条 user_coupon 记录。</p>
+<h3 id="表结构-1"><a href="#表结构-1" class="headerlink" title="表结构"></a>表结构</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> user_coupon</span><br><span class="line">(</span><br><span class="line">    id           <span class="type">BIGINT</span> <span class="keyword">PRIMARY</span> KEY ,</span><br><span class="line">    coupon_no    <span class="type">VARCHAR</span>(<span class="number">64</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    template_id  <span class="type">BIGINT</span>      <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    user_id      <span class="type">BIGINT</span>      <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    status       <span class="type">VARCHAR</span>(<span class="number">32</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    acquire_time DATETIME    <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    expire_time  DATETIME    <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    lock_time    DATETIME,</span><br><span class="line">    used_time    DATETIME,</span><br><span class="line">    order_id     <span class="type">BIGINT</span>,</span><br><span class="line">    version      <span class="type">INT</span> <span class="keyword">DEFAULT</span> <span class="number">0</span>,</span><br><span class="line">    gmt_create   DATETIME COMMENT <span class="string">&#x27;创建时间&#x27;</span>,</span><br><span class="line">    gmt_modified DATETIME   COMMENT <span class="string">&#x27;更新时间&#x27;</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="字段说明-1"><a href="#字段说明-1" class="headerlink" title="字段说明"></a>字段说明</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>BIGINT</td>
+<td>主键</td>
+<td>雪花</td>
+</tr>
+<tr>
+<td>coupon_no</td>
+<td>VARCHAR(64)</td>
+<td>券码</td>
+<td>唯一标识，用户可见的券编号</td>
+</tr>
+<tr>
+<td>template_id</td>
+<td>BIGINT</td>
+<td>模板ID</td>
+<td>关联 coupon_template.id</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>BIGINT</td>
+<td>用户ID</td>
+<td>领券用户</td>
+</tr>
+<tr>
+<td>status</td>
+<td>VARCHAR(32)</td>
+<td>状态</td>
+<td>枚举：<code>UNUSED</code>&#x3D;未使用、<code>LOCKED</code>&#x3D;已锁定、<code>USED</code>&#x3D;已使用、<code>EXPIRED</code>&#x3D;已过期</td>
+</tr>
+<tr>
+<td>acquire_time</td>
+<td>DATETIME</td>
+<td>领取时间</td>
+<td></td>
+</tr>
+<tr>
+<td>expire_time</td>
+<td>DATETIME</td>
+<td>过期时间</td>
+<td>到期后状态变为 EXPIRED</td>
+</tr>
+<tr>
+<td>lock_time</td>
+<td>DATETIME</td>
+<td>锁定时间</td>
+<td>提交订单时锁定，支付成功后变为 USED，支付失败回退 UNUSED</td>
+</tr>
+<tr>
+<td>used_time</td>
+<td>DATETIME</td>
+<td>使用时间</td>
+<td>核销时间</td>
+</tr>
+<tr>
+<td>order_id</td>
+<td>BIGINT</td>
+<td>订单ID</td>
+<td>使用时关联的订单</td>
+</tr>
+<tr>
+<td>version</td>
+<td>INT</td>
+<td>版本号</td>
+<td>乐观锁，默认0</td>
+</tr>
+<tr>
+<td>gmt_create</td>
+<td>DATETIME</td>
+<td>创建时间</td>
+<td></td>
+</tr>
+<tr>
+<td>gmt_modified</td>
+<td>DATETIME</td>
+<td>更新时间</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="状态流转"><a href="#状态流转" class="headerlink" title="状态流转"></a>状态流转</h3><pre class="mermaid">graph LR
+    START((开始)) -->|ISSUED 发放| UNUSED[UNUSED 未使用]
+    UNUSED -->|LOCKED 下单锁定| LOCKED[LOCKED 已锁定]
+    LOCKED -->|UNLOCKED 支付失败| UNUSED
+    LOCKED -->|USED 支付成功| USED[USED 已使用]
+    UNUSED -->|EXPIRED 过期| EXPIRED[EXPIRED 已失效]
+    USED -->|REFUNDED+RETURNED 退款退回| UNUSED
+    USED -->|REFUNDED 退款不返还| END1((结束))
+    EXPIRED --> END1</pre>
+
+<p>状态说明：</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>含义</th>
+<th>触发场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UNUSED</td>
+<td>未使用</td>
+<td>用户领取后初始状态</td>
+</tr>
+<tr>
+<td>LOCKED</td>
+<td>已锁定</td>
+<td>提交订单时锁定，防止并发使用</td>
+</tr>
+<tr>
+<td>USED</td>
+<td>已使用</td>
+<td>支付成功后核销</td>
+</tr>
+<tr>
+<td>EXPIRED</td>
+<td>已失效</td>
+<td>超过 expire_time 自动过期</td>
+</tr>
+</tbody></table>
+<h3 id="乐观锁（version）"><a href="#乐观锁（version）" class="headerlink" title="乐观锁（version）"></a>乐观锁（version）</h3><p>解决并发问题。同一张券不能被多次使用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 读取券，拿到当前 version</span></span><br><span class="line"><span class="type">UserCoupon</span> <span class="variable">coupon</span> <span class="operator">=</span> userCouponMapper.selectById(couponId);</span><br><span class="line"><span class="type">int</span> <span class="variable">currentVersion</span> <span class="operator">=</span> coupon.getVersion();  <span class="comment">// 比如 0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 尝试更新，带上 version 条件</span></span><br><span class="line"><span class="type">int</span> <span class="variable">rows</span> <span class="operator">=</span> userCouponMapper.updateStatus(</span><br><span class="line">    couponId, <span class="string">&quot;LOCKED&quot;</span>, currentVersion</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 判断结果</span></span><br><span class="line"><span class="keyword">if</span> (rows == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// 并发冲突，券已被其他请求修改</span></span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ConcurrentUpdateException</span>(<span class="string">&quot;优惠券状态已变更，请重试&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 成功，继续后续业务逻辑</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="CouponUseRecord-用券记录"><a href="#CouponUseRecord-用券记录" class="headerlink" title="CouponUseRecord 用券记录"></a>CouponUseRecord 用券记录</h2><h3 id="职责-2"><a href="#职责-2" class="headerlink" title="职责"></a>职责</h3><p>记录优惠券在某个订单上实际产生了多少优惠。因为订单金额会变化，不能只看 UserCoupon。</p>
+<h3 id="表结构-2"><a href="#表结构-2" class="headerlink" title="表结构"></a>表结构</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> coupon_use_record</span><br><span class="line">(</span><br><span class="line">    id              <span class="type">BIGINT</span> <span class="keyword">PRIMARY</span> KEY ,</span><br><span class="line">    user_coupon_id  <span class="type">BIGINT</span>   <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    template_id     <span class="type">BIGINT</span>   <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    user_id         <span class="type">BIGINT</span>   <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    order_id        <span class="type">BIGINT</span>   <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    order_amount    <span class="type">INT</span>      <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;原始订单金额（分）&#x27;</span>,</span><br><span class="line">    discount_amount <span class="type">INT</span>      <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;券实际减免金额（分）&#x27;</span>,</span><br><span class="line">    pay_amount      <span class="type">INT</span>      <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;实付金额（分），order_amount - discount_amount&#x27;</span>,</span><br><span class="line">    use_time        DATETIME <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    gmt_create      DATETIME COMMENT <span class="string">&#x27;创建时间&#x27;</span>,</span><br><span class="line">    gmt_modified    DATETIME   COMMENT <span class="string">&#x27;更新时间&#x27;</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="字段说明-2"><a href="#字段说明-2" class="headerlink" title="字段说明"></a>字段说明</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>BIGINT</td>
+<td>主键</td>
+<td>雪花</td>
+</tr>
+<tr>
+<td>user_coupon_id</td>
+<td>BIGINT</td>
+<td>用户券ID</td>
+<td>关联 user_coupon.id</td>
+</tr>
+<tr>
+<td>template_id</td>
+<td>BIGINT</td>
+<td>模板ID</td>
+<td>关联 coupon_template.id</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>BIGINT</td>
+<td>用户ID</td>
+<td></td>
+</tr>
+<tr>
+<td>order_id</td>
+<td>BIGINT</td>
+<td>订单ID</td>
+<td></td>
+</tr>
+<tr>
+<td>order_amount</td>
+<td>INT</td>
+<td>订单金额</td>
+<td>原始订单金额（分），与 tb_order_pay.original_price 对齐</td>
+</tr>
+<tr>
+<td>discount_amount</td>
+<td>INT</td>
+<td>优惠金额</td>
+<td>券实际减免金额（分）</td>
+</tr>
+<tr>
+<td>pay_amount</td>
+<td>INT</td>
+<td>实付金额</td>
+<td>order_amount - discount_amount（分）</td>
+</tr>
+<tr>
+<td>use_time</td>
+<td>DATETIME</td>
+<td>使用时间</td>
+<td></td>
+</tr>
+<tr>
+<td>gmt_create</td>
+<td>DATETIME</td>
+<td>创建时间</td>
+<td></td>
+</tr>
+<tr>
+<td>gmt_modified</td>
+<td>DATETIME</td>
+<td>更新时间</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p>订单 120 元 &#x3D; 12000 分，优惠券满100减20：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">order_amount=12000 discount_amount=2000 pay_amount=10000</span><br></pre></td></tr></table></figure>
+
+<h2 id="CouponEventLog-生命周期事件"><a href="#CouponEventLog-生命周期事件" class="headerlink" title="CouponEventLog 生命周期事件"></a>CouponEventLog 生命周期事件</h2><h3 id="职责-3"><a href="#职责-3" class="headerlink" title="职责"></a>职责</h3><p>统一记录优惠券的生命周期事件，用于审计、问题排查、运营分析、退款恢复。</p>
+<h3 id="表结构-3"><a href="#表结构-3" class="headerlink" title="表结构"></a>表结构</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> coupon_event_log</span><br><span class="line">(</span><br><span class="line">    id             <span class="type">BIGINT</span> <span class="keyword">PRIMARY</span> KEY ,</span><br><span class="line">    user_coupon_id <span class="type">BIGINT</span>      <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    event_type     <span class="type">VARCHAR</span>(<span class="number">32</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    before_status  <span class="type">VARCHAR</span>(<span class="number">32</span>),</span><br><span class="line">    after_status   <span class="type">VARCHAR</span>(<span class="number">32</span>),</span><br><span class="line">    operator_type  <span class="type">VARCHAR</span>(<span class="number">32</span>),</span><br><span class="line">    operator_id    <span class="type">BIGINT</span>,</span><br><span class="line">    biz_id         <span class="type">VARCHAR</span>(<span class="number">64</span>),</span><br><span class="line">    ext_info       JSON,</span><br><span class="line">    event_time     DATETIME    <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    gmt_create     DATETIME COMMENT <span class="string">&#x27;创建时间&#x27;</span>,</span><br><span class="line">    gmt_modified   DATETIME   COMMENT <span class="string">&#x27;更新时间&#x27;</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="字段说明-3"><a href="#字段说明-3" class="headerlink" title="字段说明"></a>字段说明</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>BIGINT</td>
+<td>主键</td>
+<td>雪花</td>
+</tr>
+<tr>
+<td>user_coupon_id</td>
+<td>BIGINT</td>
+<td>用户券ID</td>
+<td>关联 user_coupon.id</td>
+</tr>
+<tr>
+<td>event_type</td>
+<td>VARCHAR(32)</td>
+<td>事件类型</td>
+<td>枚举：<code>ISSUED</code>&#x3D;发放、<code>LOCKED</code>&#x3D;锁定、<code>UNLOCKED</code>&#x3D;解锁、<code>USED</code>&#x3D;使用、<code>EXPIRED</code>&#x3D;过期、<code>REFUNDED</code>&#x3D;退款、<code>RETURNED</code>&#x3D;退回</td>
+</tr>
+<tr>
+<td>before_status</td>
+<td>VARCHAR(32)</td>
+<td>变更前状态</td>
+<td></td>
+</tr>
+<tr>
+<td>after_status</td>
+<td>VARCHAR(32)</td>
+<td>变更后状态</td>
+<td></td>
+</tr>
+<tr>
+<td>operator_type</td>
+<td>VARCHAR(32)</td>
+<td>操作者类型</td>
+<td>枚举：<code>USER</code>&#x3D;用户、<code>SYSTEM</code>&#x3D;系统、<code>ADMIN</code>&#x3D;管理员</td>
+</tr>
+<tr>
+<td>operator_id</td>
+<td>BIGINT</td>
+<td>操作者ID</td>
+<td></td>
+</tr>
+<tr>
+<td>biz_id</td>
+<td>VARCHAR(64)</td>
+<td>业务ID</td>
+<td>如订单号、退款单号等</td>
+</tr>
+<tr>
+<td>ext_info</td>
+<td>JSON</td>
+<td>扩展信息</td>
+<td>附加业务数据</td>
+</tr>
+<tr>
+<td>event_time</td>
+<td>DATETIME</td>
+<td>事件时间</td>
+<td></td>
+</tr>
+<tr>
+<td>gmt_create</td>
+<td>DATETIME</td>
+<td>创建时间</td>
+<td></td>
+</tr>
+<tr>
+<td>gmt_modified</td>
+<td>DATETIME</td>
+<td>更新时间</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="事件类型"><a href="#事件类型" class="headerlink" title="事件类型"></a>事件类型</h3><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>含义</th>
+<th>典型 before→after</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ISSUED</td>
+<td>发放</td>
+<td>→ UNUSED</td>
+</tr>
+<tr>
+<td>LOCKED</td>
+<td>锁定</td>
+<td>UNUSED → LOCKED</td>
+</tr>
+<tr>
+<td>UNLOCKED</td>
+<td>解锁</td>
+<td>LOCKED → UNUSED</td>
+</tr>
+<tr>
+<td>USED</td>
+<td>使用</td>
+<td>LOCKED → USED</td>
+</tr>
+<tr>
+<td>EXPIRED</td>
+<td>过期</td>
+<td>UNUSED → EXPIRED</td>
+</tr>
+<tr>
+<td>REFUNDED</td>
+<td>退款</td>
+<td>USED → *</td>
+</tr>
+<tr>
+<td>RETURNED</td>
+<td>退回</td>
+<td>* → UNUSED</td>
+</tr>
+</tbody></table>
+<h3 id="示例-1"><a href="#示例-1" class="headerlink" title="示例"></a>示例</h3><p>一张券的完整生命周期：</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>事件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2026-01-01</td>
+<td>ISSUED</td>
+<td>用户领取</td>
+</tr>
+<tr>
+<td>2026-01-10</td>
+<td>LOCKED</td>
+<td>提交订单</td>
+</tr>
+<tr>
+<td>2026-01-10</td>
+<td>USED</td>
+<td>支付成功</td>
+</tr>
+<tr>
+<td>2026-01-15</td>
+<td>REFUNDED</td>
+<td>订单退款</td>
+</tr>
+<tr>
+<td>2026-01-15</td>
+<td>RETURNED</td>
+<td>优惠券退回</td>
+</tr>
+</tbody></table>
+<h2 id="运行流程"><a href="#运行流程" class="headerlink" title="运行流程"></a>运行流程</h2><h3 id="领取优惠券"><a href="#领取优惠券" class="headerlink" title="领取优惠券"></a>领取优惠券</h3><pre class="mermaid">graph TD
+    A[用户领取优惠券] --> B[创建 UserCoupon<br/>status=UNUSED]
+    B --> C[计算过期时间<br/>expire_time=acquire_time+valid_days]
+    C --> D[写入 EventLog<br/>event_type=ISSUED]
+    D --> E[返回领取成功]</pre>
+
+<h3 id="查询可用券"><a href="#查询可用券" class="headerlink" title="查询可用券"></a>查询可用券</h3><pre class="mermaid">graph TD
+    A[查询用户优惠券列表] --> B{status=UNUSED?}
+    B -->|否| X[排除该券]
+    B -->|是| C{在有效期内?}
+    C -->|否| X
+    C -->|是| D{匹配商品范围<br/>goods_ids?}
+    D -->|否| X
+    D -->|是| E{匹配平台范围<br/>platforms?}
+    E -->|否| X
+    E -->|是| F{匹配支付渠道<br/>channels?}
+    F -->|否| X
+    F -->|是| G{stackable=?}
+    G -->|stackable = 0| H[同一订单仅可用1张券<br/>自动匹配抵扣金额最高的券]
+    G -->|stackable = 1| I[按 stack_rule 匹配<br/>可叠加券组合]
+    H --> J[返回可用券列表]
+    I --> J</pre>
+
+<h3 id="预算管控逻辑"><a href="#预算管控逻辑" class="headerlink" title="预算管控逻辑"></a>预算管控逻辑</h3><pre class="mermaid">graph TD
+    A[优惠券核销成功] --> B[used_budget_amount += discount_amount]
+    B --> C{budget_amount 不为NULL?}
+    C -->|否| D[继续正常发放]
+    C -->|是| E{used_budget_amount<br/>>= budget_amount?}
+    E -->|否| D
+    E -->|是| F[自动暂停该券种发放<br/>拦截后续领取请求]
+    D --> G[运营后台展示预算使用率]
+    F --> G
+    G --> H{使用率 > 80%?}
+    H -->|是| I[预警提示]
+    H -->|否| J[正常展示]</pre>
+
+<h3 id="下单锁券"><a href="#下单锁券" class="headerlink" title="下单锁券"></a>下单锁券</h3><pre class="mermaid">graph TD
+    A[用户提交订单] --> B[校验优惠券可用性]
+    B --> C[UserCoupon<br/>UNUSED → LOCKED]
+    C --> D[写入 EventLog<br/>event_type=LOCKED<br/>before_status=UNUSED<br/>after_status=LOCKED]
+    D --> E{订单取消?}
+    E -->|30分钟超时自动取消| F[UserCoupon<br/>LOCKED → UNUSED]
+    E -->|用户主动取消| F
+    F --> G[写入 EventLog<br/>event_type=UNLOCKED<br/>before_status=LOCKED<br/>after_status=UNUSED]
+    G --> H[优惠券回到可领取状态<br/>用户可再次使用]</pre>
+
+<h3 id="支付成功"><a href="#支付成功" class="headerlink" title="支付成功"></a>支付成功</h3><pre class="mermaid">graph TD
+    A[支付成功回调] --> B[UserCoupon<br/>LOCKED → USED]
+    B --> C[创建 CouponUseRecord<br/>记录 order_amount / discount_amount / pay_amount]
+    C --> D[累加 coupon_template.used_budget_amount]
+    D --> E[写入 EventLog<br/>event_type=USED<br/>before_status=LOCKED<br/>after_status=USED]</pre>
+
+<h3 id="支付失败"><a href="#支付失败" class="headerlink" title="支付失败"></a>支付失败</h3><pre class="mermaid">graph TD
+    A[支付失败回调] --> B[UserCoupon<br/>LOCKED → UNUSED]
+    B --> C[写入 EventLog<br/>event_type=UNLOCKED<br/>before_status=LOCKED<br/>after_status=UNUSED]</pre>
+
+<h3 id="退款"><a href="#退款" class="headerlink" title="退款"></a>退款</h3><p>退款有两种方案，根据模板配置决定：</p>
+<p><strong>方案一：券不返还</strong></p>
+<pre class="mermaid">graph TD
+    A[订单退款] --> B[UserCoupon<br/>USED 保持不变]
+    B --> C[写入 EventLog<br/>event_type=REFUNDED]</pre>
+
+<p><strong>方案二：券返还</strong></p>
+<pre class="mermaid">graph TD
+    A[订单退款] --> B[UserCoupon<br/>USED → UNUSED]
+    B --> C[写入 EventLog<br/>event_type=REFUNDED<br/>before_status=USED<br/>after_status=UNUSED]
+    C --> D[写入 EventLog<br/>event_type=RETURNED]
+    D --> E{优惠券是否过期?}
+    E -->|未过期| F[用户可再次使用]
+    E -->|已过期| G[状态变为 EXPIRED<br/>不可再次使用]</pre>
+
+<h2 id="模型总结"><a href="#模型总结" class="headerlink" title="模型总结"></a>模型总结</h2><p>4 张核心表：</p>
+<table>
+<thead>
+<tr>
+<th>表名</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>coupon_template</td>
+<td>优惠券模板定义</td>
+</tr>
+<tr>
+<td>user_coupon</td>
+<td>用户实际拥有的券</td>
+</tr>
+<tr>
+<td>coupon_use_record</td>
+<td>核销记录</td>
+</tr>
+<tr>
+<td>coupon_event_log</td>
+<td>生命周期事件</td>
+</tr>
+</tbody></table>
+<p>这样既不会出现十几张营销表导致过度设计，也能满足未来扩展：</p>
+<ul>
+<li>云存储优惠券</li>
+<li>流量包优惠券</li>
+<li>套餐优惠券</li>
+<li>兑换码</li>
+<li>新人券</li>
+<li>活动券</li>
+<li>邀请码奖励券</li>
+<li>订阅升级优惠券</li>
+</ul>
+<p>后续即使接入 Stripe 订阅升级、套餐促销、自动发券等需求，也无需推翻当前模型。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/design/" rel="tag"># design</a>
+              <a href="/tags/coupon/" rel="tag"># coupon</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/06/03/note/20260603-bangumi-cf-worker-proxy/" rel="prev" title="Cloudflare Worker 代理 Bangumi API">
+      <i class="fa fa-chevron-left"></i> Cloudflare Worker 代理 Bangumi API
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%A8%A1%E5%9E%8B%E5%85%B3%E7%B3%BB"><span class="nav-number">1.</span> <span class="nav-text">整体模型关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CouponTemplate-%E4%BC%98%E6%83%A0%E5%88%B8%E6%A8%A1%E6%9D%BF"><span class="nav-number">2.</span> <span class="nav-text">CouponTemplate 优惠券模板</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%8C%E8%B4%A3"><span class="nav-number">2.1.</span> <span class="nav-text">职责</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E7%BB%93%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text">表结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E"><span class="nav-number">2.3.</span> <span class="nav-text">字段说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF%E7%8A%B6%E6%80%81%E8%AF%B4%E6%98%8E"><span class="nav-number">2.4.</span> <span class="nav-text">模板状态说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E6%9D%BF%E7%8A%B6%E6%80%81%E6%B5%81%E8%BD%AC"><span class="nav-number">2.5.</span> <span class="nav-text">模板状态流转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%A1%8C%E4%B8%BA%E5%B7%AE%E5%BC%82"><span class="nav-number">2.6.</span> <span class="nav-text">状态行为差异</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%A0%B8%E5%BF%83%E6%9E%9A%E4%B8%BE"><span class="nav-number">2.7.</span> <span class="nav-text">其他核心枚举</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UserCoupon-%E7%94%A8%E6%88%B7%E5%88%B8"><span class="nav-number">3.</span> <span class="nav-text">UserCoupon 用户券</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%8C%E8%B4%A3-1"><span class="nav-number">3.1.</span> <span class="nav-text">职责</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E7%BB%93%E6%9E%84-1"><span class="nav-number">3.2.</span> <span class="nav-text">表结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E-1"><span class="nav-number">3.3.</span> <span class="nav-text">字段说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E6%B5%81%E8%BD%AC"><span class="nav-number">3.4.</span> <span class="nav-text">状态流转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B9%90%E8%A7%82%E9%94%81%EF%BC%88version%EF%BC%89"><span class="nav-number">3.5.</span> <span class="nav-text">乐观锁（version）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CouponUseRecord-%E7%94%A8%E5%88%B8%E8%AE%B0%E5%BD%95"><span class="nav-number">4.</span> <span class="nav-text">CouponUseRecord 用券记录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%8C%E8%B4%A3-2"><span class="nav-number">4.1.</span> <span class="nav-text">职责</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E7%BB%93%E6%9E%84-2"><span class="nav-number">4.2.</span> <span class="nav-text">表结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E-2"><span class="nav-number">4.3.</span> <span class="nav-text">字段说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.4.</span> <span class="nav-text">示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CouponEventLog-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E4%BA%8B%E4%BB%B6"><span class="nav-number">5.</span> <span class="nav-text">CouponEventLog 生命周期事件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%81%8C%E8%B4%A3-3"><span class="nav-number">5.1.</span> <span class="nav-text">职责</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A8%E7%BB%93%E6%9E%84-3"><span class="nav-number">5.2.</span> <span class="nav-text">表结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E-3"><span class="nav-number">5.3.</span> <span class="nav-text">字段说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.4.</span> <span class="nav-text">事件类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B-1"><span class="nav-number">5.5.</span> <span class="nav-text">示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">6.</span> <span class="nav-text">运行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%86%E5%8F%96%E4%BC%98%E6%83%A0%E5%88%B8"><span class="nav-number">6.1.</span> <span class="nav-text">领取优惠券</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E5%8F%AF%E7%94%A8%E5%88%B8"><span class="nav-number">6.2.</span> <span class="nav-text">查询可用券</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E7%AE%97%E7%AE%A1%E6%8E%A7%E9%80%BB%E8%BE%91"><span class="nav-number">6.3.</span> <span class="nav-text">预算管控逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E5%8D%95%E9%94%81%E5%88%B8"><span class="nav-number">6.4.</span> <span class="nav-text">下单锁券</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E4%BB%98%E6%88%90%E5%8A%9F"><span class="nav-number">6.5.</span> <span class="nav-text">支付成功</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%AF%E4%BB%98%E5%A4%B1%E8%B4%A5"><span class="nav-number">6.6.</span> <span class="nav-text">支付失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%80%E6%AC%BE"><span class="nav-number">6.7.</span> <span class="nav-text">退款</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">模型总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">273</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">160</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

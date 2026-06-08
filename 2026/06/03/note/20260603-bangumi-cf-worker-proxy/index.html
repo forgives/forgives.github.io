@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Bangumi 的部分域名（api.bgm.tv、next.bgm.tv、bangumi.tv）在当前网络环境下无法直接访问，通过 Cloudflare Worker 做反向代理来解决。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cloudflare Worker 代理 Bangumi API">
+<meta property="og:url" content="https://forgives.github.io/2026/06/03/note/20260603-bangumi-cf-worker-proxy/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="Bangumi 的部分域名（api.bgm.tv、next.bgm.tv、bangumi.tv）在当前网络环境下无法直接访问，通过 Cloudflare Worker 做反向代理来解决。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-03T12:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-03T05:42:06.385Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="proxy">
+<meta property="article:tag" content="Cloudflare">
+<meta property="article:tag" content="Worker">
+<meta property="article:tag" content="Bangumi">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/06/03/note/20260603-bangumi-cf-worker-proxy/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Cloudflare Worker 代理 Bangumi API | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/06/03/note/20260603-bangumi-cf-worker-proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Cloudflare Worker 代理 Bangumi API
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-06-03 20:00:00" itemprop="dateCreated datePublished" datetime="2026-06-03T20:00:00+08:00">2026-06-03</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Bangumi 的部分域名（<code>api.bgm.tv</code>、<code>next.bgm.tv</code>、<code>bangumi.tv</code>）在当前网络环境下无法直接访问，通过 Cloudflare Worker 做反向代理来解决。</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>Kazumi 项目依赖 Bangumi 开放 API 获取番剧元数据、评论、角色信息等。涉及三个上游域名：</p>
+<table>
+<thead>
+<tr>
+<th>域名</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>api.bgm.tv</code></td>
+<td>基础 API（搜索、条目信息、剧集、角色）</td>
+</tr>
+<tr>
+<td><code>next.bgm.tv</code></td>
+<td>Next API（每日放送、趋势、评论、Staff）</td>
+</tr>
+<tr>
+<td><code>bangumi.tv</code></td>
+<td>官网资源（头像占位图、表情图片、页面链接）</td>
+</tr>
+</tbody></table>
+<p>三个域名在内网环境均不可达，需要统一代理。</p>
+<h2 id="方案设计"><a href="#方案设计" class="headerlink" title="方案设计"></a>方案设计</h2><p>使用一个 Cloudflare Worker，通过<strong>路径前缀</strong>区分上游：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bangumi.mydomain.com/api/*  →  api.bgm.tv/*</span><br><span class="line">bangumi.mydomain.com/next/* →  next.bgm.tv/*</span><br><span class="line">bangumi.mydomain.com/bgm/*  →  bangumi.tv/*</span><br></pre></td></tr></table></figure>
+
+<h3 id="为什么用路径前缀而不是子域名"><a href="#为什么用路径前缀而不是子域名" class="headerlink" title="为什么用路径前缀而不是子域名"></a>为什么用路径前缀而不是子域名</h3><p>Cloudflare Worker 免费版每个 worker 绑定一个路由，用路径前缀可以在单个 worker 内处理多个上游，无需额外配置多条 DNS 记录和路由规则。</p>
+<h2 id="Worker-实现"><a href="#Worker-实现" class="headerlink" title="Worker 实现"></a>Worker 实现</h2><p>核心逻辑：</p>
+<ol>
+<li><strong>路由解析</strong> — 根据 pathname 的前缀匹配上游域名</li>
+<li><strong>URL 重写</strong> — 去掉路径前缀，拼接上游地址和 query string</li>
+<li><strong>Header 过滤</strong> — 移除 Cloudflare 注入的头（<code>cf-connecting-ip</code> 等），设置正确的 <code>Host</code></li>
+<li><strong>CORS 支持</strong> — 所有响应附加跨域头，前端&#x2F;移动端可直接调用</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="variable constant_">UPSTREAM_MAP</span> = &#123;</span><br><span class="line">  <span class="string">&#x27;/api&#x27;</span>:  <span class="string">&#x27;https://api.bgm.tv&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;/next&#x27;</span>: <span class="string">&#x27;https://next.bgm.tv&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;/bgm&#x27;</span>:  <span class="string">&#x27;https://bangumi.tv&#x27;</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="variable constant_">DEFAULT_UPSTREAM</span> = <span class="string">&#x27;https://api.bgm.tv&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="variable constant_">FORBIDDEN_HEADERS</span> = [</span><br><span class="line">  <span class="string">&#x27;host&#x27;</span>, <span class="string">&#x27;cf-connecting-ip&#x27;</span>, <span class="string">&#x27;cf-connecting-ipv6&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;cf-ipcountry&#x27;</span>, <span class="string">&#x27;cf-ray&#x27;</span>, <span class="string">&#x27;cf-visitor&#x27;</span>, <span class="string">&#x27;cf-worker&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;cf-cache-status&#x27;</span>, <span class="string">&#x27;x-real-ip&#x27;</span>, <span class="string">&#x27;x-forwarded-for&#x27;</span>, <span class="string">&#x27;x-forwarded-proto&#x27;</span>,</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">resolveUpstream</span>(<span class="params">pathname</span>) &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> [prefix, origin] <span class="keyword">of</span> <span class="title class_">Object</span>.<span class="title function_">entries</span>(<span class="variable constant_">UPSTREAM_MAP</span>)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (pathname === prefix || pathname.<span class="title function_">startsWith</span>(prefix + <span class="string">&#x27;/&#x27;</span>)) &#123;</span><br><span class="line">      <span class="keyword">return</span> &#123; origin, prefix &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &#123; <span class="attr">origin</span>: <span class="variable constant_">DEFAULT_UPSTREAM</span>, <span class="attr">prefix</span>: <span class="string">&#x27;&#x27;</span> &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">buildTargetURL</span>(<span class="params">request</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> url = <span class="keyword">new</span> <span class="title function_">URL</span>(request.<span class="property">url</span>);</span><br><span class="line">  <span class="keyword">const</span> &#123; origin, prefix &#125; = <span class="title function_">resolveUpstream</span>(url.<span class="property">pathname</span>);</span><br><span class="line">  <span class="keyword">const</span> target = <span class="keyword">new</span> <span class="title function_">URL</span>(</span><br><span class="line">    url.<span class="property">pathname</span>.<span class="title function_">substring</span>(prefix.<span class="property">length</span>) + url.<span class="property">search</span>, origin</span><br><span class="line">  );</span><br><span class="line">  target.<span class="property">protocol</span> = <span class="string">&#x27;https:&#x27;</span>;</span><br><span class="line">  <span class="keyword">return</span> &#123; <span class="attr">targetURL</span>: target, <span class="attr">upstreamHost</span>: <span class="keyword">new</span> <span class="title function_">URL</span>(origin).<span class="property">host</span> &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>处理请求时过滤敏感头并附加 CORS：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">handleRequest</span>(<span class="params">event</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> request = event.<span class="property">request</span>;</span><br><span class="line">  <span class="keyword">const</span> url = <span class="keyword">new</span> <span class="title function_">URL</span>(request.<span class="property">url</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (request.<span class="property">method</span> === <span class="string">&#x27;OPTIONS&#x27;</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">handleOPTIONS</span>();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> &#123; targetURL, upstreamHost &#125; = <span class="title function_">buildTargetURL</span>(request);</span><br><span class="line">  <span class="keyword">const</span> filteredHeaders = <span class="title function_">filterRequestHeaders</span>(request.<span class="property">headers</span>, upstreamHost);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> originRequest = <span class="keyword">new</span> <span class="title class_">Request</span>(targetURL.<span class="title function_">toString</span>(), &#123;</span><br><span class="line">    <span class="attr">method</span>: request.<span class="property">method</span>,</span><br><span class="line">    <span class="attr">headers</span>: filteredHeaders,</span><br><span class="line">    <span class="attr">body</span>: request.<span class="property">method</span> !== <span class="string">&#x27;GET&#x27;</span> &amp;&amp; request.<span class="property">method</span> !== <span class="string">&#x27;HEAD&#x27;</span></span><br><span class="line">      ? request.<span class="property">body</span> : <span class="literal">null</span>,</span><br><span class="line">    <span class="attr">redirect</span>: <span class="string">&#x27;follow&#x27;</span>,</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="title function_">fetch</span>(originRequest);</span><br><span class="line">  <span class="keyword">const</span> newHeaders = <span class="title function_">withCORSHeaders</span>(response.<span class="property">headers</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Response</span>(response.<span class="property">body</span>, &#123;</span><br><span class="line">    <span class="attr">status</span>: response.<span class="property">status</span>,</span><br><span class="line">    <span class="attr">statusText</span>: response.<span class="property">statusText</span>,</span><br><span class="line">    <span class="attr">headers</span>: newHeaders,</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="客户端适配"><a href="#客户端适配" class="headerlink" title="客户端适配"></a>客户端适配</h2><p>Kazumi 项目中所有 Bangumi 相关的 URL 统一改为走代理：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// lib/request/api.dart</span></span><br><span class="line"><span class="comment">/// <span class="language-markdown">Bangumi 官网（走代理）</span></span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="built_in">String</span> bangumiIndex = <span class="string">&#x27;https://bangumi.mydomain.com/bgm/&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// <span class="language-markdown">bangumi API Domain（代理 api.bgm.tv）</span></span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="built_in">String</span> bangumiAPIDomain = <span class="string">&#x27;https://bangumi.mydomain.com/api/&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// <span class="language-markdown">Bangumi Next API Domain（代理 next.bgm.tv）</span></span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="built_in">String</span> bangumiAPINextDomain = <span class="string">&#x27;https://bangumi.mydomain.com/next&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>图片资源等硬编码 URL 也需要同步替换：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 替换前</span></span><br><span class="line">NetworkImage(<span class="string">&#x27;https://bangumi.tv/img/info_only.png&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 替换后</span></span><br><span class="line">NetworkImage(<span class="string">&#x27;https://bangumi.mydomain.com/bgm/img/info_only.png&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><ol>
+<li>在 Cloudflare Dashboard → Workers 中创建 Worker</li>
+<li>粘贴脚本，保存并部署</li>
+<li>绑定自定义域名（如 <code>bangumi.mydomain.com</code>）</li>
+</ol>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ul>
+<li><code>bangumi.tv</code> 的资源（图片、页面）通过 <code>/bgm/</code> 前缀代理，路径映射要确保去掉前缀后与原始路径一致</li>
+<li>Worker 设置 <code>redirect: &#39;follow&#39;</code>，上游如有重定向会自动跟随</li>
+<li>如果还有其他 Bangumi CDN 域名不可达（如 <code>lain.bgm.tv</code>），可以按相同模式加 <code>/lain</code> 前缀</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/proxy/" rel="tag"># proxy</a>
+              <a href="/tags/Cloudflare/" rel="tag"># Cloudflare</a>
+              <a href="/tags/Worker/" rel="tag"># Worker</a>
+              <a href="/tags/Bangumi/" rel="tag"># Bangumi</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/05/19/note/20260519-wireguard-dns/" rel="prev" title="WireGuard 导致 DNS 失效问题复盘">
+      <i class="fa fa-chevron-left"></i> WireGuard 导致 DNS 失效问题复盘
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/06/08/note/20260608-coupon-design/" rel="next" title="优惠券系统设计">
+      优惠券系统设计 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.</span> <span class="nav-text">方案设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8%E8%B7%AF%E5%BE%84%E5%89%8D%E7%BC%80%E8%80%8C%E4%B8%8D%E6%98%AF%E5%AD%90%E5%9F%9F%E5%90%8D"><span class="nav-number">2.1.</span> <span class="nav-text">为什么用路径前缀而不是子域名</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Worker-%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">Worker 实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%80%82%E9%85%8D"><span class="nav-number">4.</span> <span class="nav-text">客户端适配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2"><span class="nav-number">5.</span> <span class="nav-text">部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">6.</span> <span class="nav-text">注意事项</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">273</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">160</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

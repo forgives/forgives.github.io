@@ -876,6 +876,8 @@ run_install() {
 
     select_kernel
     apply_kernel_vars
+    mkdir -p "$WORK_DIR"
+    generate_port
     select_argo_mode
 
     echo "============================================================"
@@ -898,8 +900,6 @@ run_install() {
     echo "系统架构: $arch"
     echo "工作目录: $WORK_DIR"
     echo ""
-
-    mkdir -p "$WORK_DIR"
 
     if [ "$RUN_MODE" = "nonroot" ]; then
         : > "$WORK_DIR/run.log"
@@ -925,7 +925,6 @@ run_install() {
     fi
 
     generate_uuid
-    generate_port
     generate_config
     start_core
     sleep 2
