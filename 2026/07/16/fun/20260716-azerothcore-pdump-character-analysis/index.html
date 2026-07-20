@@ -1,0 +1,2950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="AzerothCore pdump 文件中角色数据结构与表关系解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AzerothCore pdump 文件分析">
+<meta property="og:url" content="https://forgives.github.io/2026/07/16/fun/20260716-azerothcore-pdump-character-analysis/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="AzerothCore pdump 文件中角色数据结构与表关系解析">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-16T06:00:00.000Z">
+<meta property="article:modified_time" content="2026-07-20T14:32:36.351Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="fun">
+<meta property="article:tag" content="wow">
+<meta property="article:tag" content="azerothcore">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/07/16/fun/20260716-azerothcore-pdump-character-analysis/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>AzerothCore pdump 文件分析 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/07/16/fun/20260716-azerothcore-pdump-character-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AzerothCore pdump 文件分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-07-16 14:00:00" itemprop="dateCreated datePublished" datetime="2026-07-16T14:00:00+08:00">2026-07-16</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><code>pdump</code> 是 AzerothCore 用来把单个角色完整导出 &#x2F; 导入的命令（控制台或游戏内 <code>.character pdump write|load|copy</code>）。导出来的文件是一条条 <code>INSERT</code>，把这个角色相关的表都串起来。本文以真实样本 <code>pdump_20260715.txt</code>为切片，对照 <code>PlayerDump.cpp</code> 与 <code>db_characters</code> 建表，把 18 张实际落盘的表逐个拆开：表职能、字段类型与含义、样本数据、表间引用，以及交叉读表后还原出的角色画像。</p>
+<!-- more -->
+
+<h2 id="0-样本概况"><a href="#0-样本概况" class="headerlink" title="0. 样本概况"></a>0. 样本概况</h2><h3 id="0-1-角色画像（来自-characters）"><a href="#0-1-角色画像（来自-characters）" class="headerlink" title="0.1 角色画像（来自 characters）"></a>0.1 角色画像（来自 <code>characters</code>）</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+<th>解读</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>1002</td>
+<td>角色全局唯一 ID，所有 <code>character_*</code> 表外键都指它</td>
+</tr>
+<tr>
+<td><code>account</code></td>
+<td>101</td>
+<td>账号 ID（<code>acore_auth.account.id</code>）</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>大法师</td>
+<td>角色名</td>
+</tr>
+<tr>
+<td><code>race</code> &#x2F; <code>class</code> &#x2F; <code>gender</code></td>
+<td>10 &#x2F; 8 &#x2F; 1</td>
+<td>血精灵 &#x2F; 法师 &#x2F; 女性</td>
+</tr>
+<tr>
+<td><code>level</code> &#x2F; <code>xp</code></td>
+<td>29 &#x2F; 4026</td>
+<td>当前等级与本级经验</td>
+</tr>
+<tr>
+<td><code>money</code></td>
+<td>2096484</td>
+<td>209 金 64 银 84 铜</td>
+</tr>
+<tr>
+<td><code>position_*</code> &#x2F; <code>map</code> &#x2F; <code>zone</code></td>
+<td>-2386.9, -1891.31, 95.85 &#x2F; 1 &#x2F; 17</td>
+<td>卡利姆多 · <strong>贫瘠之地</strong></td>
+</tr>
+<tr>
+<td><code>totaltime</code> &#x2F; <code>leveltime</code></td>
+<td>123225 &#x2F; 3352</td>
+<td>总在线 ≈ <strong>34.2 小时</strong>；本级 ≈ <strong>56 分钟</strong></td>
+</tr>
+<tr>
+<td><code>creation_date</code></td>
+<td>2026-06-20 18:26:59</td>
+<td>建号时间</td>
+</tr>
+<tr>
+<td><code>logout_time</code></td>
+<td>1784122746</td>
+<td>最后下线 ≈ 2026-07-15 13:39 UTC</td>
+</tr>
+<tr>
+<td><code>health</code> &#x2F; <code>power1</code></td>
+<td>973 &#x2F; 2337</td>
+<td>当前生命 &#x2F; 法力</td>
+</tr>
+</tbody></table>
+<h3 id="0-2-样本表行数"><a href="#0-2-样本表行数" class="headerlink" title="0.2 样本表行数"></a>0.2 样本表行数</h3><pre class="mermaid">flowchart TB
+    subgraph rows["样本各表行数（从高到低）"]
+      direction TB
+      A1["character_achievement_progress — 281"]
+      A2["character_spell — 179"]
+      A3["character_queststatus_rewarded — 176"]
+      A4["item_instance — 149"]
+      A5["character_inventory — 147"]
+      A6["character_reputation — 105"]
+      A7["character_action — 47"]
+      A8["character_skills — 20"]
+      A9["character_achievement — 19"]
+      A10["character_talent — 10"]
+      A11["其余 8 张表 — 各 1~4 行"]
+      A1 --> A2 --> A3 --> A4 --> A5 --> A6 --> A7 --> A8 --> A9 --> A10 --> A11
+    end</pre>
+
+<table>
+<thead>
+<tr>
+<th>表</th>
+<th align="right">行数</th>
+<th>职能一句话</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>character_achievement_progress</code></td>
+<td align="right">281</td>
+<td>成就进度计数器</td>
+</tr>
+<tr>
+<td><code>character_spell</code></td>
+<td align="right">179</td>
+<td>已学法术 &#x2F; 配方</td>
+</tr>
+<tr>
+<td><code>character_queststatus_rewarded</code></td>
+<td align="right">176</td>
+<td>已领奖任务</td>
+</tr>
+<tr>
+<td><code>item_instance</code></td>
+<td align="right">149</td>
+<td>物品实体</td>
+</tr>
+<tr>
+<td><code>character_inventory</code></td>
+<td align="right">147</td>
+<td>物品槽位映射</td>
+</tr>
+<tr>
+<td><code>character_reputation</code></td>
+<td align="right">105</td>
+<td>声望</td>
+</tr>
+<tr>
+<td><code>character_action</code></td>
+<td align="right">47</td>
+<td>动作条</td>
+</tr>
+<tr>
+<td><code>character_skills</code></td>
+<td align="right">20</td>
+<td>技能熟练度</td>
+</tr>
+<tr>
+<td><code>character_achievement</code></td>
+<td align="right">19</td>
+<td>已完成成就</td>
+</tr>
+<tr>
+<td><code>character_talent</code></td>
+<td align="right">10</td>
+<td>已点天赋法术</td>
+</tr>
+<tr>
+<td><code>character_aura</code></td>
+<td align="right">4</td>
+<td>持久光环</td>
+</tr>
+<tr>
+<td><code>character_queststatus</code></td>
+<td align="right">3</td>
+<td>进行中任务</td>
+</tr>
+<tr>
+<td><code>character_queststatus_seasonal</code></td>
+<td align="right">2</td>
+<td>节日任务状态</td>
+</tr>
+<tr>
+<td><code>character_account_data</code></td>
+<td align="right">2</td>
+<td>客户端按角色配置</td>
+</tr>
+<tr>
+<td><code>character_glyphs</code></td>
+<td align="right">1</td>
+<td>雕文</td>
+</tr>
+<tr>
+<td><code>character_homebind</code></td>
+<td align="right">1</td>
+<td>炉石绑定</td>
+</tr>
+<tr>
+<td><code>mail</code></td>
+<td align="right">1</td>
+<td>邮件</td>
+</tr>
+<tr>
+<td><code>characters</code></td>
+<td align="right">1</td>
+<td>角色主表</td>
+</tr>
+</tbody></table>
+<p>可以把它当作 <code>characters</code> 库的一次<strong>垂直切片</strong>——只盯一个角色，就能把核心表学完。</p>
+<h3 id="0-3-为什么不能直接灌库"><a href="#0-3-为什么不能直接灌库" class="headerlink" title="0.3 为什么不能直接灌库"></a>0.3 为什么不能直接灌库</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">IMPORTANT NOTE: THIS DUMPFILE IS MADE FOR USE WITH THE &#x27;PDUMP&#x27; COMMAND ONLY</span><br><span class="line">DO NOT apply it directly - it will irreversibly DAMAGE and CORRUPT your database!</span><br></pre></td></tr></table></figure>
+
+<p>必须通过 <code>pdump load</code> 回放。<code>PlayerDump.cpp</code> 导入时会重写角色 GUID、物品 GUID、邮件 ID、宠物 ID、装备方案 ID，并级联修正引用；直接 <code>mysql &lt; dump.txt</code> 会撞主键或留下悬空引用。</p>
+<h3 id="0-4-pdump-导出范围与命令"><a href="#0-4-pdump-导出范围与命令" class="headerlink" title="0.4 pdump 导出范围与命令"></a>0.4 pdump 导出范围与命令</h3><p><code>DumpTables[]</code> 登记的表比本样本多，<strong>空表不写 INSERT</strong>。本样本无宠物、装备方案、法术 CD、邮件附件。</p>
+<p>导出时按表类型处理 GUID：</p>
+<pre class="mermaid">flowchart TB
+    subgraph types["PlayerDump 表类型"]
+      DTT_CHARACTER["DTT_CHARACTER<br/>characters 主行"]
+      DTT_CHAR_TABLE["DTT_CHAR_TABLE<br/>多数 character_*"]
+      DTT_INVENTORY["DTT_INVENTORY<br/>character_inventory"]
+      DTT_ITEM["item_instance<br/>GUID_TYPE_ITEM"]
+      DTT_MAIL["mail / mail_items"]
+      DTT_PET["character_pet* / pet_*"]
+      DTT_EQSET["character_equipmentsets"]
+    end
+    DTT_CHARACTER --> DTT_CHAR_TABLE
+    DTT_CHARACTER --> DTT_INVENTORY
+    DTT_INVENTORY --> DTT_ITEM
+    DTT_CHARACTER --> DTT_MAIL
+    DTT_CHARACTER --> DTT_PET
+    DTT_CHARACTER --> DTT_EQSET</pre>
+
+<pre class="mermaid">flowchart LR
+    A[".character pdump write"] --> B["PlayerDumpWriter"]
+    B --> C["按 DumpTables 扫库"]
+    C --> D["生成 INSERT 文本"]
+    E[".character pdump load"] --> F["PlayerDumpReader"]
+    F --> G["分配新 GUID"]
+    G --> H["改写引用后入库"]</pre>
+
+<p>命令入口：<code>src/server/scripts/Commands/cs_character.cpp</code></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.character pdump write &lt;file&gt; &lt;player&gt;</span><br><span class="line">.character pdump load  &lt;file&gt; &lt;account&gt; [new_name] [new_guid]</span><br><span class="line">.character pdump copy  &lt;player&gt; &lt;account&gt; [new_name] [new_guid]</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="1-characters-——-角色主表"><a href="#1-characters-——-角色主表" class="headerlink" title="1. characters —— 角色主表"></a>1. characters —— 角色主表</h2><h3 id="1-1-职能"><a href="#1-1-职能" class="headerlink" title="1.1 职能"></a>1.1 职能</h3><p>一条记录 &#x3D; 一个角色。登录、选人界面、地图落点、休息经验、PVP 货币、天赋组开关等顶层状态都在这里。主键 <code>guid</code> 是整棵角色数据树的根。</p>
+<h3 id="1-2-字段全表"><a href="#1-2-字段全表" class="headerlink" title="1.2 字段全表"></a>1.2 字段全表</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+<th>样本值 &#x2F; 说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int unsigned PK</td>
+<td>角色 GUID</td>
+<td>1002</td>
+</tr>
+<tr>
+<td><code>account</code></td>
+<td>int unsigned</td>
+<td>账号 ID → <code>acore_auth.account.id</code></td>
+<td>101</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>varchar(12) bin</td>
+<td>角色名（大小写敏感校对）</td>
+<td>大法师</td>
+</tr>
+<tr>
+<td><code>race</code></td>
+<td>tinyint</td>
+<td><code>ChrRaces.dbc</code> ID</td>
+<td>10 血精灵</td>
+</tr>
+<tr>
+<td><code>class</code></td>
+<td>tinyint</td>
+<td><code>ChrClasses.dbc</code> ID</td>
+<td>8 法师</td>
+</tr>
+<tr>
+<td><code>gender</code></td>
+<td>tinyint</td>
+<td>0 男 &#x2F; 1 女</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>level</code></td>
+<td>tinyint</td>
+<td>等级</td>
+<td>29</td>
+</tr>
+<tr>
+<td><code>xp</code></td>
+<td>int</td>
+<td>本级当前经验</td>
+<td>4026</td>
+</tr>
+<tr>
+<td><code>money</code></td>
+<td>int</td>
+<td>铜币现金</td>
+<td>2096484</td>
+</tr>
+<tr>
+<td><code>skin</code></td>
+<td>tinyint</td>
+<td>肤色索引</td>
+<td>7</td>
+</tr>
+<tr>
+<td><code>face</code></td>
+<td>tinyint</td>
+<td>脸型</td>
+<td>3</td>
+</tr>
+<tr>
+<td><code>hairStyle</code></td>
+<td>tinyint</td>
+<td>发型</td>
+<td>11</td>
+</tr>
+<tr>
+<td><code>hairColor</code></td>
+<td>tinyint</td>
+<td>发色</td>
+<td>9</td>
+</tr>
+<tr>
+<td><code>facialStyle</code></td>
+<td>tinyint</td>
+<td>面部装饰</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>bankSlots</code></td>
+<td>tinyint</td>
+<td>已购<strong>银行背包栏</strong>数 0–7</td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>restState</code></td>
+<td>tinyint</td>
+<td>休息状态枚举</td>
+<td>1&#x3D;<code>REST_STATE_RESTED</code></td>
+</tr>
+<tr>
+<td><code>playerFlags</code></td>
+<td>int</td>
+<td><code>PlayerFlags</code> 位掩码</td>
+<td>3072&#x3D;&#96;HIDE_HELM</td>
+</tr>
+<tr>
+<td><code>position_x/y/z</code></td>
+<td>float</td>
+<td>世界坐标</td>
+<td>贫瘠之地</td>
+</tr>
+<tr>
+<td><code>map</code></td>
+<td>smallint</td>
+<td>地图 ID</td>
+<td>1 卡利姆多</td>
+</tr>
+<tr>
+<td><code>instance_id</code></td>
+<td>int</td>
+<td>实例 ID，世界地图为 0</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>instance_mode_mask</code></td>
+<td>tinyint</td>
+<td>副本难度掩码</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>orientation</code></td>
+<td>float</td>
+<td>朝向弧度</td>
+<td>2.4174</td>
+</tr>
+<tr>
+<td><code>taximask</code></td>
+<td>text</td>
+<td>飞行点位图，空格分隔 uint32</td>
+<td>14 个节点已解锁</td>
+</tr>
+<tr>
+<td><code>online</code></td>
+<td>tinyint</td>
+<td>是否在线</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>cinematic</code></td>
+<td>tinyint</td>
+<td>是否看过种族开场动画</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>totaltime</code></td>
+<td>int</td>
+<td>总在线秒数</td>
+<td>123225</td>
+</tr>
+<tr>
+<td><code>leveltime</code></td>
+<td>int</td>
+<td>本级在线秒数</td>
+<td>3352</td>
+</tr>
+<tr>
+<td><code>logout_time</code></td>
+<td>int</td>
+<td>最后登出 Unix 秒</td>
+<td>1784122746</td>
+</tr>
+<tr>
+<td><code>is_logout_resting</code></td>
+<td>tinyint</td>
+<td>是否在休息区下线</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>rest_bonus</code></td>
+<td>float</td>
+<td>已累计休息经验池</td>
+<td>1998.15</td>
+</tr>
+<tr>
+<td><code>resettalents_cost</code></td>
+<td>int</td>
+<td>下次洗天赋金币代价</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>resettalents_time</code></td>
+<td>int</td>
+<td>上次洗天赋时间</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>trans_x/y/z/o</code></td>
+<td>float</td>
+<td>交通工具内相对坐标</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>transguid</code></td>
+<td>int</td>
+<td>交通工具 guid</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>extra_flags</code></td>
+<td>smallint</td>
+<td><code>PlayerExtraFlags</code></td>
+<td>4&#x3D;<code>ACCEPT_WHISPERS</code></td>
+</tr>
+<tr>
+<td><code>stable_slots</code></td>
+<td>tinyint</td>
+<td>宠物寄存栏购买数</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>at_login</code></td>
+<td>smallint</td>
+<td><code>AtLoginFlags</code> 登录时强制动作</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>zone</code></td>
+<td>smallint</td>
+<td>区域 AreaTable ID</td>
+<td>17 贫瘠之地</td>
+</tr>
+<tr>
+<td><code>death_expire_time</code></td>
+<td>int</td>
+<td>尸体可召回等相关截止时间</td>
+<td>1783764264</td>
+</tr>
+<tr>
+<td><code>taxi_path</code></td>
+<td>text</td>
+<td>当前飞行路径序列，空则 NULL</td>
+<td>NULL</td>
+</tr>
+<tr>
+<td><code>arenaPoints</code></td>
+<td>int</td>
+<td>竞技场点</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>totalHonorPoints</code></td>
+<td>int</td>
+<td>荣誉点总量</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>todayHonorPoints</code></td>
+<td>int</td>
+<td>今日荣誉</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>yesterdayHonorPoints</code></td>
+<td>int</td>
+<td>昨日荣誉</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>totalKills</code></td>
+<td>int</td>
+<td>荣誉击杀总量</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>todayKills</code></td>
+<td>smallint</td>
+<td>今日击杀</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>yesterdayKills</code></td>
+<td>smallint</td>
+<td>昨日击杀</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>chosenTitle</code></td>
+<td>int</td>
+<td>当前展示称号 CharTitles ID</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>knownCurrencies</code></td>
+<td>bigint</td>
+<td>已知货币位图</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>watchedFaction</code></td>
+<td>int</td>
+<td>声望面板追踪的 faction；<code>0xFFFFFFFF</code>&#x3D;无</td>
+<td>4294967295</td>
+</tr>
+<tr>
+<td><code>drunk</code></td>
+<td>tinyint</td>
+<td>醉酒等级 0–100 档</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>health</code></td>
+<td>int</td>
+<td>当前生命</td>
+<td>973</td>
+</tr>
+<tr>
+<td><code>power1</code></td>
+<td>int</td>
+<td>POWER_MANA</td>
+<td>2337</td>
+</tr>
+<tr>
+<td><code>power2</code></td>
+<td>int</td>
+<td>POWER_RAGE</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>power3</code></td>
+<td>int</td>
+<td>POWER_FOCUS</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>power4</code></td>
+<td>int</td>
+<td>POWER_ENERGY</td>
+<td>100（法师残留）</td>
+</tr>
+<tr>
+<td><code>power5</code></td>
+<td>int</td>
+<td>POWER_HAPPINESS</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>power6</code></td>
+<td>int</td>
+<td>POWER_RUNE</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>power7</code></td>
+<td>int</td>
+<td>POWER_RUNIC_POWER</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>latency</code></td>
+<td>int</td>
+<td>最近延迟 ms</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>talentGroupsCount</code></td>
+<td>tinyint</td>
+<td>天赋组数量 1 或 2</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>activeTalentGroup</code></td>
+<td>tinyint</td>
+<td>当前天赋组索引</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>exploredZones</code></td>
+<td>longtext</td>
+<td>128 个 uint32 迷雾位图</td>
+<td>~132 bit 已探索</td>
+</tr>
+<tr>
+<td><code>equipmentCache</code></td>
+<td>longtext</td>
+<td>选人界面装备缓存：<code>entry ench</code> 成对</td>
+<td>见 §1.3</td>
+</tr>
+<tr>
+<td><code>ammoId</code></td>
+<td>int</td>
+<td>弹药 item entry</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>knownTitles</code></td>
+<td>longtext</td>
+<td>称号位图，空格分隔 uint32</td>
+<td>全 0</td>
+</tr>
+<tr>
+<td><code>actionBars</code></td>
+<td>tinyint</td>
+<td>额外动作条解锁位</td>
+<td>15&#x3D;<code>0b1111</code></td>
+</tr>
+<tr>
+<td><code>grantableLevels</code></td>
+<td>tinyint</td>
+<td>可授予等级（招募等）</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>order</code></td>
+<td>tinyint</td>
+<td>角色列表排序</td>
+<td>NULL</td>
+</tr>
+<tr>
+<td><code>creation_date</code></td>
+<td>timestamp</td>
+<td>建号时间</td>
+<td>2026-06-20 18:26:59</td>
+</tr>
+<tr>
+<td><code>deleteInfos_Account</code></td>
+<td>int</td>
+<td>软删除时原账号</td>
+<td>NULL</td>
+</tr>
+<tr>
+<td><code>deleteInfos_Name</code></td>
+<td>varchar(12)</td>
+<td>软删除时原名</td>
+<td>NULL</td>
+</tr>
+<tr>
+<td><code>deleteDate</code></td>
+<td>int</td>
+<td>软删除时间</td>
+<td>NULL</td>
+</tr>
+<tr>
+<td><code>innTriggerId</code></td>
+<td>int</td>
+<td>最近旅店 areatrigger</td>
+<td>2286 乱风岗</td>
+</tr>
+<tr>
+<td><code>extraBonusTalentCount</code></td>
+<td>int</td>
+<td>额外天赋点数</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<h3 id="1-2-1-race-class-gender-枚举"><a href="#1-2-1-race-class-gender-枚举" class="headerlink" title="1.2.1 race &#x2F; class &#x2F; gender 枚举"></a>1.2.1 race &#x2F; class &#x2F; gender 枚举</h3><p>源码：<code>src/server/shared/SharedDefines.h</code>（<code>enum Races</code> &#x2F; <code>enum Classes</code> &#x2F; <code>enum Gender</code>）。<code>characters.race</code>、<code>characters.class</code>、<code>characters.gender</code> 直接存这些整型 ID；创建角色时还会再和 <code>ChrRaces.dbc</code> &#x2F; <code>ChrClasses.dbc</code> 校验。</p>
+<p><strong>Gender</strong></p>
+<table>
+<thead>
+<tr>
+<th align="right">值</th>
+<th>枚举</th>
+<th>含义</th>
+<th>样本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td><code>GENDER_MALE</code></td>
+<td>男性</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td><code>GENDER_FEMALE</code></td>
+<td>女性</td>
+<td>本样本</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td><code>GENDER_NONE</code></td>
+<td>无性别（非玩家单位等）</td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>Races（3.3.5a 可创建角色）</strong></p>
+<table>
+<thead>
+<tr>
+<th align="right">值</th>
+<th>枚举</th>
+<th>中文</th>
+<th>阵营</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td><code>RACE_NONE</code></td>
+<td>无</td>
+<td>—</td>
+<td>占位，不可创建</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td><code>RACE_HUMAN</code></td>
+<td>人类</td>
+<td>联盟</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td><code>RACE_ORC</code></td>
+<td>兽人</td>
+<td>部落</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td><code>RACE_DWARF</code></td>
+<td>矮人</td>
+<td>联盟</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td><code>RACE_NIGHTELF</code></td>
+<td>暗夜精灵</td>
+<td>联盟</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td><code>RACE_UNDEAD_PLAYER</code></td>
+<td>亡灵</td>
+<td>部落</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td><code>RACE_TAUREN</code></td>
+<td>牛头人</td>
+<td>部落</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td><code>RACE_GNOME</code></td>
+<td>侏儒</td>
+<td>联盟</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td><code>RACE_TROLL</code></td>
+<td>巨魔</td>
+<td>部落</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td>（未用）</td>
+<td>地精</td>
+<td>—</td>
+<td>3.3.5 玩家不可选；枚举里注释掉</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td><code>RACE_BLOODELF</code></td>
+<td>血精灵</td>
+<td>部落</td>
+<td><strong>本样本</strong></td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td><code>RACE_DRAENEI</code></td>
+<td>德莱尼</td>
+<td>联盟</td>
+<td></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>12 及以上（邪兽人、纳迦、破碎者等）只出现在 NPC &#x2F; 扩展占位，正常 <code>characters.race</code> 不会是这些值。</p>
+</blockquote>
+<p><strong>Classes（3.3.5a）</strong></p>
+<table>
+<thead>
+<tr>
+<th align="right">值</th>
+<th>枚举</th>
+<th>中文</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td><code>CLASS_NONE</code></td>
+<td>无</td>
+<td>占位</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td><code>CLASS_WARRIOR</code></td>
+<td>战士</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td><code>CLASS_PALADIN</code></td>
+<td>圣骑士</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td><code>CLASS_HUNTER</code></td>
+<td>猎人</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td><code>CLASS_ROGUE</code></td>
+<td>潜行者</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td><code>CLASS_PRIEST</code></td>
+<td>牧师</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td><code>CLASS_DEATH_KNIGHT</code></td>
+<td>死亡骑士</td>
+<td>WotLK 英雄职业</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td><code>CLASS_SHAMAN</code></td>
+<td>萨满祭司</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td><code>CLASS_MAGE</code></td>
+<td>法师</td>
+<td><strong>本样本</strong></td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td><code>CLASS_WARLOCK</code></td>
+<td>术士</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td>（未用）</td>
+<td>—</td>
+<td>枚举空号</td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td><code>CLASS_DRUID</code></td>
+<td>德鲁伊</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>样本对应关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">race=10  → RACE_BLOODELF  血精灵</span><br><span class="line">class=8  → CLASS_MAGE     法师</span><br><span class="line">gender=1 → GENDER_FEMALE  女性</span><br></pre></td></tr></table></figure>
+
+<p>种族与职业并非任意组合。服务端创建角色时会查 <code>ChrRaces</code> &#x2F; <code>ChrClasses</code> 及内部 mask（如 <code>CLASSMASK_ALL_PLAYABLE</code>）；例如血精灵可做法师，牛头人不可。读 dump 时若看到非法组合，多半是手工改库或私服自定义。</p>
+<pre class="mermaid">flowchart LR
+    subgraph sample["本样本"]
+      R["race = 10<br/>Blood Elf"] --> C["class = 8<br/>Mage"]
+      C --> G["gender = 1<br/>Female"]
+    end</pre>
+
+<h3 id="1-2-2-其它常用枚举摘录"><a href="#1-2-2-其它常用枚举摘录" class="headerlink" title="1.2.2 其它常用枚举摘录"></a>1.2.2 其它常用枚举摘录</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PlayerFlags:     HIDE_HELM=0x400, HIDE_CLOAK=0x800, RESTING=0x20, GM=0x8 ...</span><br><span class="line">PlayerExtraFlags: GM_ON=0x1, ACCEPT_WHISPERS=0x4, TAXICHEAT=0x8, GM_INVISIBLE=0x10 ...</span><br><span class="line">AtLoginFlags:    RENAME=0x1, RESET_SPELLS=0x2, RESET_TALENTS=0x4, CUSTOMIZE=0x8 ...</span><br><span class="line">RestState:       RESTED=1, NOT_RAF_LINKED=2, TIRED=3, EXHAUSTED=5 ...</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-equipmentCache"><a href="#1-3-equipmentCache" class="headerlink" title="1.3 equipmentCache"></a>1.3 equipmentCache</h3><p>按可见装备槽顺序，每槽 2 个数：<code>itemEntry</code> + <code>PERM</code> 附魔 ID。选人界面只读主表，不联 <code>item_instance</code>。</p>
+<table>
+<thead>
+<tr>
+<th>槽</th>
+<th>itemEntry</th>
+<th>物品</th>
+<th>缓存附魔</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>头</td>
+<td>10502</td>
+<td>Spellpower Goggles Xtreme</td>
+<td>0</td>
+</tr>
+<tr>
+<td>肩</td>
+<td>3748</td>
+<td>Feline Mantle</td>
+<td>0</td>
+</tr>
+<tr>
+<td>胸</td>
+<td>4324</td>
+<td>Azure Silk Vest</td>
+<td>17</td>
+</tr>
+<tr>
+<td>腰</td>
+<td>51968</td>
+<td>Enumerated Wrap</td>
+<td>0</td>
+</tr>
+<tr>
+<td>腿</td>
+<td>7046</td>
+<td>Azure Silk Pants</td>
+<td>17</td>
+</tr>
+<tr>
+<td>脚</td>
+<td>4320</td>
+<td>Spidersilk Boots</td>
+<td>0</td>
+</tr>
+<tr>
+<td>腕</td>
+<td>14148</td>
+<td>Crystalline Cuffs</td>
+<td>0</td>
+</tr>
+<tr>
+<td>手</td>
+<td>51973</td>
+<td>Enumerated Handwraps</td>
+<td>0</td>
+</tr>
+<tr>
+<td>戒指1</td>
+<td>50255</td>
+<td>Dread Pirate Ring</td>
+<td>0</td>
+</tr>
+<tr>
+<td>戒指2</td>
+<td>1156</td>
+<td>Lavishly Jeweled Ring</td>
+<td>0</td>
+</tr>
+<tr>
+<td>饰品1</td>
+<td>42992</td>
+<td>Discerning Eye of the Beast</td>
+<td>0</td>
+</tr>
+<tr>
+<td>背</td>
+<td>6340</td>
+<td>Fenrus’ Hide</td>
+<td>0</td>
+</tr>
+<tr>
+<td>主手</td>
+<td>15241</td>
+<td>Battle Knife</td>
+<td>0</td>
+</tr>
+<tr>
+<td>副手</td>
+<td>6341</td>
+<td>Eerie Stable Lantern</td>
+<td>0</td>
+</tr>
+<tr>
+<td>远程</td>
+<td>7001</td>
+<td>Gravestone Scepter</td>
+<td>0</td>
+</tr>
+<tr>
+<td>包1–4</td>
+<td>23162×4</td>
+<td>Foror’s Crate</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<h3 id="1-4-时间线"><a href="#1-4-时间线" class="headerlink" title="1.4 时间线"></a>1.4 时间线</h3><pre class="mermaid">flowchart LR
+    T1["06-20<br/>建号 / Lv10 / RFC"] --> T2["06-27<br/>WC / 小宠物"]
+    T2 --> T3["07-04<br/>100 Quests"]
+    T3 --> T4["07-06<br/>Lv20 / SFK / 骑术 / DM"]
+    T4 --> T5["07-11<br/>决斗 / BFD / Stockades"]
+    T5 --> T6["07-15<br/>登出 / pdump"]</pre>
+
+<hr>
+<h2 id="2-character-account-data-——-客户端按角色配置"><a href="#2-character-account-data-——-客户端按角色配置" class="headerlink" title="2. character_account_data —— 客户端按角色配置"></a>2. character_account_data —— 客户端按角色配置</h2><h3 id="2-1-职能"><a href="#2-1-职能" class="headerlink" title="2.1 职能"></a>2.1 职能</h3><p>把客户端 CVar、聊天窗、按键、宏等按<strong>角色</strong>持久化。换机登录可恢复 UI 习惯。主键 <code>(guid, type)</code>。</p>
+<h3 id="2-2-字段"><a href="#2-2-字段" class="headerlink" title="2.2 字段"></a>2.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int unsigned</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>tinyint</td>
+<td><code>AccountDataType</code>，见下表</td>
+</tr>
+<tr>
+<td><code>time</code></td>
+<td>int</td>
+<td>该块最后更新 Unix 时间</td>
+</tr>
+<tr>
+<td><code>data</code></td>
+<td>blob</td>
+<td>原始内容（多为可解析文本）</td>
+</tr>
+</tbody></table>
+<p><code>AccountDataType</code>（<code>WorldSession.h</code>）：</p>
+<table>
+<thead>
+<tr>
+<th align="right">type</th>
+<th>枚举</th>
+<th>范围</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td>GLOBAL_CONFIG_CACHE</td>
+<td>账号级</td>
+<td>全局配置（一般不在本表）</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td>PER_CHARACTER_CONFIG_CACHE</td>
+<td>角色</td>
+<td><strong>CVar</strong></td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td>GLOBAL_BINDINGS_CACHE</td>
+<td>账号级</td>
+<td>全局按键</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td>PER_CHARACTER_BINDINGS_CACHE</td>
+<td>角色</td>
+<td>按键</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td>GLOBAL_MACROS_CACHE</td>
+<td>账号级</td>
+<td>全局宏</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td>PER_CHARACTER_MACROS_CACHE</td>
+<td>角色</td>
+<td>宏</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td>PER_CHARACTER_LAYOUT_CACHE</td>
+<td>角色</td>
+<td>界面布局</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td>PER_CHARACTER_CHAT_CACHE</td>
+<td>角色</td>
+<td><strong>聊天窗</strong></td>
+</tr>
+</tbody></table>
+<p>样本 2 行：<code>type=1</code>（CVar）与 <code>type=7</code>（聊天，约 3.7KB）。</p>
+<p>type&#x3D;1 要点：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">equipmentManager=1</span><br><span class="line">nameplateShowEnemies=1</span><br><span class="line">showKeyring=1</span><br><span class="line">playerStatLeftDropdown=PLAYERSTAT_BASE_STATS</span><br><span class="line">playerStatRightDropdown=PLAYERSTAT_SPELL_COMBAT</span><br><span class="line">lfgSelectedRoles=9</span><br><span class="line">minimapTrackedInfo=MINIMAP_TRACKING_VENDOR_FOOD</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3-character-achievement-——-已完成成就"><a href="#3-character-achievement-——-已完成成就" class="headerlink" title="3. character_achievement —— 已完成成就"></a>3. character_achievement —— 已完成成就</h2><h3 id="3-1-职能"><a href="#3-1-职能" class="headerlink" title="3.1 职能"></a>3.1 职能</h3><p>已经点亮的成就。完成瞬间写入一行；进度型统计在 <code>character_achievement_progress</code>。</p>
+<h3 id="3-2-字段"><a href="#3-2-字段" class="headerlink" title="3.2 字段"></a>3.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>achievement</code></td>
+<td>smallint</td>
+<td><code>Achievement.dbc</code> ID</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>int</td>
+<td>完成 Unix 时间</td>
+</tr>
+</tbody></table>
+<p>主键 <code>(guid, achievement)</code>。</p>
+<h3 id="3-3-样本-19-条"><a href="#3-3-样本-19-条" class="headerlink" title="3.3 样本 19 条"></a>3.3 样本 19 条</h3><table>
+<thead>
+<tr>
+<th align="right">ID</th>
+<th>名称</th>
+<th>时间 UTC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">879</td>
+<td>Old School Ride</td>
+<td>06-20 10:35</td>
+</tr>
+<tr>
+<td align="right">131</td>
+<td>Journeyman Medic</td>
+<td>06-20 11:07</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td>Level 10</td>
+<td>06-20 14:41</td>
+</tr>
+<tr>
+<td align="right">503 &#x2F; 522</td>
+<td>50 Quests &#x2F; Somebody Likes Me</td>
+<td>06-20 14:43</td>
+</tr>
+<tr>
+<td align="right">116</td>
+<td>Professional Journeyman</td>
+<td>06-20 14:46</td>
+</tr>
+<tr>
+<td align="right">629</td>
+<td>Ragefire Chasm</td>
+<td>06-20 15:29</td>
+</tr>
+<tr>
+<td align="right">1017</td>
+<td>Can I Keep Him?</td>
+<td>06-27 14:23</td>
+</tr>
+<tr>
+<td align="right">630</td>
+<td>Wailing Caverns</td>
+<td>06-27 15:11</td>
+</tr>
+<tr>
+<td align="right">504</td>
+<td>100 Quests</td>
+<td>07-04 12:54</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td>Level 20</td>
+<td>07-06 03:34</td>
+</tr>
+<tr>
+<td align="right">631</td>
+<td>Shadowfang Keep</td>
+<td>07-06 03:57</td>
+</tr>
+<tr>
+<td align="right">731</td>
+<td>Professional Expert</td>
+<td>07-06 04:05</td>
+</tr>
+<tr>
+<td align="right">891</td>
+<td>Giddy Up!</td>
+<td>07-06 08:25</td>
+</tr>
+<tr>
+<td align="right">628</td>
+<td>Deadmines</td>
+<td>07-06 13:54</td>
+</tr>
+<tr>
+<td align="right">1157</td>
+<td>Duel-icious</td>
+<td>07-11 06:33</td>
+</tr>
+<tr>
+<td align="right">632</td>
+<td>Blackfathom Deeps</td>
+<td>07-11 08:52</td>
+</tr>
+<tr>
+<td align="right">633</td>
+<td>Stormwind Stockade</td>
+<td>07-11 10:30</td>
+</tr>
+</tbody></table>
+<pre class="mermaid">flowchart LR
+    RFC[629 RFC] --> WC[630 WC]
+    WC --> SFK[631 SFK]
+    SFK --> DM[628 Deadmines]
+    DM --> BFD[632 BFD]
+    BFD --> STK[633 Stockades]</pre>
+
+<hr>
+<h2 id="4-character-achievement-progress-——-成就进度"><a href="#4-character-achievement-progress-——-成就进度" class="headerlink" title="4. character_achievement_progress —— 成就进度"></a>4. character_achievement_progress —— 成就进度</h2><h3 id="4-1-职能"><a href="#4-1-职能" class="headerlink" title="4.1 职能"></a>4.1 职能</h3><p>未完成或需累计的 criteria。每个 <code>(guid, criteria)</code> 一行，<code>counter</code> 为当前累计。</p>
+<h3 id="4-2-字段"><a href="#4-2-字段" class="headerlink" title="4.2 字段"></a>4.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>criteria</code></td>
+<td>smallint</td>
+<td><code>AchievementCriteria.dbc</code> ID</td>
+</tr>
+<tr>
+<td><code>counter</code></td>
+<td>int</td>
+<td>当前进度值（击杀数&#x2F;铜币&#x2F;伤害等）</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>int</td>
+<td>最后更新时间</td>
+</tr>
+</tbody></table>
+<h3 id="4-3-样本高值"><a href="#4-3-样本高值" class="headerlink" title="4.3 样本高值"></a>4.3 样本高值</h3><table>
+<thead>
+<tr>
+<th align="right">criteria</th>
+<th align="right">counter</th>
+<th>解读</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">4224</td>
+<td align="right">2317003</td>
+<td>金钱类累计，约 231 金量级</td>
+</tr>
+<tr>
+<td align="right">3361 &#x2F; 4091</td>
+<td align="right">621267</td>
+<td>62 金 12 银 67 铜</td>
+</tr>
+<tr>
+<td align="right">3355 等</td>
+<td align="right">184260</td>
+<td>造成伤害</td>
+</tr>
+<tr>
+<td align="right">3354 等</td>
+<td align="right">36676</td>
+<td>承受伤害</td>
+</tr>
+<tr>
+<td align="right">3356</td>
+<td align="right">8742</td>
+<td>治疗量</td>
+</tr>
+<tr>
+<td align="right">2072</td>
+<td align="right">1439</td>
+<td>击杀数</td>
+</tr>
+<tr>
+<td align="right">73 &#x2F; 232 等</td>
+<td align="right">176</td>
+<td>已交任务数 &#x3D; rewarded 行数</td>
+</tr>
+<tr>
+<td align="right">992 等</td>
+<td align="right">42xxx</td>
+<td>主城声望接近 Exalted</td>
+</tr>
+<tr>
+<td align="right">842–902</td>
+<td align="right">225</td>
+<td>专业 225 相关</td>
+</tr>
+<tr>
+<td align="right">164 等</td>
+<td align="right">210</td>
+<td>炼金 210 相关</td>
+</tr>
+</tbody></table>
+<p>经济结论：现金 209 金，自产统计约 62 金 → <strong>明显有外部注资</strong>。</p>
+<hr>
+<h2 id="5-character-action-——-动作条"><a href="#5-character-action-——-动作条" class="headerlink" title="5. character_action —— 动作条"></a>5. character_action —— 动作条</h2><h3 id="5-1-职能"><a href="#5-1-职能" class="headerlink" title="5.1 职能"></a>5.1 职能</h3><p>记录每个动作条按钮绑定的法术 &#x2F; 物品 &#x2F; 宏。双天赋时 <code>spec</code> 分 0&#x2F;1 两套。</p>
+<h3 id="5-2-字段"><a href="#5-2-字段" class="headerlink" title="5.2 字段"></a>5.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>spec</code></td>
+<td>tinyint</td>
+<td>天赋组索引</td>
+</tr>
+<tr>
+<td><code>button</code></td>
+<td>tinyint</td>
+<td>按钮编号 0–143</td>
+</tr>
+<tr>
+<td><code>action</code></td>
+<td>int</td>
+<td>法术 ID 或物品 entry 或宏 ID</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>tinyint</td>
+<td><code>ActionButtonType</code></td>
+</tr>
+</tbody></table>
+<p>主键 <code>(guid, spec, button)</code>。</p>
+<p><code>type</code>：</p>
+<table>
+<thead>
+<tr>
+<th align="right">值</th>
+<th>枚举</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0x00</td>
+<td>ACTION_BUTTON_SPELL</td>
+<td>法术，<code>action</code>&#x3D;spellId</td>
+</tr>
+<tr>
+<td align="right">0x01</td>
+<td>ACTION_BUTTON_C</td>
+<td>click 类</td>
+</tr>
+<tr>
+<td align="right">0x20</td>
+<td>ACTION_BUTTON_EQSET</td>
+<td>装备方案</td>
+</tr>
+<tr>
+<td align="right">0x40</td>
+<td>ACTION_BUTTON_MACRO</td>
+<td>宏</td>
+</tr>
+<tr>
+<td align="right">0x80</td>
+<td>ACTION_BUTTON_ITEM</td>
+<td>物品，<code>action</code>&#x3D;itemEntry</td>
+</tr>
+</tbody></table>
+<p><code>button</code> 分区：</p>
+<pre class="mermaid">flowchart TB
+    M["button 0-11 主动作条"]
+    M --> R1["12-23 右下"]
+    M --> R2["24-35 左下"]
+    M --> R3["36-47 右侧"]
+    M --> R4["48-59 左侧"]
+    M --> R5["60-71 额外条"]
+    M --> R6["72-83 上方条"]</pre>
+
+<p>样本 47 键：法术 39、物品 8。主条：</p>
+<table>
+<thead>
+<tr>
+<th align="right">btn</th>
+<th align="right">action</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td align="right">120</td>
+<td>Cone of Cold</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td align="right">8406</td>
+<td>Frostbolt 高阶</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td align="right">8444</td>
+<td>Fire Blast</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td align="right">8400</td>
+<td>Fireball</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td align="right">5145</td>
+<td>Arcane Missiles</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td align="right">8437</td>
+<td>Arcane Explosion</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td align="right">5019</td>
+<td>Shoot</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td align="right">1953</td>
+<td>Blink</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td align="right">12824</td>
+<td>Polymorph</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td align="right">865</td>
+<td>Frost Nova</td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td align="right">2138</td>
+<td>Fire Blast 另一阶</td>
+</tr>
+</tbody></table>
+<p>其它条含专业技能、手雷 <code>4390</code>、药水、<code>12472</code> Icy Veins、<code>2139</code> Counterspell、<code>28730</code> 奥术洪流。</p>
+<hr>
+<h2 id="6-character-aura-——-持久光环"><a href="#6-character-aura-——-持久光环" class="headerlink" title="6. character_aura —— 持久光环"></a>6. character_aura —— 持久光环</h2><h3 id="6-1-职能"><a href="#6-1-职能" class="headerlink" title="6.1 职能"></a>6.1 职能</h3><p>下线仍保留、上线需恢复的长 buff（自身护甲、智力、NPC 耐力、药剂、物品触发等）。短战斗光环通常不入库。</p>
+<h3 id="6-2-字段"><a href="#6-2-字段" class="headerlink" title="6.2 字段"></a>6.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>受益者 → <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>casterGuid</code></td>
+<td>bigint</td>
+<td>施法者完整 GUID（玩家或生物，可含 HighGuid）</td>
+</tr>
+<tr>
+<td><code>itemGuid</code></td>
+<td>bigint</td>
+<td>物品触发时的物品完整 GUID；非物品为 0</td>
+</tr>
+<tr>
+<td><code>spell</code></td>
+<td>int</td>
+<td>法术 ID</td>
+</tr>
+<tr>
+<td><code>effectMask</code></td>
+<td>tinyint</td>
+<td>哪些 effect 槽生效（bit0&#x3D;effect0…）</td>
+</tr>
+<tr>
+<td><code>recalculateMask</code></td>
+<td>tinyint</td>
+<td>上线需重算的 effect 位</td>
+</tr>
+<tr>
+<td><code>stackCount</code></td>
+<td>tinyint</td>
+<td>层数</td>
+</tr>
+<tr>
+<td><code>amount0/1/2</code></td>
+<td>int</td>
+<td>三 effect 当前修正值</td>
+</tr>
+<tr>
+<td><code>base_amount0/1/2</code></td>
+<td>int</td>
+<td>基础值（未吃加成前）</td>
+</tr>
+<tr>
+<td><code>maxDuration</code></td>
+<td>int</td>
+<td>最大持续 ms</td>
+</tr>
+<tr>
+<td><code>remainTime</code></td>
+<td>int</td>
+<td>剩余 ms（下线冻结）</td>
+</tr>
+<tr>
+<td><code>remainCharges</code></td>
+<td>tinyint</td>
+<td>剩余次数；0 常表示无次数限制</td>
+</tr>
+</tbody></table>
+<p>主键 <code>(guid, casterGuid, itemGuid, spell, effectMask)</code>。</p>
+<p>样本 4 条：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">caster=505       spell=1245 +20耐力  30min  NPC 耐力</span><br><span class="line">caster=1002      spell=1461 +15智力  30min  Arcane Intellect</span><br><span class="line">caster=1002      spell=7301 +200护甲 30min  Frost Armor</span><br><span class="line">caster=1002+item spell=3166 +7精神   ~16min 物品触发</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-character-glyphs-——-雕文"><a href="#7-character-glyphs-——-雕文" class="headerlink" title="7. character_glyphs —— 雕文"></a>7. character_glyphs —— 雕文</h2><h3 id="7-1-职能"><a href="#7-1-职能" class="headerlink" title="7.1 职能"></a>7.1 职能</h3><p>每个天赋组 6 个雕文槽（3 主 3 副，按等级解锁）。</p>
+<h3 id="7-2-字段"><a href="#7-2-字段" class="headerlink" title="7.2 字段"></a>7.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>talentGroup</code></td>
+<td>tinyint</td>
+<td>天赋组 0&#x2F;1</td>
+</tr>
+<tr>
+<td><code>glyph1..6</code></td>
+<td>smallint</td>
+<td><code>GlyphProperties.dbc</code> ID；0&#x3D;空</td>
+</tr>
+</tbody></table>
+<p>主键 <code>(guid, talentGroup)</code>。</p>
+<p>样本：<code>glyph1=315, glyph2=451, 其余 0</code>。29 级只开部分槽。</p>
+<hr>
+<h2 id="8-character-homebind-——-炉石绑定"><a href="#8-character-homebind-——-炉石绑定" class="headerlink" title="8. character_homebind —— 炉石绑定"></a>8. character_homebind —— 炉石绑定</h2><h3 id="8-1-职能"><a href="#8-1-职能" class="headerlink" title="8.1 职能"></a>8.1 职能</h3><p>炉石传送目标。每个角色一行。</p>
+<h3 id="8-2-字段"><a href="#8-2-字段" class="headerlink" title="8.2 字段"></a>8.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+<th>样本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int PK</td>
+<td>→ <code>characters.guid</code></td>
+<td>1002</td>
+</tr>
+<tr>
+<td><code>mapId</code></td>
+<td>smallint</td>
+<td>地图</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>zoneId</code></td>
+<td>smallint</td>
+<td>区域</td>
+<td>484</td>
+</tr>
+<tr>
+<td><code>posX/Y/Z</code></td>
+<td>float</td>
+<td>坐标</td>
+<td>-5473.93, -2458.54, 89.2845</td>
+</tr>
+</tbody></table>
+<p>对照 <code>areatrigger 2286</code> + <code>areatrigger_tavern</code>：千针石林 <strong>Freewind Post</strong> 旅店。与 <code>characters.innTriggerId=2286</code> 一致。人在贫瘠、炉石在千针。</p>
+<hr>
+<h2 id="9-character-inventory-item-instance-——-物品系统"><a href="#9-character-inventory-item-instance-——-物品系统" class="headerlink" title="9. character_inventory + item_instance —— 物品系统"></a>9. character_inventory + item_instance —— 物品系统</h2><h3 id="9-1-职能分工"><a href="#9-1-职能分工" class="headerlink" title="9.1 职能分工"></a>9.1 职能分工</h3><table>
+<thead>
+<tr>
+<th>表</th>
+<th>职能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>item_instance</code></td>
+<td>物品<strong>实体</strong>：模板、堆叠、附魔、耐久、绑定</td>
+</tr>
+<tr>
+<td><code>character_inventory</code></td>
+<td><strong>放哪</strong>：哪个 bag 的第几 slot</td>
+</tr>
+</tbody></table>
+<pre class="mermaid">erDiagram
+    characters ||--o{ character_inventory : "guid"
+    characters ||--o{ item_instance : "owner_guid"
+    character_inventory }o--|| item_instance : "item = guid"
+    character_inventory }o--o| item_instance : "bag = guid (or 0)"
+    characters ||--o{ item_instance : "creatorGuid"</pre>
+
+<p>样本：<code>item_instance</code> 149，<code>inventory</code> 147。多出 2 件悬空：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">36538 Clarice&#x27;s Pendant (6145)</span><br><span class="line">36539 Samophlange (5054)</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-2-character-inventory-字段"><a href="#9-2-character-inventory-字段" class="headerlink" title="9.2 character_inventory 字段"></a>9.2 character_inventory 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>角色 → <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>bag</code></td>
+<td>int</td>
+<td>容器 <code>item_instance.guid</code>；<strong>0&#x3D;角色自身槽位空间</strong></td>
+</tr>
+<tr>
+<td><code>slot</code></td>
+<td>tinyint</td>
+<td>槽位号（含义随 bag 变化）</td>
+</tr>
+<tr>
+<td><code>item</code></td>
+<td>int PK</td>
+<td>物品实例 → <code>item_instance.guid</code></td>
+</tr>
+</tbody></table>
+<p>唯一键 <code>(guid, bag, slot)</code>：同一格不能放两件。</p>
+<h3 id="9-3-bag-0-时的-slot-空间"><a href="#9-3-bag-0-时的-slot-空间" class="headerlink" title="9.3 bag&#x3D;0 时的 slot 空间"></a>9.3 bag&#x3D;0 时的 slot 空间</h3><pre class="mermaid">flowchart TB
+    subgraph body["bag = 0 角色自身"]
+      E["0-18 装备槽"]
+      B["19-22 四个背包栏"]
+      M["23-38 主背包 16 格"]
+      BI["39-66 银行物品格"]
+      BB["67-73 银行背包栏"]
+    end
+    E --> B --> M --> BI --> BB</pre>
+
+<table>
+<thead>
+<tr>
+<th>slot 范围</th>
+<th>枚举</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0–18</td>
+<td>EQUIPMENT_SLOT_*</td>
+<td>头颈肩…主副手远程战袍</td>
+</tr>
+<tr>
+<td>19–22</td>
+<td>INVENTORY_SLOT_BAG_*</td>
+<td>身上 4 个包</td>
+</tr>
+<tr>
+<td>23–38</td>
+<td>INVENTORY_SLOT_ITEM_*</td>
+<td>主背包 16 格</td>
+</tr>
+<tr>
+<td>39–66</td>
+<td>BANK_SLOT_ITEM_*</td>
+<td>银行主空间</td>
+</tr>
+<tr>
+<td>67–73</td>
+<td>BANK_SLOT_BAG_*</td>
+<td>银行包栏（<code>bankSlots</code> 控制已购数）</td>
+</tr>
+</tbody></table>
+<p>装备槽细目：</p>
+<pre class="mermaid">flowchart LR
+    subgraph equip["装备 0-18"]
+      H["0 头"] --- N["1 颈"] --- S["2 肩"] --- C["3 衬衣"]
+      C --- Ch["4 胸"] --- W["5 腰"] --- L["6 腿"] --- F["7 脚"]
+      F --- Wr["8 腕"] --- Ha["9 手"] --- R1["10 戒"] --- R2["11 戒"]
+      R2 --- T1["12 饰"] --- T2["13 饰"] --- B["14 背"]
+      B --- MH["15 主手"] --- OH["16 副手"] --- RG["17 远程"] --- TB["18 战袍"]
+    end</pre>
+
+<p>样本 <code>bag=0</code> 占用：装备 15 件（缺颈&#x2F;衬衣&#x2F;饰品2&#x2F;战袍）、背包栏 4、主包与银行大量材料格、银行包栏 5（&#x3D; <code>bankSlots</code>）。</p>
+<h3 id="9-4-item-instance-字段"><a href="#9-4-item-instance-字段" class="headerlink" title="9.4 item_instance 字段"></a>9.4 item_instance 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int PK</td>
+<td>物品实例全局 ID</td>
+</tr>
+<tr>
+<td><code>itemEntry</code></td>
+<td>int</td>
+<td>→ <code>item_template.entry</code></td>
+</tr>
+<tr>
+<td><code>owner_guid</code></td>
+<td>int</td>
+<td>所有者 → <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>creatorGuid</code></td>
+<td>int</td>
+<td>制造者角色 guid；0&#x3D;非制造</td>
+</tr>
+<tr>
+<td><code>giftCreatorGuid</code></td>
+<td>int</td>
+<td>包装赠送者</td>
+</tr>
+<tr>
+<td><code>count</code></td>
+<td>int</td>
+<td>堆叠数量</td>
+</tr>
+<tr>
+<td><code>duration</code></td>
+<td>int</td>
+<td>限时物品剩余秒；0&#x3D;无限</td>
+</tr>
+<tr>
+<td><code>charges</code></td>
+<td>tinytext</td>
+<td>最多 5 个法术充能，空格分隔</td>
+</tr>
+<tr>
+<td><code>flags</code></td>
+<td>int</td>
+<td><code>ITEM_FIELD_FLAGS</code>；样本 <code>1</code>&#x3D;已绑定</td>
+</tr>
+<tr>
+<td><code>enchantments</code></td>
+<td>text</td>
+<td>12 槽 × (id,duration,charges) &#x3D; <strong>36</strong> 个整数</td>
+</tr>
+<tr>
+<td><code>randomPropertyId</code></td>
+<td>smallint</td>
+<td>随机属性；负值多为 random suffix</td>
+</tr>
+<tr>
+<td><code>durability</code></td>
+<td>smallint</td>
+<td>当前耐久；无耐久为 0</td>
+</tr>
+<tr>
+<td><code>playedTime</code></td>
+<td>int</td>
+<td>已装备秒数</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>text</td>
+<td>可读物品正文；无则 NULL</td>
+</tr>
+</tbody></table>
+<p><code>enchantments</code> 槽：</p>
+<table>
+<thead>
+<tr>
+<th align="right">槽</th>
+<th>枚举</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td>PERM_ENCHANTMENT_SLOT</td>
+<td>永久附魔</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td>TEMP_ENCHANTMENT_SLOT</td>
+<td>临时附魔</td>
+</tr>
+<tr>
+<td align="right">2–4</td>
+<td>SOCK_ENCHANTMENT_SLOT*</td>
+<td>宝石</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td>BONUS_ENCHANTMENT_SLOT</td>
+<td>插槽奖励</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td>PRISMATIC_ENCHANTMENT_SLOT</td>
+<td>棱彩</td>
+</tr>
+<tr>
+<td align="right">7–11</td>
+<td>PROP_ENCHANTMENT_SLOT*</td>
+<td>随机属性</td>
+</tr>
+</tbody></table>
+<h3 id="9-5-样本装备-包-材料"><a href="#9-5-样本装备-包-材料" class="headerlink" title="9.5 样本装备 &#x2F; 包 &#x2F; 材料"></a>9.5 样本装备 &#x2F; 包 &#x2F; 材料</h3><p>身上装备见 §1.3 联表结果；穿最久：Feline Mantle &#x2F; Fenrus’ Hide ≈ 30.3h。</p>
+<p>背包：4×<code>23162</code> Foror’s Crate。银行 5 包（<code>bankSlots=5</code>）：4245&#x2F;932&#x2F;918&#x2F;857&#x2F;5576。</p>
+<p>材料汇总：Linen 803、Wool 364、绷带 96、手雷 56、Blood Shard 52、法力药水 29 等。</p>
+<p>自制（<code>creatorGuid=1002</code>）：Spidersilk Boots、Azure Silk Vest、Green Silken Shoulders、Crimson Silk Vest、Black Mageweave Vest、Mana Agate。</p>
+<hr>
+<h2 id="10-character-queststatus-——-进行中任务"><a href="#10-character-queststatus-——-进行中任务" class="headerlink" title="10. character_queststatus —— 进行中任务"></a>10. character_queststatus —— 进行中任务</h2><h3 id="10-1-职能"><a href="#10-1-职能" class="headerlink" title="10.1 职能"></a>10.1 职能</h3><p>任务日志里还没收工的任务：目标计数、失败&#x2F;完成态、计时器。交完领奖后删本行，写入 <code>queststatus_rewarded</code>。</p>
+<pre class="mermaid">stateDiagram-v2
+    [*] --> INCOMPLETE: 接取任务
+    INCOMPLETE --> COMPLETE: 目标达成
+    INCOMPLETE --> FAILED: 失败/超时
+    COMPLETE --> [*]: 交任务领奖
+写 rewarded 删本行
+    FAILED --> INCOMPLETE: 放弃重接
+    FAILED --> [*]: 放弃</pre>
+
+<h3 id="10-2-字段"><a href="#10-2-字段" class="headerlink" title="10.2 字段"></a>10.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>quest</code></td>
+<td>int</td>
+<td>→ <code>quest_template.ID</code></td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>tinyint</td>
+<td><code>QuestStatus</code></td>
+</tr>
+<tr>
+<td><code>explored</code></td>
+<td>tinyint</td>
+<td>探索类目标是否完成</td>
+</tr>
+<tr>
+<td><code>timer</code></td>
+<td>int</td>
+<td>限时任务截止 Unix 时间；非限时也可能写时间戳</td>
+</tr>
+<tr>
+<td><code>mobcount1..4</code></td>
+<td>smallint</td>
+<td>最多 4 个杀怪&#x2F;目标计数</td>
+</tr>
+<tr>
+<td><code>itemcount1..6</code></td>
+<td>smallint</td>
+<td>最多 6 个交物品计数</td>
+</tr>
+<tr>
+<td><code>playercount</code></td>
+<td>smallint</td>
+<td>需要玩家击杀类计数</td>
+</tr>
+</tbody></table>
+<p><code>QuestStatus</code>：</p>
+<table>
+<thead>
+<tr>
+<th align="right">值</th>
+<th>枚举</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td>NONE</td>
+<td>无</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td><strong>COMPLETE</strong></td>
+<td>目标完成，<strong>可交</strong></td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td><strong>INCOMPLETE</strong></td>
+<td>仍在进行</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td>FAILED</td>
+<td>失败</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td>REWARDED</td>
+<td>不进本表</td>
+</tr>
+</tbody></table>
+<p>样本：</p>
+<table>
+<thead>
+<tr>
+<th align="right">quest</th>
+<th>名称</th>
+<th>status</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">1088</td>
+<td>Ordanus</td>
+<td>3 INCOMPLETE</td>
+<td>还在做</td>
+</tr>
+<tr>
+<td align="right">1136</td>
+<td>Frostmaw</td>
+<td>3 INCOMPLETE</td>
+<td>千针霜喉</td>
+</tr>
+<tr>
+<td align="right">3633</td>
+<td>Goblin Engineering</td>
+<td>1 COMPLETE</td>
+<td>itemcount1&#x3D;1，可交</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="11-character-queststatus-rewarded-——-已领奖任务"><a href="#11-character-queststatus-rewarded-——-已领奖任务" class="headerlink" title="11. character_queststatus_rewarded —— 已领奖任务"></a>11. character_queststatus_rewarded —— 已领奖任务</h2><h3 id="11-1-职能"><a href="#11-1-职能" class="headerlink" title="11.1 职能"></a>11.1 职能</h3><p>永久记录「这号交过哪些任务」。任务前置、成就、某些重复性判断都读它。</p>
+<h3 id="11-2-字段"><a href="#11-2-字段" class="headerlink" title="11.2 字段"></a>11.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>quest</code></td>
+<td>int</td>
+<td>任务 ID</td>
+</tr>
+<tr>
+<td><code>active</code></td>
+<td>tinyint</td>
+<td>通常 1；部分实现用于标记是否仍参与某些逻辑</td>
+</tr>
+</tbody></table>
+<p>主键 <code>(guid, quest)</code>。样本 176 行，<code>active</code> 全 1。</p>
+<p>按 ID 段：</p>
+<table>
+<thead>
+<tr>
+<th>区段</th>
+<th align="right">数量</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0–999</td>
+<td align="right">48</td>
+<td>贫瘠&#x2F;石爪等</td>
+</tr>
+<tr>
+<td>1000–1999</td>
+<td align="right">18</td>
+<td>含法师职业任务</td>
+</tr>
+<tr>
+<td>3000–5999</td>
+<td align="right">27</td>
+<td>千针等</td>
+</tr>
+<tr>
+<td>6000–6999</td>
+<td align="right">21</td>
+<td>灰谷&#x2F;石爪&#x2F;BFD 相关</td>
+</tr>
+<tr>
+<td>8000–9999</td>
+<td align="right">53</td>
+<td>血精灵起始 + 幽魂之地</td>
+</tr>
+<tr>
+<td>10000+</td>
+<td align="right">3</td>
+<td>10068；节日 11859&#x2F;11915</td>
+</tr>
+<tr>
+<td>24882&#x2F;24883</td>
+<td align="right">2</td>
+<td>LFG 随机本每日</td>
+</tr>
+<tr>
+<td>90000</td>
+<td align="right">1</td>
+<td>私服自定义任务</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="12-character-queststatus-seasonal-——-季节性任务"><a href="#12-character-queststatus-seasonal-——-季节性任务" class="headerlink" title="12. character_queststatus_seasonal —— 季节性任务"></a>12. character_queststatus_seasonal —— 季节性任务</h2><h3 id="12-1-职能"><a href="#12-1-职能" class="headerlink" title="12.1 职能"></a>12.1 职能</h3><p>节日&#x2F;事件任务在本周期是否已做。事件重置后清或轮换，与永久 <code>rewarded</code> 互补。</p>
+<h3 id="12-2-字段"><a href="#12-2-字段" class="headerlink" title="12.2 字段"></a>12.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>quest</code></td>
+<td>int</td>
+<td>任务 ID</td>
+</tr>
+<tr>
+<td><code>event</code></td>
+<td>int</td>
+<td>→ <code>game_event.entry</code></td>
+</tr>
+</tbody></table>
+<p>样本：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">11859 Honor the Flame   event=1</span><br><span class="line">11915 Playing with Fire event=1</span><br></pre></td></tr></table></figure>
+
+<p><code>game_event=1</code> &#x3D; <strong>Midsummer Fire Festival（仲夏火焰节）</strong>。</p>
+<hr>
+<h2 id="13-character-reputation-——-声望"><a href="#13-character-reputation-——-声望" class="headerlink" title="13. character_reputation —— 声望"></a>13. character_reputation —— 声望</h2><h3 id="13-1-职能"><a href="#13-1-职能" class="headerlink" title="13.1 职能"></a>13.1 职能</h3><p>每个阵营的 standing 与 UI 标志。角色创建时会初始化大量阵营行。</p>
+<h3 id="13-2-字段"><a href="#13-2-字段" class="headerlink" title="13.2 字段"></a>13.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>faction</code></td>
+<td>smallint</td>
+<td><code>Faction.dbc</code> ID</td>
+</tr>
+<tr>
+<td><code>standing</code></td>
+<td>int</td>
+<td>原始声望点数（可负）</td>
+</tr>
+<tr>
+<td><code>flags</code></td>
+<td>smallint</td>
+<td><code>FactionFlags</code> 位掩码</td>
+</tr>
+</tbody></table>
+<p>主键 <code>(guid, faction)</code>。</p>
+<p>声望阈值：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Hated &lt; -6000 ≤ Hostile &lt; -3000 ≤ Unfriendly &lt; 0</span><br><span class="line">≤ Neutral &lt; 3000 ≤ Friendly &lt; 9000 ≤ Honored</span><br><span class="line">&lt; 21000 ≤ Revered &lt; 42000 ≤ Exalted</span><br></pre></td></tr></table></figure>
+
+<p><code>FactionFlags</code>：</p>
+<table>
+<thead>
+<tr>
+<th align="right">位</th>
+<th>枚举</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0x01</td>
+<td>VISIBLE</td>
+<td>声望面板可见</td>
+</tr>
+<tr>
+<td align="right">0x02</td>
+<td>AT_WAR</td>
+<td>交战</td>
+</tr>
+<tr>
+<td align="right">0x04</td>
+<td>HIDDEN</td>
+<td>隐藏</td>
+</tr>
+<tr>
+<td align="right">0x08</td>
+<td>INVISIBLE_FORCED</td>
+<td>强制不可见</td>
+</tr>
+<tr>
+<td align="right">0x10</td>
+<td>PEACE_FORCED</td>
+<td>强制和平</td>
+</tr>
+<tr>
+<td align="right">0x20</td>
+<td>INACTIVE</td>
+<td>玩家标为不活跃</td>
+</tr>
+<tr>
+<td align="right">0x40</td>
+<td>RIVAL</td>
+<td>外域对立阵营</td>
+</tr>
+<tr>
+<td align="right">0x80</td>
+<td>SPECIAL</td>
+<td>主城等特殊</td>
+</tr>
+</tbody></table>
+<p>样本非零：Orgrimmar&#x2F;TB 42499、Darkspear 39278、Silvermoon 38999、Undercity 37030、Ratchet 20000、三 goblin 城 10000、Argent Dawn 2500。</p>
+<hr>
+<h2 id="14-character-skills-——-技能熟练度"><a href="#14-character-skills-——-技能熟练度" class="headerlink" title="14. character_skills —— 技能熟练度"></a>14. character_skills —— 技能熟练度</h2><h3 id="14-1-职能"><a href="#14-1-职能" class="headerlink" title="14.1 职能"></a>14.1 职能</h3><p>武器、护甲、语言、专业、骑术等 <strong>SkillLine</strong> 当前值与上限。不是法术列表。</p>
+<h3 id="14-2-字段"><a href="#14-2-字段" class="headerlink" title="14.2 字段"></a>14.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>skill</code></td>
+<td>smallint</td>
+<td><code>SkillLine.dbc</code> ID</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td>smallint</td>
+<td>当前熟练度</td>
+</tr>
+<tr>
+<td><code>max</code></td>
+<td>smallint</td>
+<td>当前上限（受等级&#x2F;训练影响）</td>
+</tr>
+</tbody></table>
+<p>主键 <code>(guid, skill)</code>。</p>
+<p>样本要点：Frost&#x2F;Fire&#x2F;Arcane 145；<strong>Alchemy 210、Tailoring 220、Engineering 225</strong>；First Aid 225；Riding 75；无 Mining(186)。三门主要专业并存，说明私服放宽限制。</p>
+<hr>
+<h2 id="15-character-spell-——-已学法术"><a href="#15-character-spell-——-已学法术" class="headerlink" title="15. character_spell —— 已学法术"></a>15. character_spell —— 已学法术</h2><h3 id="15-1-职能"><a href="#15-1-职能" class="headerlink" title="15.1 职能"></a>15.1 职能</h3><p>角色会的全部法术与配方。是否放在动作条另见 <code>character_action</code>；天赋点选另见 <code>character_talent</code>。</p>
+<h3 id="15-2-字段"><a href="#15-2-字段" class="headerlink" title="15.2 字段"></a>15.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>spell</code></td>
+<td>int</td>
+<td><code>Spell.dbc</code> ID</td>
+</tr>
+<tr>
+<td><code>specMask</code></td>
+<td>tinyint</td>
+<td>哪些天赋组可用的位掩码</td>
+</tr>
+</tbody></table>
+<p>主键 <code>(guid, spell)</code>。</p>
+<p><code>specMask</code>：bit0&#x3D;spec0，bit1&#x3D;spec1；<code>255 (0xFF)</code>&#x3D;所有天赋组；<code>1</code>&#x3D;仅 spec0。</p>
+<p>样本 179 个：战斗法术 + 天赋法术 + 炼金&#x2F;工程&#x2F;裁缝&#x2F;急救配方 + 骑术 <code>33388</code> 等。</p>
+<pre class="mermaid">flowchart TB
+    spell[character_spell 会什么]
+    action[character_action 放哪]
+    talent[character_talent 天赋点了什么]
+    spell --> action
+    talent --> spell</pre>
+
+<hr>
+<h2 id="16-character-talent-——-天赋"><a href="#16-character-talent-——-天赋" class="headerlink" title="16. character_talent —— 天赋"></a>16. character_talent —— 天赋</h2><h3 id="16-1-职能"><a href="#16-1-职能" class="headerlink" title="16.1 职能"></a>16.1 职能</h3><p>已学习的天赋法术（按 rank 分行）。与 <code>character_spell</code> 中对应 spell 常同时存在。</p>
+<h3 id="16-2-字段"><a href="#16-2-字段" class="headerlink" title="16.2 字段"></a>16.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>guid</code></td>
+<td>int</td>
+<td>→ <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>spell</code></td>
+<td>int</td>
+<td>天赋法术 ID</td>
+</tr>
+<tr>
+<td><code>specMask</code></td>
+<td>tinyint</td>
+<td>所属天赋组位掩码</td>
+</tr>
+</tbody></table>
+<p>主键 <code>(guid, spell)</code>。</p>
+<p>样本 10 行全 <code>specMask=1</code>：Icy Veins、Improved Frostbolt&#x2F;Blizzard&#x2F;Permafrost、Ice Shards、Arcane Concentration&#x2F;Subtlety 等。<strong>冰系为主 + 少量奥术前置</strong>。<code>talentGroupsCount=1</code> 未开双天赋。</p>
+<hr>
+<h2 id="17-mail-——-邮件"><a href="#17-mail-——-邮件" class="headerlink" title="17. mail —— 邮件"></a>17. mail —— 邮件</h2><h3 id="17-1-职能"><a href="#17-1-职能" class="headerlink" title="17.1 职能"></a>17.1 职能</h3><p>邮箱信件。附件在 <code>mail_items</code>（本样本无）。<code>pdump</code> 按 <code>receiver</code> 导出。</p>
+<h3 id="17-2-字段"><a href="#17-2-字段" class="headerlink" title="17.2 字段"></a>17.2 字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>int PK</td>
+<td>邮件 ID</td>
+</tr>
+<tr>
+<td><code>messageType</code></td>
+<td>tinyint</td>
+<td><code>MailMessageType</code></td>
+</tr>
+<tr>
+<td><code>stationery</code></td>
+<td>tinyint</td>
+<td>信纸样式 Stationery.dbc</td>
+</tr>
+<tr>
+<td><code>mailTemplateId</code></td>
+<td>smallint</td>
+<td>非 0 时正文来自模板，subject&#x2F;body 可空</td>
+</tr>
+<tr>
+<td><code>sender</code></td>
+<td>int</td>
+<td>发件者：玩家 guid 或生物 entry（视 type）</td>
+</tr>
+<tr>
+<td><code>receiver</code></td>
+<td>int</td>
+<td>收件人 → <code>characters.guid</code></td>
+</tr>
+<tr>
+<td><code>subject</code></td>
+<td>longtext</td>
+<td>标题</td>
+</tr>
+<tr>
+<td><code>body</code></td>
+<td>longtext</td>
+<td>正文</td>
+</tr>
+<tr>
+<td><code>has_items</code></td>
+<td>tinyint</td>
+<td>是否有附件</td>
+</tr>
+<tr>
+<td><code>expire_time</code></td>
+<td>int</td>
+<td>过期 Unix 时间</td>
+</tr>
+<tr>
+<td><code>deliver_time</code></td>
+<td>int</td>
+<td>送达 Unix 时间</td>
+</tr>
+<tr>
+<td><code>money</code></td>
+<td>int</td>
+<td>附带铜币</td>
+</tr>
+<tr>
+<td><code>cod</code></td>
+<td>int</td>
+<td>到付铜币</td>
+</tr>
+<tr>
+<td><code>checked</code></td>
+<td>tinyint</td>
+<td><code>MailCheckMask</code></td>
+</tr>
+</tbody></table>
+<p><code>MailMessageType</code>：0 NORMAL，2 AUCTION，3 CREATURE，4 GAMEOBJECT，5 CALENDAR。<br><code>MailCheckMask</code>：1 READ，2 RETURNED，4 COPIED，8 COD_PAYMENT，16 HAS_BODY。</p>
+<p>样本：NPC 模板信 <code>mailTemplateId=232</code>，送达时间 &#x3D; Level 20 成就同一秒，30 天过期，已读。</p>
+<hr>
+<h2 id="18-表关系总览"><a href="#18-表关系总览" class="headerlink" title="18. 表关系总览"></a>18. 表关系总览</h2><h3 id="18-1-总图"><a href="#18-1-总图" class="headerlink" title="18.1 总图"></a>18.1 总图</h3><pre class="mermaid">erDiagram
+    characters ||--o{ character_account_data : guid
+    characters ||--o{ character_achievement : guid
+    characters ||--o{ character_achievement_progress : guid
+    characters ||--o{ character_action : guid
+    characters ||--o{ character_aura : guid
+    characters ||--o{ character_glyphs : guid
+    characters ||--|| character_homebind : guid
+    characters ||--o{ character_inventory : guid
+    characters ||--o{ character_queststatus : guid
+    characters ||--o{ character_queststatus_rewarded : guid
+    characters ||--o{ character_queststatus_seasonal : guid
+    characters ||--o{ character_reputation : guid
+    characters ||--o{ character_skills : guid
+    characters ||--o{ character_spell : guid
+    characters ||--o{ character_talent : guid
+    characters ||--o{ mail : "receiver"
+    characters ||--o{ item_instance : "owner_guid"
+    character_inventory }o--|| item_instance : "item"
+    character_inventory }o--o| item_instance : "bag"</pre>
+
+<h3 id="18-2-按子系统"><a href="#18-2-按子系统" class="headerlink" title="18.2 按子系统"></a>18.2 按子系统</h3><pre class="mermaid">flowchart TB
+    chars[characters]
+    subgraph progress[进度]
+      ach[achievement]
+      achp[achievement_progress]
+      qr[quest rewarded]
+      qs[quest status]
+      qss[quest seasonal]
+      rep[reputation]
+    end
+    subgraph power[能力]
+      sp[spell]
+      tal[talent]
+      sk[skills]
+      gl[glyphs]
+      act[action]
+    end
+    subgraph assets[资产]
+      inv[inventory]
+      ii[item_instance]
+      mail[mail]
+    end
+    subgraph client[客户端与现场]
+      ad[account_data]
+      au[aura]
+      hb[homebind]
+    end
+    chars --> progress
+    chars --> power
+    chars --> assets
+    chars --> client
+    inv --> ii</pre>
+
+<h3 id="18-3-引用规则"><a href="#18-3-引用规则" class="headerlink" title="18.3 引用规则"></a>18.3 引用规则</h3><ol>
+<li>扩展表 <code>guid</code> → <code>characters.guid</code></li>
+<li><code>character_inventory.item</code> → <code>item_instance.guid</code></li>
+<li><code>character_inventory.bag</code> → <code>item_instance.guid</code>（0&#x3D;身体）</li>
+<li><code>item_instance.owner_guid</code> &#x2F; <code>creatorGuid</code> → <code>characters.guid</code></li>
+<li><code>mail.receiver</code> → <code>characters.guid</code></li>
+<li><code>equipmentCache</code> &#x2F; <code>taximask</code> &#x2F; <code>exploredZones</code> 是主表冗余，无外键</li>
+</ol>
+<p><code>pdump load</code> 按 <code>DTT_CHARACTER</code> &#x2F; <code>DTT_INVENTORY</code> &#x2F; <code>DTT_ITEM</code> &#x2F; <code>DTT_MAIL</code> 等类型级联改 GUID。</p>
+<hr>
+<h2 id="19-交叉分析：角色故事"><a href="#19-交叉分析：角色故事" class="headerlink" title="19. 交叉分析：角色故事"></a>19. 交叉分析：角色故事</h2><h3 id="19-1-身份与时间"><a href="#19-1-身份与时间" class="headerlink" title="19.1 身份与时间"></a>19.1 身份与时间</h3><p>血精灵女法师「大法师」，guid 1002，账号 101；29 级，休息态，藏头盔披风；建号约 25 天、在线 34.2 小时。</p>
+<h3 id="19-2-练级路线"><a href="#19-2-练级路线" class="headerlink" title="19.2 练级路线"></a>19.2 练级路线</h3><pre class="mermaid">flowchart LR
+    A[永歌/幽魂] --> B[卡利姆多任务]
+    B --> C[RFC]
+    C --> D[WC]
+    D --> E[SFK]
+    E --> F[Deadmines]
+    F --> G[BFD]
+    G --> H[Stockades]
+    H --> I[贫瘠/千针]
+    I --> J[炉石: 乱风岗]</pre>
+
+<h3 id="19-3-战斗-专业-经济"><a href="#19-3-战斗-专业-经济" class="headerlink" title="19.3 战斗 &#x2F; 专业 &#x2F; 经济"></a>19.3 战斗 &#x2F; 专业 &#x2F; 经济</h3><ul>
+<li>天赋冰系为主；动作条冰火混用练级键位</li>
+<li>Engineering 225 + Tailoring 220 + Alchemy 210 + First Aid 225</li>
+<li>现金 209 金，自产统计约 62 金 → 外部供血</li>
+<li>悬空物品 2、自定义任务 90000、四只大包 23162：私服痕迹</li>
+</ul>
+<h3 id="19-4-数据质量"><a href="#19-4-数据质量" class="headerlink" title="19.4 数据质量"></a>19.4 数据质量</h3><table>
+<thead>
+<tr>
+<th>现象</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>悬空 item 2 件</td>
+<td>有实体无槽位</td>
+</tr>
+<tr>
+<td>三主要专业</td>
+<td>超官方默认 2 门</td>
+</tr>
+<tr>
+<td><code>power4=100</code></td>
+<td>法师无意义残留</td>
+</tr>
+<tr>
+<td><code>watchedFaction=-1</code></td>
+<td>未追踪声望</td>
+</tr>
+<tr>
+<td>quest 90000</td>
+<td>世界库无模板</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="20-实操：怎么自己拆-pdump"><a href="#20-实操：怎么自己拆-pdump" class="headerlink" title="20. 实操：怎么自己拆 pdump"></a>20. 实操：怎么自己拆 pdump</h2><ol>
+<li>统计表行数：提取每条 <code>INSERT INTO</code> 的表名后计数</li>
+<li>按表过滤主表 &#x2F; 天赋 &#x2F; 物品</li>
+<li>时间戳：<code>date -r 1784122746</code>（macOS）或 <code>date -d @1784122746</code>（Linux）</li>
+<li>铜币：<code>g=money//10000, s=money%10000//100, c=money%100</code> → <code>2096484 = 209g 64s 84c</code></li>
+</ol>
+<p>推荐 Python 解析：</p>
+<ol>
+<li>正则抓 <code>INSERT INTO table (cols) VALUES (vals)</code></li>
+<li>手写抗引号&#x2F;换行的值解析器</li>
+<li><code>item_instance</code> 建字典，扫 <code>character_inventory</code> 还原栏位</li>
+<li><code>item_template</code> &#x2F; DBC 翻译名字</li>
+</ol>
+<p>注意：不要直接灌库；大文本字段边界要小心；<code>enchantments</code> 36 token 按 3 一组；任务 status 勿记反。</p>
+<hr>
+<h2 id="21-源码与库表索引"><a href="#21-源码与库表索引" class="headerlink" title="21. 源码与库表索引"></a>21. 源码与库表索引</h2><table>
+<thead>
+<tr>
+<th>主题</th>
+<th>位置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>pdump 导出&#x2F;导入</td>
+<td><code>src/server/game/Tools/PlayerDump.cpp</code></td>
+</tr>
+<tr>
+<td>命令注册</td>
+<td><code>src/server/scripts/Commands/cs_character.cpp</code></td>
+</tr>
+<tr>
+<td>角色保存</td>
+<td><code>src/server/game/Entities/Player/PlayerStorage.cpp</code></td>
+</tr>
+<tr>
+<td>装备槽 &#x2F; 动作条</td>
+<td><code>src/server/game/Entities/Player/Player.h</code></td>
+</tr>
+<tr>
+<td>物品附魔槽</td>
+<td><code>src/server/game/Entities/Item/Item.h</code></td>
+</tr>
+<tr>
+<td>任务状态</td>
+<td><code>src/server/game/Quests/QuestDef.h</code></td>
+</tr>
+<tr>
+<td>邮件</td>
+<td><code>src/server/game/Mails/Mail.h</code></td>
+</tr>
+<tr>
+<td>AccountData</td>
+<td><code>src/server/game/Server/WorldSession.h</code></td>
+</tr>
+<tr>
+<td>声望 flags</td>
+<td><code>src/server/shared/DataStores/DBCEnums.h</code></td>
+</tr>
+<tr>
+<td>建表</td>
+<td><code>data/sql/base/db_characters/*.sql</code></td>
+</tr>
+<tr>
+<td>物品模板</td>
+<td><code>data/sql/base/db_world/item_template.sql</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="22-小结"><a href="#22-小结" class="headerlink" title="22. 小结"></a>22. 小结</h2><p><code>pdump</code> 表面上是一堆 <code>INSERT</code>，实际是一张以 <code>characters.guid</code> 为根的对象图：</p>
+<ul>
+<li><strong>进度</strong>：成就、任务、声望、探索、飞行点</li>
+<li><strong>能力</strong>：法术、天赋、技能、雕文、动作条</li>
+<li><strong>资产</strong>：钱、物品实体、容器嵌套、邮件</li>
+<li><strong>客户端</strong>：CVar 与聊天布局</li>
+<li><strong>现场</strong>：光环、位置、炉石、休息值</li>
+</ul>
+<p>把「大法师」这份 29 级样本走通后，再拆其它号通常只差：有无宠物&#x2F;邮件附件&#x2F;装备方案、专业与任务段、物品规模、是否双天赋。理解这 18 张表后，角色迁移、坏号修复、刷物品排查都会从「猜字段」变成「按图索骥」。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/fun/" rel="tag"># fun</a>
+              <a href="/tags/wow/" rel="tag"># wow</a>
+              <a href="/tags/azerothcore/" rel="tag"># azerothcore</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/07/12/fun/20260712-wow-dbc-format-parsing/" rel="prev" title="WOW 3.3.5a DBC 文件格式与解析">
+      <i class="fa fa-chevron-left"></i> WOW 3.3.5a DBC 文件格式与解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/07/20/fun/20260720-blp-format-parsing/" rel="next" title="WOW BLP 纹理格式与 Python 解析">
+      WOW BLP 纹理格式与 Python 解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-%E6%A0%B7%E6%9C%AC%E6%A6%82%E5%86%B5"><span class="nav-number">1.</span> <span class="nav-text">0. 样本概况</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#0-1-%E8%A7%92%E8%89%B2%E7%94%BB%E5%83%8F%EF%BC%88%E6%9D%A5%E8%87%AA-characters%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">0.1 角色画像（来自 characters）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-2-%E6%A0%B7%E6%9C%AC%E8%A1%A8%E8%A1%8C%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">0.2 样本表行数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-3-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E7%9B%B4%E6%8E%A5%E7%81%8C%E5%BA%93"><span class="nav-number">1.3.</span> <span class="nav-text">0.3 为什么不能直接灌库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-4-pdump-%E5%AF%BC%E5%87%BA%E8%8C%83%E5%9B%B4%E4%B8%8E%E5%91%BD%E4%BB%A4"><span class="nav-number">1.4.</span> <span class="nav-text">0.4 pdump 导出范围与命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-characters-%E2%80%94%E2%80%94-%E8%A7%92%E8%89%B2%E4%B8%BB%E8%A1%A8"><span class="nav-number">2.</span> <span class="nav-text">1. characters —— 角色主表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E8%81%8C%E8%83%BD"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E5%AD%97%E6%AE%B5%E5%85%A8%E8%A1%A8"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 字段全表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-race-class-gender-%E6%9E%9A%E4%B8%BE"><span class="nav-number">2.3.</span> <span class="nav-text">1.2.1 race &#x2F; class &#x2F; gender 枚举</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-%E5%85%B6%E5%AE%83%E5%B8%B8%E7%94%A8%E6%9E%9A%E4%B8%BE%E6%91%98%E5%BD%95"><span class="nav-number">2.4.</span> <span class="nav-text">1.2.2 其它常用枚举摘录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-equipmentCache"><span class="nav-number">2.5.</span> <span class="nav-text">1.3 equipmentCache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-%E6%97%B6%E9%97%B4%E7%BA%BF"><span class="nav-number">2.6.</span> <span class="nav-text">1.4 时间线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-character-account-data-%E2%80%94%E2%80%94-%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%8C%89%E8%A7%92%E8%89%B2%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">2. character_account_data —— 客户端按角色配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E8%81%8C%E8%83%BD"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-character-achievement-%E2%80%94%E2%80%94-%E5%B7%B2%E5%AE%8C%E6%88%90%E6%88%90%E5%B0%B1"><span class="nav-number">4.</span> <span class="nav-text">3. character_achievement —— 已完成成就</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E8%81%8C%E8%83%BD"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 字段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E6%A0%B7%E6%9C%AC-19-%E6%9D%A1"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 样本 19 条</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-character-achievement-progress-%E2%80%94%E2%80%94-%E6%88%90%E5%B0%B1%E8%BF%9B%E5%BA%A6"><span class="nav-number">5.</span> <span class="nav-text">4. character_achievement_progress —— 成就进度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E8%81%8C%E8%83%BD"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 字段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E6%A0%B7%E6%9C%AC%E9%AB%98%E5%80%BC"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 样本高值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-character-action-%E2%80%94%E2%80%94-%E5%8A%A8%E4%BD%9C%E6%9D%A1"><span class="nav-number">6.</span> <span class="nav-text">5. character_action —— 动作条</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E8%81%8C%E8%83%BD"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-character-aura-%E2%80%94%E2%80%94-%E6%8C%81%E4%B9%85%E5%85%89%E7%8E%AF"><span class="nav-number">7.</span> <span class="nav-text">6. character_aura —— 持久光环</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-%E8%81%8C%E8%83%BD"><span class="nav-number">7.1.</span> <span class="nav-text">6.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">7.2.</span> <span class="nav-text">6.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-character-glyphs-%E2%80%94%E2%80%94-%E9%9B%95%E6%96%87"><span class="nav-number">8.</span> <span class="nav-text">7. character_glyphs —— 雕文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-%E8%81%8C%E8%83%BD"><span class="nav-number">8.1.</span> <span class="nav-text">7.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">8.2.</span> <span class="nav-text">7.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-character-homebind-%E2%80%94%E2%80%94-%E7%82%89%E7%9F%B3%E7%BB%91%E5%AE%9A"><span class="nav-number">9.</span> <span class="nav-text">8. character_homebind —— 炉石绑定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#8-1-%E8%81%8C%E8%83%BD"><span class="nav-number">9.1.</span> <span class="nav-text">8.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">9.2.</span> <span class="nav-text">8.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-character-inventory-item-instance-%E2%80%94%E2%80%94-%E7%89%A9%E5%93%81%E7%B3%BB%E7%BB%9F"><span class="nav-number">10.</span> <span class="nav-text">9. character_inventory + item_instance —— 物品系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-1-%E8%81%8C%E8%83%BD%E5%88%86%E5%B7%A5"><span class="nav-number">10.1.</span> <span class="nav-text">9.1 职能分工</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-2-character-inventory-%E5%AD%97%E6%AE%B5"><span class="nav-number">10.2.</span> <span class="nav-text">9.2 character_inventory 字段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-3-bag-0-%E6%97%B6%E7%9A%84-slot-%E7%A9%BA%E9%97%B4"><span class="nav-number">10.3.</span> <span class="nav-text">9.3 bag&#x3D;0 时的 slot 空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-4-item-instance-%E5%AD%97%E6%AE%B5"><span class="nav-number">10.4.</span> <span class="nav-text">9.4 item_instance 字段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-5-%E6%A0%B7%E6%9C%AC%E8%A3%85%E5%A4%87-%E5%8C%85-%E6%9D%90%E6%96%99"><span class="nav-number">10.5.</span> <span class="nav-text">9.5 样本装备 &#x2F; 包 &#x2F; 材料</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-character-queststatus-%E2%80%94%E2%80%94-%E8%BF%9B%E8%A1%8C%E4%B8%AD%E4%BB%BB%E5%8A%A1"><span class="nav-number">11.</span> <span class="nav-text">10. character_queststatus —— 进行中任务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-1-%E8%81%8C%E8%83%BD"><span class="nav-number">11.1.</span> <span class="nav-text">10.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">11.2.</span> <span class="nav-text">10.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-character-queststatus-rewarded-%E2%80%94%E2%80%94-%E5%B7%B2%E9%A2%86%E5%A5%96%E4%BB%BB%E5%8A%A1"><span class="nav-number">12.</span> <span class="nav-text">11. character_queststatus_rewarded —— 已领奖任务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#11-1-%E8%81%8C%E8%83%BD"><span class="nav-number">12.1.</span> <span class="nav-text">11.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">12.2.</span> <span class="nav-text">11.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-character-queststatus-seasonal-%E2%80%94%E2%80%94-%E5%AD%A3%E8%8A%82%E6%80%A7%E4%BB%BB%E5%8A%A1"><span class="nav-number">13.</span> <span class="nav-text">12. character_queststatus_seasonal —— 季节性任务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#12-1-%E8%81%8C%E8%83%BD"><span class="nav-number">13.1.</span> <span class="nav-text">12.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">13.2.</span> <span class="nav-text">12.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-character-reputation-%E2%80%94%E2%80%94-%E5%A3%B0%E6%9C%9B"><span class="nav-number">14.</span> <span class="nav-text">13. character_reputation —— 声望</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#13-1-%E8%81%8C%E8%83%BD"><span class="nav-number">14.1.</span> <span class="nav-text">13.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">14.2.</span> <span class="nav-text">13.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-character-skills-%E2%80%94%E2%80%94-%E6%8A%80%E8%83%BD%E7%86%9F%E7%BB%83%E5%BA%A6"><span class="nav-number">15.</span> <span class="nav-text">14. character_skills —— 技能熟练度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#14-1-%E8%81%8C%E8%83%BD"><span class="nav-number">15.1.</span> <span class="nav-text">14.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">15.2.</span> <span class="nav-text">14.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#15-character-spell-%E2%80%94%E2%80%94-%E5%B7%B2%E5%AD%A6%E6%B3%95%E6%9C%AF"><span class="nav-number">16.</span> <span class="nav-text">15. character_spell —— 已学法术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#15-1-%E8%81%8C%E8%83%BD"><span class="nav-number">16.1.</span> <span class="nav-text">15.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">16.2.</span> <span class="nav-text">15.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#16-character-talent-%E2%80%94%E2%80%94-%E5%A4%A9%E8%B5%8B"><span class="nav-number">17.</span> <span class="nav-text">16. character_talent —— 天赋</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#16-1-%E8%81%8C%E8%83%BD"><span class="nav-number">17.1.</span> <span class="nav-text">16.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#16-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">17.2.</span> <span class="nav-text">16.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#17-mail-%E2%80%94%E2%80%94-%E9%82%AE%E4%BB%B6"><span class="nav-number">18.</span> <span class="nav-text">17. mail —— 邮件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#17-1-%E8%81%8C%E8%83%BD"><span class="nav-number">18.1.</span> <span class="nav-text">17.1 职能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#17-2-%E5%AD%97%E6%AE%B5"><span class="nav-number">18.2.</span> <span class="nav-text">17.2 字段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#18-%E8%A1%A8%E5%85%B3%E7%B3%BB%E6%80%BB%E8%A7%88"><span class="nav-number">19.</span> <span class="nav-text">18. 表关系总览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#18-1-%E6%80%BB%E5%9B%BE"><span class="nav-number">19.1.</span> <span class="nav-text">18.1 总图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-2-%E6%8C%89%E5%AD%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">19.2.</span> <span class="nav-text">18.2 按子系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-3-%E5%BC%95%E7%94%A8%E8%A7%84%E5%88%99"><span class="nav-number">19.3.</span> <span class="nav-text">18.3 引用规则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#19-%E4%BA%A4%E5%8F%89%E5%88%86%E6%9E%90%EF%BC%9A%E8%A7%92%E8%89%B2%E6%95%85%E4%BA%8B"><span class="nav-number">20.</span> <span class="nav-text">19. 交叉分析：角色故事</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#19-1-%E8%BA%AB%E4%BB%BD%E4%B8%8E%E6%97%B6%E9%97%B4"><span class="nav-number">20.1.</span> <span class="nav-text">19.1 身份与时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#19-2-%E7%BB%83%E7%BA%A7%E8%B7%AF%E7%BA%BF"><span class="nav-number">20.2.</span> <span class="nav-text">19.2 练级路线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#19-3-%E6%88%98%E6%96%97-%E4%B8%93%E4%B8%9A-%E7%BB%8F%E6%B5%8E"><span class="nav-number">20.3.</span> <span class="nav-text">19.3 战斗 &#x2F; 专业 &#x2F; 经济</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#19-4-%E6%95%B0%E6%8D%AE%E8%B4%A8%E9%87%8F"><span class="nav-number">20.4.</span> <span class="nav-text">19.4 数据质量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#20-%E5%AE%9E%E6%93%8D%EF%BC%9A%E6%80%8E%E4%B9%88%E8%87%AA%E5%B7%B1%E6%8B%86-pdump"><span class="nav-number">21.</span> <span class="nav-text">20. 实操：怎么自己拆 pdump</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#21-%E6%BA%90%E7%A0%81%E4%B8%8E%E5%BA%93%E8%A1%A8%E7%B4%A2%E5%BC%95"><span class="nav-number">22.</span> <span class="nav-text">21. 源码与库表索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#22-%E5%B0%8F%E7%BB%93"><span class="nav-number">23.</span> <span class="nav-text">22. 小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">275</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">158</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('/lib/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

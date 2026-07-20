@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="BLP2 纹理容器格式详解：Header、Palette、DXT 压缩与 Python blp2png 实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WOW BLP 纹理格式与 Python 解析">
+<meta property="og:url" content="https://forgives.github.io/2026/07/20/fun/20260720-blp-format-parsing/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="BLP2 纹理容器格式详解：Header、Palette、DXT 压缩与 Python blp2png 实现">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-20T07:00:00.000Z">
+<meta property="article:modified_time" content="2026-07-20T14:52:27.215Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="fun">
+<meta property="article:tag" content="wow">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/07/20/fun/20260720-blp-format-parsing/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>WOW BLP 纹理格式与 Python 解析 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/07/20/fun/20260720-blp-format-parsing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WOW BLP 纹理格式与 Python 解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-07-20 15:00:00" itemprop="dateCreated datePublished" datetime="2026-07-20T15:00:00+08:00">2026-07-20</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在折腾魔兽世界的贴图提取，BLP 是暴雪自研的 2D 纹理容器，WOW 里角色皮肤、UI 图标、地形贴图全是这个格式。本文从二进制层面拆解 BLP2 的结构，最后给一个纯 Python 的 blp2png 转换 demo。</p>
+<!-- more -->
+
+<h2 id="BLP2-是什么"><a href="#BLP2-是什么" class="headerlink" title="BLP2 是什么"></a>BLP2 是什么</h2><p>BLP（Blizzard Layered Picture）是暴雪为旗下游戏设计的纹理容器格式，WOW 使用的版本为 BLP2（magic &#x3D; <code>&quot;BLP2&quot;</code>）。它本质上是一个带 mipmap 链的图片封装，支持三种编码方式：</p>
+<table>
+<thead>
+<tr>
+<th align="center">encoding 值</th>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td>Palettized</td>
+<td>256 色调色板 + 索引，类似 GIF</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td>Compressed</td>
+<td>S3TC&#x2F;DXT 块压缩（DXT1&#x2F;3&#x2F;5）</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td>BGRA</td>
+<td>原始 32 位像素，无压缩</td>
+</tr>
+</tbody></table>
+<p>配合 <code>alphaBitDepth</code> 和 <code>alphaEncoding</code> 两个字段，可以细分出 9 种实际子格式。</p>
+<h2 id="文件整体布局"><a href="#文件整体布局" class="headerlink" title="文件整体布局"></a>文件整体布局</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────┐  Offset 0</span><br><span class="line">│            BLPHeader (148 bytes)            │</span><br><span class="line">├─────────────────────────────────────────────┤  Offset 148</span><br><span class="line">│         Palette (1024 bytes, 256×BGRx)      │</span><br><span class="line">├─────────────────────────────────────────────┤  Offset 1172</span><br><span class="line">│         Mip Level 0  (full resolution)      │</span><br><span class="line">├─────────────────────────────────────────────┤</span><br><span class="line">│         Mip Level 1  (½ × ½)               │</span><br><span class="line">├─────────────────────────────────────────────┤</span><br><span class="line">│         ...                                 │</span><br><span class="line">├─────────────────────────────────────────────┤</span><br><span class="line">│         Mip Level N  (1×1)                  │</span><br><span class="line">└─────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>Palette 区域始终存在且固定 1024 字节，即使 DXT&#x2F;BGRA 编码不使用它（此时全零填充）。</p>
+<h2 id="Header-结构（148-字节）"><a href="#Header-结构（148-字节）" class="headerlink" title="Header 结构（148 字节）"></a>Header 结构（148 字节）</h2><p>所有字段小端序（little-endian）。以下是 <code>BLPConverter.h</code> 中的原始定义：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">char</span> BLPID[<span class="number">4</span>] = &#123;<span class="string">&#x27;B&#x27;</span>, <span class="string">&#x27;L&#x27;</span>, <span class="string">&#x27;P&#x27;</span>, <span class="string">&#x27;2&#x27;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">BLPHeader</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> id[<span class="number">4</span>];                    <span class="comment">// &quot;BLP2&quot;</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> version;          <span class="comment">// 必须为 1</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> encoding;        <span class="comment">// 1 = palettized, 2 = DXT, 3 = raw BGRA</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> alphaBitDepth;   <span class="comment">// 0, 1, 4, 8 (72 见于 doodad，按 DXT5 处理)</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> alphaEncoding;   <span class="comment">// 7 indicates DXT5, 1 is DXT3</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> hasMips;         <span class="comment">// 0 = no mips, 1 = has mips</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> xResolution;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> yResolution;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> mipOffsets[<span class="number">16</span>];</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> mipSizes[<span class="number">16</span>];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span></span><br><span class="line">&#123;</span><br><span class="line">    BLP_ENCODING_INVALID,      <span class="comment">// 0</span></span><br><span class="line">    BLP_ENCODING_PALETTIZED,   <span class="comment">// 1</span></span><br><span class="line">    BLP_ENCODING_COMPRESSED,   <span class="comment">// 2</span></span><br><span class="line">    BLP_ENCODING_BGRA,         <span class="comment">// 3</span></span><br><span class="line">    BLP_ENCODING_COUNT</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="字段偏移表"><a href="#字段偏移表" class="headerlink" title="字段偏移表"></a>字段偏移表</h3><table>
+<thead>
+<tr>
+<th align="right">Offset</th>
+<th align="right">Size</th>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td align="right">4</td>
+<td><code>id</code></td>
+<td>Magic：<code>&#39;B&#39;,&#39;L&#39;,&#39;P&#39;,&#39;2&#39;</code></td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td align="right">4</td>
+<td><code>version</code></td>
+<td>必须为 <code>1</code></td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td align="right">1</td>
+<td><code>encoding</code></td>
+<td>1&#x3D;Palettized, 2&#x3D;DXT, 3&#x3D;BGRA</td>
+</tr>
+<tr>
+<td align="right">9</td>
+<td align="right">1</td>
+<td><code>alphaBitDepth</code></td>
+<td>0 &#x2F; 1 &#x2F; 4 &#x2F; 8 &#x2F; 72</td>
+</tr>
+<tr>
+<td align="right">10</td>
+<td align="right">1</td>
+<td><code>alphaEncoding</code></td>
+<td>DXT 子类型标识</td>
+</tr>
+<tr>
+<td align="right">11</td>
+<td align="right">1</td>
+<td><code>hasMips</code></td>
+<td>0&#x3D;无 mip 链, 1&#x3D;有</td>
+</tr>
+<tr>
+<td align="right">12</td>
+<td align="right">4</td>
+<td><code>xResolution</code></td>
+<td>像素宽度</td>
+</tr>
+<tr>
+<td align="right">16</td>
+<td align="right">4</td>
+<td><code>yResolution</code></td>
+<td>像素高度</td>
+</tr>
+<tr>
+<td align="right">20</td>
+<td align="right">64</td>
+<td><code>mipOffsets[16]</code></td>
+<td>每级 mip 相对文件头的偏移</td>
+</tr>
+<tr>
+<td align="right">84</td>
+<td align="right">64</td>
+<td><code>mipSizes[16]</code></td>
+<td>每级 mip 的数据字节数</td>
+</tr>
+</tbody></table>
+<h3 id="各字段详解"><a href="#各字段详解" class="headerlink" title="各字段详解"></a>各字段详解</h3><p><strong><code>id</code>（4 bytes）</strong><br>文件标识。合法值为 <code>&quot;BLP2&quot;</code>（0x42 0x4C 0x50 0x32）。若读到 <code>&quot;PTCH&quot;</code> 说明这是补丁文件而非纹理，应直接跳过。其他任何值均视为非法文件。</p>
+<p><strong><code>version</code>（uint32）</strong><br>格式版本号，WOW 使用的 BLP2 固定为 <code>1</code>。不存在其他合法版本。</p>
+<p><strong><code>encoding</code>（uint8）</strong><br>决定像素数据的编码方式，是解析分支的第一判据：</p>
+<table>
+<thead>
+<tr>
+<th align="center">值</th>
+<th>枚举名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">0</td>
+<td><code>BLP_ENCODING_INVALID</code></td>
+<td>非法，不应出现</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td><code>BLP_ENCODING_PALETTIZED</code></td>
+<td>256 色调色板索引</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td><code>BLP_ENCODING_COMPRESSED</code></td>
+<td>S3TC&#x2F;DXT 块压缩</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td><code>BLP_ENCODING_BGRA</code></td>
+<td>原始 32-bit BGRA 像素</td>
+</tr>
+</tbody></table>
+<p><strong><code>alphaBitDepth</code>（uint8）</strong><br>Alpha 通道位深，含义随 encoding 变化：</p>
+<ul>
+<li>Palettized（encoding&#x3D;1）：0&#x3D;无 alpha，1&#x3D;1-bit，4&#x3D;4-bit，8&#x3D;完整 8-bit</li>
+<li>DXT（encoding&#x3D;2）：0&#x3D;DXT1 不透明，1&#x3D;DXT1 带 alpha，4&#x2F;8 配合 alphaEncoding 区分 DXT3&#x2F;DXT5</li>
+<li>特殊值 <code>72</code>：见于部分 doodad 贴图，行为等同 DXT5（暴雪工具链 bug 遗留）</li>
+</ul>
+<p><strong><code>alphaEncoding</code>（uint8）</strong><br>仅在 DXT 模式下有意义，用于区分 DXT3 与 DXT5：</p>
+<ul>
+<li><code>1</code> → DXT3（显式 4-bit alpha）</li>
+<li><code>7</code> → DXT5（插值 alpha）</li>
+<li>Palettized 模式下写入经验值：A1 格式写 <code>1</code>，其余写 <code>8</code>（读取时忽略）</li>
+</ul>
+<p><strong><code>hasMips</code>（uint8）</strong><br>是否包含 mipmap 链。<code>0</code> 表示只有 mip0（全尺寸），<code>1</code> 表示后续还有逐级减半的 mip 数据。即使为 0，mipOffsets[0] &#x2F; mipSizes[0] 仍然有效。</p>
+<p><strong><code>xResolution</code> &#x2F; <code>yResolution</code>（uint32 × 2）</strong><br>图像宽高（像素）。必须为非零值，通常为 2 的幂（WOW 贴图规范），但格式本身不强制。</p>
+<p><strong><code>mipOffsets[16]</code>（uint32 × 16）</strong><br>每级 mip 数据相对文件起始的字节偏移。mip0 通常为 <code>1172</code>（&#x3D; 148 header + 1024 palette）。未使用的槽位为 0。</p>
+<p><strong><code>mipSizes[16]</code>（uint32 × 16）</strong><br>每级 mip 数据的字节数。与 mipOffsets 配对使用，<code>data[offset : offset+size]</code> 即为该级原始像素数据。未使用的槽位为 0。</p>
+<h3 id="Python-struct-解包"><a href="#Python-struct-解包" class="headerlink" title="Python struct 解包"></a>Python struct 解包</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"></span><br><span class="line">HEADER_STRUCT = struct.Struct(<span class="string">&quot;&lt;4sI4BII16I16I&quot;</span>)</span><br><span class="line"><span class="keyword">assert</span> HEADER_STRUCT.size == <span class="number">148</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 解包示例</span></span><br><span class="line">(raw_id, version, encoding, alpha_bit_depth, alpha_encoding,</span><br><span class="line"> has_mips, width, height, *rest) = HEADER_STRUCT.unpack_from(data, <span class="number">0</span>)</span><br><span class="line">mip_offsets = rest[:<span class="number">16</span>]   <span class="comment"># tuple of 16 uint32</span></span><br><span class="line">mip_sizes = rest[<span class="number">16</span>:<span class="number">32</span>]   <span class="comment"># tuple of 16 uint32</span></span><br></pre></td></tr></table></figure>
+
+<p>格式串含义：<code>&lt;</code> 小端，<code>4s</code> magic，<code>I</code> version，<code>4B</code> 四个 uint8 标志位，<code>II</code> 宽高，<code>16I16I</code> 偏移与大小数组。</p>
+<h2 id="格式分类矩阵"><a href="#格式分类矩阵" class="headerlink" title="格式分类矩阵"></a>格式分类矩阵</h2><p>三个字段组合决定实际编码：</p>
+<pre class="mermaid">flowchart TB
+    A[encoding] -->|1| B[Palettized]
+    A -->|2| C[DXT Compressed]
+    A -->|3| D[Raw BGRA]
+
+    B --> B0[alphaBitDepth=0 → PAL_A0]
+    B --> B1[alphaBitDepth=1 → PAL_A1]
+    B --> B4[alphaBitDepth=4 → PAL_A4]
+    B --> B8[alphaBitDepth=8 → PAL_A8]
+
+    C --> C1[abd=0 → DXT1 不透明]
+    C --> C2[abd=1 → DXT1 1-bit alpha]
+    C --> C3[abd=4, ae=1 → DXT3]
+    C --> C4[abd=8, ae=1 → DXT3]
+    C --> C5[abd=8, ae=7 → DXT5]
+    C --> C6[abd=72 → DXT5 特殊情况]</pre>
+
+<p>完整对照表：</p>
+<table>
+<thead>
+<tr>
+<th align="center">encoding</th>
+<th align="center">alphaBitDepth</th>
+<th align="center">alphaEncoding</th>
+<th>格式 ID</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">-</td>
+<td>BLP_PAL_A0</td>
+<td>调色板，无 alpha</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">-</td>
+<td>BLP_PAL_A1</td>
+<td>调色板，1-bit alpha</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">4</td>
+<td align="center">-</td>
+<td>BLP_PAL_A4</td>
+<td>调色板，4-bit alpha</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">8</td>
+<td align="center">-</td>
+<td>BLP_PAL_A8</td>
+<td>调色板，8-bit alpha</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">0</td>
+<td align="center">any</td>
+<td>BLP_DXT1_A0</td>
+<td>DXT1 不透明</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">1</td>
+<td align="center">any</td>
+<td>BLP_DXT1_A1</td>
+<td>DXT1 带 1-bit alpha</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">4</td>
+<td align="center">1</td>
+<td>BLP_DXT3</td>
+<td>DXT3</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">8</td>
+<td align="center">1</td>
+<td>BLP_DXT3</td>
+<td>DXT3</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">8</td>
+<td align="center">7</td>
+<td>BLP_DXT5</td>
+<td>DXT5</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">72</td>
+<td align="center">any</td>
+<td>BLP_DXT5</td>
+<td>DXT5（doodad 常见）</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">8</td>
+<td align="center">-</td>
+<td>BLP_BGRA</td>
+<td>原始 BGRA</td>
+</tr>
+</tbody></table>
+<h2 id="Palette-格式"><a href="#Palette-格式" class="headerlink" title="Palette 格式"></a>Palette 格式</h2><p>固定 256 条目，每条 4 字节，存储顺序为 <strong>B, G, R, x</strong>（x 为填充字节，无意义）。</p>
+<p>读取时需要交换通道：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">raw = np.frombuffer(data, dtype=np.uint8, count=<span class="number">1024</span>, offset=<span class="number">148</span>)</span><br><span class="line">palette_rgb = raw.reshape(<span class="number">256</span>, <span class="number">4</span>)[:, [<span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>]]  <span class="comment"># BGRx → RGB</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="各编码的-Mip-数据布局"><a href="#各编码的-Mip-数据布局" class="headerlink" title="各编码的 Mip 数据布局"></a>各编码的 Mip 数据布局</h2><h3 id="Palettized（encoding-1）"><a href="#Palettized（encoding-1）" class="headerlink" title="Palettized（encoding&#x3D;1）"></a>Palettized（encoding&#x3D;1）</h3><p>Mip0 数据由两部分拼接：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────┬──────────────────────────┐</span><br><span class="line">│   indices (W×H bytes)        │   alpha data (变长)       │</span><br><span class="line">│   每像素 1 字节调色板索引      │   取决于 alphaBitDepth    │</span><br><span class="line">└──────────────────────────────┴──────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="center">alphaBitDepth</th>
+<th>Alpha 数据</th>
+<th>大小</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">0</td>
+<td>无</td>
+<td>0</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td>位打包，每像素 1 bit</td>
+<td>⌈W×H &#x2F; 8⌉ bytes</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td>半字节打包，每像素 4 bit（0-15 映射到 0-255）</td>
+<td>⌈W×H &#x2F; 2⌉ bytes</td>
+</tr>
+<tr>
+<td align="center">8</td>
+<td>完整 alpha 平面</td>
+<td>W×H bytes</td>
+</tr>
+</tbody></table>
+<h3 id="DXT-Compressed（encoding-2）"><a href="#DXT-Compressed（encoding-2）" class="headerlink" title="DXT Compressed（encoding&#x3D;2）"></a>DXT Compressed（encoding&#x3D;2）</h3><p>DXT 以 4×4 像素块为单位压缩：</p>
+<table>
+<thead>
+<tr>
+<th>DXT 类型</th>
+<th align="right">块大小</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DXT1</td>
+<td align="right">8 bytes</td>
+<td>2 个 RGB565 参考色 + 2-bit 索引表</td>
+</tr>
+<tr>
+<td>DXT3</td>
+<td align="right">16 bytes</td>
+<td>8B 显式 4-bit alpha + 8B 颜色块</td>
+</tr>
+<tr>
+<td>DXT5</td>
+<td align="right">16 bytes</td>
+<td>8B 插值 alpha + 8B 颜色块</td>
+</tr>
+</tbody></table>
+<p>Mip 数据大小公式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">blocks_x = (width + 3) / 4</span><br><span class="line">blocks_y = (height + 3) / 4</span><br><span class="line">size = blocks_x × blocks_y × block_size</span><br></pre></td></tr></table></figure>
+
+<h3 id="Raw-BGRA（encoding-3）"><a href="#Raw-BGRA（encoding-3）" class="headerlink" title="Raw BGRA（encoding&#x3D;3）"></a>Raw BGRA（encoding&#x3D;3）</h3><p>最简单的情况，每像素 4 字节 B, G, R, A 顺序排列：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">size = width × height × 4</span><br></pre></td></tr></table></figure>
+
+<p>读取后交换 R&#x2F;B 通道即得 RGBA。</p>
+<h2 id="DXT-解码原理"><a href="#DXT-解码原理" class="headerlink" title="DXT 解码原理"></a>DXT 解码原理</h2><h3 id="DXT1-颜色块（8-字节）"><a href="#DXT1-颜色块（8-字节）" class="headerlink" title="DXT1 颜色块（8 字节）"></a>DXT1 颜色块（8 字节）</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Bytes 0-1: color0 (RGB565, little-endian)</span><br><span class="line">Bytes 2-3: color1 (RGB565, little-endian)</span><br><span class="line">Bytes 4-7: 16 个 2-bit 索引（每像素 2 bit，共 32 bit）</span><br></pre></td></tr></table></figure>
+
+<p>RGB565 → RGB888 转换：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">c565_to_rgb</span>(<span class="params">c: <span class="built_in">int</span></span>) -&gt; <span class="built_in">tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]:</span><br><span class="line">    r = ((c &gt;&gt; <span class="number">11</span>) &amp; <span class="number">31</span>) * <span class="number">255</span> // <span class="number">31</span></span><br><span class="line">    g = ((c &gt;&gt; <span class="number">5</span>) &amp; <span class="number">63</span>) * <span class="number">255</span> // <span class="number">63</span></span><br><span class="line">    b = (c &amp; <span class="number">31</span>) * <span class="number">255</span> // <span class="number">31</span></span><br><span class="line">    <span class="keyword">return</span> r, g, b</span><br></pre></td></tr></table></figure>
+
+<p>颜色表生成规则：</p>
+<ul>
+<li>若 <code>color0 &gt; color1</code>：4 色不透明模式，插值出 2 个中间色</li>
+<li>若 <code>color0 &lt;= color1</code>：3 色 + 透明黑（alpha&#x3D;0）</li>
+</ul>
+<h3 id="DXT3-Alpha（前-8-字节）"><a href="#DXT3-Alpha（前-8-字节）" class="headerlink" title="DXT3 Alpha（前 8 字节）"></a>DXT3 Alpha（前 8 字节）</h3><p>每像素 4 bit 显式 alpha，乘以 17 映射到 0-255：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">alpha[i] = ((block[i // <span class="number">2</span>] &gt;&gt; ((i % <span class="number">2</span>) * <span class="number">4</span>)) &amp; <span class="number">0xF</span>) * <span class="number">17</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="DXT5-Alpha（前-8-字节）"><a href="#DXT5-Alpha（前-8-字节）" class="headerlink" title="DXT5 Alpha（前 8 字节）"></a>DXT5 Alpha（前 8 字节）</h3><p>两个参考值 <code>a0</code>, <code>a1</code> + 48-bit 索引表（每像素 3 bit）：</p>
+<ul>
+<li><code>a0 &gt; a1</code>：8 级线性插值</li>
+<li><code>a0 &lt;= a1</code>：6 级插值 + 强制 0 和 255 端点</li>
+</ul>
+<h2 id="解析流程"><a href="#解析流程" class="headerlink" title="解析流程"></a>解析流程</h2><pre class="mermaid">flowchart TB
+    A[读取文件字节] --> B{文件 >= 148B?}
+    B -->|No| ERR1[NotBlpError]
+    B -->|Yes| C[解析 Header]
+    C --> D{magic == BLP2?}
+    D -->|PTCH| ERR2[PatchFileError]
+    D -->|其他| ERR1
+    D -->|Yes| E{version == 1?}
+    E -->|No| ERR3[VersionError]
+    E -->|Yes| F[classify_format]
+    F --> G{encoding?}
+    G -->|1| H[读取 Palette + 索引 + Alpha]
+    G -->|2| I[DXT 解压缩]
+    G -->|3| J[BGRA 通道交换]
+    H --> K[ImageBuffer]
+    I --> K
+    J --> K
+    K --> L[输出 PNG]</pre>
+
+<h2 id="Python-blp2png-Demo"><a href="#Python-blp2png-Demo" class="headerlink" title="Python blp2png Demo"></a>Python blp2png Demo</h2><p>以下是一个精简但完整的 BLP2 → PNG 转换脚本，覆盖 Palette &#x2F; DXT1 &#x2F; DXT3 &#x2F; DXT5 &#x2F; BGRA 全部格式。依赖 <code>numpy</code> 和 <code>Pillow</code>，DXT 解码为纯 Python 实现（无需 imagecodecs）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;Minimal BLP2 → PNG converter (pure Python + numpy + Pillow).&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"></span><br><span class="line">HEADER_FMT = <span class="string">&quot;&lt;4sI4BII16I16I&quot;</span></span><br><span class="line">HEADER_SIZE = struct.calcsize(HEADER_FMT)  <span class="comment"># 148</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">parse_blp</span>(<span class="params">data: <span class="built_in">bytes</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;解析 BLP2 header，返回 (encoding, alpha_depth, alpha_enc, w, h, mip_off, mip_size).&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(data) &lt; HEADER_SIZE:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">&quot;file too small&quot;</span>)</span><br><span class="line">    fields = struct.unpack_from(HEADER_FMT, data, <span class="number">0</span>)</span><br><span class="line">    magic, version = fields[<span class="number">0</span>], fields[<span class="number">1</span>]</span><br><span class="line">    <span class="keyword">if</span> magic == <span class="string">b&quot;PTCH&quot;</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">&quot;PTCH patch file, not BLP2&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> magic != <span class="string">b&quot;BLP2&quot;</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">f&quot;bad magic: <span class="subst">&#123;magic!r&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> version != <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">f&quot;unsupported version: <span class="subst">&#123;version&#125;</span>&quot;</span>)</span><br><span class="line">    encoding, alpha_depth, alpha_enc, has_mips = fields[<span class="number">2</span>:<span class="number">6</span>]</span><br><span class="line">    w, h = fields[<span class="number">6</span>], fields[<span class="number">7</span>]</span><br><span class="line">    mip_offsets = fields[<span class="number">8</span>:<span class="number">24</span>]</span><br><span class="line">    mip_sizes = fields[<span class="number">24</span>:<span class="number">40</span>]</span><br><span class="line">    <span class="keyword">return</span> encoding, alpha_depth, alpha_enc, w, h, mip_offsets[<span class="number">0</span>], mip_sizes[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_palette_rgb</span>(<span class="params">data: <span class="built_in">bytes</span></span>) -&gt; np.ndarray:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;读取 256 色 BGRx 调色板，返回 (256,3) RGB 数组。&quot;&quot;&quot;</span></span><br><span class="line">    raw = np.frombuffer(data, dtype=np.uint8, count=<span class="number">1024</span>, offset=HEADER_SIZE)</span><br><span class="line">    <span class="keyword">return</span> raw.reshape(<span class="number">256</span>, <span class="number">4</span>)[:, [<span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>]].copy()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">c565_to_rgb</span>(<span class="params">c: <span class="built_in">int</span></span>):</span><br><span class="line">    <span class="keyword">return</span> ((c &gt;&gt; <span class="number">11</span>) &amp; <span class="number">31</span>) * <span class="number">255</span> // <span class="number">31</span>, ((c &gt;&gt; <span class="number">5</span>) &amp; <span class="number">63</span>) * <span class="number">255</span> // <span class="number">63</span>, (c &amp; <span class="number">31</span>) * <span class="number">255</span> // <span class="number">31</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">decode_dxt1_block</span>(<span class="params">block: <span class="built_in">bytes</span>, alpha_mode: <span class="built_in">bool</span></span>):</span><br><span class="line">    c0, c1 = struct.unpack_from(<span class="string">&quot;&lt;HH&quot;</span>, block, <span class="number">0</span>)</span><br><span class="line">    bits = struct.unpack_from(<span class="string">&quot;&lt;I&quot;</span>, block, <span class="number">4</span>)[<span class="number">0</span>]</span><br><span class="line">    r0, g0, b0 = c565_to_rgb(c0)</span><br><span class="line">    r1, g1, b1 = c565_to_rgb(c1)</span><br><span class="line">    colors = [(r0, g0, b0, <span class="number">255</span>), (r1, g1, b1, <span class="number">255</span>)]</span><br><span class="line">    <span class="keyword">if</span> c0 &gt; c1 <span class="keyword">or</span> <span class="keyword">not</span> alpha_mode:</span><br><span class="line">        colors.append(((<span class="number">2</span>*r0+r1)//<span class="number">3</span>, (<span class="number">2</span>*g0+g1)//<span class="number">3</span>, (<span class="number">2</span>*b0+b1)//<span class="number">3</span>, <span class="number">255</span>))</span><br><span class="line">        colors.append(((r0+<span class="number">2</span>*r1)//<span class="number">3</span>, (g0+<span class="number">2</span>*g1)//<span class="number">3</span>, (b0+<span class="number">2</span>*b1)//<span class="number">3</span>, <span class="number">255</span>))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        colors.append(((r0+r1)//<span class="number">2</span>, (g0+g1)//<span class="number">2</span>, (b0+b1)//<span class="number">2</span>, <span class="number">255</span>))</span><br><span class="line">        colors.append((<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">    <span class="keyword">return</span> [colors[(bits &gt;&gt; (<span class="number">2</span>*i)) &amp; <span class="number">3</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">16</span>)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">decode_dxt3_alpha</span>(<span class="params">block: <span class="built_in">bytes</span></span>):</span><br><span class="line">    <span class="keyword">return</span> [((block[i//<span class="number">2</span>] &gt;&gt; ((i%<span class="number">2</span>)*<span class="number">4</span>)) &amp; <span class="number">0xF</span>) * <span class="number">17</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">16</span>)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">decode_dxt5_alpha</span>(<span class="params">block: <span class="built_in">bytes</span></span>):</span><br><span class="line">    a0, a1 = block[<span class="number">0</span>], block[<span class="number">1</span>]</span><br><span class="line">    bits = <span class="built_in">int</span>.from_bytes(block[<span class="number">2</span>:<span class="number">8</span>], <span class="string">&quot;little&quot;</span>)</span><br><span class="line">    table = [a0, a1] + [<span class="number">0</span>]*<span class="number">6</span></span><br><span class="line">    <span class="keyword">if</span> a0 &gt; a1:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">7</span>):</span><br><span class="line">            table[i+<span class="number">1</span>] = ((<span class="number">7</span>-i)*a0 + i*a1) // <span class="number">7</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">5</span>):</span><br><span class="line">            table[i+<span class="number">1</span>] = ((<span class="number">5</span>-i)*a0 + i*a1) // <span class="number">5</span></span><br><span class="line">        table[<span class="number">6</span>], table[<span class="number">7</span>] = <span class="number">0</span>, <span class="number">255</span></span><br><span class="line">    <span class="keyword">return</span> [table[(bits &gt;&gt; (<span class="number">3</span>*i)) &amp; <span class="number">7</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">16</span>)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">decompress_dxt</span>(<span class="params">data: <span class="built_in">bytes</span>, w: <span class="built_in">int</span>, h: <span class="built_in">int</span>, kind: <span class="built_in">str</span></span>) -&gt; np.ndarray:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;解压 DXT1/3/5 数据为 (H, W, 4) RGBA 数组。&quot;&quot;&quot;</span></span><br><span class="line">    out = np.zeros((h, w, <span class="number">4</span>), dtype=np.uint8)</span><br><span class="line">    bx_count, by_count = (w+<span class="number">3</span>)//<span class="number">4</span>, (h+<span class="number">3</span>)//<span class="number">4</span></span><br><span class="line">    block_size = <span class="number">8</span> <span class="keyword">if</span> kind == <span class="string">&quot;dxt1&quot;</span> <span class="keyword">else</span> <span class="number">16</span></span><br><span class="line">    pos = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> by <span class="keyword">in</span> <span class="built_in">range</span>(by_count):</span><br><span class="line">        <span class="keyword">for</span> bx <span class="keyword">in</span> <span class="built_in">range</span>(bx_count):</span><br><span class="line">            <span class="keyword">if</span> kind == <span class="string">&quot;dxt1&quot;</span>:</span><br><span class="line">                pixels = decode_dxt1_block(data[pos:pos+<span class="number">8</span>], alpha_mode=<span class="literal">True</span>)</span><br><span class="line">                alphas = [p[<span class="number">3</span>] <span class="keyword">for</span> p <span class="keyword">in</span> pixels]</span><br><span class="line">            <span class="keyword">elif</span> kind == <span class="string">&quot;dxt3&quot;</span>:</span><br><span class="line">                alphas = decode_dxt3_alpha(data[pos:pos+<span class="number">8</span>])</span><br><span class="line">                pixels = decode_dxt1_block(data[pos+<span class="number">8</span>:pos+<span class="number">16</span>], alpha_mode=<span class="literal">False</span>)</span><br><span class="line">            <span class="keyword">else</span>:  <span class="comment"># dxt5</span></span><br><span class="line">                alphas = decode_dxt5_alpha(data[pos:pos+<span class="number">8</span>])</span><br><span class="line">                pixels = decode_dxt1_block(data[pos+<span class="number">8</span>:pos+<span class="number">16</span>], alpha_mode=<span class="literal">False</span>)</span><br><span class="line">            pos += block_size</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">16</span>):</span><br><span class="line">                px, py = bx*<span class="number">4</span> + i%<span class="number">4</span>, by*<span class="number">4</span> + i//<span class="number">4</span></span><br><span class="line">                <span class="keyword">if</span> px &lt; w <span class="keyword">and</span> py &lt; h:</span><br><span class="line">                    r, g, b, _ = pixels[i]</span><br><span class="line">                    out[py, px] = (r, g, b, alphas[i])</span><br><span class="line">    <span class="keyword">return</span> out</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">blp_to_png</span>(<span class="params">src: <span class="built_in">str</span>, dst: <span class="built_in">str</span> | <span class="literal">None</span> = <span class="literal">None</span></span>):</span><br><span class="line">    data = Path(src).read_bytes()</span><br><span class="line">    encoding, alpha_depth, alpha_enc, w, h, mip_off, mip_size = parse_blp(data)</span><br><span class="line">    level0 = data[mip_off : mip_off + mip_size]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> encoding == <span class="number">1</span>:  <span class="comment"># Palettized</span></span><br><span class="line">        palette = read_palette_rgb(data)</span><br><span class="line">        n = w * h</span><br><span class="line">        indices = np.frombuffer(level0, dtype=np.uint8, count=n).reshape(h, w)</span><br><span class="line">        rgb = palette[indices]  <span class="comment"># (H, W, 3)</span></span><br><span class="line">        <span class="keyword">if</span> alpha_depth == <span class="number">8</span>:</span><br><span class="line">            alpha = np.frombuffer(level0, dtype=np.uint8, count=n, offset=n).reshape(h, w)</span><br><span class="line">            rgba = np.dstack([rgb, alpha])</span><br><span class="line">            img = Image.fromarray(rgba, <span class="string">&quot;RGBA&quot;</span>)</span><br><span class="line">        <span class="keyword">elif</span> alpha_depth == <span class="number">1</span>:</span><br><span class="line">            nb = math.ceil(n / <span class="number">8</span>)</span><br><span class="line">            bits = level0[n : n+nb]</span><br><span class="line">            alpha = np.array([<span class="number">255</span> <span class="keyword">if</span> bits[i//<span class="number">8</span>] &amp; (<span class="number">1</span> &lt;&lt; i%<span class="number">8</span>) <span class="keyword">else</span> <span class="number">0</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n)],</span><br><span class="line">                             dtype=np.uint8).reshape(h, w)</span><br><span class="line">            rgba = np.dstack([rgb, alpha])</span><br><span class="line">            img = Image.fromarray(rgba, <span class="string">&quot;RGBA&quot;</span>)</span><br><span class="line">        <span class="keyword">elif</span> alpha_depth == <span class="number">4</span>:</span><br><span class="line">            nb = math.ceil(n / <span class="number">2</span>)</span><br><span class="line">            nibs = level0[n : n+nb]</span><br><span class="line">            alpha = np.array([<span class="built_in">int</span>(<span class="built_in">round</span>(<span class="number">255</span> * ((nibs[i//<span class="number">2</span>] &gt;&gt; ((i%<span class="number">2</span>)*<span class="number">4</span>)) &amp; <span class="number">0xF</span>) / <span class="number">15</span>))</span><br><span class="line">                             <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n)], dtype=np.uint8).reshape(h, w)</span><br><span class="line">            rgba = np.dstack([rgb, alpha])</span><br><span class="line">            img = Image.fromarray(rgba, <span class="string">&quot;RGBA&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            img = Image.fromarray(rgb, <span class="string">&quot;RGB&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">elif</span> encoding == <span class="number">2</span>:  <span class="comment"># DXT</span></span><br><span class="line">        <span class="keyword">if</span> alpha_depth == <span class="number">0</span>:</span><br><span class="line">            kind = <span class="string">&quot;dxt1&quot;</span></span><br><span class="line">        <span class="keyword">elif</span> alpha_depth == <span class="number">1</span>:</span><br><span class="line">            kind = <span class="string">&quot;dxt1&quot;</span></span><br><span class="line">        <span class="keyword">elif</span> alpha_depth <span class="keyword">in</span> (<span class="number">4</span>, <span class="number">8</span>) <span class="keyword">and</span> alpha_enc == <span class="number">1</span>:</span><br><span class="line">            kind = <span class="string">&quot;dxt3&quot;</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            kind = <span class="string">&quot;dxt5&quot;</span></span><br><span class="line">        rgba = decompress_dxt(level0, w, h, kind)</span><br><span class="line">        <span class="keyword">if</span> alpha_depth == <span class="number">0</span>:</span><br><span class="line">            img = Image.fromarray(rgba[..., :<span class="number">3</span>], <span class="string">&quot;RGB&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            img = Image.fromarray(rgba, <span class="string">&quot;RGBA&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">elif</span> encoding == <span class="number">3</span>:  <span class="comment"># BGRA</span></span><br><span class="line">        bgra = np.frombuffer(level0, dtype=np.uint8, count=w*h*<span class="number">4</span>).reshape(h, w, <span class="number">4</span>)</span><br><span class="line">        rgba = bgra[..., [<span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">3</span>]]  <span class="comment"># B,G,R,A → R,G,B,A</span></span><br><span class="line">        img = Image.fromarray(np.ascontiguousarray(rgba), <span class="string">&quot;RGBA&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">f&quot;unknown encoding: <span class="subst">&#123;encoding&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    out = dst <span class="keyword">or</span> <span class="built_in">str</span>(Path(src).with_suffix(<span class="string">&quot;.png&quot;</span>))</span><br><span class="line">    img.save(out, <span class="string">&quot;PNG&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;src&#125;</span> (<span class="subst">&#123;w&#125;</span>x<span class="subst">&#123;h&#125;</span>) -&gt; <span class="subst">&#123;out&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(sys.argv) &lt; <span class="number">2</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Usage: python blp2png.py &lt;input.blp&gt; [output.png]&quot;</span>)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br><span class="line">    blp_to_png(sys.argv[<span class="number">1</span>], sys.argv[<span class="number">2</span>] <span class="keyword">if</span> <span class="built_in">len</span>(sys.argv) &gt; <span class="number">2</span> <span class="keyword">else</span> <span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pip install numpy Pillow</span><br><span class="line"></span><br><span class="line"><span class="comment"># 单文件转换</span></span><br><span class="line">python blp2png.py texture.blp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指定输出路径</span></span><br><span class="line">python blp2png.py icon.blp output/icon.png</span><br></pre></td></tr></table></figure>
+
+<h3 id="运行效果"><a href="#运行效果" class="headerlink" title="运行效果"></a>运行效果</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ python blp2png.py CharacterSkin00.blp</span><br><span class="line">CharacterSkin00.blp (256x256) -&gt; CharacterSkin00.png</span><br><span class="line"></span><br><span class="line">$ python blp2png.py SpellIcon_fireball.blp</span><br><span class="line">SpellIcon_fireball.blp (64x64) -&gt; SpellIcon_fireball.png</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>BLP2 &#x3D; 148B Header + 1024B Palette + N 级 Mip 数据，结构紧凑</li>
+<li>编码由 <code>encoding</code> + <code>alphaBitDepth</code> + <code>alphaEncoding</code> 三字段联合决定</li>
+<li>Palettized 本质是索引图 + 独立 alpha 平面（位&#x2F;半字节&#x2F;字节三种打包）</li>
+<li>DXT 以 4×4 块为单位，DXT1 8B&#x2F;块、DXT3&#x2F;5 16B&#x2F;块</li>
+<li>Python 解析核心就是 struct 拆 header → numpy 操作像素 → Pillow 写 PNG</li>
+<li>完整实现见 <code>analysis/blpconv.py</code>，可直接作为库使用：<code>from blpconv import load_blp, blp_to_png</code></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/fun/" rel="tag"># fun</a>
+              <a href="/tags/wow/" rel="tag"># wow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/07/16/fun/20260716-azerothcore-pdump-character-analysis/" rel="prev" title="AzerothCore pdump 文件分析">
+      <i class="fa fa-chevron-left"></i> AzerothCore pdump 文件分析
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#BLP2-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">BLP2 是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%95%B4%E4%BD%93%E5%B8%83%E5%B1%80"><span class="nav-number">2.</span> <span class="nav-text">文件整体布局</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Header-%E7%BB%93%E6%9E%84%EF%BC%88148-%E5%AD%97%E8%8A%82%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">Header 结构（148 字节）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5%E5%81%8F%E7%A7%BB%E8%A1%A8"><span class="nav-number">3.1.</span> <span class="nav-text">字段偏移表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%84%E5%AD%97%E6%AE%B5%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.2.</span> <span class="nav-text">各字段详解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Python-struct-%E8%A7%A3%E5%8C%85"><span class="nav-number">3.3.</span> <span class="nav-text">Python struct 解包</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%BC%E5%BC%8F%E5%88%86%E7%B1%BB%E7%9F%A9%E9%98%B5"><span class="nav-number">4.</span> <span class="nav-text">格式分类矩阵</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Palette-%E6%A0%BC%E5%BC%8F"><span class="nav-number">5.</span> <span class="nav-text">Palette 格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%84%E7%BC%96%E7%A0%81%E7%9A%84-Mip-%E6%95%B0%E6%8D%AE%E5%B8%83%E5%B1%80"><span class="nav-number">6.</span> <span class="nav-text">各编码的 Mip 数据布局</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Palettized%EF%BC%88encoding-1%EF%BC%89"><span class="nav-number">6.1.</span> <span class="nav-text">Palettized（encoding&#x3D;1）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DXT-Compressed%EF%BC%88encoding-2%EF%BC%89"><span class="nav-number">6.2.</span> <span class="nav-text">DXT Compressed（encoding&#x3D;2）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Raw-BGRA%EF%BC%88encoding-3%EF%BC%89"><span class="nav-number">6.3.</span> <span class="nav-text">Raw BGRA（encoding&#x3D;3）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DXT-%E8%A7%A3%E7%A0%81%E5%8E%9F%E7%90%86"><span class="nav-number">7.</span> <span class="nav-text">DXT 解码原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DXT1-%E9%A2%9C%E8%89%B2%E5%9D%97%EF%BC%888-%E5%AD%97%E8%8A%82%EF%BC%89"><span class="nav-number">7.1.</span> <span class="nav-text">DXT1 颜色块（8 字节）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DXT3-Alpha%EF%BC%88%E5%89%8D-8-%E5%AD%97%E8%8A%82%EF%BC%89"><span class="nav-number">7.2.</span> <span class="nav-text">DXT3 Alpha（前 8 字节）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DXT5-Alpha%EF%BC%88%E5%89%8D-8-%E5%AD%97%E8%8A%82%EF%BC%89"><span class="nav-number">7.3.</span> <span class="nav-text">DXT5 Alpha（前 8 字节）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E6%B5%81%E7%A8%8B"><span class="nav-number">8.</span> <span class="nav-text">解析流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-blp2png-Demo"><span class="nav-number">9.</span> <span class="nav-text">Python blp2png Demo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">9.1.</span> <span class="nav-text">使用方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%95%88%E6%9E%9C"><span class="nav-number">9.2.</span> <span class="nav-text">运行效果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">10.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">275</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">158</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('/lib/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>

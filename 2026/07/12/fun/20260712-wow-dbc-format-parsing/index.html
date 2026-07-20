@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近在排查 AzerothCore + PlayerBots 的 LFG 问题时，又翻到了 LFGDungeons.dbc。顺便把 3.3.5a 的 DBC 二进制格式和解析方式整理一下，方便以后直接读表，不用每次都去翻源码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WOW 3.3.5a DBC 文件格式与解析">
+<meta property="og:url" content="https://forgives.github.io/2026/07/12/fun/20260712-wow-dbc-format-parsing/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="最近在排查 AzerothCore + PlayerBots 的 LFG 问题时，又翻到了 LFGDungeons.dbc。顺便把 3.3.5a 的 DBC 二进制格式和解析方式整理一下，方便以后直接读表，不用每次都去翻源码。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-12T05:00:00.000Z">
+<meta property="article:modified_time" content="2026-07-12T05:13:19.110Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="fun">
+<meta property="article:tag" content="wow">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/07/12/fun/20260712-wow-dbc-format-parsing/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>WOW 3.3.5a DBC 文件格式与解析 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/07/12/fun/20260712-wow-dbc-format-parsing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WOW 3.3.5a DBC 文件格式与解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-07-12 13:00:00" itemprop="dateCreated datePublished" datetime="2026-07-12T13:00:00+08:00">2026-07-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近在排查 AzerothCore + PlayerBots 的 LFG 问题时，又翻到了 <code>LFGDungeons.dbc</code>。顺便把 3.3.5a 的 DBC 二进制格式和解析方式整理一下，方便以后直接读表，不用每次都去翻源码。</p>
+<span id="more"></span>
+
+<h2 id="DBC-是什么"><a href="#DBC-是什么" class="headerlink" title="DBC 是什么"></a>DBC 是什么</h2><p>DBC 全称 <strong>DataBase Client</strong>，是魔兽世界客户端用的静态数据表。3.3.5a 这一代仍然是经典的 <code>WDBC</code> 格式。</p>
+<p>服务端启动时会从 <code>DataDir/dbc/</code> 读取这些文件，把地图、法术、LFG 副本、技能、阵营等“客户端权威定义”加载进内存。常见路径：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;DataDir&gt;/dbc/Map.dbc</span><br><span class="line">&lt;DataDir&gt;/dbc/Spell.dbc</span><br><span class="line">&lt;DataDir&gt;/dbc/LFGDungeons.dbc</span><br><span class="line">&lt;DataDir&gt;/dbc/enUS/Map.dbc</span><br></pre></td></tr></table></figure>
+
+<p>注意几点：</p>
+<ol>
+<li>主 DBC 一般来自客户端 MPQ 解包后的 <code>DBFilesClient/*.dbc</code></li>
+<li>AzerothCore 还会尝试加载同名本地化目录里的字符串覆盖</li>
+<li>部分表还允许通过数据库二次覆盖，但那是另一层逻辑，不改变 DBC 文件本身格式</li>
+</ol>
+<p>对应源码入口：</p>
+<ul>
+<li><code>src/common/DataStores/DBCFileLoader.cpp</code></li>
+<li><code>src/server/shared/DataStores/DBCfmt.h</code></li>
+<li><code>src/server/shared/DataStores/DBCStructure.h</code></li>
+<li><code>src/server/game/DataStores/DBCStores.cpp</code></li>
+</ul>
+<h2 id="文件整体结构"><a href="#文件整体结构" class="headerlink" title="文件整体结构"></a>文件整体结构</h2><p>3.3.5a 的 DBC 非常规整，整个文件只有三块：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">+----------------------+</span><br><span class="line">| Header (20 bytes)    |</span><br><span class="line">+----------------------+</span><br><span class="line">| Records block        |  recordCount * recordSize</span><br><span class="line">+----------------------+</span><br><span class="line">| String block         |  stringBlockSize bytes</span><br><span class="line">+----------------------+</span><br></pre></td></tr></table></figure>
+
+<p>全部多字节数值都是 <strong>little-endian</strong>。</p>
+<h3 id="Header（20-字节）"><a href="#Header（20-字节）" class="headerlink" title="Header（20 字节）"></a>Header（20 字节）</h3><table>
+<thead>
+<tr>
+<th align="right">Offset</th>
+<th align="right">Size</th>
+<th>Type</th>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td align="right">4</td>
+<td>char[4]</td>
+<td>magic</td>
+<td>固定 <code>WDBC</code>，按 uint32 读是 <code>0x43424457</code></td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td align="right">4</td>
+<td>uint32</td>
+<td>recordCount</td>
+<td>记录条数</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td align="right">4</td>
+<td>uint32</td>
+<td>fieldCount</td>
+<td>每条记录字段数</td>
+</tr>
+<tr>
+<td align="right">12</td>
+<td align="right">4</td>
+<td>uint32</td>
+<td>recordSize</td>
+<td>单条记录字节数</td>
+</tr>
+<tr>
+<td align="right">16</td>
+<td align="right">4</td>
+<td>uint32</td>
+<td>stringBlockSize</td>
+<td>字符串块字节数</td>
+</tr>
+</tbody></table>
+<p>用 Python 读头：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line">data = Path(<span class="string">&quot;Map.dbc&quot;</span>).read_bytes()</span><br><span class="line">magic, record_count, field_count, record_size, string_size = struct.unpack_from(<span class="string">&quot;&lt;4sIIII&quot;</span>, data, <span class="number">0</span>)</span><br><span class="line"><span class="keyword">assert</span> magic == <span class="string">b&quot;WDBC&quot;</span></span><br><span class="line"><span class="built_in">print</span>(record_count, field_count, record_size, string_size)</span><br></pre></td></tr></table></figure>
+
+<p>先做长度校验：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">20 + recordCount * recordSize + stringBlockSize == file_size</span><br></pre></td></tr></table></figure>
+
+<p>对不上就说明文件截断、版本不对，或者根本不是 3.x 的 WDBC。</p>
+<h3 id="Records-块"><a href="#Records-块" class="headerlink" title="Records 块"></a>Records 块</h3><ul>
+<li>紧接 header 之后</li>
+<li>第 <code>i</code> 条记录起始：<code>20 + i * recordSize</code></li>
+<li>记录内字段按顺序紧密排列</li>
+<li><strong>没有字段名，没有类型元数据</strong></li>
+<li>绝大多数字段是 4 字节，少数表会出现 1 字节字段</li>
+</ul>
+<p>也就是说，DBC 文件自己不告诉你“第 3 列是 float 还是 string”，解析者必须额外知道 schema。</p>
+<h3 id="String-块"><a href="#String-块" class="headerlink" title="String 块"></a>String 块</h3><ul>
+<li>紧接 records 之后</li>
+<li>内容是一组以 <code>\0</code> 结尾的 C 字符串拼接</li>
+<li>记录里的字符串字段存的是 <strong>相对 string block 起点的 uint32 偏移</strong></li>
+<li>偏移 <code>0</code> 通常对应空字符串</li>
+</ul>
+<p>读取示意：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">string_block = data[<span class="number">20</span> + record_count * record_size:]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_cstring</span>(<span class="params">offset: <span class="built_in">int</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="keyword">if</span> offset &gt;= <span class="built_in">len</span>(string_block):</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    end = string_block.find(<span class="string">b&quot;\x00&quot;</span>, offset)</span><br><span class="line">    raw = string_block[offset: end <span class="keyword">if</span> end != -<span class="number">1</span> <span class="keyword">else</span> <span class="literal">None</span>]</span><br><span class="line">    <span class="keyword">return</span> raw.decode(<span class="string">&quot;utf-8&quot;</span>, errors=<span class="string">&quot;replace&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="为什么必须有-format-字符串"><a href="#为什么必须有-format-字符串" class="headerlink" title="为什么必须有 format 字符串"></a>为什么必须有 format 字符串</h2><p>因为 DBC 不自描述。AzerothCore 用 <code>DBCfmt.h</code> 里的 format 字符串描述：</p>
+<ol>
+<li>每列在文件里怎么读</li>
+<li>哪些列要进 C++ 结构体</li>
+<li>哪些列直接跳过</li>
+<li>哪一列是主键&#x2F;索引</li>
+</ol>
+<p>例如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> <span class="keyword">constexpr</span> LFGDungeonEntryfmt[] =</span><br><span class="line">    <span class="string">&quot;nssssssssssssssssxiiiiiiiiixxixixxxxxxxxxxxxxxxxx&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>format 字符定义在 <code>DBCFileLoader.h</code>：</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th align="right">文件中大小</th>
+<th>是否进入结构体</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>n</code></td>
+<td align="right">4</td>
+<td>是</td>
+<td>索引&#x2F;主键，写入结构体，并用于 <code>indexTable[id]</code></td>
+</tr>
+<tr>
+<td><code>i</code></td>
+<td align="right">4</td>
+<td>是</td>
+<td>uint32</td>
+</tr>
+<tr>
+<td><code>f</code></td>
+<td align="right">4</td>
+<td>是</td>
+<td>float</td>
+</tr>
+<tr>
+<td><code>s</code></td>
+<td align="right">4</td>
+<td>是</td>
+<td>字符串偏移，加载后变成 <code>char*</code></td>
+</tr>
+<tr>
+<td><code>b</code></td>
+<td align="right">1</td>
+<td>是</td>
+<td>uint8</td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td align="right">4</td>
+<td>否</td>
+<td>跳过 4 字节未知&#x2F;无用字段</td>
+</tr>
+<tr>
+<td><code>X</code></td>
+<td align="right">1</td>
+<td>否</td>
+<td>跳过 1 字节未知&#x2F;无用字段</td>
+</tr>
+<tr>
+<td><code>d</code></td>
+<td align="right">4</td>
+<td>否</td>
+<td>排序键，文件中有，结构体不存</td>
+</tr>
+<tr>
+<td><code>l</code></td>
+<td align="right">4</td>
+<td>是</td>
+<td>逻辑值，本仓库加载路径基本不用</td>
+</tr>
+</tbody></table>
+<p>这里有个关键区别：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">文件头里的 recordSize  = 磁盘上真实记录大小</span><br><span class="line">format 映射后的大小   = C++ 结构体大小</span><br></pre></td></tr></table></figure>
+
+<p>两者通常不相等，因为 <code>x/X/d</code> 在文件里占位，但不会进结构体。</p>
+<p>核心加载时还会断言：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ASSERT</span>(DBCFileLoader::<span class="built_in">GetFormatRecordSize</span>(fmt) == <span class="built_in">sizeof</span>(T));</span><br></pre></td></tr></table></figure>
+
+<p>所以：</p>
+<ol>
+<li><code>len(fmt)</code> 必须等于 <code>fieldCount</code></li>
+<li>format 版本必须和客户端版本匹配</li>
+<li>结构体字段顺序必须和 format 中“保留字段”一致</li>
+</ol>
+<h2 id="字符串与本地化"><a href="#字符串与本地化" class="headerlink" title="字符串与本地化"></a>字符串与本地化</h2><p>很多名字不是单个 string，而是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Name[16] + Name_lang_mask</span><br></pre></td></tr></table></figure>
+
+<p>在 format 里常写成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssssssssssssssssx</span><br></pre></td></tr></table></figure>
+
+<p>也就是 16 个本地化字符串 + 1 个 mask。</p>
+<p>常见 locale 槽位：</p>
+<table>
+<thead>
+<tr>
+<th align="right">Index</th>
+<th>Locale</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td>enUS</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td>koKR</td>
+</tr>
+<tr>
+<td align="right">2</td>
+<td>frFR</td>
+</tr>
+<tr>
+<td align="right">3</td>
+<td>deDE</td>
+</tr>
+<tr>
+<td align="right">4</td>
+<td>zhCN</td>
+</tr>
+<tr>
+<td align="right">5</td>
+<td>zhTW</td>
+</tr>
+<tr>
+<td align="right">6</td>
+<td>esES</td>
+</tr>
+<tr>
+<td align="right">7</td>
+<td>esMX</td>
+</tr>
+<tr>
+<td align="right">8</td>
+<td>ruRU</td>
+</tr>
+</tbody></table>
+<p>服务端取名时通常先看当前 locale，没有就回退到第一个非空字符串。AzerothCore 启动时还会尝试：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dbc/Map.dbc</span><br><span class="line">dbc/enUS/Map.dbc</span><br><span class="line">dbc/zhCN/Map.dbc</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>后加载的本地化 DBC 用来覆盖字符串字段。</p>
+<h2 id="解析步骤"><a href="#解析步骤" class="headerlink" title="解析步骤"></a>解析步骤</h2><h3 id="方式一：无-schema-探测"><a href="#方式一：无-schema-探测" class="headerlink" title="方式一：无 schema 探测"></a>方式一：无 schema 探测</h3><p>适合先看一张陌生表长什么样。</p>
+<ol>
+<li>读 20 字节 header，校验 <code>WDBC</code></li>
+<li>校验文件总长</li>
+<li>如果 <code>recordSize == fieldCount * 4</code>，按全 4 字节字段切分</li>
+<li>每个字段先当 uint32 读出</li>
+<li>同时尝试解释成 float &#x2F; string offset</li>
+<li>偏移落在 string block 内，且内容可打印，就标成字符串候选</li>
+</ol>
+<p>伪代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">records_offset = <span class="number">20</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(record_count):</span><br><span class="line">    base = records_offset + i * record_size</span><br><span class="line">    fields = [</span><br><span class="line">        struct.unpack_from(<span class="string">&quot;&lt;I&quot;</span>, data, base + <span class="number">4</span> * c)[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">for</span> c <span class="keyword">in</span> <span class="built_in">range</span>(field_count)</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+
+<p>这种方式快，但遇到带 <code>b/X</code> 的表会翻车，因为不是每列都是 4 字节。</p>
+<h3 id="方式二：按-AzerothCore-format-精确解析"><a href="#方式二：按-AzerothCore-format-精确解析" class="headerlink" title="方式二：按 AzerothCore format 精确解析"></a>方式二：按 AzerothCore format 精确解析</h3><p>这是正规做法。</p>
+<ol>
+<li>读 header</li>
+<li>确认 <code>len(fmt) == fieldCount</code></li>
+<li>按 format 计算每列磁盘偏移：<ul>
+<li><code>b/X</code> 占 1 字节</li>
+<li>其他占 4 字节</li>
+</ul>
+</li>
+<li>按字符取值：<ul>
+<li><code>n/i</code> -&gt; uint32</li>
+<li><code>f</code> -&gt; float</li>
+<li><code>s</code> -&gt; uint32 offset -&gt; 字符串</li>
+<li><code>b</code> -&gt; uint8</li>
+<li><code>x/X/d</code> -&gt; 跳过或仅调试输出</li>
+</ul>
+</li>
+<li>如果有 <code>n</code>，建立 <code>id -&gt; record</code> 索引</li>
+</ol>
+<p>字段偏移计算：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">compute_field_offsets</span>(<span class="params">fmt: <span class="built_in">str</span></span>):</span><br><span class="line">    offsets = []</span><br><span class="line">    pos = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> ch <span class="keyword">in</span> fmt:</span><br><span class="line">        offsets.append(pos)</span><br><span class="line">        pos += <span class="number">1</span> <span class="keyword">if</span> ch <span class="keyword">in</span> (<span class="string">&quot;b&quot;</span>, <span class="string">&quot;X&quot;</span>) <span class="keyword">else</span> <span class="number">4</span></span><br><span class="line">    <span class="keyword">return</span> offsets</span><br></pre></td></tr></table></figure>
+
+<p>核心加载路径等价于：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LoadDBCStores</span><br><span class="line">  -&gt; LoadDBC(..., sLFGDungeonStore, &quot;LFGDungeons.dbc&quot;)</span><br><span class="line">     -&gt; DBCFileLoader::Load</span><br><span class="line">     -&gt; AutoProduceData</span><br><span class="line">     -&gt; AutoProduceStrings</span><br></pre></td></tr></table></figure>
+
+<h2 id="实战：LFGDungeons-dbc"><a href="#实战：LFGDungeons-dbc" class="headerlink" title="实战：LFGDungeons.dbc"></a>实战：LFGDungeons.dbc</h2><p>format：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nssssssssssssssssxiiiiiiiiixxixixxxxxxxxxxxxxxxxx</span><br></pre></td></tr></table></figure>
+
+<p>对应 <code>LFGDungeonEntry</code> 关键字段：</p>
+<table>
+<thead>
+<tr>
+<th align="right">文件列</th>
+<th>format</th>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td>n</td>
+<td>ID</td>
+<td>LFG dungeon id</td>
+</tr>
+<tr>
+<td align="right">1-16</td>
+<td>s*16</td>
+<td>Name[16]</td>
+<td>本地化名</td>
+</tr>
+<tr>
+<td align="right">17</td>
+<td>x</td>
+<td>Name_lang_mask</td>
+<td>跳过</td>
+</tr>
+<tr>
+<td align="right">18</td>
+<td>i</td>
+<td>MinLevel</td>
+<td>最低等级</td>
+</tr>
+<tr>
+<td align="right">19</td>
+<td>i</td>
+<td>MaxLevel</td>
+<td>最高等级</td>
+</tr>
+<tr>
+<td align="right">20</td>
+<td>i</td>
+<td>TargetLevel</td>
+<td>目标等级</td>
+</tr>
+<tr>
+<td align="right">21</td>
+<td>i</td>
+<td>TargetLevelMin</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">22</td>
+<td>i</td>
+<td>TargetLevelMax</td>
+<td></td>
+</tr>
+<tr>
+<td align="right">23</td>
+<td>i</td>
+<td>MapID</td>
+<td>地图 id</td>
+</tr>
+<tr>
+<td align="right">24</td>
+<td>i</td>
+<td>Difficulty</td>
+<td>难度</td>
+</tr>
+<tr>
+<td align="right">25</td>
+<td>i</td>
+<td>Flags</td>
+<td>标志</td>
+</tr>
+<tr>
+<td align="right">26</td>
+<td>i</td>
+<td>TypeID</td>
+<td>类型</td>
+</tr>
+<tr>
+<td align="right">27</td>
+<td>x</td>
+<td>Faction</td>
+<td>跳过</td>
+</tr>
+<tr>
+<td align="right">28</td>
+<td>x</td>
+<td>TextureFilename</td>
+<td>跳过</td>
+</tr>
+<tr>
+<td align="right">29</td>
+<td>i</td>
+<td>ExpansionLevel</td>
+<td>资料片</td>
+</tr>
+<tr>
+<td align="right">30</td>
+<td>x</td>
+<td>OrderIndex</td>
+<td>跳过</td>
+</tr>
+<tr>
+<td align="right">31</td>
+<td>i</td>
+<td>GroupID</td>
+<td>random 分组</td>
+</tr>
+</tbody></table>
+<p><code>TypeID</code> 对应：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">0 = LFG_TYPE_NONE</span><br><span class="line">1 = LFG_TYPE_DUNGEON</span><br><span class="line">2 = LFG_TYPE_RAID</span><br><span class="line">4 = LFG_TYPE_ZONE</span><br><span class="line">5 = LFG_TYPE_HEROIC</span><br><span class="line">6 = LFG_TYPE_RANDOM</span><br></pre></td></tr></table></figure>
+
+<p>另外核心里还有：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">uint32 <span class="title">Entry</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> ID + (TypeID &lt;&lt; <span class="number">24</span>); &#125;</span><br></pre></td></tr></table></figure>
+
+<p>客户端 LFG slot 经常带 type 高位，服务端入队时会先：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uint32 dungeon = slot &amp; <span class="number">0x00FFFFFF</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这也是为什么日志里看到 <code>dungeon 0</code> 时，要先分清：</p>
+<ol>
+<li>是真实 DBC 里有没有 id&#x3D;0</li>
+<li>还是运行时状态把默认值 0 塞进了 join 集合</li>
+</ol>
+<p>正常 <code>LFGDungeons.dbc</code> 里，<code>0</code> 不是有效副本。</p>
+<h2 id="实战：Map-dbc"><a href="#实战：Map-dbc" class="headerlink" title="实战：Map.dbc"></a>实战：Map.dbc</h2><p>format：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nxiixssssssssssssssssxixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixiffxixi</span><br></pre></td></tr></table></figure>
+
+<p>关键字段：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MapID</td>
+<td>地图 id</td>
+</tr>
+<tr>
+<td>map_type</td>
+<td>0 世界 &#x2F; 1 副本 &#x2F; 2 团队 &#x2F; 3 战场 &#x2F; 4 竞技场</td>
+</tr>
+<tr>
+<td>Flags</td>
+<td>地图标志</td>
+</tr>
+<tr>
+<td>name[16]</td>
+<td>本地化名</td>
+</tr>
+<tr>
+<td>entrance_map&#x2F;x&#x2F;y</td>
+<td>入口信息</td>
+</tr>
+<tr>
+<td>expansionID</td>
+<td>0 Vanilla &#x2F; 1 TBC &#x2F; 2 WotLK</td>
+</tr>
+<tr>
+<td>maxPlayers</td>
+<td>人数上限</td>
+</tr>
+</tbody></table>
+<p>简单表如 <code>BankBagSlotPrices.dbc</code> 只有：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ni</span><br></pre></td></tr></table></figure>
+
+<p>很适合拿来验证解析器有没有把 header 和字段偏移读对。</p>
+<h2 id="Python-解析示例"><a href="#Python-解析示例" class="headerlink" title="Python 解析示例"></a>Python 解析示例</h2><p>最小可用版本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">parse_dbc</span>(<span class="params">path: <span class="built_in">str</span>, fmt: <span class="built_in">str</span>, limit: <span class="built_in">int</span> = <span class="number">10</span></span>):</span><br><span class="line">    data = Path(path).read_bytes()</span><br><span class="line">    magic, record_count, field_count, record_size, string_size = struct.unpack_from(<span class="string">&quot;&lt;4sIIII&quot;</span>, data, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">assert</span> magic == <span class="string">b&quot;WDBC&quot;</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="built_in">len</span>(fmt) == field_count</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 计算每列磁盘偏移</span></span><br><span class="line">    offsets = []</span><br><span class="line">    pos = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> ch <span class="keyword">in</span> fmt:</span><br><span class="line">        offsets.append(pos)</span><br><span class="line">        pos += <span class="number">1</span> <span class="keyword">if</span> ch <span class="keyword">in</span> (<span class="string">&quot;b&quot;</span>, <span class="string">&quot;X&quot;</span>) <span class="keyword">else</span> <span class="number">4</span></span><br><span class="line">    <span class="keyword">assert</span> pos == record_size</span><br><span class="line"></span><br><span class="line">    string_block = data[<span class="number">20</span> + record_count * record_size:</span><br><span class="line">                        <span class="number">20</span> + record_count * record_size + string_size]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">cstring</span>(<span class="params">off: <span class="built_in">int</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="keyword">if</span> off &gt;= <span class="built_in">len</span>(string_block):</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">        end = string_block.find(<span class="string">b&quot;\x00&quot;</span>, off)</span><br><span class="line">        raw = string_block[off:] <span class="keyword">if</span> end &lt; <span class="number">0</span> <span class="keyword">else</span> string_block[off:end]</span><br><span class="line">        <span class="keyword">return</span> raw.decode(<span class="string">&quot;utf-8&quot;</span>, errors=<span class="string">&quot;replace&quot;</span>)</span><br><span class="line"></span><br><span class="line">    rows = []</span><br><span class="line">    <span class="keyword">for</span> row <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">min</span>(limit, record_count)):</span><br><span class="line">        base = <span class="number">20</span> + row * record_size</span><br><span class="line">        item = &#123;&#125;</span><br><span class="line">        i_idx = f_idx = s_idx = <span class="number">0</span></span><br><span class="line">        locale_buf = []</span><br><span class="line">        locale_name = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">def</span> <span class="title function_">flush_locale</span>():</span><br><span class="line">            <span class="keyword">nonlocal</span> locale_buf, locale_name, s_idx</span><br><span class="line">            <span class="keyword">if</span> locale_buf <span class="keyword">and</span> locale_name <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                item[<span class="string">f&quot;<span class="subst">&#123;locale_name&#125;</span>_best&quot;</span>] = <span class="built_in">next</span>((x <span class="keyword">for</span> x <span class="keyword">in</span> locale_buf <span class="keyword">if</span> x), <span class="string">&quot;&quot;</span>)</span><br><span class="line">                s_idx += <span class="number">1</span></span><br><span class="line">            locale_buf = []</span><br><span class="line">            locale_name = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> col, ch <span class="keyword">in</span> <span class="built_in">enumerate</span>(fmt):</span><br><span class="line">            off = base + offsets[col]</span><br><span class="line">            <span class="keyword">if</span> ch <span class="keyword">in</span> (<span class="string">&quot;x&quot;</span>, <span class="string">&quot;X&quot;</span>, <span class="string">&quot;d&quot;</span>):</span><br><span class="line">                <span class="keyword">if</span> ch == <span class="string">&quot;x&quot;</span> <span class="keyword">and</span> locale_buf:</span><br><span class="line">                    flush_locale()</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">if</span> ch == <span class="string">&quot;n&quot;</span>:</span><br><span class="line">                item[<span class="string">&quot;ID&quot;</span>] = struct.unpack_from(<span class="string">&quot;&lt;I&quot;</span>, data, off)[<span class="number">0</span>]</span><br><span class="line">                flush_locale()</span><br><span class="line">            <span class="keyword">elif</span> ch == <span class="string">&quot;i&quot;</span>:</span><br><span class="line">                item[<span class="string">f&quot;i<span class="subst">&#123;i_idx&#125;</span>&quot;</span>] = struct.unpack_from(<span class="string">&quot;&lt;I&quot;</span>, data, off)[<span class="number">0</span>]</span><br><span class="line">                i_idx += <span class="number">1</span></span><br><span class="line">                flush_locale()</span><br><span class="line">            <span class="keyword">elif</span> ch == <span class="string">&quot;f&quot;</span>:</span><br><span class="line">                item[<span class="string">f&quot;f<span class="subst">&#123;f_idx&#125;</span>&quot;</span>] = struct.unpack_from(<span class="string">&quot;&lt;f&quot;</span>, data, off)[<span class="number">0</span>]</span><br><span class="line">                f_idx += <span class="number">1</span></span><br><span class="line">                flush_locale()</span><br><span class="line">            <span class="keyword">elif</span> ch == <span class="string">&quot;s&quot;</span>:</span><br><span class="line">                text = cstring(struct.unpack_from(<span class="string">&quot;&lt;I&quot;</span>, data, off)[<span class="number">0</span>])</span><br><span class="line">                <span class="keyword">if</span> locale_name <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">                    locale_name = <span class="string">f&quot;s<span class="subst">&#123;s_idx&#125;</span>&quot;</span></span><br><span class="line">                    item[locale_name] = text</span><br><span class="line">                locale_buf.append(text)</span><br><span class="line">            <span class="keyword">elif</span> ch == <span class="string">&quot;b&quot;</span>:</span><br><span class="line">                item[<span class="string">f&quot;b<span class="subst">&#123;i_idx&#125;</span>&quot;</span>] = data[off]</span><br><span class="line">        flush_locale()</span><br><span class="line">        rows.append(item)</span><br><span class="line">    <span class="keyword">return</span> rows</span><br><span class="line"></span><br><span class="line"><span class="comment"># 例子：解析 LFG</span></span><br><span class="line">fmt = <span class="string">&quot;nssssssssssssssssxiiiiiiiiixxixixxxxxxxxxxxxxxxxx&quot;</span></span><br><span class="line"><span class="keyword">for</span> row <span class="keyword">in</span> parse_dbc(<span class="string">&quot;LFGDungeons.dbc&quot;</span>, fmt, limit=<span class="number">5</span>):</span><br><span class="line">    <span class="built_in">print</span>(row[<span class="string">&quot;ID&quot;</span>], row.get(<span class="string">&quot;s0_best&quot;</span>) <span class="keyword">or</span> row.get(<span class="string">&quot;s0&quot;</span>), row.get(<span class="string">&quot;i0&quot;</span>), row.get(<span class="string">&quot;i5&quot;</span>), row.get(<span class="string">&quot;i8&quot;</span>))</span><br><span class="line">    <span class="comment"># i0=MinLevel, i5=MapID, i8=TypeID</span></span><br></pre></td></tr></table></figure>
+
+<p>如果只是想先摸表，不带 format 也行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">probe</span>(<span class="params">path: <span class="built_in">str</span>, limit: <span class="built_in">int</span> = <span class="number">3</span></span>):</span><br><span class="line">    data = Path(path).read_bytes()</span><br><span class="line">    magic, n, fields, rec_size, str_size = struct.unpack_from(<span class="string">&quot;&lt;4sIIII&quot;</span>, data, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">assert</span> magic == <span class="string">b&quot;WDBC&quot;</span></span><br><span class="line">    <span class="keyword">assert</span> rec_size == fields * <span class="number">4</span>  <span class="comment"># 简化前提：全 4 字节字段</span></span><br><span class="line">    string_block = data[<span class="number">20</span> + n * rec_size:]</span><br><span class="line">    <span class="keyword">for</span> row <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">min</span>(limit, n)):</span><br><span class="line">        base = <span class="number">20</span> + row * rec_size</span><br><span class="line">        vals = [struct.unpack_from(<span class="string">&quot;&lt;I&quot;</span>, data, base + <span class="number">4</span> * c)[<span class="number">0</span>] <span class="keyword">for</span> c <span class="keyword">in</span> <span class="built_in">range</span>(fields)]</span><br><span class="line">        <span class="built_in">print</span>(row, vals[:<span class="number">8</span>])</span><br></pre></td></tr></table></figure>
+
+<h2 id="常见坑"><a href="#常见坑" class="headerlink" title="常见坑"></a>常见坑</h2><ol>
+<li><p><strong>magic 不是 WDBC</strong><br>可能拿错版本，或者文件已经不是 3.x DBC。Cataclysm 之后逐步转 DB2，不能直接套这套解析。</p>
+</li>
+<li><p><strong>format 长度和 fieldCount 不一致</strong><br>基本就是客户端版本和 <code>DBCfmt.h</code> 对不上。</p>
+</li>
+<li><p><strong>字符串乱码</strong><br>多半是把 uint32 当内联字符串读了，或者 string offset 解释错。</p>
+</li>
+<li><p><strong><code>recordSize != fieldCount * 4</code></strong><br>表里有 1 字节字段，不能再用“每列 4 字节”的简化读取器。</p>
+</li>
+<li><p><strong>中文显示异常</strong><br>优先按 UTF-8 解，失败再考虑本地代码页。解析工具里建议 <code>errors=&quot;replace&quot;</code>，别直接崩。</p>
+</li>
+<li><p><strong>ID 不连续</strong><br>很正常。<code>n</code> 是业务 id，不是行号；索引表大小通常是 <code>max(id) + 1</code>。</p>
+</li>
+</ol>
+<h2 id="和-AzerothCore-的对应关系"><a href="#和-AzerothCore-的对应关系" class="headerlink" title="和 AzerothCore 的对应关系"></a>和 AzerothCore 的对应关系</h2><p>读 DBC 时可以按这个顺序查：</p>
+<ol>
+<li><code>DBCfmt.h</code>：这张表的 format 字符串</li>
+<li><code>DBCStructure.h</code>：字段业务含义</li>
+<li><code>DBCFileLoader.cpp</code>：磁盘怎么读</li>
+<li><code>DBCStores.cpp</code>：启动时加载哪些文件</li>
+</ol>
+<p>例如排查 LFG 时：</p>
+<ol>
+<li>解析 <code>LFGDungeons.dbc</code>，确认目标 id &#x2F; type &#x2F; map &#x2F; 等级区间</li>
+<li>对照 <code>LFGMgr</code> 里 <code>GetLFGDungeon(id)</code> 和 <code>GetDungeonType(id)</code></li>
+<li>如果运行日志出现 <code>Wrong dungeon type 0 for dungeon 0</code><br>先别急着怀疑 DBC 少了数据，很多时候是 join 集合被运行时状态写成了默认值 <code>0</code></li>
+</ol>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>3.3.5a 的 DBC 本质上就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">固定 20 字节头 + 定长记录数组 + 字符串池</span><br></pre></td></tr></table></figure>
+
+<p>难的不是文件格式本身，而是：</p>
+<ol>
+<li>字段 schema 不在文件里</li>
+<li>本地化字符串是偏移，不是内联</li>
+<li>服务端 format 与结构体是“人为约定”</li>
+</ol>
+<p>所以最稳的做法还是：</p>
+<ol>
+<li>先用 header 确认这是合法 WDBC</li>
+<li>用 <code>DBCfmt.h</code> 的 format 精确解码</li>
+<li>用 <code>DBCStructure.h</code> 给字段命名</li>
+<li>需要时再导出 CSV，方便和运行时日志对照</li>
+</ol>
+<p>以后再遇到地图、法术、LFG 相关问题，直接把对应 <code>.dbc</code> 拉出来看，比只盯 SQL 表高效得多。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/fun/" rel="tag"># fun</a>
+              <a href="/tags/wow/" rel="tag"># wow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/06/08/note/20260608-coupon-design/" rel="prev" title="优惠券系统设计">
+      <i class="fa fa-chevron-left"></i> 优惠券系统设计
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/07/16/fun/20260716-azerothcore-pdump-character-analysis/" rel="next" title="AzerothCore pdump 文件分析">
+      AzerothCore pdump 文件分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DBC-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">DBC 是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">文件整体结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Header%EF%BC%8820-%E5%AD%97%E8%8A%82%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">Header（20 字节）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Records-%E5%9D%97"><span class="nav-number">2.2.</span> <span class="nav-text">Records 块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#String-%E5%9D%97"><span class="nav-number">2.3.</span> <span class="nav-text">String 块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BF%85%E9%A1%BB%E6%9C%89-format-%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">3.</span> <span class="nav-text">为什么必须有 format 字符串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B8%8E%E6%9C%AC%E5%9C%B0%E5%8C%96"><span class="nav-number">4.</span> <span class="nav-text">字符串与本地化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.</span> <span class="nav-text">解析步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E4%B8%80%EF%BC%9A%E6%97%A0-schema-%E6%8E%A2%E6%B5%8B"><span class="nav-number">5.1.</span> <span class="nav-text">方式一：无 schema 探测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E4%BA%8C%EF%BC%9A%E6%8C%89-AzerothCore-format-%E7%B2%BE%E7%A1%AE%E8%A7%A3%E6%9E%90"><span class="nav-number">5.2.</span> <span class="nav-text">方式二：按 AzerothCore format 精确解析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%88%98%EF%BC%9ALFGDungeons-dbc"><span class="nav-number">6.</span> <span class="nav-text">实战：LFGDungeons.dbc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%88%98%EF%BC%9AMap-dbc"><span class="nav-number">7.</span> <span class="nav-text">实战：Map.dbc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-%E8%A7%A3%E6%9E%90%E7%A4%BA%E4%BE%8B"><span class="nav-number">8.</span> <span class="nav-text">Python 解析示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E5%9D%91"><span class="nav-number">9.</span> <span class="nav-text">常见坑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%92%8C-AzerothCore-%E7%9A%84%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB"><span class="nav-number">10.</span> <span class="nav-text">和 AzerothCore 的对应关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">11.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">275</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">158</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('/lib/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
