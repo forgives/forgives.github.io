@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="拆解物品附魔核心表：38 字段结构、Effect 类型、EffectArg 多义性、服务端加载机制与 Python 解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WOW 3.3.5a 物品附魔 SpellItemEnchantment.dbc 解析">
+<meta property="og:url" content="https://forgives.github.io/2026/08/01/fun/20260801-wow-spellitemenchantment-dbc/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="拆解物品附魔核心表：38 字段结构、Effect 类型、EffectArg 多义性、服务端加载机制与 Python 解析">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-08-01T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-01T03:12:26.002Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="fun">
+<meta property="article:tag" content="wow">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/08/01/fun/20260801-wow-spellitemenchantment-dbc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>WOW 3.3.5a 物品附魔 SpellItemEnchantment.dbc 解析 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/08/01/fun/20260801-wow-spellitemenchantment-dbc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WOW 3.3.5a 物品附魔 SpellItemEnchantment.dbc 解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-08-01 10:00:00" itemprop="dateCreated datePublished" datetime="2026-08-01T10:00:00+08:00">2026-08-01</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接着上次 DBC 文件格式那篇，这次钻进一张具体又特别实用的表：<code>SpellItemEnchantment.dbc</code>。魔兽里凡是叫得上名字的「物品附魔」——磨刀石、武器油、毒药、萨满武器附魔、工程附魔、珠宝宝石属性、附魔专业配方、装备自带的随机词条——全在这张表里。改私服加附魔、写随机附魔脚本、排查宝石激活条件，最后都得回到这张表读记录。</p>
+<!-- more -->
+
+<h2 id="这张表管什么"><a href="#这张表管什么" class="headerlink" title="这张表管什么"></a>这张表管什么</h2><p><code>SpellItemEnchantment.dbc</code> 是<strong>所有物品附魔的唯一权威定义表</strong>。一条记录 &#x3D; 一种附魔效果，2656 条记录覆盖了整个 3.3.5a 的附魔体系。</p>
+<p>它被三处引用：</p>
+<ol>
+<li><strong>物品模板</strong> <code>item_template</code> 的随机属性 <code>RandomProperty</code> &#x2F; <code>RandomSuffix</code>，以及装备自带的 <code>enchantedLocation</code>，都通过附魔 ID 指向这里。</li>
+<li><strong>法术效果</strong> <code>SPELL_EFFECT_ENCHANT_ITEM</code> &#x2F; <code>SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC</code>，附魔专业配方卷轴施法时按 ID 施加附魔。</li>
+<li><strong>服务端运行时</strong> <code>sSpellItemEnchantmentStore.LookupEntry(ID)</code>，装备穿上&#x2F;脱下时查这张表算属性。</li>
+</ol>
+<p>所以理解附魔 &#x3D; 理解这张表的 38 个字段怎么读。</p>
+<h2 id="文件头与整体结构"><a href="#文件头与整体结构" class="headerlink" title="文件头与整体结构"></a>文件头与整体结构</h2><p>文件格式就是标准的 WDBC（上一篇讲过），三段式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">+----------------------+</span><br><span class="line">| Header (20 bytes)    |</span><br><span class="line">+----------------------+</span><br><span class="line">| Records block        |  2656 × 152 bytes</span><br><span class="line">+----------------------+</span><br><span class="line">| String block         |  99756 bytes</span><br><span class="line">+----------------------+</span><br></pre></td></tr></table></figure>
+
+<p>本表的关键头部数值：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>magic</td>
+<td><code>WDBC</code></td>
+<td>校验用</td>
+</tr>
+<tr>
+<td>RecordCount</td>
+<td>2656</td>
+<td>记录总数</td>
+</tr>
+<tr>
+<td>FieldCount</td>
+<td>38</td>
+<td>每条记录 38 个字段</td>
+</tr>
+<tr>
+<td>RecordSize</td>
+<td>152</td>
+<td>&#x3D; 38 × 4，纯 uint32 表</td>
+</tr>
+<tr>
+<td>StringBlockSize</td>
+<td>99756</td>
+<td>16 种语言的名称都在这里</td>
+</tr>
+</tbody></table>
+<p><code>RecordSize == FieldCount × 4</code>，说明这张表<strong>没有 1 字节字段</strong>，每列都是 4 字节，解析器可以放心按 uint32 切。</p>
+<p>读头沿用老套路：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line">data = Path(<span class="string">&quot;SpellItemEnchantment.dbc&quot;</span>).read_bytes()</span><br><span class="line">magic, n, fields, rec_size, str_size = struct.unpack_from(<span class="string">&quot;&lt;4sIIII&quot;</span>, data, <span class="number">0</span>)</span><br><span class="line"><span class="keyword">assert</span> magic == <span class="string">b&quot;WDBC&quot;</span></span><br><span class="line"><span class="comment"># 2656 38 152 99756</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="38-字段总览"><a href="#38-字段总览" class="headerlink" title="38 字段总览"></a>38 字段总览</h2><p>按记录内的下标（uint32 序号）排：</p>
+<table>
+<thead>
+<tr>
+<th>下标</th>
+<th>CSV 列名</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>ID</td>
+<td>uint32</td>
+<td>附魔 ID（主键）</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Charges</td>
+<td>uint32</td>
+<td>使用次数（0 &#x3D; 永久&#x2F;无限）</td>
+</tr>
+<tr>
+<td>2-4</td>
+<td>Effect_1&#x2F;_2&#x2F;_3</td>
+<td>uint32</td>
+<td>3 个效果的类型</td>
+</tr>
+<tr>
+<td>5-7</td>
+<td>EffectPointsMin_1&#x2F;_2&#x2F;_3</td>
+<td>uint32</td>
+<td>3 个效果的最小数值</td>
+</tr>
+<tr>
+<td>8-10</td>
+<td>EffectPointsMax_1&#x2F;_2&#x2F;_3</td>
+<td>uint32</td>
+<td>3 个效果的最大数值（服务端不加载）</td>
+</tr>
+<tr>
+<td>11-13</td>
+<td>EffectArg_1&#x2F;_2&#x2F;_3</td>
+<td>uint32</td>
+<td>3 个效果的参数</td>
+</tr>
+<tr>
+<td>14-29</td>
+<td>Name_Lang_xx</td>
+<td>string×16</td>
+<td>16 个语言的名称偏移</td>
+</tr>
+<tr>
+<td>30</td>
+<td>Name_Lang_Mask</td>
+<td>uint32</td>
+<td>名称语言掩码（服务端不加载）</td>
+</tr>
+<tr>
+<td>31</td>
+<td>ItemVisual</td>
+<td>uint32</td>
+<td>物品视觉效果 ID</td>
+</tr>
+<tr>
+<td>32</td>
+<td>Flags</td>
+<td>uint32</td>
+<td>附魔标志位</td>
+</tr>
+<tr>
+<td>33</td>
+<td>Src_ItemID</td>
+<td>uint32</td>
+<td>源物品 ID（宝石附魔用）</td>
+</tr>
+<tr>
+<td>34</td>
+<td>Condition_Id</td>
+<td>uint32</td>
+<td>附魔生效条件</td>
+</tr>
+<tr>
+<td>35</td>
+<td>RequiredSkillID</td>
+<td>uint32</td>
+<td>所需专业&#x2F;技能</td>
+</tr>
+<tr>
+<td>36</td>
+<td>RequiredSkillRank</td>
+<td>uint32</td>
+<td>所需专业技能等级</td>
+</tr>
+<tr>
+<td>37</td>
+<td>MinLevel</td>
+<td>uint32</td>
+<td>最低角色等级</td>
+</tr>
+</tbody></table>
+<p>一条记录里<strong>真正承载效果语义的只有 4 组</strong>：<code>Effect</code> &#x2F; <code>EffectPointsMin</code> &#x2F; <code>EffectArg</code>（各 3 个槽），加上一个 <code>Charges</code>。其余字段要么是显示&#x2F;本地化，要么是使用门槛。把这 4 组读懂，附魔就懂了八成。</p>
+<h2 id="服务端怎么读它：format-串"><a href="#服务端怎么读它：format-串" class="headerlink" title="服务端怎么读它：format 串"></a>服务端怎么读它：format 串</h2><p>AzerothCore 用 <code>DBCfmt.h</code> 里的 format 字符串描述每列怎么读：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> <span class="keyword">constexpr</span> SpellItemEnchantmentfmt[] = <span class="string">&quot;niiiiiiixxxiiissssssssssssssssxiiiiiii&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>逐位拆：</p>
+<table>
+<thead>
+<tr>
+<th align="right">位</th>
+<th align="center">字符</th>
+<th>对应字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">0</td>
+<td align="center"><code>n</code></td>
+<td>ID</td>
+<td>主键，建索引</td>
+</tr>
+<tr>
+<td align="right">1</td>
+<td align="center"><code>i</code></td>
+<td>charges</td>
+<td>Charges</td>
+</tr>
+<tr>
+<td align="right">2-4</td>
+<td align="center"><code>iii</code></td>
+<td>type[3]</td>
+<td>Effect 类型</td>
+</tr>
+<tr>
+<td align="right">5-7</td>
+<td align="center"><code>iii</code></td>
+<td>amount[3]</td>
+<td>EffectPointsMin</td>
+</tr>
+<tr>
+<td align="right">8-10</td>
+<td align="center"><code>xxx</code></td>
+<td>—</td>
+<td><strong>跳过</strong> EffectPointsMax</td>
+</tr>
+<tr>
+<td align="right">11-13</td>
+<td align="center"><code>iii</code></td>
+<td>spellid[3]</td>
+<td>EffectArg</td>
+</tr>
+<tr>
+<td align="right">14-29</td>
+<td align="center"><code>s</code>×16</td>
+<td>description[16]</td>
+<td>名称（偏移→<code>char*</code>）</td>
+</tr>
+<tr>
+<td align="right">30</td>
+<td align="center"><code>x</code></td>
+<td>—</td>
+<td><strong>跳过</strong> Name_Lang_Mask</td>
+</tr>
+<tr>
+<td align="right">31</td>
+<td align="center"><code>i</code></td>
+<td>aura_id</td>
+<td>ItemVisual</td>
+</tr>
+<tr>
+<td align="right">32</td>
+<td align="center"><code>i</code></td>
+<td>slot</td>
+<td>Flags</td>
+</tr>
+<tr>
+<td align="right">33</td>
+<td align="center"><code>i</code></td>
+<td>GemID</td>
+<td>Src_ItemID</td>
+</tr>
+<tr>
+<td align="right">34</td>
+<td align="center"><code>i</code></td>
+<td>EnchantmentCondition</td>
+<td>Condition_Id</td>
+</tr>
+<tr>
+<td align="right">35</td>
+<td align="center"><code>i</code></td>
+<td>requiredSkill</td>
+<td>RequiredSkillID</td>
+</tr>
+<tr>
+<td align="right">36</td>
+<td align="center"><code>i</code></td>
+<td>requiredSkillValue</td>
+<td>RequiredSkillRank</td>
+</tr>
+<tr>
+<td align="right">37</td>
+<td align="center"><code>i</code></td>
+<td>requiredLevel</td>
+<td>MinLevel</td>
+</tr>
+</tbody></table>
+<p>对应 <code>DBCStructure.h</code> 里的结构体：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MAX_SPELL_ITEM_ENCHANTMENT_EFFECTS 3</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">SpellItemEnchantmentEntry</span></span><br><span class="line">&#123;</span><br><span class="line">    uint32      ID;                                             <span class="comment">// 0</span></span><br><span class="line">    uint32      charges;                                        <span class="comment">// 1</span></span><br><span class="line">    uint32      type[MAX_SPELL_ITEM_ENCHANTMENT_EFFECTS];       <span class="comment">// 2-4</span></span><br><span class="line">    uint32      amount[MAX_SPELL_ITEM_ENCHANTMENT_EFFECTS];     <span class="comment">// 5-7</span></span><br><span class="line">    <span class="comment">//uint32      amount2[...]                                  // 8-10  (未加载)</span></span><br><span class="line">    uint32      spellid[MAX_SPELL_ITEM_ENCHANTMENT_EFFECTS];    <span class="comment">// 11-13</span></span><br><span class="line">    <span class="type">char</span> <span class="type">const</span>* description[<span class="number">16</span>];                                <span class="comment">// 14-29</span></span><br><span class="line">    <span class="comment">//uint32      descriptionFlags;                             // 30    (未加载)</span></span><br><span class="line">    uint32      aura_id;                                        <span class="comment">// 31</span></span><br><span class="line">    uint32      slot;                                           <span class="comment">// 32</span></span><br><span class="line">    uint32      GemID;                                          <span class="comment">// 33</span></span><br><span class="line">    uint32      EnchantmentCondition;                           <span class="comment">// 34</span></span><br><span class="line">    uint32      requiredSkill;                                  <span class="comment">// 35</span></span><br><span class="line">    uint32      requiredSkillValue;                             <span class="comment">// 36</span></span><br><span class="line">    uint32      requiredLevel;                                  <span class="comment">// 37</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>两个被注释掉的字段是关键坑（见后文）。</p>
+<h2 id="字段逐一详解"><a href="#字段逐一详解" class="headerlink" title="字段逐一详解"></a>字段逐一详解</h2><p>总览表只给了字段名，真正改附魔、排查问题时要的是每个字段的<strong>含义、用途、取值、示例</strong>。下面按字段下标逐个拆。</p>
+<h3 id="字段-0：ID-——-附魔主键"><a href="#字段-0：ID-——-附魔主键" class="headerlink" title="字段 0：ID —— 附魔主键"></a>字段 0：ID —— 附魔主键</h3><p>全表唯一标识符，业务主键。几乎所有附魔逻辑的入口都靠它：</p>
+<ul>
+<li>物品模板 <code>item_template</code> 的随机属性 <code>RandomProperty</code> &#x2F; <code>RandomSuffix</code>、装备自带 <code>enchantedLocation</code> 通过它引用附魔。</li>
+<li>法术效果 <code>SPELL_EFFECT_ENCHANT_ITEM</code> &#x2F; <code>SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC</code> 按它施加附魔。</li>
+<li>服务端 <code>sSpellItemEnchantmentStore.LookupEntry(ID)</code> 全局查询。</li>
+</ul>
+<p>示例：<code>1</code> &#x3D; Rockbiter 3（石化武器 3 级）、<code>7</code> &#x3D; Deadly Poison（致命毒药）、<code>2686</code> &#x3D; +8 Strength（+8 力量宝石）。ID 不连续，索引表大小通常是 <code>max(id)+1</code>，不是行号。</p>
+<h3 id="字段-1：Charges-——-使用次数"><a href="#字段-1：Charges-——-使用次数" class="headerlink" title="字段 1：Charges —— 使用次数"></a>字段 1：Charges —— 使用次数</h3><p>「使用型」附魔效果的可触发次数：</p>
+<ul>
+<li><code>0</code> &#x3D; 永久 &#x2F; 被动 &#x2F; 无限（绝大多数附魔）。</li>
+<li><code>&gt;0</code> &#x3D; 触发 N 次后消失（工程附魔、毒药等消耗型）。</li>
+</ul>
+<p>示例：<code>1003</code> Venomhide Poison Charges&#x3D;15（击中 15 次后消失）。仅对 <code>COMBAT_SPELL</code> &#x2F; <code>USE_SPELL</code> 类型有意义，属性类附魔恒为 0。</p>
+<h3 id="字段-2-4：Effect-1-2-3-——-效果类型"><a href="#字段-2-4：Effect-1-2-3-——-效果类型" class="headerlink" title="字段 2-4：Effect_1 &#x2F; _2 &#x2F; _3 —— 效果类型"></a>字段 2-4：Effect_1 &#x2F; _2 &#x2F; _3 —— 效果类型</h3><p>3 个独立效果槽的<strong>类型</strong>，决定同槽 <code>EffectPointsMin</code> 与 <code>EffectArg</code> 的语义。完整 9 种类型枚举与 2656 条记录的分布见后文「Effect 类型」一节。</p>
+<p>这里只要记住：一条附魔可以同时挂多种效果，各占一个槽。比如一件装备可以同时「+8 力量」+「击中概率触发暗影箭」，就是 Effect_1&#x3D;STAT、Effect_2&#x3D;COMBAT_SPELL 各填一槽。</p>
+<h3 id="字段-5-7：EffectPointsMin-1-2-3-——-效果数值"><a href="#字段-5-7：EffectPointsMin-1-2-3-——-效果数值" class="headerlink" title="字段 5-7：EffectPointsMin_1 &#x2F; _2 &#x2F; _3 —— 效果数值"></a>字段 5-7：EffectPointsMin_1 &#x2F; _2 &#x2F; _3 —— 效果数值</h3><p>对应效果的数值（最小值），语义随 Effect 类型变：</p>
+<table>
+<thead>
+<tr>
+<th>Effect 类型</th>
+<th>PointsMin 含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>STAT</td>
+<td>属性加成点数（+8 力量 → 8）</td>
+</tr>
+<tr>
+<td>DAMAGE</td>
+<td>武器伤害增加量（+3 Damage → 3）</td>
+</tr>
+<tr>
+<td>RESISTANCE</td>
+<td>抗性点数（+8 护甲 → 8）</td>
+</tr>
+<tr>
+<td>COMBAT_SPELL</td>
+<td>通常 0（由 SpellID 决定）</td>
+</tr>
+<tr>
+<td>EQUIP_SPELL</td>
+<td>通常 0（法术自身决定）</td>
+</tr>
+<tr>
+<td>TOTEM</td>
+<td>每秒伤害基数（实际值 &#x3D; amount × 武器速度）</td>
+</tr>
+</tbody></table>
+<p><strong>可为负数</strong>：如 <code>27</code> Sundered 破甲 PointsMin &#x3D; -10（减少护甲）。DBC 里存的是 uint32，服务端按 int32 解释，所以自己解析时要用 <code>&lt;i</code> 而不是 <code>&lt;I</code>，否则破甲类附魔会读成一个巨大的正数。</p>
+<h3 id="字段-8-10：EffectPointsMax-1-2-3-——-效果最大值（服务端不加载）"><a href="#字段-8-10：EffectPointsMax-1-2-3-——-效果最大值（服务端不加载）" class="headerlink" title="字段 8-10：EffectPointsMax_1 &#x2F; _2 &#x2F; _3 —— 效果最大值（服务端不加载）"></a>字段 8-10：EffectPointsMax_1 &#x2F; _2 &#x2F; _3 —— 效果最大值（服务端不加载）</h3><p>理论上用于范围随机附魔（min~max），但 <strong>AzerothCore 完全不读这三个字段</strong>：format 串里是 <code>xxx</code>，结构体里对应成员 <code>amount2</code> 被整段注释掉。服务端实际数值恒等于 EffectPointsMin。</p>
+<p>也就是说：想靠改 DBC 实现「随机范围数值附魔」（比如 +5~+10 力量），在 3.3.5 服务端<strong>不会生效</strong>，得自己写代码支持。这个字段是纯客户端&#x2F;理论保留。</p>
+<h3 id="字段-11-13：EffectArg-1-2-3-——-效果参数"><a href="#字段-11-13：EffectArg-1-2-3-——-效果参数" class="headerlink" title="字段 11-13：EffectArg_1 &#x2F; _2 &#x2F; _3 —— 效果参数"></a>字段 11-13：EffectArg_1 &#x2F; _2 &#x2F; _3 —— 效果参数</h3><p>效果的具体指向，是整张表<strong>最容易踩坑的字段</strong>：语义随 Effect 类型变。STAT 时是 ItemModType，RESISTANCE 时是抗性学校，COMBAT_SPELL &#x2F; EQUIP_SPELL &#x2F; USE_SPELL 时才是 SpellID。完整对照表与 ItemModType 取值见后文「EffectArg 的多义性」一节。</p>
+<p>源码成员名叫 <code>spellid</code>，但<strong>只有法术类 Effect 它才是 SpellID</strong>——这个名字本身就是个坑。</p>
+<h3 id="字段-14-29：Name-Lang-xx-——-16-个语言名称"><a href="#字段-14-29：Name-Lang-xx-——-16-个语言名称" class="headerlink" title="字段 14-29：Name_Lang_xx —— 16 个语言名称"></a>字段 14-29：Name_Lang_xx —— 16 个语言名称</h3><p>附魔的显示名称，按 16 个语言槽位存储。记录里存的是<strong>字符串块偏移</strong>（uint32），<code>0</code> 表示该语言未提供名称，客户端会回退到 enUS。</p>
+<table>
+<thead>
+<tr>
+<th align="right">下标</th>
+<th>语言</th>
+<th></th>
+<th align="right">下标</th>
+<th>语言</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">14</td>
+<td>enUS</td>
+<td></td>
+<td align="right">22</td>
+<td>zhTW</td>
+</tr>
+<tr>
+<td align="right">15</td>
+<td>enGB</td>
+<td></td>
+<td align="right">23</td>
+<td>esES</td>
+</tr>
+<tr>
+<td align="right">16</td>
+<td>koKR</td>
+<td></td>
+<td align="right">24</td>
+<td>esMX</td>
+</tr>
+<tr>
+<td align="right">17</td>
+<td>frFR</td>
+<td></td>
+<td align="right">25</td>
+<td>ruRU</td>
+</tr>
+<tr>
+<td align="right">18</td>
+<td>deDE</td>
+<td></td>
+<td align="right">26</td>
+<td>ptPT</td>
+</tr>
+<tr>
+<td align="right">19</td>
+<td>enCN</td>
+<td></td>
+<td align="right">27</td>
+<td>ptBR</td>
+</tr>
+<tr>
+<td align="right">20</td>
+<td>zhCN</td>
+<td></td>
+<td align="right">28</td>
+<td>itIT</td>
+</tr>
+<tr>
+<td align="right">21</td>
+<td>enTW</td>
+<td></td>
+<td align="right">29</td>
+<td>Unk（保留）</td>
+</tr>
+</tbody></table>
+<p><strong>中文端特殊处理（重要）</strong>：国服 3.3.5 汉化端常把中文字符串实际写进 <code>deDE</code> 槽位（下标 18）而非标准 <code>zhCN</code>（下标 20）。做中英 DBC 合并时（如 <code>merge_spellitemenchantment_dbc.py</code>），脚本只把英文 enUS 名称追加到字符串块末尾、更新 enUS 槽位（下标 14），保留 deDE 槽位的中文字符串不动。处理本地化前<strong>务必先确认中文到底落在哪个槽</strong>，否则会读到空名或英文名。</p>
+<h3 id="字段-30：Name-Lang-Mask-——-名称语言掩码（服务端不加载）"><a href="#字段-30：Name-Lang-Mask-——-名称语言掩码（服务端不加载）" class="headerlink" title="字段 30：Name_Lang_Mask —— 名称语言掩码（服务端不加载）"></a>字段 30：Name_Lang_Mask —— 名称语言掩码（服务端不加载）</h3><p>位掩码，标记哪些语言槽位有效（非空）。本表几乎所有记录都是 <code>16712190</code>。<strong>服务端不读取</strong>（format 里是 <code>x</code>），纯客户端字段，用于决定某语言未提供时回退到哪种语言。改它对服务端逻辑毫无影响。</p>
+<h3 id="字段-31：ItemVisual-——-物品视觉效果"><a href="#字段-31：ItemVisual-——-物品视觉效果" class="headerlink" title="字段 31：ItemVisual —— 物品视觉效果"></a>字段 31：ItemVisual —— 物品视觉效果</h3><p>CSV 列名 ItemVisual，源码成员 <code>aura_id</code>。指向 <code>ItemVisual.dbc</code> 的 ID，决定附魔后在角色身上的<strong>视觉特效</strong>（火焰、冰霜、闪电光晕）。</p>
+<p>服务端只在构建物品更新数据包 <code>SMSG_UPDATE_OBJECT</code> 时透传给客户端，自身不解释其值：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*data &lt;&lt; <span class="built_in">uint32</span>(enchant ? enchant-&gt;aura_id : <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<p>所以改这个字段<strong>只影响外观光效，不影响任何数值</strong>。示例：Rockbiter&#x3D;61、Flametongue 3&#x3D;32（火焰光效）、Reinforced&#x3D;0（无特效）。</p>
+<h3 id="字段-32：Flags-——-附魔标志位"><a href="#字段-32：Flags-——-附魔标志位" class="headerlink" title="字段 32：Flags —— 附魔标志位"></a>字段 32：Flags —— 附魔标志位</h3><p>CSV 列名 Flags，源码成员 <code>slot</code>（历史遗留命名，实际语义是 flags 位掩码）。位定义（<code>Item.h</code>）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">EnchantmentSlotMask</span></span><br><span class="line">&#123;</span><br><span class="line">    ENCHANTMENT_CAN_SOULBOUND = <span class="number">0x01</span>,  <span class="comment">// 附魔后物品会绑定</span></span><br><span class="line">    ENCHANTMENT_UNK1          = <span class="number">0x02</span>,</span><br><span class="line">    ENCHANTMENT_UNK2          = <span class="number">0x04</span>,</span><br><span class="line">    ENCHANTMENT_UNK3          = <span class="number">0x08</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>服务端检查（<code>Item.cpp</code>）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (enchantEntry-&gt;slot &amp; ENCHANTMENT_CAN_SOULBOUND)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;   <span class="comment">// 该附魔会使物品变为灵魂绑定</span></span><br></pre></td></tr></table></figure>
+
+<p>常见取值：<code>0</code> &#x3D; 普通附魔无标志；<code>1</code> &#x3D; 施加后灵魂绑定（多数消耗型附魔：磨刀石、武器油、毒药）。<strong>字段名 <code>slot</code> 极易和装备上的附魔槽位枚举 <code>EnchantmentSlot</code> 混淆，看注释别看名字</strong>。</p>
+<h3 id="字段-33：Src-ItemID-——-源物品-ID"><a href="#字段-33：Src-ItemID-——-源物品-ID" class="headerlink" title="字段 33：Src_ItemID —— 源物品 ID"></a>字段 33：Src_ItemID —— 源物品 ID</h3><p>CSV 列名 Src_ItemID，源码成员 <code>GemID</code>。对<strong>宝石附魔</strong>（珠宝加工镶嵌）指向宝石的 <code>item_template.entry</code>，服务端用它数「装备上有几颗同类宝石」来判断 meta 宝石激活条件：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">uint32 gemid = enchantEntry-&gt;GemID;</span><br><span class="line"><span class="keyword">if</span> (gemid) &#123;</span><br><span class="line">    ItemTemplate <span class="type">const</span>* gemProto = sObjectMgr-&gt;<span class="built_in">GetItemTemplate</span>(gemid);</span><br><span class="line">    <span class="comment">// 取宝石颜色，判断 meta 宝石激活条件</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>非宝石附魔此字段为 0。示例：</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>名称</th>
+<th align="right">Src_ItemID</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2686</td>
+<td>+8 Strength</td>
+<td align="right">23233</td>
+<td>宝石物品 23233 的属性</td>
+</tr>
+<tr>
+<td>2687</td>
+<td>+8 Agility</td>
+<td align="right">23234</td>
+<td>宝石物品 23234</td>
+</tr>
+<tr>
+<td>2688</td>
+<td>+8 Stamina</td>
+<td align="right">23235</td>
+<td>宝石物品 23235</td>
+</tr>
+</tbody></table>
+<h3 id="字段-34：Condition-Id-——-附魔条件"><a href="#字段-34：Condition-Id-——-附魔条件" class="headerlink" title="字段 34：Condition_Id —— 附魔条件"></a>字段 34：Condition_Id —— 附魔条件</h3><p>指向 <code>SpellItemEnchantmentCondition.dbc</code> 的 ID，定义该附魔<strong>生效所需的复杂条件</strong>（如「装备至少 4 颗蓝色宝石」）。条件表支持 5 组比较：颜色、比较运算符、比较颜色、数值、逻辑连接符。<code>0</code> &#x3D; 无条件，附魔总是生效。</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>名称</th>
+<th align="right">Condition_Id</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2689</td>
+<td>+8 mana every 5 sec.</td>
+<td align="right">28</td>
+</tr>
+<tr>
+<td>2704</td>
+<td>+12 Strength if 4 blue gems equipped</td>
+<td align="right">3</td>
+</tr>
+<tr>
+<td>2827</td>
+<td>+14 Crit and 1% Spell Reflect</td>
+<td align="right">64</td>
+</tr>
+<tr>
+<td>2829</td>
+<td>+24 AP and Minor Run Speed Increase</td>
+<td align="right">63</td>
+</tr>
+</tbody></table>
+<p>meta 宝石「为什么没激活」类问题，最终都要回到这个条件表查。</p>
+<h3 id="字段-35：RequiredSkillID-——-所需专业"><a href="#字段-35：RequiredSkillID-——-所需专业" class="headerlink" title="字段 35：RequiredSkillID —— 所需专业"></a>字段 35：RequiredSkillID —— 所需专业</h3><p>源码成员 <code>requiredSkill</code>，指向 <code>SkillLine.dbc</code> 的专业技能 ID。服务端校验专业门槛（<code>Item.cpp</code>）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (enchantEntry-&gt;requiredSkill &amp;&amp;</span><br><span class="line">    player-&gt;<span class="built_in">GetSkillValue</span>(enchantEntry-&gt;requiredSkill) &lt; enchantEntry-&gt;requiredSkillValue)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;   <span class="comment">// 专业技能等级不足，附魔不生效</span></span><br></pre></td></tr></table></figure>
+
+<p>常见值：<code>0</code> &#x3D; 无专业要求（普通附魔、宝石属性）；<code>164</code> &#x3D; 锻造；<code>333</code> &#x3D; 附魔；<code>755</code> &#x3D; 珠宝加工。高级珠宝专属宝石（如 BoP 橙色宝石）会限 <code>RequiredSkillID=755</code>。</p>
+<h3 id="字段-36：RequiredSkillRank-——-所需专业等级"><a href="#字段-36：RequiredSkillRank-——-所需专业等级" class="headerlink" title="字段 36：RequiredSkillRank —— 所需专业等级"></a>字段 36：RequiredSkillRank —— 所需专业等级</h3><p>源码成员 <code>requiredSkillValue</code>，与 RequiredSkillID 配合，指定专业的<strong>等级下限</strong>。取值 1~450（WLK 上限 450）。示例：<code>RequiredSkillID=755, RequiredSkillRank=350</code> → 需珠宝加工 350 才生效。</p>
+<h3 id="字段-37：MinLevel-——-最低角色等级"><a href="#字段-37：MinLevel-——-最低角色等级" class="headerlink" title="字段 37：MinLevel —— 最低角色等级"></a>字段 37：MinLevel —— 最低角色等级</h3><p>源码成员 <code>requiredLevel</code>，使用此附魔的物品要求的最低角色等级。附魔可能<strong>抬高</strong>物品需求等级（<code>Item.cpp</code>）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (enchantEntry-&gt;requiredLevel &gt; level)</span><br><span class="line">    level = enchantEntry-&gt;requiredLevel;   <span class="comment">// 附魔越高，装备门槛越高</span></span><br></pre></td></tr></table></figure>
+
+<p>多数记录为 <code>0</code>（无等级加成），高级配方（TBC&#x2F;WLK 顶级）可能设为 60&#x2F;70&#x2F;80。这也是为什么同一件装备打了高级附魔后，小号反而戴不上去。</p>
+<hr>
+<h2 id="Effect-类型：附魔效果的分发器"><a href="#Effect-类型：附魔效果的分发器" class="headerlink" title="Effect 类型：附魔效果的分发器"></a>Effect 类型：附魔效果的分发器</h2><p>3 个 Effect 槽位的取值来自 <code>DBCEnums.h</code> 的 <code>ItemEnchantmentType</code> 枚举，它<strong>决定 <code>EffectPointsMin</code> 和 <code>EffectArg</code> 怎么解释</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">ItemEnchantmentType</span></span><br><span class="line">&#123;</span><br><span class="line">    ITEM_ENCHANTMENT_TYPE_NONE             = <span class="number">0</span>, <span class="comment">// 无效果</span></span><br><span class="line">    ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL     = <span class="number">1</span>, <span class="comment">// 近战击中时概率施放法术</span></span><br><span class="line">    ITEM_ENCHANTMENT_TYPE_DAMAGE           = <span class="number">2</span>, <span class="comment">// 增加武器伤害（磨刀石 +X Damage）</span></span><br><span class="line">    ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL      = <span class="number">3</span>, <span class="comment">// 装备时施放法术（光环 Buff）</span></span><br><span class="line">    ITEM_ENCHANTMENT_TYPE_RESISTANCE       = <span class="number">4</span>, <span class="comment">// 增加某系抗性</span></span><br><span class="line">    ITEM_ENCHANTMENT_TYPE_STAT             = <span class="number">5</span>, <span class="comment">// 增加属性（力量/敏捷/爆击等级…）</span></span><br><span class="line">    ITEM_ENCHANTMENT_TYPE_TOTEM            = <span class="number">6</span>, <span class="comment">// 萨满图腾增强（石化武器）</span></span><br><span class="line">    ITEM_ENCHANTMENT_TYPE_USE_SPELL        = <span class="number">7</span>, <span class="comment">// 右键使用时施放法术（主动）</span></span><br><span class="line">    ITEM_ENCHANTMENT_TYPE_PRISMATIC_SOCKET = <span class="number">8</span>  <span class="comment">// 添加一个棱彩色孔（无色孔）</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>2656 条记录里 Effect_1 的分布，能直观看出这张表的主体是什么：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">5  STAT           1566 条  ← 绝对主体，属性加成类（含绝大多数宝石）</span><br><span class="line">3  EQUIP_SPELL     582 条     装备光环</span><br><span class="line">4  RESISTANCE      315 条     抗性</span><br><span class="line">1  COMBAT_SPELL     93 条     击中触发（毒药、武器油）</span><br><span class="line">2  DAMAGE           39 条     武器伤害（磨刀石）</span><br><span class="line">6  TOTEM            36 条     萨满武器附魔</span><br><span class="line">7  USE_SPELL         少量     主动使用</span><br><span class="line">8  PRISMATIC_SOCKET  少量     棱彩孔</span><br></pre></td></tr></table></figure>
+
+<p>属性加成类（STAT）占了近 60%，因为珠宝加工每一颗宝石的属性都是一条独立记录。</p>
+<h2 id="EffectArg-的多义性（最关键的坑）"><a href="#EffectArg-的多义性（最关键的坑）" class="headerlink" title="EffectArg 的多义性（最关键的坑）"></a>EffectArg 的多义性（最关键的坑）</h2><p><code>EffectArg</code>（结构体里叫 <code>spellid</code>）名字像法术 ID，但<strong>它的语义随 Effect 类型变</strong>。脱离 Effect 单看 EffectArg 一定会读错：</p>
+<table>
+<thead>
+<tr>
+<th>Effect 类型</th>
+<th>EffectArg 含义</th>
+<th>引用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>COMBAT_SPELL</code>(1)</td>
+<td>触发法术的 SpellID</td>
+<td>Spell.dbc</td>
+</tr>
+<tr>
+<td><code>EQUIP_SPELL</code>(3)</td>
+<td>装备时施加的光环 SpellID</td>
+<td>Spell.dbc</td>
+</tr>
+<tr>
+<td><code>USE_SPELL</code>(7)</td>
+<td>右键使用时施放的 SpellID</td>
+<td>Spell.dbc</td>
+</tr>
+<tr>
+<td><code>RESISTANCE</code>(4)</td>
+<td>抗性学校索引（0&#x3D;物理护甲…）</td>
+<td>SpellSchools 枚举</td>
+</tr>
+<tr>
+<td><code>STAT</code>(5)</td>
+<td>属性类型（ItemModType）</td>
+<td>ItemModType 枚举</td>
+</tr>
+<tr>
+<td><code>DAMAGE</code>(2)</td>
+<td>通常为 0</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>TOTEM</code>(6)</td>
+<td>通常为 0</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>PRISMATIC_SOCKET</code>(8)</td>
+<td>通常为 0</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<h3 id="STAT-时-EffectArg-ItemModType"><a href="#STAT-时-EffectArg-ItemModType" class="headerlink" title="STAT 时 EffectArg &#x3D; ItemModType"></a>STAT 时 EffectArg &#x3D; ItemModType</h3><p>最常见的分支，<code>EffectArg</code> 是属性类型枚举（<code>ItemTemplate.h</code>）。节选实战中最常遇到的值：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">ITEM_MOD_MANA                 = <span class="number">0</span>,  <span class="comment">// 法力值</span></span><br><span class="line">ITEM_MOD_HEALTH               = <span class="number">1</span>,  <span class="comment">// 生命值</span></span><br><span class="line">ITEM_MOD_AGILITY              = <span class="number">3</span>,  <span class="comment">// 敏捷</span></span><br><span class="line">ITEM_MOD_STRENGTH             = <span class="number">4</span>,  <span class="comment">// 力量</span></span><br><span class="line">ITEM_MOD_INTELLECT            = <span class="number">5</span>,  <span class="comment">// 智力</span></span><br><span class="line">ITEM_MOD_SPIRIT               = <span class="number">6</span>,  <span class="comment">// 精神</span></span><br><span class="line">ITEM_MOD_STAMINA              = <span class="number">7</span>,  <span class="comment">// 耐力</span></span><br><span class="line">ITEM_MOD_DEFENSE_SKILL_RATING = <span class="number">12</span>, <span class="comment">// 防御技能等级</span></span><br><span class="line">ITEM_MOD_DODGE_RATING         = <span class="number">13</span>, <span class="comment">// 躲闪等级</span></span><br><span class="line">ITEM_MOD_PARRY_RATING         = <span class="number">14</span>, <span class="comment">// 招架等级</span></span><br><span class="line">ITEM_MOD_BLOCK_RATING         = <span class="number">15</span>, <span class="comment">// 格挡等级</span></span><br><span class="line">ITEM_MOD_HIT_RATING           = <span class="number">31</span>, <span class="comment">// 综合命中等级</span></span><br><span class="line">ITEM_MOD_CRIT_RATING          = <span class="number">32</span>, <span class="comment">// 综合爆击等级</span></span><br><span class="line">ITEM_MOD_RESILIENCE_RATING    = <span class="number">35</span>, <span class="comment">// 韧性等级</span></span><br><span class="line">ITEM_MOD_HASTE_RATING         = <span class="number">36</span>, <span class="comment">// 急速等级</span></span><br><span class="line">ITEM_MOD_EXPERTISE_RATING     = <span class="number">37</span>, <span class="comment">// 精通等级</span></span><br><span class="line">ITEM_MOD_ATTACK_POWER         = <span class="number">38</span>, <span class="comment">// 攻击强度</span></span><br><span class="line">ITEM_MOD_RANGED_ATTACK_POWER  = <span class="number">39</span>, <span class="comment">// 远程攻击强度</span></span><br><span class="line">ITEM_MOD_MANA_REGENERATION    = <span class="number">43</span>, <span class="comment">// 每5秒法力回复</span></span><br><span class="line">ITEM_MOD_SPELL_POWER          = <span class="number">45</span>, <span class="comment">// 法术强度</span></span><br><span class="line">ITEM_MOD_HEALTH_REGEN         = <span class="number">46</span>, <span class="comment">// 每5秒生命回复</span></span><br><span class="line">ITEM_MOD_SPELL_PENETRATION    = <span class="number">47</span>, <span class="comment">// 法术穿透</span></span><br></pre></td></tr></table></figure>
+
+<p>所以一条「+8 力量宝石」的记录就是：<code>Effect=5(STAT)</code>，<code>EffectPointsMin=8</code>，<code>EffectArg=4(ITEM_MOD_STRENGTH)</code>。</p>
+<h3 id="一组真实记录对照"><a href="#一组真实记录对照" class="headerlink" title="一组真实记录对照"></a>一组真实记录对照</h3><p>从 CSV 抽几条典型记录，把 Effect &#x2F; PointsMin &#x2F; EffectArg 串起来看：</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>名称</th>
+<th>Effect</th>
+<th>PointsMin</th>
+<th>EffectArg</th>
+<th>解读</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Rockbiter 3</td>
+<td>6 (TOTEM)</td>
+<td>6</td>
+<td>0</td>
+<td>萨满石化武器，每秒 6 点伤害基数</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Frostbrand 1</td>
+<td>1 (COMBAT_SPELL)</td>
+<td>0</td>
+<td>8034</td>
+<td>击中时施放 Spell 8034</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Deadly Poison</td>
+<td>1 (COMBAT_SPELL)</td>
+<td>30</td>
+<td>2818</td>
+<td>30 PPM 触发 Spell 2818</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Sharpened (+3 Dmg)</td>
+<td>2 (DAMAGE)</td>
+<td>3</td>
+<td>0</td>
+<td>磨刀石 +3 武器伤害</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Reinforced (+8 Arm)</td>
+<td>4 (RESISTANCE)</td>
+<td>8</td>
+<td>0</td>
+<td>+8 物理护甲</td>
+</tr>
+<tr>
+<td>24</td>
+<td>+5 Mana</td>
+<td>5 (STAT)</td>
+<td>5</td>
+<td>0</td>
+<td>+5 法力值（ITEM_MOD_MANA&#x3D;0）</td>
+</tr>
+<tr>
+<td>28</td>
+<td>+4 All Resistances</td>
+<td>3 (EQUIP_SPELL)</td>
+<td>0</td>
+<td>7438</td>
+<td>装备时施放 Spell 7438（全抗光环）</td>
+</tr>
+<tr>
+<td>2686</td>
+<td>+8 Strength</td>
+<td>5 (STAT)</td>
+<td>8</td>
+<td>4</td>
+<td>+8 力量（宝石属性）</td>
+</tr>
+<tr>
+<td>3319</td>
+<td>(Prismatic Socket)</td>
+<td>8 (PRISMATIC_SOCKET)</td>
+<td>0</td>
+<td>0</td>
+<td>添加一个棱彩孔</td>
+</tr>
+</tbody></table>
+<p>注意 <code>EffectPointsMin</code> 可以是负数——比如破甲类附魔存 <code>-10</code>（DBC 里是 uint32，服务端按 int32 解释）。</p>
+<h2 id="服务端怎么应用效果"><a href="#服务端怎么应用效果" class="headerlink" title="服务端怎么应用效果"></a>服务端怎么应用效果</h2><p>装备穿上时，<code>PlayerStorage.cpp</code> 的 <code>_ApplyItemMods</code> 遍历 3 个效果槽，按 <code>type</code> 分发：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (uint8 s = <span class="number">0</span>; s &lt; MAX_SPELL_ITEM_ENCHANTMENT_EFFECTS; ++s)</span><br><span class="line">&#123;</span><br><span class="line">    uint32 enchant_display_type = pEnchant-&gt;type[s];</span><br><span class="line">    uint32 enchant_amount       = pEnchant-&gt;amount[s];</span><br><span class="line">    uint32 enchant_spell_id     = pEnchant-&gt;spellid[s];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (enchant_display_type)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">case</span> ITEM_ENCHANTMENT_TYPE_NONE:            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL:    <span class="comment">/* CastItemCombatSpell 处理 */</span> <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ITEM_ENCHANTMENT_TYPE_DAMAGE:          <span class="comment">/* 更新伤害修正 */</span> <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:     <span class="comment">/* 施加/移除光环 */</span> <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ITEM_ENCHANTMENT_TYPE_RESISTANCE:      <span class="comment">/* 修改抗性 */</span> <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ITEM_ENCHANTMENT_TYPE_STAT:            <span class="comment">/* 按 enchant_spell_id 修改属性 */</span> <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ITEM_ENCHANTMENT_TYPE_TOTEM:           <span class="comment">/* 萨满石化武器 */</span> <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ITEM_ENCHANTMENT_TYPE_USE_SPELL:       <span class="comment">/* CastItemUseSpell 处理 */</span> <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ITEM_ENCHANTMENT_TYPE_PRISMATIC_SOCKET:<span class="comment">/* 增加棱彩孔，无数值 */</span> <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这就是为什么附魔表用「3 槽 + type 分发」而不是定长字段——一条附魔可以同时给「+8 力量 + 概率触发法术」两种效果，各占一个槽。</p>
+<h2 id="常见坑"><a href="#常见坑" class="headerlink" title="常见坑"></a>常见坑</h2><p>字段详解里已分散提过，这里收成一张速查表，排查时按图索骥：</p>
+<ol>
+<li><strong>字段 8-10 EffectPointsMax 服务端用 <code>xxx</code> 跳过</strong>：改 DBC 想做随机范围附魔不生效，数值恒等于 EffectPointsMin。</li>
+<li><strong>字段 30 Name_Lang_Mask 服务端用 <code>x</code> 跳过</strong>：纯客户端字段，决定回退语言。</li>
+<li><strong>中文端 zhCN 常落在 deDE 槽（下标 18）</strong>：合并本地化前先确认中文槽位，合并脚本常把 <code>LOCALE_ZHCN</code> 硬编码成 4。</li>
+<li><strong>字段 11-13 EffectArg 必须配合 Effect 解释</strong>：Effect&#x3D;5 是 ItemModType，&#x3D;4 是抗性学校，&#x3D;1&#x2F;3&#x2F;7 才是 SpellID。</li>
+<li><strong>字段 31 ItemVisual（aura_id）是纯视觉</strong>：改它只影响光效，不影响数值。</li>
+<li><strong>字段 32 源码名 <code>slot</code> 实为 Flags</strong>：跟装备 <code>EnchantmentSlot</code> 枚举是两回事，看注释别看名字。</li>
+<li><strong>EffectPointsMin 可为负</strong>：破甲类存负数，解析要用 <code>&lt;i</code> 不能用 <code>&lt;I</code>，否则读到巨大正数。</li>
+</ol>
+<h2 id="Python-解析示例"><a href="#Python-解析示例" class="headerlink" title="Python 解析示例"></a>Python 解析示例</h2><p>接上一篇的 <code>parse_dbc</code> 思路，写一个针对附魔表的解析器，把每条记录解成可读的三效果描述：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;SpellItemEnchantment.dbc → 可读附魔效果列表。&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line">FMT = <span class="string">&quot;niiiiiiixxxiiissssssssssssssssxiiiiiii&quot;</span>  <span class="comment"># 来自 DBCfmt.h</span></span><br><span class="line"></span><br><span class="line">EFFECT_NAME = &#123;</span><br><span class="line">    <span class="number">0</span>: <span class="string">&quot;NONE&quot;</span>, <span class="number">1</span>: <span class="string">&quot;COMBAT_SPELL&quot;</span>, <span class="number">2</span>: <span class="string">&quot;DAMAGE&quot;</span>, <span class="number">3</span>: <span class="string">&quot;EQUIP_SPELL&quot;</span>,</span><br><span class="line">    <span class="number">4</span>: <span class="string">&quot;RESISTANCE&quot;</span>, <span class="number">5</span>: <span class="string">&quot;STAT&quot;</span>, <span class="number">6</span>: <span class="string">&quot;TOTEM&quot;</span>, <span class="number">7</span>: <span class="string">&quot;USE_SPELL&quot;</span>, <span class="number">8</span>: <span class="string">&quot;PRISMATIC_SOCKET&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Effect=5(STAT) 时 EffectArg 用到的 ItemModType 节选</span></span><br><span class="line">STAT_NAME = &#123;</span><br><span class="line">    <span class="number">0</span>: <span class="string">&quot;法力值&quot;</span>, <span class="number">1</span>: <span class="string">&quot;生命值&quot;</span>, <span class="number">3</span>: <span class="string">&quot;敏捷&quot;</span>, <span class="number">4</span>: <span class="string">&quot;力量&quot;</span>, <span class="number">5</span>: <span class="string">&quot;智力&quot;</span>,</span><br><span class="line">    <span class="number">6</span>: <span class="string">&quot;精神&quot;</span>, <span class="number">7</span>: <span class="string">&quot;耐力&quot;</span>, <span class="number">12</span>: <span class="string">&quot;防御等级&quot;</span>, <span class="number">13</span>: <span class="string">&quot;躲闪等级&quot;</span>, <span class="number">14</span>: <span class="string">&quot;招架等级&quot;</span>,</span><br><span class="line">    <span class="number">15</span>: <span class="string">&quot;格挡等级&quot;</span>, <span class="number">31</span>: <span class="string">&quot;命中等级&quot;</span>, <span class="number">32</span>: <span class="string">&quot;爆击等级&quot;</span>, <span class="number">35</span>: <span class="string">&quot;韧性等级&quot;</span>,</span><br><span class="line">    <span class="number">36</span>: <span class="string">&quot;急速等级&quot;</span>, <span class="number">37</span>: <span class="string">&quot;精通等级&quot;</span>, <span class="number">38</span>: <span class="string">&quot;攻击强度&quot;</span>, <span class="number">45</span>: <span class="string">&quot;法术强度&quot;</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">field_offsets</span>(<span class="params">fmt: <span class="built_in">str</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;按 format 计算每列磁盘偏移：b/X 占 1 字节，其余 4 字节。&quot;&quot;&quot;</span></span><br><span class="line">    offs, pos = [], <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> ch <span class="keyword">in</span> fmt:</span><br><span class="line">        offs.append(pos)</span><br><span class="line">        pos += <span class="number">1</span> <span class="keyword">if</span> ch <span class="keyword">in</span> (<span class="string">&quot;b&quot;</span>, <span class="string">&quot;X&quot;</span>) <span class="keyword">else</span> <span class="number">4</span></span><br><span class="line">    <span class="keyword">return</span> offs, pos</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">parse_enchantments</span>(<span class="params">path: <span class="built_in">str</span></span>):</span><br><span class="line">    data = Path(path).read_bytes()</span><br><span class="line">    magic, n, fields, rec_size, str_size = struct.unpack_from(<span class="string">&quot;&lt;4sIIII&quot;</span>, data, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">assert</span> magic == <span class="string">b&quot;WDBC&quot;</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="built_in">len</span>(FMT) == fields</span><br><span class="line"></span><br><span class="line">    offs, total = field_offsets(FMT)</span><br><span class="line">    <span class="keyword">assert</span> total == rec_size</span><br><span class="line"></span><br><span class="line">    str_base = <span class="number">20</span> + n * rec_size</span><br><span class="line">    string_block = data[str_base:str_base + str_size]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">cstring</span>(<span class="params">off</span>):</span><br><span class="line">        <span class="keyword">if</span> off &lt;= <span class="number">0</span> <span class="keyword">or</span> off &gt;= <span class="built_in">len</span>(string_block):</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;&quot;</span></span><br><span class="line">        end = string_block.find(<span class="string">b&quot;\x00&quot;</span>, off)</span><br><span class="line">        raw = string_block[off:] <span class="keyword">if</span> end &lt; <span class="number">0</span> <span class="keyword">else</span> string_block[off:end]</span><br><span class="line">        <span class="keyword">return</span> raw.decode(<span class="string">&quot;utf-8&quot;</span>, errors=<span class="string">&quot;replace&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">u32</span>(<span class="params">rec_base, col</span>):</span><br><span class="line">        <span class="keyword">return</span> struct.unpack_from(<span class="string">&quot;&lt;I&quot;</span>, data, rec_base + offs[col])[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">    rows = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">        base = <span class="number">20</span> + i * rec_size</span><br><span class="line">        eid = u32(base, <span class="number">0</span>)</span><br><span class="line">        effects = []</span><br><span class="line">        <span class="keyword">for</span> s <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):  <span class="comment"># 3 个效果槽</span></span><br><span class="line">            t = u32(base, <span class="number">2</span> + s)        <span class="comment"># Effect 类型</span></span><br><span class="line">            amt = struct.unpack_from(<span class="string">&quot;&lt;i&quot;</span>, data, base + offs[<span class="number">5</span> + s])[<span class="number">0</span>]  <span class="comment"># 按 int32 读，支持负数</span></span><br><span class="line">            arg = u32(base, <span class="number">11</span> + s)     <span class="comment"># EffectArg</span></span><br><span class="line">            <span class="keyword">if</span> t == <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">if</span> t == <span class="number">5</span>:  <span class="comment"># STAT：把 arg 翻译成属性名</span></span><br><span class="line">                arg_desc = STAT_NAME.get(arg, <span class="string">f&quot;mod<span class="subst">&#123;arg&#125;</span>&quot;</span>)</span><br><span class="line">                effects.append(<span class="string">f&quot;<span class="subst">&#123;EFFECT_NAME[t]&#125;</span> <span class="subst">&#123;amt:+d&#125;</span> <span class="subst">&#123;arg_desc&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> t <span class="keyword">in</span> (<span class="number">1</span>, <span class="number">3</span>, <span class="number">7</span>):  <span class="comment"># 法术类：arg 是 SpellID</span></span><br><span class="line">                effects.append(<span class="string">f&quot;<span class="subst">&#123;EFFECT_NAME[t]&#125;</span> amt=<span class="subst">&#123;amt&#125;</span> spell=<span class="subst">&#123;arg&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                effects.append(<span class="string">f&quot;<span class="subst">&#123;EFFECT_NAME[t]&#125;</span> <span class="subst">&#123;amt:+d&#125;</span> arg=<span class="subst">&#123;arg&#125;</span>&quot;</span>)</span><br><span class="line">        rows.append(&#123;</span><br><span class="line">            <span class="string">&quot;id&quot;</span>: eid,</span><br><span class="line">            <span class="string">&quot;name&quot;</span>: cstring(u32(base, <span class="number">14</span>)),  <span class="comment"># enUS 槽位</span></span><br><span class="line">            <span class="string">&quot;charges&quot;</span>: u32(base, <span class="number">1</span>),</span><br><span class="line">            <span class="string">&quot;effects&quot;</span>: effects,</span><br><span class="line">        &#125;)</span><br><span class="line">    <span class="keyword">return</span> rows</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="keyword">for</span> r <span class="keyword">in</span> parse_enchantments(<span class="string">&quot;SpellItemEnchantment.dbc&quot;</span>)[:<span class="number">30</span>]:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;[<span class="subst">&#123;r[<span class="string">&#x27;id&#x27;</span>]:&gt;<span class="number">5</span>&#125;</span>] <span class="subst">&#123;r[<span class="string">&#x27;name&#x27;</span>]:&lt;<span class="number">24</span>&#125;</span> charges=<span class="subst">&#123;r[<span class="string">&#x27;charges&#x27;</span>]:&lt;<span class="number">3</span>&#125;</span> | <span class="subst">&#123;<span class="string">&#x27; / &#x27;</span>.join(r[<span class="string">&#x27;effects&#x27;</span>])&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>跑出来大致是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[    1] Rockbiter 3              charges=0   | TOTEM +6 arg=0</span><br><span class="line">[    2] Frostbrand 1             charges=0   | COMBAT_SPELL amt=0 spell=8034</span><br><span class="line">[    7] Deadly Poison            charges=0   | COMBAT_SPELL amt=30 spell=2818</span><br><span class="line">[   13] Sharpened (+3 Dmg)       charges=0   | DAMAGE +3 arg=0</span><br><span class="line">[   15] Reinforced (+8 Arm)      charges=0   | RESISTANCE +8 arg=0</span><br><span class="line">[   24] +5 Mana                  charges=0   | STAT +5 法力值</span><br><span class="line">[ 2686] +8 Strength              charges=0   | STAT +8 力量</span><br></pre></td></tr></table></figure>
+
+<p>排查「为什么这颗宝石没生效」「这条随机词条给了什么属性」时，比起翻 SQL 表，直接把 <code>.dbc</code> 拉出来跑一遍这个脚本更快。</p>
+<h2 id="和随机附魔脚本的关系"><a href="#和随机附魔脚本的关系" class="headerlink" title="和随机附魔脚本的关系"></a>和随机附魔脚本的关系</h2><p>仓库里的 <code>Bin/lua_scripts/RandomEnchants.lua</code>（Eluna 脚本）实现随机附魔系统，脚本里那些附魔 ID——比如 <code>&#123;343, 0, 0, &quot;+8 敏捷&quot;, &quot;敏捷&quot;&#125;</code> 里的 <code>343</code>——全部指向这张表的 ID 字段。<code>item:SetEnchantment(enchId, slot)</code> 最终也是回到 <code>sSpellItemEnchantmentStore</code> 查记录。</p>
+<p>也就是说：<strong>Lua 脚本只负责分配和过滤 ID，效果的真实数值&#x2F;类型永远由 DBC 里的 Effect &#x2F; EffectPointsMin &#x2F; EffectArg 决定</strong>。加新附魔词条时，先确认对应 ID 在 DBC 里确实存在且语义正确，否则脚本配了也触发不出效果。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li>一条附魔 &#x3D; 3 个效果槽，每槽由 <code>Effect</code>（类型）+ <code>EffectPointsMin</code>（数值）+ <code>EffectArg</code>（参数）三字段决定。</li>
+<li><code>EffectArg</code> 是不是 SpellID 取决于 <code>Effect</code>：STAT 时是 ItemModType，RESISTANCE 时是抗性学校，只有 1&#x2F;3&#x2F;7 时才是 SpellID。</li>
+<li><code>EffectPointsMax</code>（8-10）和 <code>Name_Lang_Mask</code>（30）服务端用 <code>xxx</code>&#x2F;<code>x</code> 跳过，纯客户端字段。</li>
+<li>中文端 zhCN 常实际存在 deDE 槽位，做本地化合并前先确认。</li>
+<li>源码字段名 <code>slot</code> 实为 Flags、<code>spellid</code> 实为 EffectArg，都是历史遗留，看注释别看名字。</li>
+</ul>
+<p>排查顺序：解析 <code>.dbc</code> 确认 ID&#x2F;Effect&#x2F;Arg → 对照 <code>ItemModType</code> 翻译属性 → 对照 <code>Spell.dbc</code> 翻译法术 → 最后才去看运行时日志。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/fun/" rel="tag"># fun</a>
+              <a href="/tags/wow/" rel="tag"># wow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/07/20/fun/20260720-blp-format-parsing/" rel="prev" title="WOW BLP 纹理格式与 Python 解析">
+      <i class="fa fa-chevron-left"></i> WOW BLP 纹理格式与 Python 解析
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%99%E5%BC%A0%E8%A1%A8%E7%AE%A1%E4%BB%80%E4%B9%88"><span class="nav-number">1.</span> <span class="nav-text">这张表管什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%A4%B4%E4%B8%8E%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">文件头与整体结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#38-%E5%AD%97%E6%AE%B5%E6%80%BB%E8%A7%88"><span class="nav-number">3.</span> <span class="nav-text">38 字段总览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%80%8E%E4%B9%88%E8%AF%BB%E5%AE%83%EF%BC%9Aformat-%E4%B8%B2"><span class="nav-number">4.</span> <span class="nav-text">服务端怎么读它：format 串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5%E9%80%90%E4%B8%80%E8%AF%A6%E8%A7%A3"><span class="nav-number">5.</span> <span class="nav-text">字段逐一详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-0%EF%BC%9AID-%E2%80%94%E2%80%94-%E9%99%84%E9%AD%94%E4%B8%BB%E9%94%AE"><span class="nav-number">5.1.</span> <span class="nav-text">字段 0：ID —— 附魔主键</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-1%EF%BC%9ACharges-%E2%80%94%E2%80%94-%E4%BD%BF%E7%94%A8%E6%AC%A1%E6%95%B0"><span class="nav-number">5.2.</span> <span class="nav-text">字段 1：Charges —— 使用次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-2-4%EF%BC%9AEffect-1-2-3-%E2%80%94%E2%80%94-%E6%95%88%E6%9E%9C%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.3.</span> <span class="nav-text">字段 2-4：Effect_1 &#x2F; _2 &#x2F; _3 —— 效果类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-5-7%EF%BC%9AEffectPointsMin-1-2-3-%E2%80%94%E2%80%94-%E6%95%88%E6%9E%9C%E6%95%B0%E5%80%BC"><span class="nav-number">5.4.</span> <span class="nav-text">字段 5-7：EffectPointsMin_1 &#x2F; _2 &#x2F; _3 —— 效果数值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-8-10%EF%BC%9AEffectPointsMax-1-2-3-%E2%80%94%E2%80%94-%E6%95%88%E6%9E%9C%E6%9C%80%E5%A4%A7%E5%80%BC%EF%BC%88%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%8D%E5%8A%A0%E8%BD%BD%EF%BC%89"><span class="nav-number">5.5.</span> <span class="nav-text">字段 8-10：EffectPointsMax_1 &#x2F; _2 &#x2F; _3 —— 效果最大值（服务端不加载）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-11-13%EF%BC%9AEffectArg-1-2-3-%E2%80%94%E2%80%94-%E6%95%88%E6%9E%9C%E5%8F%82%E6%95%B0"><span class="nav-number">5.6.</span> <span class="nav-text">字段 11-13：EffectArg_1 &#x2F; _2 &#x2F; _3 —— 效果参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-14-29%EF%BC%9AName-Lang-xx-%E2%80%94%E2%80%94-16-%E4%B8%AA%E8%AF%AD%E8%A8%80%E5%90%8D%E7%A7%B0"><span class="nav-number">5.7.</span> <span class="nav-text">字段 14-29：Name_Lang_xx —— 16 个语言名称</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-30%EF%BC%9AName-Lang-Mask-%E2%80%94%E2%80%94-%E5%90%8D%E7%A7%B0%E8%AF%AD%E8%A8%80%E6%8E%A9%E7%A0%81%EF%BC%88%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%8D%E5%8A%A0%E8%BD%BD%EF%BC%89"><span class="nav-number">5.8.</span> <span class="nav-text">字段 30：Name_Lang_Mask —— 名称语言掩码（服务端不加载）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-31%EF%BC%9AItemVisual-%E2%80%94%E2%80%94-%E7%89%A9%E5%93%81%E8%A7%86%E8%A7%89%E6%95%88%E6%9E%9C"><span class="nav-number">5.9.</span> <span class="nav-text">字段 31：ItemVisual —— 物品视觉效果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-32%EF%BC%9AFlags-%E2%80%94%E2%80%94-%E9%99%84%E9%AD%94%E6%A0%87%E5%BF%97%E4%BD%8D"><span class="nav-number">5.10.</span> <span class="nav-text">字段 32：Flags —— 附魔标志位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-33%EF%BC%9ASrc-ItemID-%E2%80%94%E2%80%94-%E6%BA%90%E7%89%A9%E5%93%81-ID"><span class="nav-number">5.11.</span> <span class="nav-text">字段 33：Src_ItemID —— 源物品 ID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-34%EF%BC%9ACondition-Id-%E2%80%94%E2%80%94-%E9%99%84%E9%AD%94%E6%9D%A1%E4%BB%B6"><span class="nav-number">5.12.</span> <span class="nav-text">字段 34：Condition_Id —— 附魔条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-35%EF%BC%9ARequiredSkillID-%E2%80%94%E2%80%94-%E6%89%80%E9%9C%80%E4%B8%93%E4%B8%9A"><span class="nav-number">5.13.</span> <span class="nav-text">字段 35：RequiredSkillID —— 所需专业</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-36%EF%BC%9ARequiredSkillRank-%E2%80%94%E2%80%94-%E6%89%80%E9%9C%80%E4%B8%93%E4%B8%9A%E7%AD%89%E7%BA%A7"><span class="nav-number">5.14.</span> <span class="nav-text">字段 36：RequiredSkillRank —— 所需专业等级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5-37%EF%BC%9AMinLevel-%E2%80%94%E2%80%94-%E6%9C%80%E4%BD%8E%E8%A7%92%E8%89%B2%E7%AD%89%E7%BA%A7"><span class="nav-number">5.15.</span> <span class="nav-text">字段 37：MinLevel —— 最低角色等级</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Effect-%E7%B1%BB%E5%9E%8B%EF%BC%9A%E9%99%84%E9%AD%94%E6%95%88%E6%9E%9C%E7%9A%84%E5%88%86%E5%8F%91%E5%99%A8"><span class="nav-number">6.</span> <span class="nav-text">Effect 类型：附魔效果的分发器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EffectArg-%E7%9A%84%E5%A4%9A%E4%B9%89%E6%80%A7%EF%BC%88%E6%9C%80%E5%85%B3%E9%94%AE%E7%9A%84%E5%9D%91%EF%BC%89"><span class="nav-number">7.</span> <span class="nav-text">EffectArg 的多义性（最关键的坑）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#STAT-%E6%97%B6-EffectArg-ItemModType"><span class="nav-number">7.1.</span> <span class="nav-text">STAT 时 EffectArg &#x3D; ItemModType</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E7%BB%84%E7%9C%9F%E5%AE%9E%E8%AE%B0%E5%BD%95%E5%AF%B9%E7%85%A7"><span class="nav-number">7.2.</span> <span class="nav-text">一组真实记录对照</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%80%8E%E4%B9%88%E5%BA%94%E7%94%A8%E6%95%88%E6%9E%9C"><span class="nav-number">8.</span> <span class="nav-text">服务端怎么应用效果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E5%9D%91"><span class="nav-number">9.</span> <span class="nav-text">常见坑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-%E8%A7%A3%E6%9E%90%E7%A4%BA%E4%BE%8B"><span class="nav-number">10.</span> <span class="nav-text">Python 解析示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%92%8C%E9%9A%8F%E6%9C%BA%E9%99%84%E9%AD%94%E8%84%9A%E6%9C%AC%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">11.</span> <span class="nav-text">和随机附魔脚本的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">12.</span> <span class="nav-text">小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">276</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">158</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-overlay.is-active {
+  display: flex;
+}
+.mermaid-zoom-content {
+  position: relative;
+  width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-content svg {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.mermaid-zoom-content pre.mermaid,
+.mermaid-zoom-content .mermaid {
+  cursor: default;
+  text-align: center;
+  background: transparent;
+}
+.mermaid-zoom-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mermaid-zoom-close:focus {
+  outline: 2px solid #fff;
+}
+.post-body pre.mermaid,
+.post-body .mermaid {
+  cursor: zoom-in;
+}
+.post-body pre.mermaid:hover,
+.post-body .mermaid:hover {
+  opacity: .98;
+}
+</style>
+<script>
+(function() {
+  function openZoom(root) {
+    var clone = root.cloneNode(true);
+    clone.style.maxWidth = '';
+    clone.style.maxHeight = '';
+    clone.classList.remove('mermaid-click-zoom-root');
+
+    var hint = root.querySelector('.mermaid-click-zoom-hint');
+    if (hint) hint.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'mermaid-zoom-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Mermaid zoom');
+
+    var content = document.createElement('div');
+    content.className = 'mermaid-zoom-content';
+
+    var close = document.createElement('button');
+    close.className = 'mermaid-zoom-close';
+    close.type = 'button';
+    close.textContent = 'Close';
+    close.addEventListener('click', function() {
+      closeZoom(overlay);
+    });
+
+    content.appendChild(close);
+    content.appendChild(clone);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    overlay.addEventListener('click', function(event) {
+      if (event.target === overlay) {
+        closeZoom(overlay);
+      }
+    });
+
+    requestAnimationFrame(function() {
+      overlay.classList.add('is-active');
+      close.focus();
+    });
+  }
+
+  function closeZoom(overlay) {
+    overlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }
+
+  function openZoomFromTarget(target) {
+    var root = target.closest('.post-body pre.mermaid, .post-body .mermaid');
+    if (!root) return;
+    openZoom(root);
+  }
+
+  function bindMermaidZoom() {
+    var container = document.querySelector('.post-body') || document.body;
+    if (container.dataset.mermaidZoomDelegate === 'true') return;
+    container.dataset.mermaidZoomDelegate = 'true';
+
+    container.addEventListener('click', function(event) {
+      if (event.target.closest('.mermaid-zoom-overlay')) return;
+      openZoomFromTarget(event.target);
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        var active = document.querySelector('.mermaid-zoom-overlay.is-active');
+        if (active) closeZoom(active);
+      }
+    });
+  }
+
+  function ensureBoundAfterRender() {
+    bindMermaidZoom();
+
+    var pre = document.querySelector('.post-body pre.mermaid, .post-body .mermaid');
+    if (!pre) return;
+
+    if (pre.querySelector('svg')) {
+      return;
+    }
+
+    if (typeof MutationObserver === 'undefined') return;
+
+    var observer = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].target.querySelector && mutations[i].target.querySelector('svg')) {
+          bindMermaidZoom();
+          observer.disconnect();
+          return;
+        }
+      }
+    });
+    observer.observe(pre.parentNode, { childList: true, subtree: true, attributes: false, characterData: false });
+
+    setTimeout(function() {
+      observer.disconnect();
+      bindMermaidZoom();
+    }, 3000);
+  }
+
+  if (document.querySelectorAll('pre.mermaid').length) {
+    NexT.utils.getScript('/lib/mermaid.min.js', function() {
+      mermaid.initialize({
+        theme    : 'forest',
+        logLevel : 3,
+        flowchart: { curve     : 'linear' },
+        gantt    : { axisFormat: '%m/%d/%Y' },
+        sequence : { actorMargin: 50 },
+        startOnLoad: true
+      });
+      ensureBoundAfterRender();
+    }, window.mermaid);
+  } else {
+    ensureBoundAfterRender();
+  }
+})();
+</script>
+
+  
+
+  
+
+</body>
+</html>

@@ -361,7 +361,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">275</span>
+          <span class="site-state-item-count">276</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -449,20 +449,193 @@
 
 
 
-<script>
-if (document.querySelectorAll('pre.mermaid').length) {
-  NexT.utils.getScript('/lib/mermaid.min.js', () => {
-    mermaid.initialize({
-      theme    : 'forest',
-      logLevel : 3,
-      flowchart: { curve     : 'linear' },
-      gantt    : { axisFormat: '%m/%d/%Y' },
-      sequence : { actorMargin: 50 }
-    });
-  }, window.mermaid);
+<style>
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
 }
-</script>
+.mermaid-zoom-overlay.is-active {
+  display: flex;
+}
+.mermaid-zoom-content {
+  position: relative;
+  width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-content svg {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.mermaid-zoom-content pre.mermaid,
+.mermaid-zoom-content .mermaid {
+  cursor: default;
+  text-align: center;
+  background: transparent;
+}
+.mermaid-zoom-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mermaid-zoom-close:focus {
+  outline: 2px solid #fff;
+}
+.post-body pre.mermaid,
+.post-body .mermaid {
+  cursor: zoom-in;
+}
+.post-body pre.mermaid:hover,
+.post-body .mermaid:hover {
+  opacity: .98;
+}
+</style>
+<script>
+(function() {
+  function openZoom(root) {
+    var clone = root.cloneNode(true);
+    clone.style.maxWidth = '';
+    clone.style.maxHeight = '';
+    clone.classList.remove('mermaid-click-zoom-root');
 
+    var hint = root.querySelector('.mermaid-click-zoom-hint');
+    if (hint) hint.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'mermaid-zoom-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Mermaid zoom');
+
+    var content = document.createElement('div');
+    content.className = 'mermaid-zoom-content';
+
+    var close = document.createElement('button');
+    close.className = 'mermaid-zoom-close';
+    close.type = 'button';
+    close.textContent = 'Close';
+    close.addEventListener('click', function() {
+      closeZoom(overlay);
+    });
+
+    content.appendChild(close);
+    content.appendChild(clone);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    overlay.addEventListener('click', function(event) {
+      if (event.target === overlay) {
+        closeZoom(overlay);
+      }
+    });
+
+    requestAnimationFrame(function() {
+      overlay.classList.add('is-active');
+      close.focus();
+    });
+  }
+
+  function closeZoom(overlay) {
+    overlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }
+
+  function openZoomFromTarget(target) {
+    var root = target.closest('.post-body pre.mermaid, .post-body .mermaid');
+    if (!root) return;
+    openZoom(root);
+  }
+
+  function bindMermaidZoom() {
+    var container = document.querySelector('.post-body') || document.body;
+    if (container.dataset.mermaidZoomDelegate === 'true') return;
+    container.dataset.mermaidZoomDelegate = 'true';
+
+    container.addEventListener('click', function(event) {
+      if (event.target.closest('.mermaid-zoom-overlay')) return;
+      openZoomFromTarget(event.target);
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        var active = document.querySelector('.mermaid-zoom-overlay.is-active');
+        if (active) closeZoom(active);
+      }
+    });
+  }
+
+  function ensureBoundAfterRender() {
+    bindMermaidZoom();
+
+    var pre = document.querySelector('.post-body pre.mermaid, .post-body .mermaid');
+    if (!pre) return;
+
+    if (pre.querySelector('svg')) {
+      return;
+    }
+
+    if (typeof MutationObserver === 'undefined') return;
+
+    var observer = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].target.querySelector && mutations[i].target.querySelector('svg')) {
+          bindMermaidZoom();
+          observer.disconnect();
+          return;
+        }
+      }
+    });
+    observer.observe(pre.parentNode, { childList: true, subtree: true, attributes: false, characterData: false });
+
+    setTimeout(function() {
+      observer.disconnect();
+      bindMermaidZoom();
+    }, 3000);
+  }
+
+  if (document.querySelectorAll('pre.mermaid').length) {
+    NexT.utils.getScript('/lib/mermaid.min.js', function() {
+      mermaid.initialize({
+        theme    : 'forest',
+        logLevel : 3,
+        flowchart: { curve     : 'linear' },
+        gantt    : { axisFormat: '%m/%d/%Y' },
+        sequence : { actorMargin: 50 },
+        startOnLoad: true
+      });
+      ensureBoundAfterRender();
+    }, window.mermaid);
+  } else {
+    ensureBoundAfterRender();
+  }
+})();
+</script>
 
   
 
