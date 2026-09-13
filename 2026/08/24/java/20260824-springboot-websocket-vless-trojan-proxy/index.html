@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="本文总结在 Spring Boot 2.5.6 + Java 8 + 内嵌 Tomcat 环境下，于单个 Controller 内实现 VLESS 与 Trojan 协议服务端的完整技术方案。通过 WebSocket 二进制帧承载协议隧道，首包完成协议识别与目标地址解析后建立 TCP 连接，并在 WebSocket 与 TCP 之间双向转发；同时提供订阅接口返回节点 URL。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot 2.x 内嵌 VLESS &#x2F; Trojan over WebSocket 代理隧道实现">
+<meta property="og:url" content="https://forgives.github.io/2026/08/24/java/20260824-springboot-websocket-vless-trojan-proxy/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="本文总结在 Spring Boot 2.5.6 + Java 8 + 内嵌 Tomcat 环境下，于单个 Controller 内实现 VLESS 与 Trojan 协议服务端的完整技术方案。通过 WebSocket 二进制帧承载协议隧道，首包完成协议识别与目标地址解析后建立 TCP 连接，并在 WebSocket 与 TCP 之间双向转发；同时提供订阅接口返回节点 URL。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-08-24T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-13T02:47:03.204Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="websocket">
+<meta property="article:tag" content="vless">
+<meta property="article:tag" content="trojan">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/08/24/java/20260824-springboot-websocket-vless-trojan-proxy/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring Boot 2.x 内嵌 VLESS / Trojan over WebSocket 代理隧道实现 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/08/24/java/20260824-springboot-websocket-vless-trojan-proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring Boot 2.x 内嵌 VLESS / Trojan over WebSocket 代理隧道实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-08-24 10:00:00" itemprop="dateCreated datePublished" datetime="2026-08-24T10:00:00+08:00">2026-08-24</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="1-技术栈与约束"><a href="#1-技术栈与约束" class="headerlink" title="1. 技术栈与约束"></a>1. 技术栈与约束</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>版本 &#x2F; 约束</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Spring Boot</td>
+<td>2.5.6</td>
+<td>WebSocket API 为 <code>javax.websocket.*</code> &#x2F; Spring 5.3.x，非 jakarta；不可用 Boot 3.x 特性</td>
+</tr>
+<tr>
+<td>JDK</td>
+<td>1.8</td>
+<td>无虚拟线程、无 <code>java.net.http.HttpClient</code>（Java 11+）、无 <code>List.of</code> &#x2F; <code>var</code> &#x2F; <code>String.repeat</code></td>
+</tr>
+<tr>
+<td>内嵌容器</td>
+<td>Tomcat（<code>spring-boot-starter-web</code> 默认）</td>
+<td><code>tomcat-embed-websocket</code> 随 starter 引入；WS 消息回调跑在 Tomcat WS worker 线程池（默认上限 200）</td>
+</tr>
+<tr>
+<td>代码组织</td>
+<td>单 Controller 文件</td>
+<td>一个类同时承担 HTTP 路由、WS 端点注册、WS 隧道逻辑三种角色</td>
+</tr>
+<tr>
+<td>协议范围</td>
+<td>VLESS + Trojan</td>
+<td>首包嗅探分流，两种协议共享同一 WS 端点</td>
+</tr>
+</tbody></table>
+<h2 id="2-依赖引入"><a href="#2-依赖引入" class="headerlink" title="2. 依赖引入"></a>2. 依赖引入</h2><p><code>pom.xml</code> 新增 <code>spring-boot-starter-websocket</code>，显式版本与 <code>spring-boot-starter-web</code> 对齐：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-websocket<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.5.6<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-架构设计（单-Controller-三合一）"><a href="#3-架构设计（单-Controller-三合一）" class="headerlink" title="3. 架构设计（单 Controller 三合一）"></a>3. 架构设计（单 Controller 三合一）</h2><p>一个类同时承担三种角色：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ProxyTunnelController</span><br><span class="line">├── @Controller + @RequestMapping(&quot;/api/v1/proxy&quot;)        ← HTTP 路由（订阅接口）</span><br><span class="line">├── @EnableWebSocket + implements WebSocketConfigurer    ← WS 端点注册（常量路径）</span><br><span class="line">├── extends BinaryWebSocketHandler                        ← WS 隧道逻辑（协议嗅探 / 解析 / 转发）</span><br><span class="line">└── @Bean ServletServerContainerFactoryBean              ← 二进制缓冲区 1MB（lite-mode Bean）</span><br></pre></td></tr></table></figure>
+
+<p>要点：</p>
+<ol>
+<li><code>@EnableWebSocket</code> 放在 <code>@Controller</code> 类上即生效（lite mode，Spring 会处理其 <code>@Import</code>），无需独立 <code>@Configuration</code> 类。</li>
+<li><code>registerWebSocketHandlers</code> 中 <code>registry.addHandler(this, WSPATH).setAllowedOrigins(&quot;*&quot;)</code>，<code>WSPATH</code> 为完整路径常量。Tomcat 对路径按最长匹配处理，与 HTTP 路由无冲突。</li>
+<li><code>@Bean ServletServerContainerFactoryBean</code>：Boot 2.5 的 <code>WebSocketServletAutoConfiguration</code> 带 <code>@ConditionalOnMissingBean</code>，用户 Bean 自动优先生效。</li>
+</ol>
+<h2 id="4-协议格式"><a href="#4-协议格式" class="headerlink" title="4. 协议格式"></a>4. 协议格式</h2><h3 id="4-1-VLESS-首包字节布局"><a href="#4-1-VLESS-首包字节布局" class="headerlink" title="4.1 VLESS 首包字节布局"></a>4.1 VLESS 首包字节布局</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[version:1B][uuid:16B][addonsLen:1B][addons:nB][cmd:1B][port:2B BE][atyp:1B][addr:变长]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>version</code>：固定 <code>0x00</code></li>
+<li><code>uuid</code>：16 字节认证凭据（UUID 去 <code>-</code> 后 hex 解码）</li>
+<li><code>addonsLen</code> + <code>addons</code>：附加数据长度与内容</li>
+<li><code>cmd</code>：必须为 <code>0x01</code>（TCP CONNECT）</li>
+<li><code>port</code>：2 字节大端序</li>
+<li><code>atyp</code>：<code>1=IPv4</code>（4 字节点分十进制）&#x2F; <code>2=域名</code>（1 字节长度 + UTF-8 文本）&#x2F; <code>3=IPv6</code>（16 字节按 2 字节分组）</li>
+<li>隧道建立后服务端需先回发 2 字节握手响应 <code>&#123;0x00, 0x00&#125;</code></li>
+</ul>
+<h3 id="4-2-Trojan-首包字节布局"><a href="#4-2-Trojan-首包字节布局" class="headerlink" title="4.2 Trojan 首包字节布局"></a>4.2 Trojan 首包字节布局</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[sha224(uuid-hex):56B][\r\n?][cmd:1B=0x01][atyp:1B][addr:变长][port:2B BE][\r\n?][payload]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>sha224(uuid-hex)</code>：UUID 字符串的 SHA-224 摘要转 hex 字符串的 ASCII 字节（56 字节）</li>
+<li>可选 CRLF（<code>\r\n</code>）</li>
+<li><code>cmd</code>：必须为 <code>0x01</code>（CONNECT）</li>
+<li><code>atyp</code>：<code>1=IPv4</code> &#x2F; <code>3=域名</code> &#x2F; <code>4=IPv6</code></li>
+<li>端口后可选尾部 CRLF，随后为业务数据</li>
+</ul>
+<h3 id="4-3-嗅探顺序"><a href="#4-3-嗅探顺序" class="headerlink" title="4.3 嗅探顺序"></a>4.3 嗅探顺序</h3><p>先按 VLESS 判定（首字节 0 且 UUID 匹配），再按 Trojan 判定（SHA-224 前缀匹配），均不匹配返回 null → 关闭连接。凭据比较采用恒定时间比较，防止基于时序的侧信道攻击。</p>
+<h2 id="5-线程模型"><a href="#5-线程模型" class="headerlink" title="5. 线程模型"></a>5. 线程模型</h2><p>Java 8 无虚拟线程，模型设计为「两条通道 + 一把锁」：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">                         ┌──────────────────────────────┐</span><br><span class="line">WS 客户端 ◄── Binary ──►  │  Tomcat WS worker 线程池      │</span><br><span class="line">                         │  （默认 200，消息回调串行）     │</span><br><span class="line">                         └──────┬───────────────────────┘</span><br><span class="line">                   回调线程直写   │  sendLock 同步</span><br><span class="line">                   （阻塞式，天然背压）</span><br><span class="line">                                ▼</span><br><span class="line">                       Socket.getOutputStream() ──► TCP 目标</span><br><span class="line">                                ▲</span><br><span class="line">                   泵线程读      │</span><br><span class="line">                         ┌──────┴───────────────────────┐</span><br><span class="line">                         │  自建有界 ThreadPoolExecutor  │</span><br><span class="line">                         │  core=8 max=200 daemon       │</span><br><span class="line">                         └──────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p><strong>WS → TCP</strong>：在 Tomcat WS 回调线程中直接 <code>socket.getOutputStream().write(...)</code>（阻塞式）。回调阻塞期间容器不再向该 session 分发下一帧 → TCP 接收窗口收缩 → 客户端自动减速，天然背压。代价是占用容器 WS 线程，并发上限受 Tomcat WS 线程池约束（单实例 200，可通过 <code>-Dorg.apache.tomcat.websocket.threadPoolSize=N</code> 调整）。</p>
+</li>
+<li><p><strong>TCP → WS</strong>：每隧道一个泵任务，提交到自建线程池。拒绝策略为「关闭隧道」而非 CallerRuns（CallerRuns 会反压到泵提交线程，语义混乱）。</p>
+</li>
+<li><p><strong>sendMessage 线程安全</strong>：泵线程与 WS 回调 &#x2F; 关闭并发调用 <code>session.sendMessage</code> 会抛 <code>IllegalStateException</code>，全部发送路径套 <code>synchronized (sendLock)</code>。</p>
+</li>
+</ol>
+<h2 id="6-二进制缓冲区"><a href="#6-二进制缓冲区" class="headerlink" title="6. 二进制缓冲区"></a>6. 二进制缓冲区</h2><p>不设置时 Tomcat 默认 8KB，大帧（如刷页面、下载）会被容器直接关闭连接。通过 <code>ServletServerContainerFactoryBean</code>（内部走 javax <code>ServerContainer</code>）将 <code>maxBinaryMessageBufferSize</code> 设为 1MB，并设置 <code>maxSessionIdleTimeout</code> 10 分钟，避免 SLB &#x2F; Ingress 空闲超时前服务端先杀会话。</p>
+<h2 id="7-隧道生命周期"><a href="#7-隧道生命周期" class="headerlink" title="7. 隧道生命周期"></a>7. 隧道生命周期</h2><h3 id="7-1-建立流程（openTunnel）"><a href="#7-1-建立流程（openTunnel）" class="headerlink" title="7.1 建立流程（openTunnel）"></a>7.1 建立流程（openTunnel）</h3><ol>
+<li>解析首包得到协议类型与目标地址，凭据或格式非法则关闭连接</li>
+<li>黑名单校验目标域名，命中则关闭连接</li>
+<li>建立 TCP 连接（<code>setTcpNoDelay(true)</code> + 限时建连）并注册隧道</li>
+<li>VLESS 协议先发送 2 字节握手响应，再写入首包剩余业务数据</li>
+<li>提交 TCP 到 WS 的泵送任务；任一步骤失败即关闭连接，保证无残留</li>
+</ol>
+<p>注册时机：握手响应与首包直写<strong>之前</strong>先 <code>tunnels.put(session, tunnel)</code>，保证后续帧可路由。</p>
+<h3 id="7-2-WebSocket-生命周期回调"><a href="#7-2-WebSocket-生命周期回调" class="headerlink" title="7.2 WebSocket 生命周期回调"></a>7.2 WebSocket 生命周期回调</h3><table>
+<thead>
+<tr>
+<th>回调</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>handleBinaryMessage</code></td>
+<td>隧道未建立时调用 <code>openTunnel</code>；已建立时 <code>tunnel.write(payload)</code> 直写 TCP，写失败即 <code>closeTunnel</code></td>
+</tr>
+<tr>
+<td><code>afterConnectionClosed</code></td>
+<td>客户端断开 → <code>closeTunnel</code></td>
+</tr>
+<tr>
+<td><code>handleTransportError</code></td>
+<td>传输异常 → 记录日志并 <code>closeTunnel</code></td>
+</tr>
+<tr>
+<td><code>@PreDestroy destroy</code></td>
+<td>遍历关闭全部活跃隧道、清空映射、<code>pumpPool.shutdownNow()</code></td>
+</tr>
+</tbody></table>
+<h3 id="7-3-关闭与清理"><a href="#7-3-关闭与清理" class="headerlink" title="7.3 关闭与清理"></a>7.3 关闭与清理</h3><ul>
+<li><code>closeTunnel</code>：<code>markClosed()</code> 保证关闭只执行一次，随后移除映射、关闭 Socket 与 Session（均幂等 try&#x2F;catch）</li>
+<li><code>Tunnel.markClosed</code>：<code>synchronized (sendLock)</code> 内置位，防止关闭与发送竞争</li>
+<li><code>ConcurrentHashMap&lt;WebSocketSession, Tunnel&gt;</code> 记录活跃隧道</li>
+</ul>
+<h2 id="8-订阅接口"><a href="#8-订阅接口" class="headerlink" title="8. 订阅接口"></a>8. 订阅接口</h2><p><code>GET /api/v1/proxy/subscribe</code>，返回 base64 编码的 VLESS &#x2F; Trojan 节点订阅内容。流程：</p>
+<ol>
+<li>缓存窗口过期时占用 <code>ISP_LOCK</code> 窗口并触发后台 ISP 探测，探测失败保留旧值</li>
+<li>以常量接入域名 &#x2F; 端口与当前 ISP 拼装两条节点 URL</li>
+<li>拼接后 base64 编码，以 <code>text/plain</code> 返回</li>
+</ol>
+<p>节点 URL 模板（<code>WSPATH</code> 中的 <code>/</code> 编码为 <code>%2F</code>）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vless://&#123;UUID&#125;@&#123;DOMAIN&#125;:&#123;PORT&#125;?encryption=none&amp;security=tls&amp;sni=&#123;DOMAIN&#125;&amp;fp=chrome&amp;type=ws&amp;host=&#123;DOMAIN&#125;&amp;path=&#123;WSPATH_ENCODED&#125;#&#123;NAME&#125;-&#123;ISP&#125;</span><br><span class="line">trojan://&#123;UUID&#125;@&#123;DOMAIN&#125;:&#123;PORT&#125;?security=tls&amp;sni=&#123;DOMAIN&#125;&amp;fp=chrome&amp;type=ws&amp;host=&#123;DOMAIN&#125;&amp;path=&#123;WSPATH_ENCODED&#125;#&#123;NAME&#125;-&#123;ISP&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ISP 探测细节：</p>
+<ul>
+<li>后台守护线程执行，避免占用容器请求线程</li>
+<li>双源顺序探测，任一源返回有效数据即返回，全部失败返回 null（保留旧值）</li>
+<li>字段优先级：国家码取 <code>country_code</code> &#x2F; <code>countryCode</code>，运营商取 <code>isp</code> &#x2F; <code>org</code> &#x2F; <code>organization</code></li>
+<li>结果清洗：空格替换为下划线，去除首尾 <code>-</code>，拼为「国家码-运营商」</li>
+<li>专用 <code>RestTemplate</code> 连接与读取超时均为 1500ms</li>
+</ul>
+<h2 id="9-可调参数"><a href="#9-可调参数" class="headerlink" title="9. 可调参数"></a>9. 可调参数</h2><table>
+<thead>
+<tr>
+<th>常量</th>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>UUID</code></td>
+<td>自定义 UUID</td>
+<td>VLESS 首包 UUID 认证与 Trojan 首包哈希种子，上线前必须更换</td>
+</tr>
+<tr>
+<td><code>WSPATH</code></td>
+<td><code>/api/v1/proxy/websocket</code></td>
+<td>WebSocket 接入路径</td>
+</tr>
+<tr>
+<td><code>CONNECT_TIMEOUT_MS</code></td>
+<td><code>10_000</code></td>
+<td>TCP 连接建立超时（毫秒）</td>
+</tr>
+<tr>
+<td><code>PUMP_BUFFER_SIZE</code></td>
+<td><code>16 * 1024</code></td>
+<td>TCP 向 WS 泵送的读缓冲区大小</td>
+</tr>
+<tr>
+<td><code>MAX_BINARY_BUFFER</code></td>
+<td><code>1024 * 1024</code></td>
+<td>二进制帧缓冲上限（字节）</td>
+</tr>
+<tr>
+<td><code>IDLE_TIMEOUT_MS</code></td>
+<td><code>10min</code></td>
+<td>会话空闲超时</td>
+</tr>
+<tr>
+<td><code>PUMP_CORE / PUMP_MAX / PUMP_KEEP_ALIVE_SEC</code></td>
+<td><code>8 / 200 / 60</code></td>
+<td>泵线程池参数</td>
+</tr>
+<tr>
+<td><code>SUB_DOMAIN / SUB_PORT / SUB_SECURITY / SUB_NAME</code></td>
+<td><code>your-domain.com / 443 / tls / ProxyNode</code></td>
+<td>订阅节点接入参数</td>
+</tr>
+<tr>
+<td><code>SUB_TTL_MS</code></td>
+<td><code>10min</code></td>
+<td>订阅 ISP 信息刷新间隔</td>
+</tr>
+<tr>
+<td><code>ISP_TIMEOUT_MS</code></td>
+<td><code>1500</code></td>
+<td>ISP 探测单源超时（毫秒）</td>
+</tr>
+<tr>
+<td><code>BLOCKED_DOMAINS</code></td>
+<td>10 个测速域名</td>
+<td>目标域名黑名单（含子域名）</td>
+</tr>
+</tbody></table>
+<h2 id="10-完整代码"><a href="#10-完整代码" class="headerlink" title="10. 完整代码"></a>10. 完整代码</h2><p>以下为完整的单文件实现，包名与路径均为示例值，按实际项目调整即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br><span class="line">494</span><br><span class="line">495</span><br><span class="line">496</span><br><span class="line">497</span><br><span class="line">498</span><br><span class="line">499</span><br><span class="line">500</span><br><span class="line">501</span><br><span class="line">502</span><br><span class="line">503</span><br><span class="line">504</span><br><span class="line">505</span><br><span class="line">506</span><br><span class="line">507</span><br><span class="line">508</span><br><span class="line">509</span><br><span class="line">510</span><br><span class="line">511</span><br><span class="line">512</span><br><span class="line">513</span><br><span class="line">514</span><br><span class="line">515</span><br><span class="line">516</span><br><span class="line">517</span><br><span class="line">518</span><br><span class="line">519</span><br><span class="line">520</span><br><span class="line">521</span><br><span class="line">522</span><br><span class="line">523</span><br><span class="line">524</span><br><span class="line">525</span><br><span class="line">526</span><br><span class="line">527</span><br><span class="line">528</span><br><span class="line">529</span><br><span class="line">530</span><br><span class="line">531</span><br><span class="line">532</span><br><span class="line">533</span><br><span class="line">534</span><br><span class="line">535</span><br><span class="line">536</span><br><span class="line">537</span><br><span class="line">538</span><br><span class="line">539</span><br><span class="line">540</span><br><span class="line">541</span><br><span class="line">542</span><br><span class="line">543</span><br><span class="line">544</span><br><span class="line">545</span><br><span class="line">546</span><br><span class="line">547</span><br><span class="line">548</span><br><span class="line">549</span><br><span class="line">550</span><br><span class="line">551</span><br><span class="line">552</span><br><span class="line">553</span><br><span class="line">554</span><br><span class="line">555</span><br><span class="line">556</span><br><span class="line">557</span><br><span class="line">558</span><br><span class="line">559</span><br><span class="line">560</span><br><span class="line">561</span><br><span class="line">562</span><br><span class="line">563</span><br><span class="line">564</span><br><span class="line">565</span><br><span class="line">566</span><br><span class="line">567</span><br><span class="line">568</span><br><span class="line">569</span><br><span class="line">570</span><br><span class="line">571</span><br><span class="line">572</span><br><span class="line">573</span><br><span class="line">574</span><br><span class="line">575</span><br><span class="line">576</span><br><span class="line">577</span><br><span class="line">578</span><br><span class="line">579</span><br><span class="line">580</span><br><span class="line">581</span><br><span class="line">582</span><br><span class="line">583</span><br><span class="line">584</span><br><span class="line">585</span><br><span class="line">586</span><br><span class="line">587</span><br><span class="line">588</span><br><span class="line">589</span><br><span class="line">590</span><br><span class="line">591</span><br><span class="line">592</span><br><span class="line">593</span><br><span class="line">594</span><br><span class="line">595</span><br><span class="line">596</span><br><span class="line">597</span><br><span class="line">598</span><br><span class="line">599</span><br><span class="line">600</span><br><span class="line">601</span><br><span class="line">602</span><br><span class="line">603</span><br><span class="line">604</span><br><span class="line">605</span><br><span class="line">606</span><br><span class="line">607</span><br><span class="line">608</span><br><span class="line">609</span><br><span class="line">610</span><br><span class="line">611</span><br><span class="line">612</span><br><span class="line">613</span><br><span class="line">614</span><br><span class="line">615</span><br><span class="line">616</span><br><span class="line">617</span><br><span class="line">618</span><br><span class="line">619</span><br><span class="line">620</span><br><span class="line">621</span><br><span class="line">622</span><br><span class="line">623</span><br><span class="line">624</span><br><span class="line">625</span><br><span class="line">626</span><br><span class="line">627</span><br><span class="line">628</span><br><span class="line">629</span><br><span class="line">630</span><br><span class="line">631</span><br><span class="line">632</span><br><span class="line">633</span><br><span class="line">634</span><br><span class="line">635</span><br><span class="line">636</span><br><span class="line">637</span><br><span class="line">638</span><br><span class="line">639</span><br><span class="line">640</span><br><span class="line">641</span><br><span class="line">642</span><br><span class="line">643</span><br><span class="line">644</span><br><span class="line">645</span><br><span class="line">646</span><br><span class="line">647</span><br><span class="line">648</span><br><span class="line">649</span><br><span class="line">650</span><br><span class="line">651</span><br><span class="line">652</span><br><span class="line">653</span><br><span class="line">654</span><br><span class="line">655</span><br><span class="line">656</span><br><span class="line">657</span><br><span class="line">658</span><br><span class="line">659</span><br><span class="line">660</span><br><span class="line">661</span><br><span class="line">662</span><br><span class="line">663</span><br><span class="line">664</span><br><span class="line">665</span><br><span class="line">666</span><br><span class="line">667</span><br><span class="line">668</span><br><span class="line">669</span><br><span class="line">670</span><br><span class="line">671</span><br><span class="line">672</span><br><span class="line">673</span><br><span class="line">674</span><br><span class="line">675</span><br><span class="line">676</span><br><span class="line">677</span><br><span class="line">678</span><br><span class="line">679</span><br><span class="line">680</span><br><span class="line">681</span><br><span class="line">682</span><br><span class="line">683</span><br><span class="line">684</span><br><span class="line">685</span><br><span class="line">686</span><br><span class="line">687</span><br><span class="line">688</span><br><span class="line">689</span><br><span class="line">690</span><br><span class="line">691</span><br><span class="line">692</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.proxy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.databind.JsonNode;</span><br><span class="line"><span class="keyword">import</span> com.fasterxml.jackson.databind.ObjectMapper;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"><span class="keyword">import</span> org.springframework.context.annotation.Bean;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.HttpEntity;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.HttpHeaders;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.HttpMethod;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.MediaType;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.ResponseEntity;</span><br><span class="line"><span class="keyword">import</span> org.springframework.http.client.SimpleClientHttpRequestFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Controller;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.GetMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.client.RestTemplate;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.socket.BinaryMessage;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.socket.CloseStatus;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.socket.WebSocketSession;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.socket.config.annotation.EnableWebSocket;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.socket.config.annotation.WebSocketConfigurer;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.socket.handler.BinaryWebSocketHandler;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.annotation.PreDestroy;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.InputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.OutputStream;</span><br><span class="line"><span class="keyword">import</span> java.net.InetSocketAddress;</span><br><span class="line"><span class="keyword">import</span> java.net.Socket;</span><br><span class="line"><span class="keyword">import</span> java.nio.ByteBuffer;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"><span class="keyword">import</span> java.security.MessageDigest;</span><br><span class="line"><span class="keyword">import</span> java.security.NoSuchAlgorithmException;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ConcurrentHashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.SynchronousQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ThreadPoolExecutor;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 代理隧道控制器。</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * &lt;p&gt;通过 WebSocket 二进制帧承载两条协议隧道（VLESS / Trojan），首包完成协议识别与目标地址解析后，</span></span><br><span class="line"><span class="comment"> * 建立 TCP 连接并在 WebSocket 与 TCP 之间双向转发；同时提供订阅接口返回两条协议的节点 URL。</span></span><br><span class="line"><span class="comment"> * 全部逻辑集中在单个类内，不依赖额外业务模块。</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * &lt;p&gt;参数（UUID / 路径前缀 / 池大小 / 超时等）以类常量形式集中定义，可按环境调整。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@EnableWebSocket</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/api/v1/proxy&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ProxyTunnelController</span> <span class="keyword">extends</span> <span class="title class_">BinaryWebSocketHandler</span> <span class="keyword">implements</span> <span class="title class_">WebSocketConfigurer</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== 可调参数 ====================</span></span><br><span class="line">    <span class="comment">/** 认证凭据，用于 VLESS 首包 UUID 校验与 Trojan 首包哈希校验 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">UUID</span> <span class="operator">=</span> <span class="string">&quot;your-uuid-here&quot;</span>;</span><br><span class="line">    <span class="comment">/** WebSocket 接入路径，与 HTTP 路由前缀对齐 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">WSPATH</span> <span class="operator">=</span> <span class="string">&quot;/api/v1/proxy/websocket&quot;</span>;</span><br><span class="line">    <span class="comment">/** TCP 连接建立超时（毫秒） */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">CONNECT_TIMEOUT_MS</span> <span class="operator">=</span> <span class="number">10_000</span>;</span><br><span class="line">    <span class="comment">/** TCP 向 WS 泵送的读缓冲区大小 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">PUMP_BUFFER_SIZE</span> <span class="operator">=</span> <span class="number">16</span> * <span class="number">1024</span>;</span><br><span class="line">    <span class="comment">/** 二进制帧缓冲上限（字节），避免默认 8KB 导致大帧被容器断开 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">MAX_BINARY_BUFFER</span> <span class="operator">=</span> <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line">    <span class="comment">/** 会话空闲超时（毫秒） */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">IDLE_TIMEOUT_MS</span> <span class="operator">=</span> TimeUnit.MINUTES.toMillis(<span class="number">10</span>);</span><br><span class="line">    <span class="comment">/** 泵线程池核心线程数 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">PUMP_CORE</span> <span class="operator">=</span> <span class="number">8</span>;</span><br><span class="line">    <span class="comment">/** 泵线程池最大线程数 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">PUMP_MAX</span> <span class="operator">=</span> <span class="number">200</span>;</span><br><span class="line">    <span class="comment">/** 泵线程池空闲存活时间 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">PUMP_KEEP_ALIVE_SEC</span> <span class="operator">=</span> <span class="number">60L</span>;</span><br><span class="line">    <span class="comment">/** 订阅节点接入域名，上线前按环境替换 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">SUB_DOMAIN</span> <span class="operator">=</span> <span class="string">&quot;your-domain.com&quot;</span>;</span><br><span class="line">    <span class="comment">/** 订阅节点接入端口 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">SUB_PORT</span> <span class="operator">=</span> <span class="number">443</span>;</span><br><span class="line">    <span class="comment">/** 订阅节点传输安全参数（tls / none） */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">SUB_SECURITY</span> <span class="operator">=</span> <span class="string">&quot;tls&quot;</span>;</span><br><span class="line">    <span class="comment">/** 订阅节点备注名前缀 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">SUB_NAME</span> <span class="operator">=</span> <span class="string">&quot;ProxyNode&quot;</span>;</span><br><span class="line">    <span class="comment">/** 订阅元信息刷新间隔（毫秒） */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">SUB_TTL_MS</span> <span class="operator">=</span> TimeUnit.MINUTES.toMillis(<span class="number">10</span>);</span><br><span class="line">    <span class="comment">/** ISP 探测接口的单源超时（毫秒） */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">ISP_TIMEOUT_MS</span> <span class="operator">=</span> <span class="number">1500L</span>;</span><br><span class="line">    <span class="comment">/** ISP 双源探测端点 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String[] ISP_ENDPOINTS = &#123;<span class="string">&quot;https://api.ip.sb/geoip&quot;</span>, <span class="string">&quot;http://ip-api.com/json&quot;</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/** 目标地址黑名单（及其子域名） */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> List&lt;String&gt; BLOCKED_DOMAINS = Collections.unmodifiableList(Arrays.asList(</span><br><span class="line">            <span class="string">&quot;speedtest.net&quot;</span>, <span class="string">&quot;fast.com&quot;</span>, <span class="string">&quot;speedtest.cn&quot;</span>, <span class="string">&quot;speed.cloudflare.com&quot;</span>,</span><br><span class="line">            <span class="string">&quot;speedof.me&quot;</span>, <span class="string">&quot;testmy.net&quot;</span>, <span class="string">&quot;bandwidth.place&quot;</span>, <span class="string">&quot;speed.io&quot;</span>,</span><br><span class="line">            <span class="string">&quot;librespeed.org&quot;</span>, <span class="string">&quot;speedcheck.org&quot;</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== 协议常量 ====================</span></span><br><span class="line">    <span class="comment">/** VLESS 协议 UUID 的二进制形式（hex 解码，16 字节） */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">byte</span>[] UUID_BYTES = hexToBytes(UUID.replace(<span class="string">&quot;-&quot;</span>, <span class="string">&quot;&quot;</span>));</span><br><span class="line">    <span class="comment">/** Trojan 协议首包哈希：SHA-224(UUID) 的 hex 字符串字节（56 字节） */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">byte</span>[] TROJAN_HASH = buildTrojanHash();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/** 当前节点 ISP 描述（国家码-运营商），探测失败保留旧值 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="type">String</span> <span class="variable">nodeIsp</span> <span class="operator">=</span> <span class="string">&quot;Unknown&quot;</span>;</span><br><span class="line">    <span class="comment">/** 上次 ISP 探测时间戳，配合 ISP_LOCK 避免并发重复探测 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> <span class="type">long</span> <span class="variable">ispRefreshedAt</span> <span class="operator">=</span> <span class="number">0L</span>;</span><br><span class="line">    <span class="comment">/** ISP 探测窗口锁 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Object</span> <span class="variable">ISP_LOCK</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">    <span class="comment">/** ISP 探测响应解析器 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">ObjectMapper</span> <span class="variable">OBJECT_MAPPER</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectMapper</span>();</span><br><span class="line">    <span class="comment">/** ISP 探测 HTTP 客户端 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">RestTemplate</span> <span class="variable">ISP_REST</span> <span class="operator">=</span> buildIspRestTemplate();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/** 活跃隧道集合：session -&gt; tunnel */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ConcurrentHashMap&lt;WebSocketSession, Tunnel&gt; tunnels = <span class="keyword">new</span> <span class="title class_">ConcurrentHashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="comment">/** TCP 向 WS 方向泵送线程池，有界且拒绝即关闭隧道 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">ThreadPoolExecutor</span> <span class="variable">pumpPool</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ThreadPoolExecutor</span>(</span><br><span class="line">            PUMP_CORE, PUMP_MAX, PUMP_KEEP_ALIVE_SEC, TimeUnit.SECONDS,</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">SynchronousQueue</span>&lt;Runnable&gt;(),</span><br><span class="line">            r -&gt; &#123;</span><br><span class="line">                <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(r, <span class="string">&quot;proxy-tunnel-pump&quot;</span>);</span><br><span class="line">                t.setDaemon(<span class="literal">true</span>);</span><br><span class="line">                <span class="keyword">return</span> t;</span><br><span class="line">            &#125;,</span><br><span class="line">            (r, executor) -&gt; &#123;</span><br><span class="line">                log.warn(<span class="string">&quot;Proxy pump pool saturated, close tunnel&quot;</span>);</span><br><span class="line">                <span class="keyword">if</span> (r <span class="keyword">instanceof</span> PumpTask) &#123;</span><br><span class="line">                    ((PumpTask) r).closeNow();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== WebSocket 端点注册与容器配置 ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">registerWebSocketHandlers</span><span class="params">(WebSocketHandlerRegistry registry)</span> &#123;</span><br><span class="line">        registry.addHandler(<span class="built_in">this</span>, WSPATH).setAllowedOrigins(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> ServletServerContainerFactoryBean <span class="title function_">proxyWebSocketContainer</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">ServletServerContainerFactoryBean</span> <span class="variable">container</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServletServerContainerFactoryBean</span>();</span><br><span class="line">        container.setMaxBinaryMessageBufferSize(MAX_BINARY_BUFFER);</span><br><span class="line">        container.setMaxSessionIdleTimeout(IDLE_TIMEOUT_MS);</span><br><span class="line">        <span class="keyword">return</span> container;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== 订阅接口 ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 返回 base64 编码的 VLESS / Trojan 节点订阅内容。</span></span><br><span class="line"><span class="comment">     * 步骤：</span></span><br><span class="line"><span class="comment">     * 1. 缓存窗口过期时占用窗口并触发后台 ISP 探测，探测失败保留旧值</span></span><br><span class="line"><span class="comment">     * 2. 以常量接入域名/端口与当前 ISP 拼装两条节点 URL</span></span><br><span class="line"><span class="comment">     * 3. 拼接后 base64 编码，以 text/plain 返回</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/subscribe&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> ResponseEntity&lt;String&gt; <span class="title function_">subscribe</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (ISP_LOCK) &#123;</span><br><span class="line">            <span class="keyword">if</span> (System.currentTimeMillis() - ispRefreshedAt &gt; SUB_TTL_MS) &#123;</span><br><span class="line">                ispRefreshedAt = System.currentTimeMillis();</span><br><span class="line">                refreshIspAsync();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">String</span> <span class="variable">namePart</span> <span class="operator">=</span> SUB_NAME + <span class="string">&quot;-&quot;</span> + nodeIsp;</span><br><span class="line">        <span class="type">String</span> <span class="variable">wsPathEncoded</span> <span class="operator">=</span> WSPATH.replace(<span class="string">&quot;/&quot;</span>, <span class="string">&quot;%2F&quot;</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">vlessUrl</span> <span class="operator">=</span> <span class="string">&quot;vless://&quot;</span> + UUID + <span class="string">&quot;@&quot;</span> + SUB_DOMAIN + <span class="string">&quot;:&quot;</span> + SUB_PORT</span><br><span class="line">                + <span class="string">&quot;?encryption=none&amp;security=&quot;</span> + SUB_SECURITY + <span class="string">&quot;&amp;sni=&quot;</span> + SUB_DOMAIN</span><br><span class="line">                + <span class="string">&quot;&amp;fp=chrome&amp;type=ws&amp;host=&quot;</span> + SUB_DOMAIN + <span class="string">&quot;&amp;path=&quot;</span> + wsPathEncoded + <span class="string">&quot;#&quot;</span> + namePart;</span><br><span class="line">        <span class="type">String</span> <span class="variable">trojanUrl</span> <span class="operator">=</span> <span class="string">&quot;trojan://&quot;</span> + UUID + <span class="string">&quot;@&quot;</span> + SUB_DOMAIN + <span class="string">&quot;:&quot;</span> + SUB_PORT</span><br><span class="line">                + <span class="string">&quot;?security=&quot;</span> + SUB_SECURITY + <span class="string">&quot;&amp;sni=&quot;</span> + SUB_DOMAIN</span><br><span class="line">                + <span class="string">&quot;&amp;fp=chrome&amp;type=ws&amp;host=&quot;</span> + SUB_DOMAIN + <span class="string">&quot;&amp;path=&quot;</span> + wsPathEncoded + <span class="string">&quot;#&quot;</span> + namePart;</span><br><span class="line">        <span class="type">String</span> <span class="variable">base64</span> <span class="operator">=</span> Base64.getEncoder()</span><br><span class="line">                .encodeToString((vlessUrl + <span class="string">&quot;\n&quot;</span> + trojanUrl).getBytes(StandardCharsets.UTF_8));</span><br><span class="line">        <span class="keyword">return</span> ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body(base64 + <span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 后台线程执行 ISP 探测，避免占用容器请求线程。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">refreshIspAsync</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">t</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> fetchIsp();</span><br><span class="line">            <span class="keyword">if</span> (result != <span class="literal">null</span>) &#123;</span><br><span class="line">                nodeIsp = result;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="string">&quot;proxy-sub-isp&quot;</span>);</span><br><span class="line">        t.setDaemon(<span class="literal">true</span>);</span><br><span class="line">        t.start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 双源顺序探测出口 ISP 信息，任一源返回有效数据即拼为&quot;国家码-运营商&quot;返回，全部失败返回 null。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String <span class="title function_">fetchIsp</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (String endpoint : ISP_ENDPOINTS) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="type">HttpHeaders</span> <span class="variable">headers</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HttpHeaders</span>();</span><br><span class="line">                headers.set(<span class="string">&quot;User-Agent&quot;</span>, <span class="string">&quot;Mozilla/5.0&quot;</span>);</span><br><span class="line">                ResponseEntity&lt;String&gt; resp = ISP_REST.exchange(</span><br><span class="line">                        endpoint, HttpMethod.GET, <span class="keyword">new</span> <span class="title class_">HttpEntity</span>&lt;Void&gt;(headers), String.class);</span><br><span class="line">                <span class="type">JsonNode</span> <span class="variable">node</span> <span class="operator">=</span> OBJECT_MAPPER.readTree(resp.getBody());</span><br><span class="line">                <span class="type">String</span> <span class="variable">code</span> <span class="operator">=</span> firstText(node, <span class="string">&quot;country_code&quot;</span>, <span class="string">&quot;countryCode&quot;</span>);</span><br><span class="line">                <span class="type">String</span> <span class="variable">provider</span> <span class="operator">=</span> firstText(node, <span class="string">&quot;isp&quot;</span>, <span class="string">&quot;org&quot;</span>, <span class="string">&quot;organization&quot;</span>);</span><br><span class="line">                <span class="type">String</span> <span class="variable">cleaned</span> <span class="operator">=</span> (code + <span class="string">&quot;-&quot;</span> + provider).replace(<span class="string">&quot; &quot;</span>, <span class="string">&quot;_&quot;</span>);</span><br><span class="line">                <span class="keyword">while</span> (cleaned.startsWith(<span class="string">&quot;-&quot;</span>)) &#123;</span><br><span class="line">                    cleaned = cleaned.substring(<span class="number">1</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">while</span> (cleaned.endsWith(<span class="string">&quot;-&quot;</span>)) &#123;</span><br><span class="line">                    cleaned = cleaned.substring(<span class="number">0</span>, cleaned.length() - <span class="number">1</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (!cleaned.isEmpty()) &#123;</span><br><span class="line">                    <span class="keyword">return</span> cleaned;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.debug(<span class="string">&quot;ISP source &#123;&#125; failed: &#123;&#125;&quot;</span>, endpoint, e.getMessage());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 按候选字段顺序取第一个非空文本值。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String <span class="title function_">firstText</span><span class="params">(JsonNode node, String... fields)</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (String field : fields) &#123;</span><br><span class="line">            <span class="type">JsonNode</span> <span class="variable">value</span> <span class="operator">=</span> node.get(field);</span><br><span class="line">            <span class="keyword">if</span> (value != <span class="literal">null</span> &amp;&amp; value.isTextual() &amp;&amp; !value.asText().isEmpty()) &#123;</span><br><span class="line">                <span class="keyword">return</span> value.asText();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 构建 ISP 探测专用 HTTP 客户端，连接与读取超时均为 ISP_TIMEOUT_MS。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RestTemplate <span class="title function_">buildIspRestTemplate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">SimpleClientHttpRequestFactory</span> <span class="variable">factory</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SimpleClientHttpRequestFactory</span>();</span><br><span class="line">        factory.setConnectTimeout((<span class="type">int</span>) ISP_TIMEOUT_MS);</span><br><span class="line">        factory.setReadTimeout((<span class="type">int</span>) ISP_TIMEOUT_MS);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">RestTemplate</span>(factory);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== WebSocket 生命周期 ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">handleBinaryMessage</span><span class="params">(WebSocketSession session, BinaryMessage message)</span> &#123;</span><br><span class="line">        <span class="type">Tunnel</span> <span class="variable">tunnel</span> <span class="operator">=</span> tunnels.get(session);</span><br><span class="line">        <span class="keyword">if</span> (tunnel == <span class="literal">null</span>) &#123;</span><br><span class="line">            openTunnel(session, message.getPayload());</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            tunnel.write(message.getPayload());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;Proxy write to tcp failed, close tunnel: &#123;&#125;&quot;</span>, e.getMessage());</span><br><span class="line">            closeTunnel(tunnel);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">afterConnectionClosed</span><span class="params">(WebSocketSession session, CloseStatus status)</span> &#123;</span><br><span class="line">        closeTunnel(tunnels.get(session));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">handleTransportError</span><span class="params">(WebSocketSession session, Throwable exception)</span> &#123;</span><br><span class="line">        log.debug(<span class="string">&quot;Proxy transport error, close tunnel: &#123;&#125;&quot;</span>, exception.getMessage());</span><br><span class="line">        closeTunnel(tunnels.get(session));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PreDestroy</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (Tunnel tunnel : tunnels.values()) &#123;</span><br><span class="line">            closeTunnel(tunnel);</span><br><span class="line">        &#125;</span><br><span class="line">        tunnels.clear();</span><br><span class="line">        pumpPool.shutdownNow();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== 隧道建立 ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 建立隧道。</span></span><br><span class="line"><span class="comment">     * 步骤：</span></span><br><span class="line"><span class="comment">     * 1. 解析首包得到协议类型与目标地址，凭据或格式非法则关闭连接</span></span><br><span class="line"><span class="comment">     * 2. 黑名单校验目标域名，命中则关闭连接</span></span><br><span class="line"><span class="comment">     * 3. 建立 TCP 连接并注册隧道</span></span><br><span class="line"><span class="comment">     * 4. VLESS 协议先发送 2 字节握手响应，再写入首包剩余业务数据</span></span><br><span class="line"><span class="comment">     * 5. 提交 TCP 到 WS 的泵送任务，任一步骤失败即关闭连接，保证无残留</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">openTunnel</span><span class="params">(WebSocketSession session, ByteBuffer payload)</span> &#123;</span><br><span class="line">        <span class="type">byte</span>[] msg = toBytes(payload);</span><br><span class="line">        <span class="type">Target</span> <span class="variable">target</span> <span class="operator">=</span> sniff(msg);</span><br><span class="line">        <span class="keyword">if</span> (target == <span class="literal">null</span>) &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;Proxy handshake rejected: unsupported protocol or bad credential&quot;</span>);</span><br><span class="line">            closeQuietly(session);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isBlockedDomain(target.host)) &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;Proxy handshake rejected: host blocked: &#123;&#125;&quot;</span>, target.host);</span><br><span class="line">            closeQuietly(session);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Socket</span>();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            socket.setTcpNoDelay(<span class="literal">true</span>);</span><br><span class="line">            socket.connect(<span class="keyword">new</span> <span class="title class_">InetSocketAddress</span>(target.host, target.port), CONNECT_TIMEOUT_MS);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;Proxy connect failed to &#123;&#125;:&#123;&#125;: &#123;&#125;&quot;</span>, target.host, target.port, e.getMessage());</span><br><span class="line">            closeQuietly(socket);</span><br><span class="line">            closeQuietly(session);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">Tunnel</span> <span class="variable">tunnel</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Tunnel</span>(session, socket);</span><br><span class="line">        tunnels.put(session, tunnel);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (target.vless) &#123;</span><br><span class="line">                session.sendMessage(<span class="keyword">new</span> <span class="title class_">BinaryMessage</span>(<span class="keyword">new</span> <span class="title class_">byte</span>[]&#123;<span class="number">0x00</span>, <span class="number">0x00</span>&#125;));</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (target.payloadOffset &lt; msg.length) &#123;</span><br><span class="line">                <span class="type">OutputStream</span> <span class="variable">out</span> <span class="operator">=</span> socket.getOutputStream();</span><br><span class="line">                out.write(msg, target.payloadOffset, msg.length - target.payloadOffset);</span><br><span class="line">                out.flush();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            log.debug(<span class="string">&quot;Proxy write first payload failed: &#123;&#125;&quot;</span>, e.getMessage());</span><br><span class="line">            closeTunnel(tunnel);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        pumpPool.execute(<span class="keyword">new</span> <span class="title class_">PumpTask</span>(tunnel));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 关闭隧道：仅首次调用生效，随后清理映射并关闭两端。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">closeTunnel</span><span class="params">(Tunnel tunnel)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (tunnel == <span class="literal">null</span> || !tunnel.markClosed()) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        tunnels.remove(tunnel.session);</span><br><span class="line">        closeQuietly(tunnel.socket);</span><br><span class="line">        closeQuietly(tunnel.session);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">closeQuietly</span><span class="params">(Socket socket)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (socket != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                socket.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException ignored) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">closeQuietly</span><span class="params">(WebSocketSession session)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (session != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (session.isOpen()) &#123;</span><br><span class="line">                    session.close(CloseStatus.NORMAL);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException ignored) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== 协议嗅探与解析 ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 识别首包协议并解析目标地址。</span></span><br><span class="line"><span class="comment">     * 先按 VLESS 判定（首字节 0 且 UUID 匹配），再按 Trojan 判定（SHA-224 哈希前缀匹配），</span></span><br><span class="line"><span class="comment">     * 均不匹配返回 null。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Target <span class="title function_">sniff</span><span class="params">(<span class="type">byte</span>[] msg)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (msg.length &gt; <span class="number">17</span> &amp;&amp; msg[<span class="number">0</span>] == <span class="number">0</span> &amp;&amp; constantTimeEquals(UUID_BYTES, <span class="number">0</span>, msg, <span class="number">1</span>, <span class="number">16</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> parseVless(msg);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (msg.length &gt;= <span class="number">58</span> &amp;&amp; constantTimeEquals(TROJAN_HASH, <span class="number">0</span>, msg, <span class="number">0</span>, <span class="number">56</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> parseTrojan(msg);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 解析 VLESS 首包：version(1) + uuid(16) + addonsLen(1) + addons(n) + cmd(1) + port(2) + atyp(1) + addr。</span></span><br><span class="line"><span class="comment">     * cmd 必须为 0x01（TCP CONNECT），任何越界或非法寻址返回 null。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Target <span class="title function_">parseVless</span><span class="params">(<span class="type">byte</span>[] msg)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> (msg[<span class="number">17</span>] &amp; <span class="number">0xFF</span>) + <span class="number">18</span>;</span><br><span class="line">        <span class="keyword">if</span> (i &gt;= msg.length) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> <span class="variable">cmd</span> <span class="operator">=</span> msg[i++] &amp; <span class="number">0xFF</span>;</span><br><span class="line">        <span class="keyword">if</span> (cmd != <span class="number">0x01</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (i + <span class="number">2</span> &gt; msg.length) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> ((msg[i] &amp; <span class="number">0xFF</span>) &lt;&lt; <span class="number">8</span>) | (msg[i + <span class="number">1</span>] &amp; <span class="number">0xFF</span>);</span><br><span class="line">        i += <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> (i &gt;= msg.length) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> <span class="variable">atyp</span> <span class="operator">=</span> msg[i++] &amp; <span class="number">0xFF</span>;</span><br><span class="line">        String host;</span><br><span class="line">        <span class="keyword">switch</span> (atyp) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> (i + <span class="number">4</span> &gt; msg.length) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                host = joinIpv4(msg, i);</span><br><span class="line">                i += <span class="number">4</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">                <span class="keyword">if</span> (i &gt;= msg.length) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> msg[i] &amp; <span class="number">0xFF</span>;</span><br><span class="line">                <span class="keyword">if</span> (i + <span class="number">1</span> + len &gt; msg.length) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                host = <span class="keyword">new</span> <span class="title class_">String</span>(msg, i + <span class="number">1</span>, len, StandardCharsets.UTF_8);</span><br><span class="line">                i += <span class="number">1</span> + len;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">                <span class="keyword">if</span> (i + <span class="number">16</span> &gt; msg.length) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                host = joinIpv6(msg, i);</span><br><span class="line">                i += <span class="number">16</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (host.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Target</span>(host, port, i, <span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 解析 Trojan 首包：sha224 哈希(56) + [CRLF] + cmd(1) + atyp(1) + addr + port(2) + [CRLF]。</span></span><br><span class="line"><span class="comment">     * cmd 必须为 0x01（CONNECT），任何越界或非法寻址返回 null。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Target <span class="title function_">parseTrojan</span><span class="params">(<span class="type">byte</span>[] msg)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">56</span>;</span><br><span class="line">        <span class="keyword">if</span> (msg[i] == <span class="number">0x0d</span> &amp;&amp; msg[i + <span class="number">1</span>] == <span class="number">0x0a</span>) &#123;</span><br><span class="line">            i += <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (i &gt;= msg.length) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> <span class="variable">cmd</span> <span class="operator">=</span> msg[i++] &amp; <span class="number">0xFF</span>;</span><br><span class="line">        <span class="keyword">if</span> (cmd != <span class="number">0x01</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (i &gt;= msg.length) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> <span class="variable">atyp</span> <span class="operator">=</span> msg[i++] &amp; <span class="number">0xFF</span>;</span><br><span class="line">        String host;</span><br><span class="line">        <span class="keyword">switch</span> (atyp) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> (i + <span class="number">4</span> &gt; msg.length) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                host = joinIpv4(msg, i);</span><br><span class="line">                i += <span class="number">4</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">                <span class="keyword">if</span> (i &gt;= msg.length) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> msg[i] &amp; <span class="number">0xFF</span>;</span><br><span class="line">                <span class="keyword">if</span> (i + <span class="number">1</span> + len &gt; msg.length) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                host = <span class="keyword">new</span> <span class="title class_">String</span>(msg, i + <span class="number">1</span>, len, StandardCharsets.UTF_8);</span><br><span class="line">                i += <span class="number">1</span> + len;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">                <span class="keyword">if</span> (i + <span class="number">16</span> &gt; msg.length) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                host = joinIpv6(msg, i);</span><br><span class="line">                i += <span class="number">16</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (i + <span class="number">2</span> &gt; msg.length) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">int</span> <span class="variable">port</span> <span class="operator">=</span> ((msg[i] &amp; <span class="number">0xFF</span>) &lt;&lt; <span class="number">8</span>) | (msg[i + <span class="number">1</span>] &amp; <span class="number">0xFF</span>);</span><br><span class="line">        i += <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> (i &lt; msg.length &amp;&amp; msg[i] == <span class="number">0x0d</span> &amp;&amp; i + <span class="number">1</span> &lt; msg.length &amp;&amp; msg[i + <span class="number">1</span>] == <span class="number">0x0a</span>) &#123;</span><br><span class="line">            i += <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (host.isEmpty()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Target</span>(host, port, i, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== 黑名单 ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">isBlockedDomain</span><span class="params">(String host)</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">h</span> <span class="operator">=</span> host.toLowerCase();</span><br><span class="line">        <span class="keyword">for</span> (String blocked : BLOCKED_DOMAINS) &#123;</span><br><span class="line">            <span class="keyword">if</span> (h.equals(blocked) || h.endsWith(<span class="string">&quot;.&quot;</span> + blocked)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== 字节工具 ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String <span class="title function_">joinIpv4</span><span class="params">(<span class="type">byte</span>[] msg, <span class="type">int</span> i)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> (msg[i] &amp; <span class="number">0xFF</span>) + <span class="string">&quot;.&quot;</span> + (msg[i + <span class="number">1</span>] &amp; <span class="number">0xFF</span>) + <span class="string">&quot;.&quot;</span></span><br><span class="line">                + (msg[i + <span class="number">2</span>] &amp; <span class="number">0xFF</span>) + <span class="string">&quot;.&quot;</span> + (msg[i + <span class="number">3</span>] &amp; <span class="number">0xFF</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String <span class="title function_">joinIpv6</span><span class="params">(<span class="type">byte</span>[] msg, <span class="type">int</span> i)</span> &#123;</span><br><span class="line">        <span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; <span class="number">16</span>; j += <span class="number">2</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (j &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                sb.append(<span class="string">&#x27;:&#x27;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            sb.append(Integer.toHexString(((msg[i + j] &amp; <span class="number">0xFF</span>) &lt;&lt; <span class="number">8</span>) | (msg[i + j + <span class="number">1</span>] &amp; <span class="number">0xFF</span>)));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">byte</span>[] toBytes(ByteBuffer buffer) &#123;</span><br><span class="line">        <span class="type">ByteBuffer</span> <span class="variable">dup</span> <span class="operator">=</span> buffer.duplicate();</span><br><span class="line">        <span class="type">byte</span>[] out = <span class="keyword">new</span> <span class="title class_">byte</span>[dup.remaining()];</span><br><span class="line">        dup.get(out);</span><br><span class="line">        <span class="keyword">return</span> out;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">byte</span>[] hexToBytes(String hex) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> hex.length();</span><br><span class="line">        <span class="type">byte</span>[] out = <span class="keyword">new</span> <span class="title class_">byte</span>[len / <span class="number">2</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; len; i += <span class="number">2</span>) &#123;</span><br><span class="line">            out[i / <span class="number">2</span>] = (<span class="type">byte</span>) ((Character.digit(hex.charAt(i), <span class="number">16</span>) &lt;&lt; <span class="number">4</span>)</span><br><span class="line">                    | Character.digit(hex.charAt(i + <span class="number">1</span>), <span class="number">16</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> out;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String <span class="title function_">toHex</span><span class="params">(<span class="type">byte</span>[] bytes)</span> &#123;</span><br><span class="line">        <span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>(bytes.length * <span class="number">2</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">byte</span> b : bytes) &#123;</span><br><span class="line">            sb.append(Character.forDigit((b &gt;&gt; <span class="number">4</span>) &amp; <span class="number">0xF</span>, <span class="number">16</span>));</span><br><span class="line">            sb.append(Character.forDigit(b &amp; <span class="number">0xF</span>, <span class="number">16</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">byte</span>[] buildTrojanHash() &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">byte</span>[] digest = MessageDigest.getInstance(<span class="string">&quot;SHA-224&quot;</span>).digest(UUID.getBytes(StandardCharsets.UTF_8));</span><br><span class="line">            <span class="keyword">return</span> toHex(digest).getBytes(StandardCharsets.ISO_8859_1);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchAlgorithmException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(<span class="string">&quot;SHA-224 algorithm not available&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 恒定时间比较，等价 timingSafeEqual，防止基于时序的凭据侧信道。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">constantTimeEquals</span><span class="params">(<span class="type">byte</span>[] a, <span class="type">int</span> offA, <span class="type">byte</span>[] b, <span class="type">int</span> offB, <span class="type">int</span> len)</span> &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">diff</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">            diff |= a[offA + i] ^ b[offB + i];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> diff == <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ==================== 内部结构 ====================</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/** 首包解析结果：目标地址 + 首包业务数据偏移 + 协议类型标记 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Target</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> String host;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">int</span> port;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">int</span> payloadOffset;</span><br><span class="line">        <span class="comment">/** VLESS 协议标记：隧道建立后需先发送 2 字节握手响应 */</span></span><br><span class="line">        <span class="keyword">final</span> <span class="type">boolean</span> vless;</span><br><span class="line"></span><br><span class="line">        Target(String host, <span class="type">int</span> port, <span class="type">int</span> payloadOffset, <span class="type">boolean</span> vless) &#123;</span><br><span class="line">            <span class="built_in">this</span>.host = host;</span><br><span class="line">            <span class="built_in">this</span>.port = port;</span><br><span class="line">            <span class="built_in">this</span>.payloadOffset = payloadOffset;</span><br><span class="line">            <span class="built_in">this</span>.vless = vless;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 单条隧道的双向转发状态：持有 session 与 socket，负责 WS 数据写 TCP 与 TCP 泵送回 WS。</span></span><br><span class="line"><span class="comment">     * sendLock 保证 session.sendMessage 串行，closed 标记保证关闭只执行一次。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Tunnel</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> WebSocketSession session;</span><br><span class="line">        <span class="keyword">final</span> Socket socket;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">Object</span> <span class="variable">sendLock</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="type">boolean</span> closed;</span><br><span class="line"></span><br><span class="line">        Tunnel(WebSocketSession session, Socket socket) &#123;</span><br><span class="line">            <span class="built_in">this</span>.session = session;</span><br><span class="line">            <span class="built_in">this</span>.socket = socket;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * WS 方向数据直写 TCP（在容器回调线程执行，阻塞即天然背压）。</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">write</span><span class="params">(ByteBuffer data)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="type">OutputStream</span> <span class="variable">out</span> <span class="operator">=</span> socket.getOutputStream();</span><br><span class="line">            <span class="keyword">if</span> (data.hasArray()) &#123;</span><br><span class="line">                out.write(data.array(), data.arrayOffset() + data.position(), data.remaining());</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="type">byte</span>[] tmp = <span class="keyword">new</span> <span class="title class_">byte</span>[data.remaining()];</span><br><span class="line">                data.duplicate().get(tmp);</span><br><span class="line">                out.write(tmp);</span><br><span class="line">            &#125;</span><br><span class="line">            out.flush();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * TCP 数据泵送回 WS：持续读 socket 并发送二进制帧，EOF/异常后统一收口。</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">pump</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="type">byte</span>[] buf = <span class="keyword">new</span> <span class="title class_">byte</span>[PUMP_BUFFER_SIZE];</span><br><span class="line">            <span class="keyword">try</span> (<span class="type">InputStream</span> <span class="variable">in</span> <span class="operator">=</span> socket.getInputStream()) &#123;</span><br><span class="line">                <span class="type">int</span> n;</span><br><span class="line">                <span class="keyword">while</span> (!closed &amp;&amp; (n = in.read(buf)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (n == <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="type">byte</span>[] chunk = Arrays.copyOf(buf, n);</span><br><span class="line">                    <span class="keyword">synchronized</span> (sendLock) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (!closed &amp;&amp; session.isOpen()) &#123;</span><br><span class="line">                            session.sendMessage(<span class="keyword">new</span> <span class="title class_">BinaryMessage</span>(ByteBuffer.wrap(chunk)));</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                log.debug(<span class="string">&quot;Proxy pump stream ended: &#123;&#125;&quot;</span>, e.getMessage());</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                closeTunnel(<span class="built_in">this</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">boolean</span> <span class="title function_">markClosed</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (sendLock) &#123;</span><br><span class="line">                <span class="keyword">if</span> (closed) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                closed = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 触发隧道关闭，供线程池拒绝策略调用。</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">closeNow</span><span class="params">()</span> &#123;</span><br><span class="line">            closeTunnel(<span class="built_in">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/** 泵送任务包装，线程池拒绝时可直接关闭隧道 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">PumpTask</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Tunnel tunnel;</span><br><span class="line"></span><br><span class="line">        PumpTask(Tunnel tunnel) &#123;</span><br><span class="line">            <span class="built_in">this</span>.tunnel = tunnel;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            tunnel.pump();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">closeNow</span><span class="params">()</span> &#123;</span><br><span class="line">            tunnel.closeNow();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="11-网关配置"><a href="#11-网关配置" class="headerlink" title="11. 网关配置"></a>11. 网关配置</h2><p>前置 SLB &#x2F; Nginx Ingress 需正确透传 WebSocket Upgrade：</p>
+<p><strong>Nginx 示例：</strong></p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">location</span> /api/v1/proxy/websocket &#123;</span><br><span class="line">    <span class="attribute">proxy_pass</span> http://backend;</span><br><span class="line">    <span class="attribute">proxy_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">    <span class="attribute">proxy_set_header</span> Upgrade <span class="variable">$http_upgrade</span>;</span><br><span class="line">    <span class="attribute">proxy_set_header</span> Connection <span class="string">&quot;upgrade&quot;</span>;</span><br><span class="line">    <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">    <span class="attribute">proxy_read_timeout</span> <span class="number">600s</span>;</span><br><span class="line">    <span class="attribute">proxy_send_timeout</span> <span class="number">600s</span>;</span><br><span class="line">    <span class="attribute">proxy_buffering</span> <span class="literal">off</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>K8s ingress-nginx 注解：</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">nginx.ingress.kubernetes.io/proxy-read-timeout:</span> <span class="string">&quot;600&quot;</span></span><br><span class="line"><span class="attr">nginx.ingress.kubernetes.io/proxy-send-timeout:</span> <span class="string">&quot;600&quot;</span></span><br><span class="line"><span class="attr">nginx.ingress.kubernetes.io/configuration-snippet:</span> <span class="string">|</span></span><br><span class="line"><span class="string">  proxy_http_version 1.1;</span></span><br><span class="line"><span class="string">  proxy_set_header Upgrade $http_upgrade;</span></span><br><span class="line"><span class="string">  proxy_set_header Connection &quot;upgrade&quot;;</span></span><br><span class="line"><span class="string">  proxy_buffering off;</span></span><br></pre></td></tr></table></figure>
+
+<p>要点：</p>
+<ul>
+<li><code>proxy_read_timeout</code> &#x2F; <code>proxy_send_timeout</code> 须大于服务端 <code>maxSessionIdleTimeout</code>（10min），建议 600s</li>
+<li><code>proxy_buffering off</code> 避免大帧被截断</li>
+<li>验证：握手响应 <code>101 Switching Protocols</code>、10 分钟空闲连接存活、512KB 帧传输无截断</li>
+</ul>
+<h2 id="12-验证方案"><a href="#12-验证方案" class="headerlink" title="12. 验证方案"></a>12. 验证方案</h2><ol>
+<li><strong>编译</strong>：<code>mvn clean install</code> 通过</li>
+<li><strong>回环 echo 自测</strong>：<code>nc -l 8080</code> 作为回环目标；Node 测试脚本（<code>ws</code> 库）构造 VLESS 首包（目标 <code>127.0.0.1:8080</code>）连接 <code>ws://127.0.0.1:8088/api/v1/proxy/websocket</code>，发送后应收到 echo 回传二进制帧</li>
+<li><strong>Trojan 同理</strong>：脚本计算 <code>sha224(UUID)</code> hex 前 56 字节构造首包，验证解析与回传</li>
+<li><strong>错误凭据</strong>：错误 UUID &#x2F; 错误 Trojan 哈希 → 连接被立即关闭</li>
+<li><strong>黑名单</strong>：目标 <code>speedtest.net:443</code> → 连接关闭</li>
+<li><strong>大帧</strong>：发送 512KB 二进制帧验证缓冲区配置生效（无 8KB 截断）</li>
+<li><strong>线程安全</strong>：并发 50 隧道压测，观察无 <code>IllegalStateException</code>、无泄漏线程</li>
+</ol>
+<h2 id="13-风险与注意事项"><a href="#13-风险与注意事项" class="headerlink" title="13. 风险与注意事项"></a>13. 风险与注意事项</h2><table>
+<thead>
+<tr>
+<th>风险</th>
+<th>等级</th>
+<th>说明与对策</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>安全与合规</td>
+<td>高</td>
+<td>凭据一旦泄露该端口即成为开放代理跳板。对策：UUID 上线前必须更换；高危端口（25&#x2F;465&#x2F;587 等）拒绝逻辑可选实施</td>
+</tr>
+<tr>
+<td>Tomcat WS 线程池上限（200）</td>
+<td>高</td>
+<td>单实例隧道并发上限 &#x3D; min(WS 线程池, 泵线程池 200)。对策：<code>-Dorg.apache.tomcat.websocket.threadPoolSize=N</code> 调整</td>
+</tr>
+<tr>
+<td>网关空闲超时</td>
+<td>高</td>
+<td><code>proxy-read-timeout</code>（常见 60s）会切断空闲隧道。对策：客户端开启心跳；服务端 <code>maxSessionIdleTimeout</code> 设 10min 并配合网关超时调优</td>
+</tr>
+<tr>
+<td>APM 字节码增强</td>
+<td>中</td>
+<td>APM SDK 对 Socket 读写增强可能带来长连接转发开销。对策：上线后观测泵线程 CPU；必要时对代理类豁免</td>
+</tr>
+<tr>
+<td><code>sendMessage</code> 并发异常</td>
+<td>高</td>
+<td>全部发送路径 <code>synchronized(sendLock)</code>，关闭与泵送并发安全</td>
+</tr>
+<tr>
+<td>泵线程池耗尽</td>
+<td>中</td>
+<td>有界 200 + 拒绝即关隧道，防止线程爆炸拖垮整机</td>
+</tr>
+<tr>
+<td>内存拷贝开销</td>
+<td>低</td>
+<td>每帧 <code>BinaryMessage</code> 一次拷贝，百级并发可接受</td>
+</tr>
+</tbody></table>
+<h2 id="14-设计要点总结"><a href="#14-设计要点总结" class="headerlink" title="14. 设计要点总结"></a>14. 设计要点总结</h2><table>
+<thead>
+<tr>
+<th>要点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单 Controller 三合一</td>
+<td><code>@Controller</code> + <code>@EnableWebSocket</code> + <code>extends BinaryWebSocketHandler</code> + <code>implements WebSocketConfigurer</code>，lite mode 下 <code>@Bean</code> 直接生效</td>
+</tr>
+<tr>
+<td>协议嗅探分流</td>
+<td>首包先匹配 VLESS（首字节 0 + UUID），再匹配 Trojan（SHA-224 前缀），恒定时间比较防侧信道</td>
+</tr>
+<tr>
+<td>天然背压</td>
+<td>WS 回调线程阻塞式写 TCP，容器不再分发下一帧 → TCP 接收窗口收缩 → 客户端减速</td>
+</tr>
+<tr>
+<td>有界线程池 + 拒绝即关</td>
+<td>防止线程爆炸拖垮整机，拒绝策略直接关闭隧道而非 CallerRuns</td>
+</tr>
+<tr>
+<td>sendLock 串行化</td>
+<td>泵线程与回调 &#x2F; 关闭并发调用 <code>sendMessage</code> 全部 <code>synchronized(sendLock)</code></td>
+</tr>
+<tr>
+<td>markClosed 幂等</td>
+<td>保证关闭只执行一次，防止重复关闭异常</td>
+</tr>
+<tr>
+<td>二进制缓冲区 1MB</td>
+<td>避免默认 8KB 导致大帧被容器断开</td>
+</tr>
+<tr>
+<td>空闲超时 10min</td>
+<td>配合网关空闲超时调优，避免服务端先杀会话</td>
+</tr>
+<tr>
+<td>订阅 ISP 缓存</td>
+<td>双源探测 + 10min TTL + 后台线程 + 失败保留旧值</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/websocket/" rel="tag"># websocket</a>
+              <a href="/tags/vless/" rel="tag"># vless</a>
+              <a href="/tags/trojan/" rel="tag"># trojan</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/08/12/fun/20260812-wow-mpq-format-parsing/" rel="prev" title="WOW 3.3.5a MPQ 归档格式与解析">
+      <i class="fa fa-chevron-left"></i> WOW 3.3.5a MPQ 归档格式与解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/09/13/fun/20260913-wow-mpq-dbc-replace/" rel="next" title="WOW 3.3.5a MPQ 补丁归档 DBC 替换实战">
+      WOW 3.3.5a MPQ 补丁归档 DBC 替换实战 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%8A%80%E6%9C%AF%E6%A0%88%E4%B8%8E%E7%BA%A6%E6%9D%9F"><span class="nav-number">1.</span> <span class="nav-text">1. 技术栈与约束</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%BE%9D%E8%B5%96%E5%BC%95%E5%85%A5"><span class="nav-number">2.</span> <span class="nav-text">2. 依赖引入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%EF%BC%88%E5%8D%95-Controller-%E4%B8%89%E5%90%88%E4%B8%80%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">3. 架构设计（单 Controller 三合一）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%8D%8F%E8%AE%AE%E6%A0%BC%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">4. 协议格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-VLESS-%E9%A6%96%E5%8C%85%E5%AD%97%E8%8A%82%E5%B8%83%E5%B1%80"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 VLESS 首包字节布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-Trojan-%E9%A6%96%E5%8C%85%E5%AD%97%E8%8A%82%E5%B8%83%E5%B1%80"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 Trojan 首包字节布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E5%97%85%E6%8E%A2%E9%A1%BA%E5%BA%8F"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 嗅探顺序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">5.</span> <span class="nav-text">5. 线程模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%BC%93%E5%86%B2%E5%8C%BA"><span class="nav-number">6.</span> <span class="nav-text">6. 二进制缓冲区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E9%9A%A7%E9%81%93%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">7.</span> <span class="nav-text">7. 隧道生命周期</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-%E5%BB%BA%E7%AB%8B%E6%B5%81%E7%A8%8B%EF%BC%88openTunnel%EF%BC%89"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 建立流程（openTunnel）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-WebSocket-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%9B%9E%E8%B0%83"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 WebSocket 生命周期回调</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-%E5%85%B3%E9%97%AD%E4%B8%8E%E6%B8%85%E7%90%86"><span class="nav-number">7.3.</span> <span class="nav-text">7.3 关闭与清理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E8%AE%A2%E9%98%85%E6%8E%A5%E5%8F%A3"><span class="nav-number">8.</span> <span class="nav-text">8. 订阅接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-%E5%8F%AF%E8%B0%83%E5%8F%82%E6%95%B0"><span class="nav-number">9.</span> <span class="nav-text">9. 可调参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="nav-number">10.</span> <span class="nav-text">10. 完整代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-%E7%BD%91%E5%85%B3%E9%85%8D%E7%BD%AE"><span class="nav-number">11.</span> <span class="nav-text">11. 网关配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-%E9%AA%8C%E8%AF%81%E6%96%B9%E6%A1%88"><span class="nav-number">12.</span> <span class="nav-text">12. 验证方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-%E9%A3%8E%E9%99%A9%E4%B8%8E%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">13.</span> <span class="nav-text">13. 风险与注意事项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-%E8%AE%BE%E8%AE%A1%E8%A6%81%E7%82%B9%E6%80%BB%E7%BB%93"><span class="nav-number">14.</span> <span class="nav-text">14. 设计要点总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">279</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">159</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-overlay.is-active {
+  display: flex;
+}
+.mermaid-zoom-content {
+  position: relative;
+  width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-content svg {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.mermaid-zoom-content pre.mermaid,
+.mermaid-zoom-content .mermaid {
+  cursor: default;
+  text-align: center;
+  background: transparent;
+}
+.mermaid-zoom-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mermaid-zoom-close:focus {
+  outline: 2px solid #fff;
+}
+.post-body pre.mermaid,
+.post-body .mermaid {
+  cursor: zoom-in;
+}
+.post-body pre.mermaid:hover,
+.post-body .mermaid:hover {
+  opacity: .98;
+}
+</style>
+<script>
+(function() {
+  function openZoom(root) {
+    var clone = root.cloneNode(true);
+    clone.style.maxWidth = '';
+    clone.style.maxHeight = '';
+    clone.classList.remove('mermaid-click-zoom-root');
+
+    var hint = root.querySelector('.mermaid-click-zoom-hint');
+    if (hint) hint.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'mermaid-zoom-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Mermaid zoom');
+
+    var content = document.createElement('div');
+    content.className = 'mermaid-zoom-content';
+
+    var close = document.createElement('button');
+    close.className = 'mermaid-zoom-close';
+    close.type = 'button';
+    close.textContent = 'Close';
+    close.addEventListener('click', function() {
+      closeZoom(overlay);
+    });
+
+    content.appendChild(close);
+    content.appendChild(clone);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    overlay.addEventListener('click', function(event) {
+      if (event.target === overlay) {
+        closeZoom(overlay);
+      }
+    });
+
+    requestAnimationFrame(function() {
+      overlay.classList.add('is-active');
+      close.focus();
+    });
+  }
+
+  function closeZoom(overlay) {
+    overlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }
+
+  function openZoomFromTarget(target) {
+    var root = target.closest('.post-body pre.mermaid, .post-body .mermaid');
+    if (!root) return;
+    openZoom(root);
+  }
+
+  function bindMermaidZoom() {
+    var container = document.querySelector('.post-body') || document.body;
+    if (container.dataset.mermaidZoomDelegate === 'true') return;
+    container.dataset.mermaidZoomDelegate = 'true';
+
+    container.addEventListener('click', function(event) {
+      if (event.target.closest('.mermaid-zoom-overlay')) return;
+      openZoomFromTarget(event.target);
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        var active = document.querySelector('.mermaid-zoom-overlay.is-active');
+        if (active) closeZoom(active);
+      }
+    });
+  }
+
+  function ensureBoundAfterRender() {
+    bindMermaidZoom();
+
+    var pre = document.querySelector('.post-body pre.mermaid, .post-body .mermaid');
+    if (!pre) return;
+
+    if (pre.querySelector('svg')) {
+      return;
+    }
+
+    if (typeof MutationObserver === 'undefined') return;
+
+    var observer = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].target.querySelector && mutations[i].target.querySelector('svg')) {
+          bindMermaidZoom();
+          observer.disconnect();
+          return;
+        }
+      }
+    });
+    observer.observe(pre.parentNode, { childList: true, subtree: true, attributes: false, characterData: false });
+
+    setTimeout(function() {
+      observer.disconnect();
+      bindMermaidZoom();
+    }, 3000);
+  }
+
+  if (document.querySelectorAll('pre.mermaid').length) {
+    NexT.utils.getScript('/lib/mermaid.min.js', function() {
+      mermaid.initialize({
+        theme    : 'forest',
+        logLevel : 3,
+        flowchart: { curve     : 'linear' },
+        gantt    : { axisFormat: '%m/%d/%Y' },
+        sequence : { actorMargin: 50 },
+        startOnLoad: true
+      });
+      ensureBoundAfterRender();
+    }, window.mermaid);
+  } else {
+    ensureBoundAfterRender();
+  }
+})();
+</script>
+
+  
+
+  
+
+</body>
+</html>

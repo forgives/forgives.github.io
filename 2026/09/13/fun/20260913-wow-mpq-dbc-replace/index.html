@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="把 data_v20 的 42 个 DBC 打进无 listfile 的 PATCH-I.MPQ：标准路径哈希探测定位、WDBC 魔数识别、&quot;尾部追加 + 块表改写&quot;替换实现、加密解密函数不对称的大坑，附 Python 工具与批量替换实测">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WOW 3.3.5a MPQ 补丁归档 DBC 替换实战">
+<meta property="og:url" content="https://forgives.github.io/2026/09/13/fun/20260913-wow-mpq-dbc-replace/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="把 data_v20 的 42 个 DBC 打进无 listfile 的 PATCH-I.MPQ：标准路径哈希探测定位、WDBC 魔数识别、&quot;尾部追加 + 块表改写&quot;替换实现、加密解密函数不对称的大坑，附 Python 工具与批量替换实测">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-09-13T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-13T02:50:49.410Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="fun">
+<meta property="article:tag" content="wow">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/09/13/fun/20260913-wow-mpq-dbc-replace/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>WOW 3.3.5a MPQ 补丁归档 DBC 替换实战 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/09/13/fun/20260913-wow-mpq-dbc-replace/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WOW 3.3.5a MPQ 补丁归档 DBC 替换实战
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-09-13 12:00:00" itemprop="dateCreated datePublished" datetime="2026-09-13T12:00:00+08:00">2026-09-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>接着之前 MPQ 格式解析那篇。格式读懂了只是第一步，这次要解决一个实际问题：<strong>手上有 3.3.5a 客户端的补丁归档 <code>PATCH-I.MPQ</code>（430MB）和一套完整的 DBC 数据（245 个文件），想把其中的 DBC 全部替换成自己的版本</strong>。听起来简单，动手才发现两个坎：这个补丁包没有 <code>(listfile)</code>，一个文件名都看不到；而 MPQ 的块表重加密还有个不踩不知道的深坑。整理成这篇自包含笔记，工具是之前那篇的 <code>mpq_parser.py</code>（本次新增 <code>replace</code> 命令）。</p>
+<!-- more -->
+
+<h2 id="1-问题：为什么看不到文件树"><a href="#1-问题：为什么看不到文件树" class="headerlink" title="1. 问题：为什么看不到文件树"></a>1. 问题：为什么看不到文件树</h2><p>先看现象。用解析器 <code>list</code> 这个补丁包：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">共 10214 个文件块存在 (有名字 1, 未知 10213)</span><br><span class="line">内置 (listfile) 提供文件名数: 1</span><br><span class="line">Index  CompSize     UncompSize   文件名          Flags</span><br><span class="line">357    0x000002F8BD 0x0000046628 (attributes)   C</span><br><span class="line">0      0x0000007C32 0x0000012941 (unknown #0)   C</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>10214 个文件，只有 <code>(attributes)</code> 一个有名字。原因在 MPQ 的底层设计（格式细节见 MPQ 格式解析那篇）：</p>
+<ul>
+<li><strong>哈希表只存文件名的两个 32 位哈希（name1&#x2F;name2），块表只有位置和大小</strong>——MPQ 从头到尾不存文件名原文；</li>
+<li>“枚举内容”完全依赖内嵌清单 <code>(listfile)</code>，而 <strong>Blizzard 对 patch 归档刻意不放 listfile</strong>：客户端按硬编码路径哈希查找文件，根本不需要名字清单，省掉它还能减小补丁体积；</li>
+<li>唯一的指望 <code>(attributes)</code> 也是坏的：解压后开头不是标准 <code>ATTR</code> 魔数，用标准密钥 <code>hash(&quot;(attributes)&quot;, FILE_KEY)</code> 和 FIX_KEY 变体都解不开，全文没有一段可读字符串——被加密混淆过，靠它恢复文件名没戏。</li>
+</ul>
+<p>但数据本身是好的。抽查解压前几个块，全是正常的 <code>BLP2</code> 贴图和 zhCN 的 <code>GlobalStrings.lua</code>。<strong>看不到名字 ≠ 动不了文件</strong>。</p>
+<h2 id="2-无名字归档怎么定位文件：标准路径哈希探测"><a href="#2-无名字归档怎么定位文件：标准路径哈希探测" class="headerlink" title="2. 无名字归档怎么定位文件：标准路径哈希探测"></a>2. 无名字归档怎么定位文件：标准路径哈希探测</h2><p>客户端加载文件的链路是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">硬编码路径 &quot;DBFilesClient\Spell.dbc&quot;</span><br><span class="line">        │  hash_string(路径, NAME_A / NAME_B / TABLE_OFFSET)</span><br><span class="line">        ▼</span><br><span class="line">哈希表线性探测 → block_index → 块表 → 数据</span><br></pre></td></tr></table></figure>
+
+<p>我们不知道归档里有什么，但<strong>知道客户端会按什么名字来找</strong>。把候选路径算出哈希去哈希表里查一下（解析器现成的 <code>find_block_index</code>），命中即定位：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys; sys.path.insert(<span class="number">0</span>, <span class="string">&#x27;.&#x27;</span>)</span><br><span class="line"><span class="keyword">from</span> mpq_parser <span class="keyword">import</span> MPQArchive, MPQ_FILE_EXISTS</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> MPQArchive(<span class="string">r&#x27;D:/games/wow-study/PlayBots_Stuff/Temp/PATCH-I.MPQ&#x27;</span>) <span class="keyword">as</span> arc:</span><br><span class="line">    idx = arc.find_block_index(<span class="string">r&#x27;DBFilesClient\SpellItemEnchantment.dbc&#x27;</span>)</span><br><span class="line">    b = arc.block_table[idx]</span><br><span class="line">    <span class="comment"># 块 9968, comp=49297, uncomp=447066, flags=0x80000200</span></span><br></pre></td></tr></table></figure>
+
+<p>注意路径规则与哈希函数一致：大小写不敏感、<code>/</code> 与 <code>\</code> 等价。DBC 在客户端里的标准路径前缀是 <code>DBFilesClient\</code>。</p>
+<p>字典哪来？手头正好有一套完整客户端解包出的 <code>data_v20\dbc</code>（245 个 DBC）。拿这 245 个文件名逐个探测，<strong>命中 42 个</strong>——比例很合理：PATCH-I.MPQ 是补丁包，只收录被这个补丁修改过的 DBC，其余 203 个在基础包里，不在这个归档的管辖范围。</p>
+<blockquote>
+<p>没有现成字典时，用社区维护的 known listfile（Ladik 等工具内置的那份）做碰撞即可，方法完全一样。</p>
+</blockquote>
+<p>flags&#x3D;0x80000200 &#x3D; <code>MPQ_FILE_EXISTS | MPQ_FILE_COMPRESS</code>：无加密、非单块、非 patch delta、无扇区 CRC，是最干净的替换目标。flags 里有 <code>E</code>（加密）、<code>P</code>（patch delta，需要 base 归档合成数据）的块，替换前要掂量。</p>
+<h2 id="3-怎么确认拿到的真是-DBC：WDBC-头校验"><a href="#3-怎么确认拿到的真是-DBC：WDBC-头校验" class="headerlink" title="3. 怎么确认拿到的真是 DBC：WDBC 头校验"></a>3. 怎么确认拿到的真是 DBC：WDBC 头校验</h2><p>替换前的最后一道关：确认解出来的东西真是格式完好的 DBC。DBC 格式那篇讲过 WDBC 结构，实战中看头 20 字节就够了：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">偏移  大小  字段             SpellItemEnchantment.dbc 实测</span><br><span class="line">0     4    magic            &#x27;WDBC&#x27;          ← 魔数, 一票否决</span><br><span class="line">4     4    RecordCount      2656            ← 记录数</span><br><span class="line">8     4    FieldCount       38              ← 每条记录字段数</span><br><span class="line">12    4    RecordSize       152             ← 每条记录字节数</span><br><span class="line">16    4    StringBlockSize  99756           ← 字符串块大小</span><br></pre></td></tr></table></figure>
+
+<p>两条快速自检：</p>
+<ul>
+<li><strong>总长守恒</strong>：<code>20 + RecordCount × RecordSize + StringBlockSize == 文件大小</code>。不等说明文件截断或者根本不是 DBC；</li>
+<li><strong>RecordSize 与 FieldCount 的关系</strong>：<code>RecordSize == FieldCount × 4</code> 说明全表没有 1 字节字段（如本表）；若不等，差值就是 1 字节字段的个数，解析时按 <code>uint32/uint8</code> 混合切。</li>
+</ul>
+<p>提取命令一行搞定：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">python mpq_parser.py extract PATCH-I.MPQ <span class="string">&quot;DBFilesClient\SpellItemEnchantment.dbc&quot;</span> SpellItemEnchantment.dbc</span><br><span class="line"><span class="comment"># 提取成功: SpellItemEnchantment.dbc  (447066 bytes)  → 魔数 b&#x27;WDBC&#x27; ✓</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-替换实现：尾部追加-块表单条目改写"><a href="#4-替换实现：尾部追加-块表单条目改写" class="headerlink" title="4. 替换实现：尾部追加 + 块表单条目改写"></a>4. 替换实现：尾部追加 + 块表单条目改写</h2><h3 id="4-1-为什么不重建归档"><a href="#4-1-为什么不重建归档" class="headerlink" title="4.1 为什么不重建归档"></a>4.1 为什么不重建归档</h3><p>MPQ 归档里各文件的数据块相互独立，位置全靠块表描述。替换一个文件不需要碰其他任何数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">新数据压缩 → 追加到归档尾部 (512 对齐)</span><br><span class="line">块表解密 → 只改这一个条目 (file_pos/comp_size/uncomp_size) → 重新加密写回</span><br><span class="line">哈希表不动 (名字哈希没变) · 头部只更新 archive_size</span><br></pre></td></tr></table></figure>
+
+<p>对比”解包 10214 个文件 → 重新打包”的重建方案：不用腾 430MB×2 的临时空间、没有遗漏改名风险、单文件替换几秒完成。代价是归档体积单调增长（旧数据成死空间），对补丁场景无所谓。</p>
+<h3 id="4-2-写入端布局必须与读取端对偶"><a href="#4-2-写入端布局必须与读取端对偶" class="headerlink" title="4.2 写入端布局必须与读取端对偶"></a>4.2 写入端布局必须与读取端对偶</h3><p>读取端对 <code>COMPRESS</code> 多扇区文件的布局要求是死的：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[扇区偏移表 (sectorCount+1) × uint32]   ← offsets[0] = 表自身长度, 供校验</span><br><span class="line">[扇区0][扇区1]...                        ← 每扇区 ≤ sectorSize (本包 4096)</span><br></pre></td></tr></table></figure>
+
+<p>写入端照此生成：每扇区 <code>zlib.compress(raw, 9)</code> 前加 1 字节算法掩码 <code>0x02</code>；<strong>压缩后不比原文小的扇区直接存明文</strong>（读取端的判据是 <code>raw_len == expected</code> 即未压缩）；不写扇区 CRC，同步清掉条目的 <code>SECTOR_CRC</code> 标志。</p>
+<h3 id="4-3-深坑：加密和解密不是同一个函数"><a href="#4-3-深坑：加密和解密不是同一个函数" class="headerlink" title="4.3 深坑：加密和解密不是同一个函数"></a>4.3 深坑：加密和解密不是同一个函数</h3><p>这是本次最大的收获，值得单独一节。块表是整表加密的，改一条就得”解密→改→重新加密”。想当然认为 XOR 类加密正反同函数，直接把解密函数再跑一遍当加密用——结果<strong>整张块表报废，10214 个条目全部乱码</strong>（万幸是在测试副本上）。最小复现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">p  = decrypt(c0, key)   <span class="comment"># 解密 → 明文 ✓</span></span><br><span class="line">c1 = decrypt(p, key)    <span class="comment"># 再跑一次想当加密用</span></span><br><span class="line">c1 == c0                <span class="comment"># False ! 整表已坏</span></span><br></pre></td></tr></table></figure>
+
+<p>翻 StormLib 源码（<code>StormCommon.h</code>）才知道两个方向的 key2 推进来源不同：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DecryptMpqBlock: key2 用&quot;还原出的明文&quot;(输出)推进</span></span><br><span class="line">dwValue32 = *DataBlock ^ (dwKey1 + dwKey2);   <span class="comment">// 输入异或 → 明文</span></span><br><span class="line">*DataBlock = dwValue32;</span><br><span class="line">dwKey2 = dwValue32 + dwKey2 + (dwKey2 &lt;&lt; <span class="number">5</span>) + <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// EncryptMpqBlock: key2 用&quot;输入的明文&quot;推进</span></span><br><span class="line">dwValue32 = *DataBlock;                        <span class="comment">// 明文是输入</span></span><br><span class="line">*DataBlock = dwValue32 ^ (dwKey1 + dwKey2);</span><br><span class="line">dwKey2 = dwValue32 + dwKey2 + (dwKey2 &lt;&lt; <span class="number">5</span>) + <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<p>两个方向的 key2 都按”明文字”推进，但<strong>解密时明文是输出，加密时明文是输入</strong>。拿解密函数处理明文时输出是密文，key2 就按密文推进了——一步走偏，全表皆错。修复是老老实实写一个 <code>encrypt_block</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">encrypt_block</span>(<span class="params">buf, key</span>):</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(nwords):</span><br><span class="line">        key2 = (key2 + crypt[<span class="number">0x400</span> + (key1 &amp; <span class="number">0xFF</span>)]) &amp; <span class="number">0xFFFFFFFF</span></span><br><span class="line">        plain = struct.unpack_from(<span class="string">&#x27;&lt;I&#x27;</span>, buf, i * <span class="number">4</span>)[<span class="number">0</span>]      <span class="comment"># 明文 = 输入</span></span><br><span class="line">        struct.pack_into(<span class="string">&#x27;&lt;I&#x27;</span>, buf, i * <span class="number">4</span>, plain ^ ((key1 + key2) &amp; <span class="number">0xFFFFFFFF</span>))</span><br><span class="line">        key1 = (((~key1 &lt;&lt; <span class="number">21</span>) &amp; <span class="number">0xFFFFFFFF</span>) + <span class="number">0x11111111</span>) &amp; <span class="number">0xFFFFFFFF</span> | (key1 &gt;&gt; <span class="number">11</span>)</span><br><span class="line">        key2 = (plain + key2 + (key2 &lt;&lt; <span class="number">5</span>) + <span class="number">3</span>) &amp; <span class="number">0xFFFFFFFF</span>  <span class="comment"># 按明文推进</span></span><br><span class="line">    <span class="keyword">return</span> key</span><br></pre></td></tr></table></figure>
+
+<p>修复后对真实归档整张 164736 字节的块表做”解密→加密”往返，与磁盘原文逐字节相等。<strong>教训：MPQ 的加密解密是一对镜像函数，不是同一个函数。</strong></p>
+<h2 id="5-批量替换实战：42-个-DBC-全量打进补丁包"><a href="#5-批量替换实战：42-个-DBC-全量打进补丁包" class="headerlink" title="5. 批量替换实战：42 个 DBC 全量打进补丁包"></a>5. 批量替换实战：42 个 DBC 全量打进补丁包</h2><h3 id="5-1-先建映射表"><a href="#5-1-先建映射表" class="headerlink" title="5.1 先建映射表"></a>5.1 先建映射表</h3><p>对 245 个候选名批量探测，落一张 TSV 映射表（是否在包内、块索引、包内外大小、flags）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> name <span class="keyword">in</span> os.listdir(<span class="string">r&#x27;D:/games/wow-study/data_v20/dbc&#x27;</span>):</span><br><span class="line">    idx = arc.find_block_index(<span class="string">&#x27;DBFilesClient\\&#x27;</span> + name)</span><br><span class="line">    <span class="comment"># 命中: 记录块索引与大小; 未命中: 标记 NO</span></span><br></pre></td></tr></table></figure>
+
+<p>42 命中 &#x2F; 203 不在包内。映射表还有个意外用途——<strong>版本对比</strong>：替换前 <code>DungeonMapChunk.dbc</code> 包内 87401 字节 vs data_v20 12461 字节，说明补丁里的版本比手头数据新得多；替换后统一拉平。</p>
+<h3 id="5-2-批量执行与验证"><a href="#5-2-批量执行与验证" class="headerlink" title="5.2 批量执行与验证"></a>5.2 批量执行与验证</h3><p>驱动脚本按映射表循环调用 <code>replace</code>（每次调用独立打开归档，改完即落盘），40 个文件（2 个之前已替换过）一次跑完，<strong>40&#x2F;40 成功零失败</strong>，归档从 430,952,769 涨到 439,620,927 字节（追加约 8.7MB）。</p>
+<p>最终验证三条：</p>
+<ol>
+<li><strong>逐字节回读比对</strong>：42 个 DBC 全部与 data_v20 版本 <code>back == local</code> 为 True；</li>
+<li><strong>邻居完好性</strong>：替换块前后相邻块、随机抽样块解压正常（<code>WDBC</code>&#x2F;<code>BLP2</code> 魔数正确）；</li>
+<li><strong>结构一致性</strong>：文件块总数 10214 不变，头部 archive_size 与实际文件大小相等。</li>
+</ol>
+<p>多次追加替换互不影响——每次替换只改写自己那条块表记录，前面的追加数据原封不动。</p>
+<h2 id="6-操作手册"><a href="#6-操作手册" class="headerlink" title="6. 操作手册"></a>6. 操作手册</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定位 (标准路径哈希探测, flags 不应有 E/P/D)</span></span><br><span class="line">python mpq_parser.py info &lt;MPQ&gt;          <span class="comment"># 看头部与块表</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 提取 → 确认 WDBC 头 → 修改</span></span><br><span class="line">python mpq_parser.py extract &lt;MPQ&gt; <span class="string">&quot;DBFilesClient\Spell.dbc&quot;</span> Spell.dbc.orig</span><br><span class="line"></span><br><span class="line"><span class="comment"># 备份 (替换不可逆!)</span></span><br><span class="line"><span class="built_in">cp</span> &lt;MPQ&gt; &lt;MPQ&gt;.bak</span><br><span class="line"></span><br><span class="line"><span class="comment"># 替换 (新数据尾部追加, 不重建归档)</span></span><br><span class="line">python mpq_parser.py replace &lt;MPQ&gt; <span class="string">&quot;DBFilesClient\Spell.dbc&quot;</span> &lt;新文件.dbc&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证 (回读比对 + 邻居抽查)</span></span><br><span class="line">python mpq_parser.py list &lt;MPQ&gt;</span><br></pre></td></tr></table></figure>
+
+<p>注意事项：</p>
+<ul>
+<li><strong>重启客户端生效</strong>，MPQ 启动时加载，运行中不重读；</li>
+<li>改动没生效？检查是否有字母序更靠后的补丁 MPQ 里存在同名文件（加载顺序后者覆盖前者）；</li>
+<li>替换后 <code>(attributes)</code> 里的记录（大小&#x2F;CRC）会过期——<strong>客户端运行时不校验 attributes</strong>，只有第三方校验工具会抱怨；</li>
+<li>v1 归档 4GB 上限：追加偏移是 32 位，反复大量替换要留意余量；</li>
+<li>这套方法只能<strong>替换</strong>已有条目，不能<strong>新增</strong>文件——新增需要扩哈希表（容量恒为 2 的幂），等价于重建归档。</li>
+</ul>
+<h2 id="7-小结"><a href="#7-小结" class="headerlink" title="7. 小结"></a>7. 小结</h2><p>回头看，整条链路就是三句话：</p>
+<ol>
+<li><strong>没有文件树不影响动手</strong>——MPQ 的查找本来就是”路径哈希 → 块表”，拿客户端会用的标准路径反查即可，字典覆盖率决定能找到多少；</li>
+<li><strong>DBC 识别看头 20 字节</strong>——<code>WDBC</code> 魔数加”20 + 记录数×记录大小 + 字符串块 &#x3D; 文件总长”守恒校验，几秒钟排除假货；</li>
+<li><strong>替换走”追加 + 改表”路线</strong>——不重建归档，代价最小；唯一的深坑是块表重加密必须用独立的加密函数，MPQ 的加密解密是一对镜像，不是同一把钥匙正反拧。</li>
+</ol>
+<p>工具：<code>mpq_parser.py</code>（list &#x2F; tree &#x2F; extract &#x2F; extractall &#x2F; info &#x2F; <strong>replace</strong>），纯 Python 标准库，无第三方依赖。最终交付的 <code>PATCH-I.MPQ</code> 经文件级验证：42 个 DBC 回读逐字节一致、归档结构完好；客户端实际加载效果待重启游戏确认。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/fun/" rel="tag"># fun</a>
+              <a href="/tags/wow/" rel="tag"># wow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/08/24/java/20260824-springboot-websocket-vless-trojan-proxy/" rel="prev" title="Spring Boot 2.x 内嵌 VLESS / Trojan over WebSocket 代理隧道实现">
+      <i class="fa fa-chevron-left"></i> Spring Boot 2.x 内嵌 VLESS / Trojan over WebSocket 代理隧道实现
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%97%AE%E9%A2%98%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E7%9C%8B%E4%B8%8D%E5%88%B0%E6%96%87%E4%BB%B6%E6%A0%91"><span class="nav-number">1.</span> <span class="nav-text">1. 问题：为什么看不到文件树</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E6%97%A0%E5%90%8D%E5%AD%97%E5%BD%92%E6%A1%A3%E6%80%8E%E4%B9%88%E5%AE%9A%E4%BD%8D%E6%96%87%E4%BB%B6%EF%BC%9A%E6%A0%87%E5%87%86%E8%B7%AF%E5%BE%84%E5%93%88%E5%B8%8C%E6%8E%A2%E6%B5%8B"><span class="nav-number">2.</span> <span class="nav-text">2. 无名字归档怎么定位文件：标准路径哈希探测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%80%8E%E4%B9%88%E7%A1%AE%E8%AE%A4%E6%8B%BF%E5%88%B0%E7%9A%84%E7%9C%9F%E6%98%AF-DBC%EF%BC%9AWDBC-%E5%A4%B4%E6%A0%A1%E9%AA%8C"><span class="nav-number">3.</span> <span class="nav-text">3. 怎么确认拿到的真是 DBC：WDBC 头校验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E6%9B%BF%E6%8D%A2%E5%AE%9E%E7%8E%B0%EF%BC%9A%E5%B0%BE%E9%83%A8%E8%BF%BD%E5%8A%A0-%E5%9D%97%E8%A1%A8%E5%8D%95%E6%9D%A1%E7%9B%AE%E6%94%B9%E5%86%99"><span class="nav-number">4.</span> <span class="nav-text">4. 替换实现：尾部追加 + 块表单条目改写</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E9%87%8D%E5%BB%BA%E5%BD%92%E6%A1%A3"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 为什么不重建归档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E5%86%99%E5%85%A5%E7%AB%AF%E5%B8%83%E5%B1%80%E5%BF%85%E9%A1%BB%E4%B8%8E%E8%AF%BB%E5%8F%96%E7%AB%AF%E5%AF%B9%E5%81%B6"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 写入端布局必须与读取端对偶</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E6%B7%B1%E5%9D%91%EF%BC%9A%E5%8A%A0%E5%AF%86%E5%92%8C%E8%A7%A3%E5%AF%86%E4%B8%8D%E6%98%AF%E5%90%8C%E4%B8%80%E4%B8%AA%E5%87%BD%E6%95%B0"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 深坑：加密和解密不是同一个函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%89%B9%E9%87%8F%E6%9B%BF%E6%8D%A2%E5%AE%9E%E6%88%98%EF%BC%9A42-%E4%B8%AA-DBC-%E5%85%A8%E9%87%8F%E6%89%93%E8%BF%9B%E8%A1%A5%E4%B8%81%E5%8C%85"><span class="nav-number">5.</span> <span class="nav-text">5. 批量替换实战：42 个 DBC 全量打进补丁包</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E5%85%88%E5%BB%BA%E6%98%A0%E5%B0%84%E8%A1%A8"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 先建映射表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-%E6%89%B9%E9%87%8F%E6%89%A7%E8%A1%8C%E4%B8%8E%E9%AA%8C%E8%AF%81"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 批量执行与验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C"><span class="nav-number">6.</span> <span class="nav-text">6. 操作手册</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E5%B0%8F%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">7. 小结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">279</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">159</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-overlay.is-active {
+  display: flex;
+}
+.mermaid-zoom-content {
+  position: relative;
+  width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-content svg {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.mermaid-zoom-content pre.mermaid,
+.mermaid-zoom-content .mermaid {
+  cursor: default;
+  text-align: center;
+  background: transparent;
+}
+.mermaid-zoom-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mermaid-zoom-close:focus {
+  outline: 2px solid #fff;
+}
+.post-body pre.mermaid,
+.post-body .mermaid {
+  cursor: zoom-in;
+}
+.post-body pre.mermaid:hover,
+.post-body .mermaid:hover {
+  opacity: .98;
+}
+</style>
+<script>
+(function() {
+  function openZoom(root) {
+    var clone = root.cloneNode(true);
+    clone.style.maxWidth = '';
+    clone.style.maxHeight = '';
+    clone.classList.remove('mermaid-click-zoom-root');
+
+    var hint = root.querySelector('.mermaid-click-zoom-hint');
+    if (hint) hint.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'mermaid-zoom-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Mermaid zoom');
+
+    var content = document.createElement('div');
+    content.className = 'mermaid-zoom-content';
+
+    var close = document.createElement('button');
+    close.className = 'mermaid-zoom-close';
+    close.type = 'button';
+    close.textContent = 'Close';
+    close.addEventListener('click', function() {
+      closeZoom(overlay);
+    });
+
+    content.appendChild(close);
+    content.appendChild(clone);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    overlay.addEventListener('click', function(event) {
+      if (event.target === overlay) {
+        closeZoom(overlay);
+      }
+    });
+
+    requestAnimationFrame(function() {
+      overlay.classList.add('is-active');
+      close.focus();
+    });
+  }
+
+  function closeZoom(overlay) {
+    overlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }
+
+  function openZoomFromTarget(target) {
+    var root = target.closest('.post-body pre.mermaid, .post-body .mermaid');
+    if (!root) return;
+    openZoom(root);
+  }
+
+  function bindMermaidZoom() {
+    var container = document.querySelector('.post-body') || document.body;
+    if (container.dataset.mermaidZoomDelegate === 'true') return;
+    container.dataset.mermaidZoomDelegate = 'true';
+
+    container.addEventListener('click', function(event) {
+      if (event.target.closest('.mermaid-zoom-overlay')) return;
+      openZoomFromTarget(event.target);
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        var active = document.querySelector('.mermaid-zoom-overlay.is-active');
+        if (active) closeZoom(active);
+      }
+    });
+  }
+
+  function ensureBoundAfterRender() {
+    bindMermaidZoom();
+
+    var pre = document.querySelector('.post-body pre.mermaid, .post-body .mermaid');
+    if (!pre) return;
+
+    if (pre.querySelector('svg')) {
+      return;
+    }
+
+    if (typeof MutationObserver === 'undefined') return;
+
+    var observer = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].target.querySelector && mutations[i].target.querySelector('svg')) {
+          bindMermaidZoom();
+          observer.disconnect();
+          return;
+        }
+      }
+    });
+    observer.observe(pre.parentNode, { childList: true, subtree: true, attributes: false, characterData: false });
+
+    setTimeout(function() {
+      observer.disconnect();
+      bindMermaidZoom();
+    }, 3000);
+  }
+
+  if (document.querySelectorAll('pre.mermaid').length) {
+    NexT.utils.getScript('/lib/mermaid.min.js', function() {
+      mermaid.initialize({
+        theme    : 'forest',
+        logLevel : 3,
+        flowchart: { curve     : 'linear' },
+        gantt    : { axisFormat: '%m/%d/%Y' },
+        sequence : { actorMargin: 50 },
+        startOnLoad: true
+      });
+      ensureBoundAfterRender();
+    }, window.mermaid);
+  } else {
+    ensureBoundAfterRender();
+  }
+})();
+</script>
+
+  
+
+  
+
+</body>
+</html>
