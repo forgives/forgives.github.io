@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="同接口两处 @DubboReference 属性不一致会拆成两个 ReferenceBean、两条订阅。SCA 2.2.7 旧版 SpringCloudRegistry 按 generateId 去重监听器时把 timeout 等差异抹平，导致 provider 重发布后只有一个引用刷新到新 IP。本文顺着 Dubbo 2.7.18 + SCA 2.2.7 源码把这条链路走完。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="同接口多引用 × Spring Cloud 注册中心变更推送丢失">
+<meta property="og:url" content="https://forgives.github.io/2026/09/16/java/20260916-dubbo-spring-cloud-registry-notify-lost/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="同接口两处 @DubboReference 属性不一致会拆成两个 ReferenceBean、两条订阅。SCA 2.2.7 旧版 SpringCloudRegistry 按 generateId 去重监听器时把 timeout 等差异抹平，导致 provider 重发布后只有一个引用刷新到新 IP。本文顺着 Dubbo 2.7.18 + SCA 2.2.7 源码把这条链路走完。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-09-16T09:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-30T12:56:21.637Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="nacos">
+<meta property="article:tag" content="dubbo">
+<meta property="article:tag" content="spring-cloud">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/09/16/java/20260916-dubbo-spring-cloud-registry-notify-lost/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>同接口多引用 × Spring Cloud 注册中心变更推送丢失 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/09/16/java/20260916-dubbo-spring-cloud-registry-notify-lost/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          同接口多引用 × Spring Cloud 注册中心变更推送丢失
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-09-16 17:00:00" itemprop="dateCreated datePublished" datetime="2026-09-16T17:00:00+08:00">2026-09-16</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>K8s 里 provider 重发布后 IP 变了，消费端同一个 Dubbo 接口却出现「一半调用新 IP、一半还在打老 IP」。更糟的是老 IP 马上被别的应用占用，TCP 能连上，对端却返回 <code>service not found</code>，排查很容易误判成 provider 自己的问题。</p>
+<p>根因其实很窄：<strong>同接口多引用把订阅拆成两条，旧版 <code>spring-cloud</code> 注册中心又把这两条监听器按同一把 key 去重了。</strong> 下面按源码把链路拆开。</p>
+<!-- more -->
+
+<p>分析基线：<code>org.apache.dubbo:dubbo:2.7.18</code> + <code>com.alibaba.cloud:spring-cloud-starter-dubbo:2.2.7.RELEASE</code> + <code>spring-cloud-starter-alibaba-nacos-discovery:2.2.9.RELEASE</code>（nacos-client 1.4.2）。注册中心走的是 Spring Cloud <code>DiscoveryClient</code>，不是 Dubbo 原生 <code>nacos://</code>。</p>
+<h2 id="1-问题现象"><a href="#1-问题现象" class="headerlink" title="1. 问题现象"></a>1. 问题现象</h2><p>消费端对同一个接口写了两处引用，注解属性不一致：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 显式指定超时 10 秒</span></span><br><span class="line"><span class="meta">@DubboReference(timeout = 10000)</span></span><br><span class="line"><span class="keyword">private</span> AccountNacosClient accountClient;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 无任何属性，全部走默认值</span></span><br><span class="line"><span class="meta">@DubboReference</span></span><br><span class="line"><span class="keyword">private</span> AccountNacosClient accountNacosClient;</span><br></pre></td></tr></table></figure>
+
+<p>provider 在 K8s 重发布后：</p>
+<ul>
+<li>Pod 重建，IP 从老地址变成新地址；</li>
+<li>老 IP 随即被集群里另一个应用的新 Pod 占用；</li>
+<li><strong>只有一个引用刷新到新 IP，另一个继续打老 IP</strong>；</li>
+<li>老 IP 对端也监听 Dubbo 端口，三次握手成功，但 <code>ServiceRepository</code> 里没有这个服务，返回 <code>service not found</code>。症状隐蔽，难归因。</li>
+</ul>
+<p>两个待回答的问题：</p>
+<ol>
+<li>同一接口两处 <code>@DubboReference</code>（配置不一致）会不会产生多个 Bean？</li>
+<li>注册中心推送变更时，是不是只更新了其中一个 Bean？为什么？</li>
+</ol>
+<h2 id="2-当前环境"><a href="#2-当前环境" class="headerlink" title="2. 当前环境"></a>2. 当前环境</h2><h3 id="2-1-版本事实"><a href="#2-1-版本事实" class="headerlink" title="2.1 版本事实"></a>2.1 版本事实</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+- com.alibaba.cloud:spring-cloud-starter-dubbo:jar:2.2.7.RELEASE:compile</span><br><span class="line">|  +- org.apache.dubbo:dubbo:jar:2.7.18:compile</span><br><span class="line">|  +- org.apache.dubbo:dubbo-spring-boot-starter:jar:2.7.13:compile</span><br><span class="line">+- com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery:jar:2.2.9.RELEASE:compile</span><br><span class="line">|  +- com.alibaba.nacos:nacos-client:jar:1.4.2:compile</span><br></pre></td></tr></table></figure>
+
+<p>消费端另有 <code>dubbo.consumer.check=false</code>。依赖树里<strong>没有</strong> <code>dubbo-registry-nacos</code>，服务发现走 Spring Cloud <code>DiscoveryClient</code>，即 <code>spring-cloud://</code> 协议。Nacos 配置中心显式设置了 <code>spring.cloud.dubbo.registry-type: spring-cloud</code>。</p>
+<h3 id="2-2-注册中心选型"><a href="#2-2-注册中心选型" class="headerlink" title="2.2 注册中心选型"></a>2.2 注册中心选型</h3><p>SCA 2.2.7 里 <code>spring-cloud://</code> 有两套实现，由 <code>SpringCloudRegistryFactory</code> 按配置创建：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SpringCloudRegistryFactory#createRegistry（SCA 2.2.7）</span></span><br><span class="line"><span class="keyword">switch</span> (dubboCloudProperties.getRegistryType()) &#123;</span><br><span class="line"><span class="keyword">case</span> SPRING_CLOUD_REGISTRY_PROPERTY_VALUE:      <span class="comment">// &quot;spring-cloud&quot;</span></span><br><span class="line">    registry = <span class="keyword">new</span> <span class="title class_">SpringCloudRegistry</span>(...);    <span class="comment">// 旧版，AbstractSpringCloudRegistry</span></span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line"><span class="keyword">default</span>:                                        <span class="comment">// &quot;dubbo-cloud&quot;（默认值）</span></span><br><span class="line">    registry = <span class="keyword">new</span> <span class="title class_">DubboCloudRegistry</span>(...);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>DubboCloudProperties.registryType</code> 默认是 <code>&quot;dubbo-cloud&quot;</code>。当前环境显式配成 <code>&quot;spring-cloud&quot;</code>，命中已经 <code>@Deprecated</code> 的 <code>SpringCloudRegistry</code>。<strong>这是本次 bug 的载体。</strong></p>
+<h2 id="3-多引用如何形成两条独立订阅"><a href="#3-多引用如何形成两条独立订阅" class="headerlink" title="3. 多引用如何形成两条独立订阅"></a>3. 多引用如何形成两条独立订阅</h2><h3 id="3-1-DubboReference-注入入口与-bean-name"><a href="#3-1-DubboReference-注入入口与-bean-name" class="headerlink" title="3.1 @DubboReference 注入入口与 bean name"></a>3.1 <code>@DubboReference</code> 注入入口与 bean name</h3><p><code>ReferenceAnnotationBeanPostProcessor#doGetInjectedBean</code> 处理注解字段：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ReferenceAnnotationBeanPostProcessor#doGetInjectedBean（Dubbo 2.7.18）</span></span><br><span class="line"><span class="keyword">protected</span> Object <span class="title function_">doGetInjectedBean</span><span class="params">(AnnotationAttributes attributes, Object bean, String beanName,</span></span><br><span class="line"><span class="params">                                   Class&lt;?&gt; injectedType, InjectionMetadata.InjectedElement injectedElement)</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">referencedBeanName</span> <span class="operator">=</span> buildReferencedBeanName(attributes, injectedType);</span><br><span class="line">    <span class="type">String</span> <span class="variable">referenceBeanName</span> <span class="operator">=</span> getReferenceBeanName(attributes, injectedType);</span><br><span class="line"></span><br><span class="line">    referencedBeanNameIdx.computeIfAbsent(referencedBeanName, k -&gt; <span class="keyword">new</span> <span class="title class_">TreeSet</span>&lt;&gt;()).add(referenceBeanName);</span><br><span class="line"></span><br><span class="line">    <span class="type">ReferenceBean</span> <span class="variable">referenceBean</span> <span class="operator">=</span> buildReferenceBeanIfAbsent(referenceBeanName, attributes, injectedType);</span><br><span class="line">    <span class="comment">// 直接拿 ReferenceBean 内部生成的代理，不走 Spring 按类型查找</span></span><br><span class="line">    <span class="keyword">return</span> getBeanFactory().applyBeanPostProcessorsAfterInitialization(referenceBean.get(), referenceBeanName);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>bean name 由 <code>generateReferenceBeanName</code> 生成，<strong>注解的全部非默认属性都参与命名</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> String <span class="title function_">generateReferenceBeanName</span><span class="params">(AnnotationAttributes attributes, Class&lt;?&gt; interfaceClass)</span> &#123;</span><br><span class="line">    <span class="type">StringBuilder</span> <span class="variable">beanNameBuilder</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>(<span class="string">&quot;@Reference&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (!attributes.isEmpty()) &#123;</span><br><span class="line">        beanNameBuilder.append(<span class="string">&#x27;(&#x27;</span>);</span><br><span class="line">        <span class="keyword">for</span> (Map.Entry&lt;String, Object&gt; entry : attributes.entrySet()) &#123;</span><br><span class="line">            beanNameBuilder.append(entry.getKey()).append(<span class="string">&#x27;=&#x27;</span>).append(convertAttribute(entry.getValue())).append(<span class="string">&#x27;,&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    beanNameBuilder.append(<span class="string">&quot; &quot;</span>).append(interfaceClass.getName());</span><br><span class="line">    <span class="keyword">return</span> beanNameBuilder.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>注解写法</th>
+<th>生成的 bean name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>@DubboReference</code>（全默认）</td>
+<td><code>@Reference com.xxx.AccountNacosClient</code></td>
+</tr>
+<tr>
+<td><code>@DubboReference(timeout = 10000)</code></td>
+<td><code>@Reference(timeout=10000) com.xxx.AccountNacosClient</code></td>
+</tr>
+</tbody></table>
+<p>属性不同 → bean name 不同 → <code>buildReferenceBeanIfAbsent</code> 缓存 miss → 各建一个 <code>ReferenceBean</code>。属性完全一致才会复用同一个实例。</p>
+<p>每个 <code>ReferenceBean</code> 再以单例注册进 Spring 容器。<code>ReferenceBean</code> 继承 <code>ReferenceConfig</code>，<code>getObject()</code> 走 <code>get()</code> → <code>init()</code> → <code>createProxy()</code>。<code>ReferenceConfig</code> 之间<strong>没有静态代理缓存</strong>（<code>ReferenceConfigCache</code> 只服务编程式 API），<code>ref</code> &#x2F; <code>invoker</code> 都是实例字段。</p>
+<p>于是两个引用 &#x3D; <strong>2 个代理 + 2 个 <code>RegistryDirectory</code> + 2 条订阅 URL</strong>，超时分别生效（10s &#x2F; 默认 1000ms）。</p>
+<h3 id="3-2-订阅-URL-从参数层面分叉"><a href="#3-2-订阅-URL-从参数层面分叉" class="headerlink" title="3.2 订阅 URL 从参数层面分叉"></a>3.2 订阅 URL 从参数层面分叉</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// RegistryProtocol#doCreateInvoker（Dubbo 2.7.18）</span></span><br><span class="line"><span class="keyword">protected</span> &lt;T&gt; ClusterInvoker&lt;T&gt; <span class="title function_">doCreateInvoker</span><span class="params">(DynamicDirectory&lt;T&gt; directory, Cluster cluster, Registry registry, Class&lt;T&gt; type)</span> &#123;</span><br><span class="line">    directory.setRegistry(registry);</span><br><span class="line">    directory.setProtocol(protocol);</span><br><span class="line">    Map&lt;String, String&gt; parameters = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, String&gt;(directory.getConsumerUrl().getParameters());</span><br><span class="line">    <span class="type">URL</span> <span class="variable">urlToRegistry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">URL</span>(CONSUMER_PROTOCOL, parameters.remove(REGISTER_IP_KEY), <span class="number">0</span>, type.getName(), parameters);</span><br><span class="line">    directory.subscribe(toSubscribeUrl(urlToRegistry));</span><br><span class="line">    <span class="keyword">return</span> (ClusterInvoker&lt;T&gt;) cluster.join(directory);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> URL <span class="title function_">toSubscribeUrl</span><span class="params">(URL url)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> url.addParameter(CATEGORY_KEY, PROVIDERS_CATEGORY + <span class="string">&quot;,&quot;</span> + CONFIGURATORS_CATEGORY + <span class="string">&quot;,&quot;</span> + ROUTERS_CATEGORY);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>两条订阅 URL 示意（参数按 TreeMap 排序，<code>check=false</code> 来自 <code>dubbo.consumer.check</code>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">① @DubboReference(timeout = 10000)</span><br><span class="line">consumer://&lt;本机IP&gt;/...AccountNacosClient</span><br><span class="line">  ?application=user-growth&amp;category=providers,configurators,routers&amp;check=false</span><br><span class="line">  &amp;dubbo=2.0.2&amp;interface=...AccountNacosClient&amp;side=consumer&amp;sticky=false</span><br><span class="line">  &amp;timeout=10000&amp;timestamp=...</span><br><span class="line"></span><br><span class="line">② @DubboReference（无属性）</span><br><span class="line">consumer://&lt;本机IP&gt;/...AccountNacosClient</span><br><span class="line">  ?application=user-growth&amp;category=providers,configurators,routers&amp;check=false</span><br><span class="line">  &amp;dubbo=2.0.2&amp;interface=...AccountNacosClient&amp;side=consumer&amp;sticky=false</span><br><span class="line">  &amp;timestamp=...</span><br></pre></td></tr></table></figure>
+
+<p><code>FailbackRegistry.subscribe(url, listener)</code> 最终落到 <code>SpringCloudRegistry.doSubscribe(url, listener)</code>，<code>listener</code> 就是该引用自己的 <code>RegistryDirectory</code>。<strong>两条订阅、两个 Directory，互不可见——这是后续单边刷新的结构性前提。</strong></p>
+<h2 id="4-首次订阅为什么看起来正常"><a href="#4-首次订阅为什么看起来正常" class="headerlink" title="4. 首次订阅为什么看起来正常"></a>4. 首次订阅为什么看起来正常</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AbstractSpringCloudRegistry#doSubscribe（SCA 2.2.7）</span></span><br><span class="line"><span class="keyword">else</span> &#123; <span class="comment">// for general Dubbo Services</span></span><br><span class="line">    subscribeDubboServiceURLs(url, listener);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">subscribeDubboServiceURLs</span><span class="params">(URL url, NotifyListener listener)</span> &#123;</span><br><span class="line">    doSubscribeDubboServiceURLs(url, listener);                    <span class="comment">// ① 首次同步全量拉取</span></span><br><span class="line">    registerServiceInstancesChangedEventListener(url, listener);  <span class="comment">// ② 注册增量变更监听器</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首次路径 <code>subscribeDubboServiceURL</code> 内部：<code>discoveryClient.getInstances(serviceName)</code> 直查 Nacos → 拉 <code>exportedURLs</code> → 为每个实例拼 provider URL → <code>listener.notify(allSubscribedURLs)</code>。</p>
+<p>关键点：<strong>首次拉取没有任何按 URL 的去重</strong>。两个引用各执行一次、各拿一份正确地址列表。所以启动后一切正常，问题只在后续增量变更时暴露。</p>
+<h2 id="5-变更推送为什么只刷新一个引用"><a href="#5-变更推送为什么只刷新一个引用" class="headerlink" title="5. 变更推送为什么只刷新一个引用"></a>5. 变更推送为什么只刷新一个引用</h2><h3 id="5-1-Nacos-实例变更如何到达-SCA"><a href="#5-1-Nacos-实例变更如何到达-SCA" class="headerlink" title="5.1 Nacos 实例变更如何到达 SCA"></a>5.1 Nacos 实例变更如何到达 SCA</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Nacos Server</span><br><span class="line">  │ 实例变更（Pod 重建，IP 变化）</span><br><span class="line">  ▼</span><br><span class="line">nacos-client NamingService.subscribe(serviceName, group, listener)</span><br><span class="line">  │ NamingEvent     ← SCA NacosConfiguration 按 serviceName 去重，只注册一次</span><br><span class="line">  ▼</span><br><span class="line">DubboServiceDiscoveryAutoConfiguration#dispatchServiceInstancesChangedEvent</span><br><span class="line">  │ 发布 Spring 事件 ServiceInstancesChangedEvent</span><br><span class="line">  ▼</span><br><span class="line">SimpleApplicationEventMulticaster 回调所有 ApplicationListener</span><br></pre></td></tr></table></figure>
+
+<p>Nacos 侧事件本身是正常的。问题出在消费侧监听器的注册。</p>
+<h3 id="5-2-generateId-去重：bug-位置"><a href="#5-2-generateId-去重：bug-位置" class="headerlink" title="5.2 generateId 去重：bug 位置"></a>5.2 <code>generateId</code> 去重：bug 位置</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AbstractSpringCloudRegistry（SCA 2.2.7）</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Set&lt;String&gt; REGISTER_LISTENERS = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;();   <span class="comment">// static，JVM 级共享</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">registerServiceInstancesChangedEventListener</span><span class="params">(URL url, NotifyListener listener)</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">listenerId</span> <span class="operator">=</span> generateId(url);</span><br><span class="line">    <span class="keyword">if</span> (REGISTER_LISTENERS.add(listenerId)) &#123;           <span class="comment">// 已存在则直接跳过</span></span><br><span class="line">        applicationContext.addApplicationListener(</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">ApplicationListener</span>&lt;ServiceInstancesChangedEvent&gt;() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onApplicationEvent</span><span class="params">(ServiceInstancesChangedEvent event)</span> &#123;</span><br><span class="line">                    subscribeDubboServiceURL(url, listener, event.getServiceName(),</span><br><span class="line">                            s -&gt; event.getServiceInstances());</span><br><span class="line">                    <span class="comment">// 只 notify 捕获的这个 url 对应的 listener</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> String <span class="title function_">generateId</span><span class="params">(URL url)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> url.toString(VERSION_KEY, GROUP_KEY, PROTOCOL_KEY);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>REGISTER_LISTENERS</code> 是 <code>static</code>，整个 JVM 一份。第二次订阅如果算出同一个 <code>listenerId</code>，监听器<strong>静默丢弃，连日志都没有</strong>。</p>
+<p><code>generateId</code> 的取值范围才是根因。Dubbo 2.7.18 的 <code>URL#toString(String... parameters)</code> 走 <code>buildParameters</code>，传入的 parameters 是<strong>白名单</strong>，只保留这些 key：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// URL#buildParameters（Dubbo 2.7.18）</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">buildParameters</span><span class="params">(StringBuilder buf, <span class="type">boolean</span> concat, String[] parameters)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (CollectionUtils.isNotEmptyMap(getParameters())) &#123;</span><br><span class="line">        List&lt;String&gt; includes = (ArrayUtils.isEmpty(parameters) ? <span class="literal">null</span> : Arrays.asList(parameters));</span><br><span class="line">        <span class="keyword">for</span> (Map.Entry&lt;String, String&gt; entry : <span class="keyword">new</span> <span class="title class_">TreeMap</span>&lt;&gt;(getParameters()).entrySet()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (StringUtils.isNotEmpty(entry.getKey())</span><br><span class="line">                    &amp;&amp; (includes == <span class="literal">null</span> || includes.contains(entry.getKey()))) &#123;</span><br><span class="line">                <span class="comment">// 仅白名单内的 key 参与拼接</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>generateId</code> 只保留 <code>version</code> &#x2F; <code>group</code> &#x2F; <code>protocol</code>。消费端订阅 URL 上这三个参数通常都不存在（接口无 version&#x2F;group，consumer URL 上也没有 protocol 参数）。于是两个引用的去重 key 变成同一个裸 URL：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">listenerId① = listenerId② = &quot;consumer://&lt;本机IP&gt;/...AccountNacosClient&quot;</span><br></pre></td></tr></table></figure>
+
+<p><code>timeout=10000</code> 让订阅 URL 不同（两个 Directory），但 <code>generateId</code> 把差异抹平（去重命中）：</p>
+<table>
+<thead>
+<tr>
+<th>引用</th>
+<th>实际订阅 URL</th>
+<th>generateId</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>引用① <code>timeout=10000</code></td>
+<td><code>consumer://ip/...AccountNacosClient?...&amp;timeout=10000&amp;...</code></td>
+<td><code>consumer://ip/...AccountNacosClient</code></td>
+</tr>
+<tr>
+<td>引用② 全默认</td>
+<td><code>consumer://ip/...AccountNacosClient?...</code>（无 timeout）</td>
+<td><strong>完全相同</strong></td>
+</tr>
+</tbody></table>
+<p>谁中招由 Spring Bean 初始化顺序决定。<code>@DubboReference</code> 字段注入发生在宿主 Bean 创建时，先初始化的引用拿到变更监听器，后初始化的引用被 <code>REGISTER_LISTENERS.add</code> 吞掉。</p>
+<h2 id="6-RegistryDirectory：地址列表的唯一更新入口"><a href="#6-RegistryDirectory：地址列表的唯一更新入口" class="headerlink" title="6. RegistryDirectory：地址列表的唯一更新入口"></a>6. RegistryDirectory：地址列表的唯一更新入口</h2><p>这一节把消费端「为什么老 IP 不会自己消失」补完整。<code>RegistryDirectory</code> 本身就是 <code>NotifyListener</code>，订阅时把自己交给注册中心：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// RegistryDirectory#subscribe（Dubbo 2.7.18）</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">subscribe</span><span class="params">(URL url)</span> &#123;</span><br><span class="line">    setConsumerUrl(url);</span><br><span class="line">    CONSUMER_CONFIGURATION_LISTENER.addNotifyListener(<span class="built_in">this</span>);</span><br><span class="line">    referenceConfigurationListener = <span class="keyword">new</span> <span class="title class_">ReferenceConfigurationListener</span>(<span class="built_in">this</span>, url);</span><br><span class="line">    registry.subscribe(url, <span class="built_in">this</span>);   <span class="comment">// this = NotifyListener</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>地址列表活在两个实例字段上：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Map&lt;url, Invoker&gt; cache service url to invoker mapping.</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">volatile</span> Map&lt;URL, Invoker&lt;T&gt;&gt; urlInvokerMap;</span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">volatile</span> Set&lt;URL&gt; cachedInvokerUrls;</span><br></pre></td></tr></table></figure>
+
+<p>每个 <code>RegistryDirectory</code> 一份，<strong>互不共享</strong>。集群调用走 <code>FailoverClusterInvoker#doInvoke</code> → <code>list(invocation)</code> → <code>Directory.doList</code>，读的就是这份 <code>invokers</code>。</p>
+<h3 id="6-1-notify-是刷新的唯一入口"><a href="#6-1-notify-是刷新的唯一入口" class="headerlink" title="6.1 notify 是刷新的唯一入口"></a>6.1 <code>notify</code> 是刷新的唯一入口</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">notify</span><span class="params">(List&lt;URL&gt; urls)</span> &#123;</span><br><span class="line">    Map&lt;String, List&lt;URL&gt;&gt; categoryUrls = urls.stream()</span><br><span class="line">            .filter(Objects::nonNull)</span><br><span class="line">            .filter(<span class="built_in">this</span>::isValidCategory)</span><br><span class="line">            .filter(<span class="built_in">this</span>::isNotCompatibleFor26x)</span><br><span class="line">            .collect(Collectors.groupingBy(<span class="built_in">this</span>::judgeCategory));</span><br><span class="line"></span><br><span class="line">    List&lt;URL&gt; configuratorURLs = categoryUrls.getOrDefault(CONFIGURATORS_CATEGORY, Collections.emptyList());</span><br><span class="line">    <span class="built_in">this</span>.configurators = Configurator.toConfigurators(configuratorURLs).orElse(<span class="built_in">this</span>.configurators);</span><br><span class="line"></span><br><span class="line">    List&lt;URL&gt; routerURLs = categoryUrls.getOrDefault(ROUTERS_CATEGORY, Collections.emptyList());</span><br><span class="line">    toRouters(routerURLs).ifPresent(<span class="built_in">this</span>::addRouters);</span><br><span class="line"></span><br><span class="line">    List&lt;URL&gt; providerURLs = categoryUrls.getOrDefault(PROVIDERS_CATEGORY, Collections.emptyList());</span><br><span class="line">    refreshOverrideAndInvoker(providerURLs);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>notify</code> 按 category 拆成 configurators &#x2F; routers &#x2F; providers，真正换地址在 <code>refreshOverrideAndInvoker</code> → <code>refreshInvoker</code>。</p>
+<h3 id="6-2-refreshInvoker：换新列表，顺手销毁老-invoker"><a href="#6-2-refreshInvoker：换新列表，顺手销毁老-invoker" class="headerlink" title="6.2 refreshInvoker：换新列表，顺手销毁老 invoker"></a>6.2 <code>refreshInvoker</code>：换新列表，顺手销毁老 invoker</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">refreshInvoker</span><span class="params">(List&lt;URL&gt; invokerUrls)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (invokerUrls.size() == <span class="number">1</span></span><br><span class="line">            &amp;&amp; EMPTY_PROTOCOL.equals(invokerUrls.get(<span class="number">0</span>).getProtocol())) &#123;</span><br><span class="line">        <span class="built_in">this</span>.forbidden = <span class="literal">true</span>;</span><br><span class="line">        <span class="built_in">this</span>.invokers = Collections.emptyList();</span><br><span class="line">        destroyAllInvokers();                    <span class="comment">// 空协议：禁止访问，关掉全部 invoker</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Map&lt;URL, Invoker&lt;T&gt;&gt; oldUrlInvokerMap = <span class="built_in">this</span>.urlInvokerMap;</span><br><span class="line">    <span class="keyword">if</span> (invokerUrls.isEmpty() &amp;&amp; <span class="built_in">this</span>.cachedInvokerUrls != <span class="literal">null</span>) &#123;</span><br><span class="line">        invokerUrls.addAll(<span class="built_in">this</span>.cachedInvokerUrls);   <span class="comment">// 本次只推了 override/router，沿用缓存地址</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.cachedInvokerUrls = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;&gt;(invokerUrls);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (invokerUrls.isEmpty()) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Map&lt;URL, Invoker&lt;T&gt;&gt; newUrlInvokerMap = toInvokers(invokerUrls);</span><br><span class="line">    List&lt;Invoker&lt;T&gt;&gt; newInvokers = Collections.unmodifiableList(<span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(newUrlInvokerMap.values()));</span><br><span class="line">    routerChain.setInvokers(newInvokers);</span><br><span class="line">    <span class="built_in">this</span>.invokers = newInvokers;</span><br><span class="line">    <span class="built_in">this</span>.urlInvokerMap = newUrlInvokerMap;</span><br><span class="line"></span><br><span class="line">    destroyUnusedInvokers(oldUrlInvokerMap, newUrlInvokerMap);   <span class="comment">// 老 IP 从这里被干掉</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>toInvokers</code> 的缓存 key 是 <strong>merge 后的 provider URL</strong>。URL 没变就复用旧 invoker，URL 变了（IP 变了）就 <code>protocol.refer</code> 新建：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Map&lt;URL, Invoker&lt;T&gt;&gt; <span class="title function_">toInvokers</span><span class="params">(List&lt;URL&gt; urls)</span> &#123;</span><br><span class="line">    Map&lt;URL, Invoker&lt;T&gt;&gt; newUrlInvokerMap = <span class="keyword">new</span> <span class="title class_">ConcurrentHashMap</span>&lt;&gt;();</span><br><span class="line">    Map&lt;URL, Invoker&lt;T&gt;&gt; localUrlInvokerMap = <span class="built_in">this</span>.urlInvokerMap;</span><br><span class="line">    <span class="keyword">for</span> (URL providerUrl : urls) &#123;</span><br><span class="line">        <span class="type">URL</span> <span class="variable">url</span> <span class="operator">=</span> mergeUrl(providerUrl);</span><br><span class="line">        Invoker&lt;T&gt; invoker = localUrlInvokerMap == <span class="literal">null</span> ? <span class="literal">null</span> : localUrlInvokerMap.get(url);</span><br><span class="line">        <span class="keyword">if</span> (invoker == <span class="literal">null</span>) &#123;                          <span class="comment">// 缓存没有：重新 refer</span></span><br><span class="line">            invoker = <span class="keyword">new</span> <span class="title class_">InvokerDelegate</span>&lt;&gt;(protocol.refer(serviceType, url), url, providerUrl);</span><br><span class="line">            newUrlInvokerMap.put(url, invoker);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            newUrlInvokerMap.put(url, invoker);         <span class="comment">// URL 没变：复用</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> newUrlInvokerMap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>destroyUnusedInvokers</code> 则按 URL 做差集：旧 map 里有、新 map 里没有的，直接 <code>destroyAll()</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">destroyUnusedInvokers</span><span class="params">(Map&lt;URL, Invoker&lt;T&gt;&gt; oldUrlInvokerMap, Map&lt;URL, Invoker&lt;T&gt;&gt; newUrlInvokerMap)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (newUrlInvokerMap == <span class="literal">null</span> || newUrlInvokerMap.size() == <span class="number">0</span>) &#123;</span><br><span class="line">        destroyAllInvokers();</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (oldUrlInvokerMap != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (URL key : oldUrlInvokerMap.keySet()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (key != <span class="literal">null</span> &amp;&amp; !newUrlInvokerMap.containsKey(key)) &#123;</span><br><span class="line">                Invoker&lt;T&gt; invoker = oldUrlInvokerMap.get(key);</span><br><span class="line">                <span class="keyword">if</span> (invoker != <span class="literal">null</span>) &#123;</span><br><span class="line">                    invoker.destroyAll();               <span class="comment">// 老 IP 连接在这里关掉</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以：<strong>只有收到 <code>notify</code>，Directory 才会换地址、才会销毁老 IP invoker。</strong> 连接断开、调用失败、failover 重试，都不会回头刷新地址列表。<code>FailoverClusterInvoker</code> 每次 <code>list()</code> 拿到的仍是启动时那份 <code>invokers</code>。</p>
+<h3 id="6-3-两个引用在-notify-之后的分叉"><a href="#6-3-两个引用在-notify-之后的分叉" class="headerlink" title="6.3 两个引用在 notify 之后的分叉"></a>6.3 两个引用在 notify 之后的分叉</h3><p>被刷新侧（先订阅、监听器注册成功）：</p>
+<ol>
+<li><code>ServiceInstancesChangedEvent</code> 回调匿名监听器；</li>
+<li><code>subscribeDubboServiceURL</code> 重新拉元数据，拼出新 IP 的 provider URL；</li>
+<li><code>RegistryDirectory.notify</code> → <code>refreshInvoker</code> → <code>toInvokers</code> 创建新 IP invoker；</li>
+<li><code>destroyUnusedInvokers</code> 把老 IP invoker <code>destroyAll()</code>；</li>
+<li>后续调用切到新 IP。</li>
+</ol>
+<p>停滞侧（后订阅、监听器被去重吞掉）：</p>
+<ol>
+<li><code>RegistryDirectory.notify</code> <strong>从未被调用</strong>；</li>
+<li><code>urlInvokerMap</code> &#x2F; <code>invokers</code> 停留在启动时刻（老 IP）；</li>
+<li><code>FailoverClusterInvoker</code> 每次仍从老列表选 invoker；</li>
+<li><strong>无自愈</strong>：重连、超时、<code>retries=2</code> 都只是对着老 IP 再打几次。</li>
+</ol>
+<p>这就是「一半刷新、一半打老 IP」的消费端机制。注册中心 bug 在 SCA，消费端 Directory 则忠实执行「没 notify 就不动」。</p>
+<h2 id="7-根因链条"><a href="#7-根因链条" class="headerlink" title="7. 根因链条"></a>7. 根因链条</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">同接口两处 @DubboReference 属性不同（timeout=10000 vs 全默认）</span><br><span class="line">  →【多 Bean】两个 ReferenceBean / 两个代理 / 两条订阅 URL / 两个 RegistryDirectory</span><br><span class="line">  →【注册中心侧】SpringCloudRegistry（registry-type: spring-cloud）</span><br><span class="line">      REGISTER_LISTENERS 静态集合按 generateId(url) 去重</span><br><span class="line">      generateId = URL#toString(version, group, protocol) → 白名单过滤掉 timeout</span><br><span class="line">      → 两个引用的 listenerId 相同</span><br><span class="line">  → 后订阅引用的 ServiceInstancesChangedEvent 监听器【从未注册】（静默失败，无日志）</span><br><span class="line">  → provider 重发布时事件只回调先订阅引用的监听器</span><br><span class="line">      → 只 notify 先订阅引用的 RegistryDirectory</span><br><span class="line">      → 后订阅引用的地址列表停留在启动时刻 → 持续调用老 IP</span><br></pre></td></tr></table></figure>
+
+<p>回答开头两个问题：</p>
+<ol>
+<li><strong>会。</strong> 同接口配置不一致会产生多个 Bean：注解非默认属性参与 <code>ReferenceBean</code> 命名，属性不同就各建一个；属性完全一致则复用。</li>
+<li><strong>会，而且是确定性的。</strong> 旧版 <code>SpringCloudRegistry</code> 的变更监听器按 <code>generateId</code> 去重，这个 ID 抹掉了两个引用的全部差异，后订阅引用的监听器从未注册，推送永远只刷新先订阅的那个。<strong>同接口多引用 + <code>registry-type: spring-cloud</code>，100% 复现。</strong></li>
+</ol>
+<p>时序：</p>
+<pre class="mermaid">sequenceDiagram
+    participant K8s as K8s 重发布
+    participant N as Nacos Server
+    participant NC as nacos-client
+    participant AC as SCA AutoConfiguration
+    participant MC as Spring 事件多播器
+    participant L1 as 匿名监听器（引用①）
+    participant D1 as RegistryDirectory①
+    participant D2 as RegistryDirectory②
+
+    Note over D1,D2: 启动：doSubscribe 全量拉取，两引用列表均正确<br/>generateId 相同 → 仅①注册了变更监听器
+    K8s->>N: Pod 重建（IP：老 → 新）
+    N->>NC: NamingEvent
+    NC->>AC: Nacos EventListener 回调
+    AC->>MC: publishEvent(ServiceInstancesChangedEvent)
+    MC->>L1: onApplicationEvent（唯一注册的监听器）
+    L1->>D1: listener①.notify(新 IP 列表)
+    D1->>D1: refreshInvoker + destroyUnusedInvokers(老 IP)
+    Note over D2: 无监听器 → 无回调 → urlInvokerMap 仍是老 IP</pre>
+
+<p>触发条件：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>ReferenceBean 数量</th>
+<th>变更监听器</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>同接口、两处属性<strong>完全一致</strong></td>
+<td>1（复用）</td>
+<td>1 条（也只需要 1 条）</td>
+<td>无问题</td>
+</tr>
+<tr>
+<td>同接口、属性<strong>不一致</strong>（本次）</td>
+<td>2</td>
+<td>只注册 1 条，另一条被吞</td>
+<td><strong>单边刷新</strong></td>
+</tr>
+<tr>
+<td>不同接口</td>
+<td>各 1</td>
+<td>generateId 含接口名，天然不同</td>
+<td>无互相影响</td>
+</tr>
+<tr>
+<td><code>registry-type: dubbo-cloud</code>（默认）</td>
+<td>2</td>
+<td>单一监听器遍历所有 handler</td>
+<td>两个引用都会刷新</td>
+</tr>
+</tbody></table>
+<p>两个条件缺一不可：没有多 Bean，去重无害；多 Bean 但走默认 <code>dubbo-cloud</code>，<code>DubboCloudRegistry#onApplicationEvent</code> 会遍历 <code>urlSubscribeHandlerMap</code> 刷新所有订阅。</p>
+<p>对照一下默认实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DubboCloudRegistry#refreshGeneralServiceInfo（SCA 2.2.7）</span></span><br><span class="line">urlSubscribeHandlerMap.forEach((url, handler) -&gt; &#123;   <span class="comment">// key = 完整订阅 URL，两个引用两个 entry</span></span><br><span class="line">    <span class="keyword">if</span> (handler.relatedWith(appName, revision)) &#123;</span><br><span class="line">        urls2refresh.add(url);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">for</span> (URL url : urls2refresh) &#123;</span><br><span class="line">    handler.refresh();                               <span class="comment">// 各自 listener.notify</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>dubbo-cloud</code> 正常路径下两个引用都会刷新。它自己另有一条概率性坑：新 revision 首次出现时要 RPC 新实例的 <code>DubboMetadataService</code> 拉元数据，新 Pod 未就绪会失败（只打 warn），该 revision 不被登记、本轮不刷新，且后续事件不再重试。当前环境没走这条实现，仅作对照。</p>
+<h3 id="7-1-老-IP-被占用-vs-空闲"><a href="#7-1-老-IP-被占用-vs-空闲" class="headerlink" title="7.1 老 IP 被占用 vs 空闲"></a>7.1 老 IP 被占用 vs 空闲</h3><table>
+<thead>
+<tr>
+<th>老 IP 状态</th>
+<th>症状</th>
+<th>排查难度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>空闲，无 Pod</td>
+<td>TCP 连不上，直接超时 &#x2F; <code>RpcException</code>，<code>retries=2</code> 放大</td>
+<td>容易归因到「连的是老 IP」</td>
+</tr>
+<tr>
+<td>被其他应用占用（本次）</td>
+<td>握手成功，对端返回 <code>service not found</code></td>
+<td>很容易误判成 provider 端问题</td>
+</tr>
+</tbody></table>
+<h3 id="7-2-附带影响"><a href="#7-2-附带影响" class="headerlink" title="7.2 附带影响"></a>7.2 附带影响</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>注入正确性</td>
+<td>无影响。<code>@DubboReference</code> 直接返回 <code>referenceBean.get()</code>，不走按类型查找</td>
+</tr>
+<tr>
+<td>超时行为</td>
+<td><strong>分别生效</strong>：一侧 10s，另一侧默认 <strong>1000ms</strong>，批量查询 + 默认 2 次重试是隐患</td>
+</tr>
+<tr>
+<td>资源开销</td>
+<td>多一份订阅、一个 Directory、一条 Invoker 链；TCP 连接在协议层按地址池化，开销可控</td>
+</tr>
+<tr>
+<td>按类型注入</td>
+<td>两个 <code>ReferenceBean</code> 都以接口类型暴露，若再用 <code>@Autowired AccountNacosClient</code> 会 <code>NoUniqueBeanDefinitionException</code></td>
+</tr>
+<tr>
+<td>启动可观测</td>
+<td>启动完成 WARN：<code>xxx has 2 reference instances, there are: @Reference(timeout=10000) ..., @Reference ...</code></td>
+</tr>
+</tbody></table>
+<h2 id="8-验证方法"><a href="#8-验证方法" class="headerlink" title="8. 验证方法"></a>8. 验证方法</h2><ol>
+<li><strong>启动日志（多 Bean）</strong>：搜 <code>reference instances</code>，同一接口对应 2 个 reference bean 名称。</li>
+<li><strong>事件日志（单边刷新）</strong>：实例变更时 <code>The Dubbo Service URL[ID : consumer://&lt;ip&gt;/...AccountNacosClient...] is being subscribed for service[name: xxx]</code> 只出现<strong>一个 ID</strong>。同一接口本应每个引用刷新一次。</li>
+<li><strong>运行时定位（Arthas）</strong>：<ul>
+<li><code>vmtool --action getInstances --className org.apache.dubbo.registry.integration.RegistryDirectory --express &#39;instances.size()&#39;</code>，同一接口应看到 2 个 Directory。</li>
+<li>对两个实例分别 &#96;ognl ‘#invokers&#x3D;{@org.apache.dubbo.common.utils.ReflectUtils@getFieldValue(instance,”invokers”)}, #invokers.</li>
+</ul>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/nacos/" rel="tag"># nacos</a>
+              <a href="/tags/dubbo/" rel="tag"># dubbo</a>
+              <a href="/tags/spring-cloud/" rel="tag"># spring-cloud</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/09/13/fun/20260913-wow-mpq-dbc-replace/" rel="prev" title="WOW 3.3.5a MPQ 补丁归档 DBC 替换实战">
+      <i class="fa fa-chevron-left"></i> WOW 3.3.5a MPQ 补丁归档 DBC 替换实战
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E9%97%AE%E9%A2%98%E7%8E%B0%E8%B1%A1"><span class="nav-number">1.</span> <span class="nav-text">1. 问题现象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%BD%93%E5%89%8D%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">2. 当前环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E7%89%88%E6%9C%AC%E4%BA%8B%E5%AE%9E"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 版本事实</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E9%80%89%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 注册中心选型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E5%A4%9A%E5%BC%95%E7%94%A8%E5%A6%82%E4%BD%95%E5%BD%A2%E6%88%90%E4%B8%A4%E6%9D%A1%E7%8B%AC%E7%AB%8B%E8%AE%A2%E9%98%85"><span class="nav-number">3.</span> <span class="nav-text">3. 多引用如何形成两条独立订阅</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-DubboReference-%E6%B3%A8%E5%85%A5%E5%85%A5%E5%8F%A3%E4%B8%8E-bean-name"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 @DubboReference 注入入口与 bean name</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E8%AE%A2%E9%98%85-URL-%E4%BB%8E%E5%8F%82%E6%95%B0%E5%B1%82%E9%9D%A2%E5%88%86%E5%8F%89"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 订阅 URL 从参数层面分叉</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E9%A6%96%E6%AC%A1%E8%AE%A2%E9%98%85%E4%B8%BA%E4%BB%80%E4%B9%88%E7%9C%8B%E8%B5%B7%E6%9D%A5%E6%AD%A3%E5%B8%B8"><span class="nav-number">4.</span> <span class="nav-text">4. 首次订阅为什么看起来正常</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%8F%98%E6%9B%B4%E6%8E%A8%E9%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E5%88%B7%E6%96%B0%E4%B8%80%E4%B8%AA%E5%BC%95%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">5. 变更推送为什么只刷新一个引用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-Nacos-%E5%AE%9E%E4%BE%8B%E5%8F%98%E6%9B%B4%E5%A6%82%E4%BD%95%E5%88%B0%E8%BE%BE-SCA"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 Nacos 实例变更如何到达 SCA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-generateId-%E5%8E%BB%E9%87%8D%EF%BC%9Abug-%E4%BD%8D%E7%BD%AE"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 generateId 去重：bug 位置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-RegistryDirectory%EF%BC%9A%E5%9C%B0%E5%9D%80%E5%88%97%E8%A1%A8%E7%9A%84%E5%94%AF%E4%B8%80%E6%9B%B4%E6%96%B0%E5%85%A5%E5%8F%A3"><span class="nav-number">6.</span> <span class="nav-text">6. RegistryDirectory：地址列表的唯一更新入口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-notify-%E6%98%AF%E5%88%B7%E6%96%B0%E7%9A%84%E5%94%AF%E4%B8%80%E5%85%A5%E5%8F%A3"><span class="nav-number">6.1.</span> <span class="nav-text">6.1 notify 是刷新的唯一入口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-refreshInvoker%EF%BC%9A%E6%8D%A2%E6%96%B0%E5%88%97%E8%A1%A8%EF%BC%8C%E9%A1%BA%E6%89%8B%E9%94%80%E6%AF%81%E8%80%81-invoker"><span class="nav-number">6.2.</span> <span class="nav-text">6.2 refreshInvoker：换新列表，顺手销毁老 invoker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-%E4%B8%A4%E4%B8%AA%E5%BC%95%E7%94%A8%E5%9C%A8-notify-%E4%B9%8B%E5%90%8E%E7%9A%84%E5%88%86%E5%8F%89"><span class="nav-number">6.3.</span> <span class="nav-text">6.3 两个引用在 notify 之后的分叉</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E6%A0%B9%E5%9B%A0%E9%93%BE%E6%9D%A1"><span class="nav-number">7.</span> <span class="nav-text">7. 根因链条</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-%E8%80%81-IP-%E8%A2%AB%E5%8D%A0%E7%94%A8-vs-%E7%A9%BA%E9%97%B2"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 老 IP 被占用 vs 空闲</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-%E9%99%84%E5%B8%A6%E5%BD%B1%E5%93%8D"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 附带影响</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E9%AA%8C%E8%AF%81%E6%96%B9%E6%B3%95"><span class="nav-number">8.</span> <span class="nav-text">8. 验证方法</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">280</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">161</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-overlay.is-active {
+  display: flex;
+}
+.mermaid-zoom-content {
+  position: relative;
+  width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-content svg {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.mermaid-zoom-content pre.mermaid,
+.mermaid-zoom-content .mermaid {
+  cursor: default;
+  text-align: center;
+  background: transparent;
+}
+.mermaid-zoom-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mermaid-zoom-close:focus {
+  outline: 2px solid #fff;
+}
+.post-body pre.mermaid,
+.post-body .mermaid {
+  cursor: zoom-in;
+}
+.post-body pre.mermaid:hover,
+.post-body .mermaid:hover {
+  opacity: .98;
+}
+</style>
+<script>
+(function() {
+  function openZoom(root) {
+    var clone = root.cloneNode(true);
+    clone.style.maxWidth = '';
+    clone.style.maxHeight = '';
+    clone.classList.remove('mermaid-click-zoom-root');
+
+    var hint = root.querySelector('.mermaid-click-zoom-hint');
+    if (hint) hint.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'mermaid-zoom-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Mermaid zoom');
+
+    var content = document.createElement('div');
+    content.className = 'mermaid-zoom-content';
+
+    var close = document.createElement('button');
+    close.className = 'mermaid-zoom-close';
+    close.type = 'button';
+    close.textContent = 'Close';
+    close.addEventListener('click', function() {
+      closeZoom(overlay);
+    });
+
+    content.appendChild(close);
+    content.appendChild(clone);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    overlay.addEventListener('click', function(event) {
+      if (event.target === overlay) {
+        closeZoom(overlay);
+      }
+    });
+
+    requestAnimationFrame(function() {
+      overlay.classList.add('is-active');
+      close.focus();
+    });
+  }
+
+  function closeZoom(overlay) {
+    overlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }
+
+  function openZoomFromTarget(target) {
+    var root = target.closest('.post-body pre.mermaid, .post-body .mermaid');
+    if (!root) return;
+    openZoom(root);
+  }
+
+  function bindMermaidZoom() {
+    var container = document.querySelector('.post-body') || document.body;
+    if (container.dataset.mermaidZoomDelegate === 'true') return;
+    container.dataset.mermaidZoomDelegate = 'true';
+
+    container.addEventListener('click', function(event) {
+      if (event.target.closest('.mermaid-zoom-overlay')) return;
+      openZoomFromTarget(event.target);
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        var active = document.querySelector('.mermaid-zoom-overlay.is-active');
+        if (active) closeZoom(active);
+      }
+    });
+  }
+
+  function ensureBoundAfterRender() {
+    bindMermaidZoom();
+
+    var pre = document.querySelector('.post-body pre.mermaid, .post-body .mermaid');
+    if (!pre) return;
+
+    if (pre.querySelector('svg')) {
+      return;
+    }
+
+    if (typeof MutationObserver === 'undefined') return;
+
+    var observer = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].target.querySelector && mutations[i].target.querySelector('svg')) {
+          bindMermaidZoom();
+          observer.disconnect();
+          return;
+        }
+      }
+    });
+    observer.observe(pre.parentNode, { childList: true, subtree: true, attributes: false, characterData: false });
+
+    setTimeout(function() {
+      observer.disconnect();
+      bindMermaidZoom();
+    }, 3000);
+  }
+
+  if (document.querySelectorAll('pre.mermaid').length) {
+    NexT.utils.getScript('/lib/mermaid.min.js', function() {
+      mermaid.initialize({
+        theme    : 'forest',
+        logLevel : 3,
+        flowchart: { curve     : 'linear' },
+        gantt    : { axisFormat: '%m/%d/%Y' },
+        sequence : { actorMargin: 50 },
+        startOnLoad: true
+      });
+      ensureBoundAfterRender();
+    }, window.mermaid);
+  } else {
+    ensureBoundAfterRender();
+  }
+})();
+</script>
+
+  
+
+  
+
+</body>
+</html>
