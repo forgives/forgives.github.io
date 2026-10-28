@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="逆向百度网盘成长值签到与每日答题自动化，含 2026-10 新版接口参数与防风控设计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="逆向百度网盘签到自动化">
+<meta property="og:url" content="https://forgives.github.io/2026/10/28/crack/20261028-baidupan-checkin-crack/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="逆向百度网盘成长值签到与每日答题自动化，含 2026-10 新版接口参数与防风控设计">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-28T13:30:00.000Z">
+<meta property="article:modified_time" content="2026-10-28T12:51:23.260Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="reverse">
+<meta property="article:tag" content="baidu">
+<meta property="article:tag" content="checkin">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/10/28/crack/20261028-baidupan-checkin-crack/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>逆向百度网盘签到自动化 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/10/28/crack/20261028-baidupan-checkin-crack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          逆向百度网盘签到自动化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-10-28 21:30:00" itemprop="dateCreated datePublished" datetime="2026-10-28T21:30:00+08:00">2026-10-28</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>网上流传的百度网盘签到脚本几乎都用的同一套接口，拿来实测直接报 400。排查发现这批接口已经被百度下线了一年左右，现行可用的参数组合完全不同。本文记录从排查到复现的完整过程，以及防封号的请求编排设计。</p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>百度网盘会员有一套成长值体系，每天可以白嫖两笔成长值：</p>
+<ul>
+<li><strong>签到</strong>：每日签到领成长值（连续签到有递增奖励）</li>
+<li><strong>答题</strong>：每日一题，接口直接返回答案，提交就给分</li>
+</ul>
+<p>老版本脚本（各大签到聚合项目抄来抄去的版本）都是这三个请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GET https://pan.baidu.com/rest/2.0/membership/level?app_id=250528&amp;web=5&amp;method=signin</span><br><span class="line">GET https://pan.baidu.com/act/v2/membergrowv2/getdailyquestion?app_id=250528&amp;web=5</span><br><span class="line">GET https://pan.baidu.com/act/v2/membergrowv2/answerquestion?app_id=250528&amp;web=5&amp;ask_id=xxx&amp;answer=x</span><br></pre></td></tr></table></figure>
+
+<p>带 BDUSS cookie 实测第一个请求直接挂：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">HTTP 400</span><br><span class="line">&#123;&quot;error_code&quot;:100002,&quot;error_msg&quot;:&quot;Param error&quot;,&quot;request_id&quot;:&quot;...&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="排查过程"><a href="#排查过程" class="headerlink" title="排查过程"></a>排查过程</h2><h3 id="先排除-cookie-问题"><a href="#先排除-cookie-问题" class="headerlink" title="先排除 cookie 问题"></a>先排除 cookie 问题</h3><p>第一步是分清”cookie 失效”还是”接口变了”。拿同一个 cookie 打两个不同端点：</p>
+<table>
+<thead>
+<tr>
+<th>端点</th>
+<th>参数</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/rest/2.0/membership/user?method=query</code></td>
+<td><code>web=5</code></td>
+<td>200，返回真实会员数据（等级 9、成长值 69925、年度 SVIP）</td>
+</tr>
+<tr>
+<td><code>/rest/2.0/membership/level?method=query</code></td>
+<td><code>web=5</code></td>
+<td>400 + 100002 Param error</td>
+</tr>
+<tr>
+<td><code>/rest/2.0/membership/level?method=signin</code></td>
+<td><code>web=5</code></td>
+<td>400 + 100002 Param error</td>
+</tr>
+</tbody></table>
+<p>结论很清晰：cookie 是好的（user 接口正常吐数据），是 <code>membership/level</code> 这个端点的<strong>参数契约</strong>变了。再换成无 cookie 请求 level 端点，同样 400——它压根没走到鉴权那步，参数校验就拒了。</p>
+<p>换 <code>web=1</code>、POST、加 <code>clienttype=0</code> 等参数变体全部无效，这条老路彻底死了。</p>
+<h3 id="GitHub-考古"><a href="#GitHub-考古" class="headerlink" title="GitHub 考古"></a>GitHub 考古</h3><p>去翻还在维护的签到项目，<a target="_blank" rel="noopener" href="https://github.com/Sitoi/dailycheckin">Sitoi&#x2F;dailycheckin</a> 的 issue #534（2025-10）就在报”百度网盘签到无反应”，至今没修——全量代码搜索发现几十个项目还在抄这套死掉的接口。</p>
+<p>唯一有价值的是 <a target="_blank" rel="noopener" href="https://github.com/xvkong233/qlscript">xvkong233&#x2F;qlscript</a> 的 <code>baidu_netdisk.py</code>：作者在 2026-10 用 App 13.34.3 真机抓包重做了整套实现，注释里连反欺诈指纹、风控错误码表都写全了。从中拿到关键结论：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 成长值通道现行参数组合</span></span><br><span class="line">QUERY_PARAMS = &#123;<span class="string">&quot;app_id&quot;</span>: <span class="string">&quot;250528&quot;</span>, <span class="string">&quot;web&quot;</span>: <span class="string">&quot;1&quot;</span>, <span class="string">&quot;clienttype&quot;</span>: <span class="string">&quot;5&quot;</span>, <span class="string">&quot;clientinfo&quot;</span>: <span class="string">&quot;wap&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>老接口 <code>web=5</code> 被服务端下线，现行可用的是 <code>web=1&amp;clienttype=5&amp;clientinfo=wap</code>（wap 网页端通道）。</p>
+<h2 id="现行接口"><a href="#现行接口" class="headerlink" title="现行接口"></a>现行接口</h2><p>以下全部实测验证过（2026-10-28）。请求头只需要三条：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HEADERS = &#123;</span><br><span class="line">    <span class="string">&quot;User-Agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 (Linux; Android 16; Xiaomi 17 Pro Max) &quot;</span></span><br><span class="line">                  <span class="string">&quot;AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Referer&quot;</span>: <span class="string">&quot;https://pan.baidu.com/wap/svip/growth/task&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Accept&quot;</span>: <span class="string">&quot;application/json, text/plain, */*&quot;</span>,</span><br><span class="line">    <span class="string">&quot;X-Requested-With&quot;</span>: <span class="string">&quot;XMLHttpRequest&quot;</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-签到状态查询（只读）"><a href="#1-签到状态查询（只读）" class="headerlink" title="1. 签到状态查询（只读）"></a>1. 签到状态查询（只读）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /rest/2.0/membership/level?app_id=250528&amp;web=1&amp;clienttype=5&amp;clientinfo=wap&amp;method=signinlist</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">            <span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span> <span class="attr">&quot;is_signin&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span> <span class="attr">&quot;points&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">,</span> <span class="attr">&quot;is_signin&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span> <span class="attr">&quot;points&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">7</span><span class="punctuation">,</span> <span class="attr">&quot;is_signin&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span> <span class="attr">&quot;points&quot;</span><span class="punctuation">:</span> <span class="number">14</span><span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;signed_cnt&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;today_signed&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;error_code&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;error_msg&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>today_signed</code> 是当日是否已签的权威判定，<code>signed_cnt</code> 是连续签到天数，<code>list</code> 是本月签到日历（id 即第几天，<code>points</code> 是当日可领成长值）。</p>
+<h3 id="2-签到（写）"><a href="#2-签到（写）" class="headerlink" title="2. 签到（写）"></a>2. 签到（写）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /rest/2.0/membership/level?app_id=250528&amp;web=1&amp;clienttype=5&amp;clientinfo=wap&amp;method=signin</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;error_code&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;error_msg&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;result&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;points&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>签完再查一次 signinlist，日历第一天 <code>is_signin</code> 变 <code>true</code>、<code>signed_cnt</code> 变 1。重复请求时返回 <code>error_code: 421001</code>（error_msg 含 repeat）。</p>
+<h3 id="3-每日答题（这组接口用老参数-web-5-反而活着）"><a href="#3-每日答题（这组接口用老参数-web-5-反而活着）" class="headerlink" title="3. 每日答题（这组接口用老参数 web&#x3D;5 反而活着）"></a>3. 每日答题（这组接口用老参数 web&#x3D;5 反而活着）</h3><p>取题：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /act/v2/membergrowv2/getdailyquestion?app_id=250528&amp;web=5</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;answer&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;answer_status&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;ask_id&quot;</span><span class="punctuation">:</span> <span class="number">1237</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;question&quot;</span><span class="punctuation">:</span> <span class="string">&quot;做成长值任务是否可以加速提升会员等级？&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;score&quot;</span><span class="punctuation">:</span> <span class="number">3</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;errno&quot;</span><span class="punctuation">:</span> <span class="number">0</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>answer</code> 字段直接就是正确答案的序号——出题接口就是答案接口。<code>answer_status: 1</code> 表示今天已答过。</p>
+<p>提交（把取到的 ask_id 和 answer 原样带回去）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /act/v2/membergrowv2/answerquestion?app_id=250528&amp;web=5&amp;ask_id=1237&amp;answer=1</span><br></pre></td></tr></table></figure>
+
+<p>成功响应含 <code>data.score</code>；重复提交返回 <code>errno: 9502</code>。</p>
+<h3 id="4-会员信息（顺带验证签到收益）"><a href="#4-会员信息（顺带验证签到收益）" class="headerlink" title="4. 会员信息（顺带验证签到收益）"></a>4. 会员信息（顺带验证签到收益）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /rest/2.0/membership/user?app_id=250528&amp;web=5&amp;method=query</span><br></pre></td></tr></table></figure>
+
+<p>成长值在 <code>level_info</code> 里：<code>current_level</code>（等级）、<code>current_value</code>（成长值）。实测签到 +2 后这里从 69925 变 69927，数字对得上。</p>
+<h2 id="关键细节"><a href="#关键细节" class="headerlink" title="关键细节"></a>关键细节</h2><h3 id="cookie-放会话-jar，不要写死-Cookie-头"><a href="#cookie-放会话-jar，不要写死-Cookie-头" class="headerlink" title="cookie 放会话 jar，不要写死 Cookie 头"></a>cookie 放会话 jar，不要写死 Cookie 头</h3><p>把 cookie 字符串塞进 <code>requests.Session().cookies</code>（domain 填 <code>.baidu.com</code>），而不是拼到请求头里。原因：请求过程中服务端会下发 <code>BAIDUID</code>、<code>PANWEB</code> 等 Set-Cookie，会话 jar 会自动带上后续请求，写死 Cookie 头这些就全丢了，会话上下文不完整，风控侧看起来就是异常客户端。</p>
+<p>cookie 要求很低：成长值&#x2F;答题&#x2F;信息查询这条链路<strong>只要 BDUSS 一个字段</strong>就够（实测无 STOKEN 全通）。整串浏览器 cookie 复制进来也行。</p>
+<h3 id="判定位汇总"><a href="#判定位汇总" class="headerlink" title="判定位汇总"></a>判定位汇总</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>签到状态</td>
+<td><code>data.today_signed</code></td>
+</tr>
+<tr>
+<td>签到成功</td>
+<td><code>error_code == 0</code>，积分在 <code>result.points</code></td>
+</tr>
+<tr>
+<td>重复签到</td>
+<td><code>error_code == 421001</code> 或 error_msg 含 repeat&#x2F;已签</td>
+</tr>
+<tr>
+<td>cookie 失效</td>
+<td><code>error_code == -6</code> 或 error_msg 含”登录”</td>
+</tr>
+<tr>
+<td>取题成功</td>
+<td><code>errno == 0</code>，答案在 <code>data.answer</code>&#x2F;<code>data.ask_id</code></td>
+</tr>
+<tr>
+<td>已答过</td>
+<td><code>data.answer_status == 1</code>（取题时）或 <code>errno == 9502</code>（提交时）</td>
+</tr>
+<tr>
+<td>答题成功</td>
+<td>响应含 <code>data.score</code></td>
+</tr>
+</tbody></table>
+<h2 id="Python-实现"><a href="#Python-实现" class="headerlink" title="Python 实现"></a>Python 实现</h2><p>自包含版本，cookie 作为参数传入，结果直接打印：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">API_BASE = <span class="string">&quot;https://pan.baidu.com&quot;</span></span><br><span class="line"><span class="comment"># 2026-10 实测：签到通道必须用 web=1 + clienttype=5 + clientinfo=wap，</span></span><br><span class="line"><span class="comment"># 网上流传的 web=5 组合已被服务端下线（400 + 100002 Param error）</span></span><br><span class="line">SIGNIN_PARAMS = &#123;<span class="string">&quot;app_id&quot;</span>: <span class="string">&quot;250528&quot;</span>, <span class="string">&quot;web&quot;</span>: <span class="string">&quot;1&quot;</span>, <span class="string">&quot;clienttype&quot;</span>: <span class="string">&quot;5&quot;</span>, <span class="string">&quot;clientinfo&quot;</span>: <span class="string">&quot;wap&quot;</span>&#125;</span><br><span class="line">GROWTH_PARAMS = &#123;<span class="string">&quot;app_id&quot;</span>: <span class="string">&quot;250528&quot;</span>, <span class="string">&quot;web&quot;</span>: <span class="string">&quot;5&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line">UA = (<span class="string">&quot;Mozilla/5.0 (Linux; Android 16; Xiaomi 17 Pro Max) &quot;</span></span><br><span class="line">      <span class="string">&quot;AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">build_session</span>(<span class="params">cookie_str: <span class="built_in">str</span></span>) -&gt; requests.Session:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;cookie 放入会话 jar 而非写死 Cookie 头，</span></span><br><span class="line"><span class="string">    保证服务端运行中下发的 cookie（BAIDUID/PANWEB 等）能在后续请求回传&quot;&quot;&quot;</span></span><br><span class="line">    session = requests.Session()</span><br><span class="line">    session.headers.update(&#123;</span><br><span class="line">        <span class="string">&quot;User-Agent&quot;</span>: UA,</span><br><span class="line">        <span class="string">&quot;Referer&quot;</span>: <span class="string">&quot;https://pan.baidu.com/wap/svip/growth/task&quot;</span>,</span><br><span class="line">        <span class="string">&quot;Accept&quot;</span>: <span class="string">&quot;application/json, text/plain, */*&quot;</span>,</span><br><span class="line">        <span class="string">&quot;X-Requested-With&quot;</span>: <span class="string">&quot;XMLHttpRequest&quot;</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">for</span> part <span class="keyword">in</span> re.split(<span class="string">r&quot;[;\n]+\s*&quot;</span>, cookie_str):</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&quot;=&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> part:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        name, value = part.split(<span class="string">&quot;=&quot;</span>, <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> name.strip():</span><br><span class="line">            session.cookies.<span class="built_in">set</span>(name.strip(), value.strip(), domain=<span class="string">&quot;.baidu.com&quot;</span>, path=<span class="string">&quot;/&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> session</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pan_get_json</span>(<span class="params">session, path, params</span>):</span><br><span class="line">    resp = session.get(API_BASE + path, params=params, timeout=<span class="number">15</span>)</span><br><span class="line">    <span class="keyword">if</span> resp.status_code != <span class="number">200</span>:</span><br><span class="line">        <span class="keyword">raise</span> RuntimeError(<span class="string">f&quot;HTTP <span class="subst">&#123;resp.status_code&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> resp.json()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">growth_signin</span>(<span class="params">session</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;成长值签到：先读 signinlist 判断今日是否已签（避免重复写请求触发风控），</span></span><br><span class="line"><span class="string">    未签才调用 signin&quot;&quot;&quot;</span></span><br><span class="line">    data = pan_get_json(session, <span class="string">&quot;/rest/2.0/membership/level&quot;</span>,</span><br><span class="line">                        <span class="built_in">dict</span>(SIGNIN_PARAMS, method=<span class="string">&quot;signinlist&quot;</span>))</span><br><span class="line">    <span class="keyword">if</span> data.get(<span class="string">&quot;error_code&quot;</span>) != <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">f&quot;签到状态查询失败: <span class="subst">&#123;data.get(<span class="string">&#x27;error_msg&#x27;</span>) <span class="keyword">or</span> data&#125;</span>&quot;</span></span><br><span class="line">    inner = data.get(<span class="string">&quot;data&quot;</span>) <span class="keyword">or</span> &#123;&#125;</span><br><span class="line">    <span class="keyword">if</span> inner.get(<span class="string">&quot;today_signed&quot;</span>):</span><br><span class="line">        cnt = inner.get(<span class="string">&quot;signed_cnt&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="string">f&quot;今日已签到, 已连续签到 <span class="subst">&#123;cnt&#125;</span> 天&quot;</span> <span class="keyword">if</span> cnt <span class="keyword">else</span> <span class="string">&quot;今日已签到&quot;</span></span><br><span class="line"></span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    result = pan_get_json(session, <span class="string">&quot;/rest/2.0/membership/level&quot;</span>,</span><br><span class="line">                          <span class="built_in">dict</span>(SIGNIN_PARAMS, method=<span class="string">&quot;signin&quot;</span>))</span><br><span class="line">    code = result.get(<span class="string">&quot;error_code&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> code == <span class="number">0</span>:</span><br><span class="line">        points = (result.get(<span class="string">&quot;result&quot;</span>) <span class="keyword">or</span> &#123;&#125;).get(<span class="string">&quot;points&quot;</span>)</span><br><span class="line">        cnt = inner.get(<span class="string">&quot;signed_cnt&quot;</span>)</span><br><span class="line">        msg = <span class="string">f&quot;签到成功, 获得成长值: <span class="subst">&#123;points <span class="keyword">if</span> points <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">else</span> <span class="string">&#x27;未知&#x27;</span>&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">if</span> cnt:</span><br><span class="line">            msg += <span class="string">f&quot;, 已连续签到 <span class="subst">&#123;cnt + <span class="number">1</span>&#125;</span> 天&quot;</span></span><br><span class="line">        <span class="keyword">return</span> msg</span><br><span class="line">    error_msg = <span class="built_in">str</span>(result.get(<span class="string">&quot;error_msg&quot;</span>) <span class="keyword">or</span> <span class="string">&quot;&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> code == <span class="number">421001</span> <span class="keyword">or</span> <span class="string">&quot;repeat&quot;</span> <span class="keyword">in</span> error_msg.lower() <span class="keyword">or</span> <span class="string">&quot;已签&quot;</span> <span class="keyword">in</span> error_msg:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;今日已签到(重复请求)&quot;</span></span><br><span class="line">    <span class="keyword">if</span> code == -<span class="number">6</span> <span class="keyword">or</span> <span class="string">&quot;登录&quot;</span> <span class="keyword">in</span> error_msg:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;签到失败: cookie(BDUSS) 已失效&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;签到失败: <span class="subst">&#123;error_msg&#125;</span> (error_code=<span class="subst">&#123;code&#125;</span>)&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">answer_daily_question</span>(<span class="params">session</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;每日答题：出题接口直接返回答案，照抄提交即可；</span></span><br><span class="line"><span class="string">    answer_status=1 表示今天已答过，直接短路，不再发提交请求&quot;&quot;&quot;</span></span><br><span class="line">    data = pan_get_json(session, <span class="string">&quot;/act/v2/membergrowv2/getdailyquestion&quot;</span>, <span class="built_in">dict</span>(GROWTH_PARAMS))</span><br><span class="line">    <span class="keyword">if</span> data.get(<span class="string">&quot;errno&quot;</span>) <span class="keyword">not</span> <span class="keyword">in</span> (<span class="number">0</span>, <span class="literal">None</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="string">f&quot;获取日常问题失败: <span class="subst">&#123;data.get(<span class="string">&#x27;show_msg&#x27;</span>) <span class="keyword">or</span> data.get(<span class="string">&#x27;errno&#x27;</span>)&#125;</span>&quot;</span></span><br><span class="line">    inner = data.get(<span class="string">&quot;data&quot;</span>) <span class="keyword">or</span> &#123;&#125;</span><br><span class="line">    ask_id, answer = inner.get(<span class="string">&quot;ask_id&quot;</span>), inner.get(<span class="string">&quot;answer&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> ask_id:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;未找到日常问题或答案&quot;</span></span><br><span class="line">    <span class="keyword">if</span> inner.get(<span class="string">&quot;answer_status&quot;</span>) == <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;今日已答题&quot;</span></span><br><span class="line">    <span class="keyword">if</span> answer <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;今日题目暂无答案, 跳过答题&quot;</span></span><br><span class="line"></span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    result = pan_get_json(session, <span class="string">&quot;/act/v2/membergrowv2/answerquestion&quot;</span>,</span><br><span class="line">                          <span class="built_in">dict</span>(GROWTH_PARAMS, ask_id=ask_id, answer=answer))</span><br><span class="line">    <span class="keyword">if</span> result.get(<span class="string">&quot;errno&quot;</span>) == <span class="number">9502</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;今日已答题&quot;</span></span><br><span class="line">    score = (result.get(<span class="string">&quot;data&quot;</span>) <span class="keyword">or</span> &#123;&#125;).get(<span class="string">&quot;score&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> score <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">f&quot;答题成功, 获得成长值: <span class="subst">&#123;score&#125;</span>&quot;</span></span><br><span class="line">    show_msg = (result.get(<span class="string">&quot;data&quot;</span>) <span class="keyword">or</span> &#123;&#125;).get(<span class="string">&quot;show_msg&quot;</span>) <span class="keyword">or</span> result.get(<span class="string">&quot;show_msg&quot;</span>) <span class="keyword">or</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;答题未生效: <span class="subst">&#123;show_msg <span class="keyword">or</span> result&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_user_info</span>(<span class="params">session</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;查询会员等级与成长值&quot;&quot;&quot;</span></span><br><span class="line">    data = pan_get_json(session, <span class="string">&quot;/rest/2.0/membership/user&quot;</span>,</span><br><span class="line">                        <span class="built_in">dict</span>(GROWTH_PARAMS, method=<span class="string">&quot;query&quot;</span>))</span><br><span class="line">    info = data.get(<span class="string">&quot;level_info&quot;</span>) <span class="keyword">or</span> &#123;&#125;</span><br><span class="line">    level, value = info.get(<span class="string">&quot;current_level&quot;</span>), info.get(<span class="string">&quot;current_value&quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> level <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> value <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;获取用户信息失败: 响应中未找到等级/成长值字段&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">f&quot;当前会员等级: <span class="subst">&#123;level&#125;</span>, 成长值: <span class="subst">&#123;value&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">baidupan_checkin</span>(<span class="params">cookie_str: <span class="built_in">str</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;流程: 成长值签到 → 每日答题 → 查询会员等级与成长值&quot;&quot;&quot;</span></span><br><span class="line">    session = build_session(cookie_str)</span><br><span class="line">    results = [growth_signin(session)]</span><br><span class="line">    time.sleep(<span class="number">3</span>)</span><br><span class="line">    results.append(answer_daily_question(session))</span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line">    results.append(get_user_info(session))</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n&quot;</span>.join(results)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    cookie = <span class="string">&quot;BDUSS=xxxxxxxx&quot;</span>  <span class="comment"># 浏览器登录 pan.baidu.com 后复制，仅 BDUSS 必需</span></span><br><span class="line">    <span class="built_in">print</span>(baidupan_checkin(cookie))</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行效果"><a href="#运行效果" class="headerlink" title="运行效果"></a>运行效果</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ python baidupan_checkin.py</span><br><span class="line">签到成功, 获得成长值: 2, 已连续签到 1 天</span><br><span class="line">今日已答题</span><br><span class="line">当前会员等级: 9, 成长值: 69927</span><br></pre></td></tr></table></figure>
+
+<p>第二次运行（幂等路径，只有只读请求）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ python baidupan_checkin.py</span><br><span class="line">今日已签到, 已连续签到 1 天</span><br><span class="line">今日已答题</span><br><span class="line">当前会员等级: 9, 成长值: 69927</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="防封号设计"><a href="#防封号设计" class="headerlink" title="防封号设计"></a>防封号设计</h2><p>签到类自动化最大的风险不是接口，是请求行为把自己送进风控。这套实现的约束：</p>
+<ol>
+<li><strong>先查后写</strong>：<code>signinlist</code> 是只读查询，先看 <code>today_signed</code>，已签就绝不再发 <code>signin</code> 写请求。写请求每天最多出现一次</li>
+<li><strong>幂等短路</strong>：答题先看 <code>answer_status</code>，已答过不发提交请求；服务端兜底的 421001&#x2F;9502 也按”已签&#x2F;已答”归为幂等成功，不重试</li>
+<li><strong>请求量恒定</strong>：每天全流程 3<del>5 个请求（3 只读 + 最多 2 写），间隔 2</del>3 秒，不并发、不重试轰炸</li>
+<li><strong>浏览器同源</strong>：UA&#x2F;Referer 对齐 wap 成长值任务页，cookie 走会话 jar 保持会话连续性</li>
+</ol>
+<p>即便脚本一天跑多次，重复执行时全部走只读路径，行为等价于多刷新了几次页面。</p>
+<h2 id="边界：没做的事"><a href="#边界：没做的事" class="headerlink" title="边界：没做的事"></a>边界：没做的事</h2><p>百度任务体系还有几条通道，逆向结论记录在这里但<strong>没有自动化</strong>：</p>
+<ul>
+<li><strong>任务中心签到</strong>（<code>/coins/taskcenter/signin</code>，金币&#x2F;任务系统 H5）：必须带 <code>z</code>&#x2F;<code>channel</code>&#x2F;<code>offlinepackage</code> 等完整客户端参数，其中 <code>z</code> 是 sofire 反欺诈指纹（<code>com.baidu.sofire.ac.FH.gz</code>），由设备+登录态在本机算出，<strong>不能跨账号&#x2F;跨设备复放</strong>，拿别人的抓包值只会收到 errno&#x3D;2。要自动化这条通道得上 Frida 在真机现场取指纹，成本完全不成比例</li>
+<li><strong>PC 积分签到</strong>（<code>/coins/pc/signin</code>）：需要伪装 PC 客户端 Electron UA，奖励是金币不是成长值</li>
+<li><strong>补签</strong>（<code>/coins/taskcenter/suppsignin</code>）：与任务中心共用设备链和 z 指纹，同上不碰</li>
+</ul>
+<p>成长值签到+答题这条 BDUSS 就能走的通道，是整套体系里唯一不需要对抗设备指纹的，性价比最高。</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/xvkong233/qlscript">xvkong233&#x2F;qlscript</a> - 2026-10 真机抓包的全量实现，本文新参数来源</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/Sitoi/dailycheckin/issues/534">Sitoi&#x2F;dailycheckin#534</a> - 老接口失效的公开 issue</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/power721/PowerList">power721&#x2F;PowerList</a> - Go 版同类实现（用的还是死掉的老接口，仅作旁证）</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/reverse/" rel="tag"># reverse</a>
+              <a href="/tags/baidu/" rel="tag"># baidu</a>
+              <a href="/tags/checkin/" rel="tag"># checkin</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/09/16/java/20260916-dubbo-spring-cloud-registry-notify-lost/" rel="prev" title="同接口多引用 × Spring Cloud 注册中心变更推送丢失">
+      <i class="fa fa-chevron-left"></i> 同接口多引用 × Spring Cloud 注册中心变更推送丢失
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%92%E6%9F%A5%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">排查过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%88%E6%8E%92%E9%99%A4-cookie-%E9%97%AE%E9%A2%98"><span class="nav-number">2.1.</span> <span class="nav-text">先排除 cookie 问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GitHub-%E8%80%83%E5%8F%A4"><span class="nav-number">2.2.</span> <span class="nav-text">GitHub 考古</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E8%A1%8C%E6%8E%A5%E5%8F%A3"><span class="nav-number">3.</span> <span class="nav-text">现行接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%AD%BE%E5%88%B0%E7%8A%B6%E6%80%81%E6%9F%A5%E8%AF%A2%EF%BC%88%E5%8F%AA%E8%AF%BB%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">1. 签到状态查询（只读）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%AD%BE%E5%88%B0%EF%BC%88%E5%86%99%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">2. 签到（写）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%AF%8F%E6%97%A5%E7%AD%94%E9%A2%98%EF%BC%88%E8%BF%99%E7%BB%84%E6%8E%A5%E5%8F%A3%E7%94%A8%E8%80%81%E5%8F%82%E6%95%B0-web-5-%E5%8F%8D%E8%80%8C%E6%B4%BB%E7%9D%80%EF%BC%89"><span class="nav-number">3.3.</span> <span class="nav-text">3. 每日答题（这组接口用老参数 web&#x3D;5 反而活着）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BC%9A%E5%91%98%E4%BF%A1%E6%81%AF%EF%BC%88%E9%A1%BA%E5%B8%A6%E9%AA%8C%E8%AF%81%E7%AD%BE%E5%88%B0%E6%94%B6%E7%9B%8A%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">4. 会员信息（顺带验证签到收益）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E7%BB%86%E8%8A%82"><span class="nav-number">4.</span> <span class="nav-text">关键细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cookie-%E6%94%BE%E4%BC%9A%E8%AF%9D-jar%EF%BC%8C%E4%B8%8D%E8%A6%81%E5%86%99%E6%AD%BB-Cookie-%E5%A4%B4"><span class="nav-number">4.1.</span> <span class="nav-text">cookie 放会话 jar，不要写死 Cookie 头</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E5%AE%9A%E4%BD%8D%E6%B1%87%E6%80%BB"><span class="nav-number">4.2.</span> <span class="nav-text">判定位汇总</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-%E5%AE%9E%E7%8E%B0"><span class="nav-number">5.</span> <span class="nav-text">Python 实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%95%88%E6%9E%9C"><span class="nav-number">6.</span> <span class="nav-text">运行效果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%B2%E5%B0%81%E5%8F%B7%E8%AE%BE%E8%AE%A1"><span class="nav-number">7.</span> <span class="nav-text">防封号设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%B9%E7%95%8C%EF%BC%9A%E6%B2%A1%E5%81%9A%E7%9A%84%E4%BA%8B"><span class="nav-number">8.</span> <span class="nav-text">边界：没做的事</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reference"><span class="nav-number">9.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">281</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">163</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-overlay.is-active {
+  display: flex;
+}
+.mermaid-zoom-content {
+  position: relative;
+  width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-content svg {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.mermaid-zoom-content pre.mermaid,
+.mermaid-zoom-content .mermaid {
+  cursor: default;
+  text-align: center;
+  background: transparent;
+}
+.mermaid-zoom-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mermaid-zoom-close:focus {
+  outline: 2px solid #fff;
+}
+.post-body pre.mermaid,
+.post-body .mermaid {
+  cursor: zoom-in;
+}
+.post-body pre.mermaid:hover,
+.post-body .mermaid:hover {
+  opacity: .98;
+}
+</style>
+<script>
+(function() {
+  function openZoom(root) {
+    var clone = root.cloneNode(true);
+    clone.style.maxWidth = '';
+    clone.style.maxHeight = '';
+    clone.classList.remove('mermaid-click-zoom-root');
+
+    var hint = root.querySelector('.mermaid-click-zoom-hint');
+    if (hint) hint.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'mermaid-zoom-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Mermaid zoom');
+
+    var content = document.createElement('div');
+    content.className = 'mermaid-zoom-content';
+
+    var close = document.createElement('button');
+    close.className = 'mermaid-zoom-close';
+    close.type = 'button';
+    close.textContent = 'Close';
+    close.addEventListener('click', function() {
+      closeZoom(overlay);
+    });
+
+    content.appendChild(close);
+    content.appendChild(clone);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    overlay.addEventListener('click', function(event) {
+      if (event.target === overlay) {
+        closeZoom(overlay);
+      }
+    });
+
+    requestAnimationFrame(function() {
+      overlay.classList.add('is-active');
+      close.focus();
+    });
+  }
+
+  function closeZoom(overlay) {
+    overlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }
+
+  function openZoomFromTarget(target) {
+    var root = target.closest('.post-body pre.mermaid, .post-body .mermaid');
+    if (!root) return;
+    openZoom(root);
+  }
+
+  function bindMermaidZoom() {
+    var container = document.querySelector('.post-body') || document.body;
+    if (container.dataset.mermaidZoomDelegate === 'true') return;
+    container.dataset.mermaidZoomDelegate = 'true';
+
+    container.addEventListener('click', function(event) {
+      if (event.target.closest('.mermaid-zoom-overlay')) return;
+      openZoomFromTarget(event.target);
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        var active = document.querySelector('.mermaid-zoom-overlay.is-active');
+        if (active) closeZoom(active);
+      }
+    });
+  }
+
+  function ensureBoundAfterRender() {
+    bindMermaidZoom();
+
+    var pre = document.querySelector('.post-body pre.mermaid, .post-body .mermaid');
+    if (!pre) return;
+
+    if (pre.querySelector('svg')) {
+      return;
+    }
+
+    if (typeof MutationObserver === 'undefined') return;
+
+    var observer = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].target.querySelector && mutations[i].target.querySelector('svg')) {
+          bindMermaidZoom();
+          observer.disconnect();
+          return;
+        }
+      }
+    });
+    observer.observe(pre.parentNode, { childList: true, subtree: true, attributes: false, characterData: false });
+
+    setTimeout(function() {
+      observer.disconnect();
+      bindMermaidZoom();
+    }, 3000);
+  }
+
+  if (document.querySelectorAll('pre.mermaid').length) {
+    NexT.utils.getScript('/lib/mermaid.min.js', function() {
+      mermaid.initialize({
+        theme    : 'forest',
+        logLevel : 3,
+        flowchart: { curve     : 'linear' },
+        gantt    : { axisFormat: '%m/%d/%Y' },
+        sequence : { actorMargin: 50 },
+        startOnLoad: true
+      });
+      ensureBoundAfterRender();
+    }, window.mermaid);
+  } else {
+    ensureBoundAfterRender();
+  }
+})();
+</script>
+
+  
+
+  
+
+</body>
+</html>
