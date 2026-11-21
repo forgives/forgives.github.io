@@ -1,0 +1,70 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <title>freevip</title>
+</head>
+
+<body>
+    <div class="container" id="app" style="margin-top:10px;">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default"
+                id="u" v-model="link" placeholder="这里输入观看的视频链接地址，选用下面通道观看" />
+        </div>
+        <div class="input-group mb-3">
+            <div class="input-group-append" v-for="(value,index) in urls">
+                <button class="btn btn-success" type="button" name="player-but" v-on:click="play(value)" style="margin-right:5px;margin-bottom: 5px;">通道 {{index+1}}
+                    <span v-if="value.priority > 0"> 👍</span></button>
+            </div>
+        </div>
+
+
+        <iframe id="WANG" scrolling="no" frameborder="0" border="0" marginwidth="0" marginheight="0" allowfullscreen="true"
+            v-bind:src="v" width="100%" height="80%">
+        </iframe>
+    </div>
+
+
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                urls: [
+                    { url: 'http://v.d9y.net/vip/?url=', priority: 1, type: 'jump' },
+                    { url: 'qianniudy.com/dp.html?v=', priority: 1, type: 'jump' },
+                    { url: 'http://jx.du2.cc/?url=', priority: 1, type: 'jump' },
+                    { url: 'http://api2.club/index.php?url=', priority: 1, type: 'jump' },
+                    { url: 'http://www.82190555.com/index.php?url=', priority: 1, type: 'jump' },
+                    { url: 'https://z1.m1907.cn/?a=1&jx=', priority: 1, type: 'jump' },
+                    { url: 'http://api.bbbbbb.me/jx/?url=', priority: 0, type: 'jump' },
+                    { url: 'https://api.bbbbbb.me/sg/?url=', priority: 0, type: 'jump' },
+                    { url: 'http://api.ledboke.com/?url=', priority: 0, type: 'jump' },
+                    { url: 'http://jx.98a.ink/vip/?url=', priority: 0, type: 'jump' },
+                    { url: 'http://jx.skyfollowsnow.pro/?url=', priority: 0, type: 'jump' }
+                ],
+                v: '',
+                link: ''
+            },
+            methods: {
+                create: function () {
+                },
+                play: function (value) {
+                    if (value.type == 'iframe') {
+                        this.v = value.url + this.link;
+                    } else if (value.type == 'jump') {
+                        window.open(value.url + this.link);
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

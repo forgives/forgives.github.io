@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="给吹米掌机（TinaLinux，非 Android）通过 adb 装两个移植游戏的完整记录：仙剑1（sdlpal）踩了中文路径毁目录名、系统缺 SDL2、launch.sh 环境变量顺序三个坑；Undertale（gmloader）需要自己用安卓 APK 重打包数据包，还发现安卓版音乐是独立 ogg、只打 game.droid 会进游戏但没声音。附每个坑的排查过程与解法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="吹米 Trimui 掌机 adb 装机实战：仙剑1 与 Undertale">
+<meta property="og:url" content="https://forgives.github.io/2026/10/30/fun/20261030-trimui-ports-install/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="给吹米掌机（TinaLinux，非 Android）通过 adb 装两个移植游戏的完整记录：仙剑1（sdlpal）踩了中文路径毁目录名、系统缺 SDL2、launch.sh 环境变量顺序三个坑；Undertale（gmloader）需要自己用安卓 APK 重打包数据包，还发现安卓版音乐是独立 ogg、只打 game.droid 会进游戏但没声音。附每个坑的排查过程与解法。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-30T15:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-30T14:45:44.534Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="fun">
+<meta property="article:tag" content="trimui">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://forgives.github.io/2026/10/30/fun/20261030-trimui-ports-install/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>吹米 Trimui 掌机 adb 装机实战：仙剑1 与 Undertale | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/10/30/fun/20261030-trimui-ports-install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          吹米 Trimui 掌机 adb 装机实战：仙剑1 与 Undertale
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-10-30 23:00:00" itemprop="dateCreated datePublished" datetime="2026-10-30T23:00:00+08:00">2026-10-30</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>手上有台吹米（Trimui）掌机，之前一直只玩它 TF 卡里预装的模拟器 ROM。这次想给它装两个”移植游戏”：《仙剑奇侠传1》和《Undertale（传说之下）》。整个过程踩了不少坑，好在每个都用 adb 实测验证到了”游戏真的跑起来”才算数，整理成这篇笔记。</p>
+<p>先交代设备底细，后面的坑都和它有关。</p>
+<!-- more -->
+
+<h2 id="1-设备：不是安卓，是-TinaLinux"><a href="#1-设备：不是安卓，是-TinaLinux" class="headerlink" title="1. 设备：不是安卓，是 TinaLinux"></a>1. 设备：不是安卓，是 TinaLinux</h2><p>adb 连上之后先看系统：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ adb devices -l</span><br><span class="line">1c000c6605064751d5d    device product:€肂 model:__B device:€肂</span><br><span class="line"></span><br><span class="line">$ adb shell uname -a</span><br><span class="line">Linux TinaLinux 4.9.191 #407 SMP PREEMPT ... aarch64 GNU/Linux</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>TinaLinux</strong>（全智 A133P 平台，4× Cortex-A53），不是 Android，但自带 <code>adbd</code> 所以 adb 照常能用；</li>
+<li>model 显示 <code>__B</code>、product 是乱码，这是吹米固件的老毛病，不影响使用；</li>
+<li>存储就一个 TF 卡，挂载在 <code>/mnt/SDCARD</code>（57.5G）：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/dev/mmcblk1p1 on /mnt/SDCARD type vfat (rw,fmask=0000,...)</span><br></pre></td></tr></table></figure>
+
+<p>卡里是标准吹米目录：<code>Roms</code>（约 2500 个模拟器 ROM，GBA&#x2F;MAME&#x2F;PS 等 30 多个平台）、<code>Ports</code>、<code>RetroArch</code>、<code>Emus</code> 等。</p>
+<h3 id="Ports-是什么"><a href="#Ports-是什么" class="headerlink" title="Ports 是什么"></a>Ports 是什么</h3><p><code>Ports</code>（移植游戏）和 <code>Roms</code>（模拟器）是两条完全不同的路线：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Roms + Emus（模拟）</th>
+<th>Ports（移植）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原理</td>
+<td>模拟器伪装成 FC&#x2F;GBA 主机跑卡带</td>
+<td>游戏程序重新编译成 <strong>ARM Linux 原生代码</strong>直接跑</td>
+</tr>
+<tr>
+<td>开销</td>
+<td>大</td>
+<td>小，所以这台入门机也能跑 DOOM 级别</td>
+</tr>
+<tr>
+<td>代表</td>
+<td>模拟器 ROM</td>
+<td>仙剑（sdlpal）、Undertale（gmloader）、小丑牌、星露谷</td>
+</tr>
+</tbody></table>
+<p><code>Ports</code> 目录名的约定来自社区工具 <strong>PortMaster</strong>（这台机器预装了 v6.55）：每个游戏一个目录，放一个 <code>config.json</code> 描述菜单项、一个 <code>launch.sh</code> 启动脚本。原厂 UI 开机扫描这个目录生成游戏列表。机器上已经装好的小丑牌就是这个结构，照着抄就行。</p>
+<h2 id="2-仙剑1（sdlpal）：三个坑"><a href="#2-仙剑1（sdlpal）：三个坑" class="headerlink" title="2. 仙剑1（sdlpal）：三个坑"></a>2. 仙剑1（sdlpal）：三个坑</h2><p>sdlpal 是仙剑 95 版的开源重制引擎，社区有打包好的 PortMaster 移植包：主程序 + 仙剑原版 <code>.mkf</code> 数据文件 + 配置，共 42 个文件 253MB。下载的包先做两件事：确认二进制是 aarch64（<code>file</code> 命令看，三个可执行文件都是 ARM aarch64 ✅）、确认 <code>config.json</code> 格式和机器上已有的小丑牌一致（✅，label 已经写好”仙剑奇侠传”）。然后开始推。</p>
+<h3 id="坑一：中文路径毁掉-adb-push-的目标目录名"><a href="#坑一：中文路径毁掉-adb-push-的目标目录名" class="headerlink" title="坑一：中文路径毁掉 adb push 的目标目录名"></a>坑一：中文路径毁掉 adb push 的目标目录名</h3><p>第一版命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb push &quot;E:/游戏/Trimui/games/sdlpal&quot; &quot;/mnt/SDCARD/Ports/&quot;</span><br></pre></td></tr></table></figure>
+
+<p>adb 报告 42 个文件全部推送成功，但设备上的目录名变成了 <strong><code>sdl</code></strong> 而不是 <code>sdlpal</code>——中文路径 <code>游戏</code> 经过 Windows adb.exe 传参时把编码搞乱了，文件本身没事，目标目录名被截断。</p>
+<p><strong>解法</strong>：换到 ASCII 路径再推，或者事后在设备上改回来都行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell &quot;mv /mnt/SDCARD/Ports/sdl /mnt/SDCARD/Ports/sdlpal&quot;</span><br></pre></td></tr></table></figure>
+
+<p>推完一定要核对文件数（本地 42 &#x3D; 设备 42）和目录名。</p>
+<h3 id="坑二：系统里找不到-libSDL2"><a href="#坑二：系统里找不到-libSDL2" class="headerlink" title="坑二：系统里找不到 libSDL2"></a>坑二：系统里找不到 libSDL2</h3><p>用动态链接器做依赖检查（不等同于真跑，但能把缺库提前暴露）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ LD_LIBRARY_PATH=/mnt/SDCARD/Ports/sdlpal/lib \</span><br><span class="line">  /lib/ld-linux-aarch64.so.1 --list /mnt/SDCARD/Ports/sdlpal/sdlpal</span><br><span class="line">error while loading shared libraries: libSDL2-2.0.so.0: cannot open shared object file</span><br></pre></td></tr></table></figure>
+
+<p>移植包的 <code>lib/</code> 里只有 GL&#x2F;X11 一族，没有 SDL2；<code>/usr/lib</code> 里也没有。但机器上明明跑着 SDL2 写的原厂程序——搜一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ adb shell find / -name &quot;libSDL2*&quot; 2&gt;/dev/null</span><br><span class="line">/rom/usr/trimui/lib/libSDL2-2.0.so.0        ← 在这</span><br><span class="line">/rom/usr/trimui/lib/libSDL2_image-2.0.so.0</span><br><span class="line">/rom/usr/trimui/lib/libSDL2_mixer-2.0.so.0</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>原厂把 SDL2 全家桶放在只读 rootfs 的 <code>/rom/usr/trimui/lib/</code>，这个路径不在默认搜索路径里。<strong>解法</strong>：把 SDL2 复制进移植包自己的 <code>lib/</code>（launch.sh 的 <code>LD_LIBRARY_PATH</code> 正好覆盖到），不动系统：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell &quot;cp /rom/usr/trimui/lib/libSDL2-2.0.so.0 /mnt/SDCARD/Ports/sdlpal/lib/&quot;</span><br></pre></td></tr></table></figure>
+
+<p>顺带一提，TF 卡是 <code>fmask=0000</code> 的 vfat，所有文件自动带执行权限，<strong>不需要 chmod</strong>。</p>
+<h3 id="坑三：launch-sh-的环境变量顺序写反了"><a href="#坑三：launch-sh-的环境变量顺序写反了" class="headerlink" title="坑三：launch.sh 的环境变量顺序写反了"></a>坑三：launch.sh 的环境变量顺序写反了</h3><p>包里自带的启动脚本：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SDL_GAMECONTROLLERCONFIG_FILE=<span class="string">&quot;./gamecontrollerdb.txt&quot;</span> ./gptokeyb -k <span class="string">&quot;sdlpal&quot;</span> -c <span class="string">&quot;./sdlpal.gptk&quot;</span> &amp;</span><br><span class="line"><span class="built_in">sleep</span> 1</span><br><span class="line"><span class="built_in">export</span> LD_LIBRARY_PATH=$(<span class="built_in">dirname</span> <span class="string">&quot;<span class="variable">$0</span>&quot;</span>)/lib:<span class="variable">$LD_LIBRARY_PATH</span>   ← 在 gptokeyb 之后才设置</span><br><span class="line">HOME=/mnt/SDCARD <span class="variable">$progdir</span>/sdlpal</span><br></pre></td></tr></table></figure>
+
+<p>gptokeyb（按键映射工具）也要 SDL2，但它启动时 <code>LD_LIBRARY_PATH</code> 还没设置——在别的系统上 SDL2 在系统默认路径所以从没暴露过，吹米上必挂。冒烟测试第一次跑就抓到了：sdlpal 活着，gptokeyb 死了。</p>
+<p><strong>解法</strong>：把 <code>export</code> 提到最前面重写脚本。然后做真机冒烟测试——精简系统连 <code>timeout</code> 命令都没有，用后台 + sleep + kill 的土办法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ adb shell &quot;cd /mnt/SDCARD/Ports/sdlpal &amp;&amp; sh ./launch.sh &gt; /tmp/pal.log 2&gt;&amp;1 &amp; \</span><br><span class="line">  sleep 14; pidof sdlpal; pidof gptokeyb; \</span><br><span class="line">  kill -9 \$(pidof sdlpal) \$(pidof gptokeyb)&quot;</span><br><span class="line">4146      ← sdlpal 活着</span><br><span class="line">4139      ← gptokeyb 也活着了</span><br></pre></td></tr></table></figure>
+
+<p>两个进程同时稳定存活，日志干净（只剩一条无害的 libasound 版本警告），这 14 秒里掌机屏幕上已经能看到仙剑的启动画面了。最后到掌机的 Ports 分类里<strong>刷新一下列表</strong>，”仙剑奇侠传”就出现了（不用重启）。</p>
+<h2 id="3-Undertale（gmloader）：壳和数据是分开的"><a href="#3-Undertale（gmloader）：壳和数据是分开的" class="headerlink" title="3. Undertale（gmloader）：壳和数据是分开的"></a>3. Undertale（gmloader）：壳和数据是分开的</h2><p>Undertale 是 GameMaker 引擎游戏，移植思路完全不同：社区工具 <strong>gmloader</strong> 直接运行安卓版的 GameMaker 运行时（libyoyo.so）+ 游戏数据（game.droid）。因为 Undertale 是付费游戏，移植包按规矩<strong>不带数据</strong>，得自己备。</p>
+<p>下载到的移植包两层结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">undertale/</span><br><span class="line">├── Undertale.sh          ← PortMaster 通用启动模板</span><br><span class="line">└── undertale/            ← 游戏本体目录</span><br><span class="line">    ├── gmloadernext.aarch64   ← gmloader 加载器</span><br><span class="line">    ├── undertale.port         ← 数据包（zip 格式）</span><br><span class="line">    ├── undertale.gptk         ← 按键映射</span><br><span class="line">    ├── lib/                   ← openal/zip/crypto 等库</span><br><span class="line">    └── ...</span><br></pre></td></tr></table></figure>
+
+<p>两个问题：</p>
+<p><strong>其一</strong>，外层 <code>Undertale.sh</code> 不能用。它是给各种自定义固件写的通用模板：路径写死 <code>/roms/ports</code>、<code>/opt/...</code>，还有 bash 专属语法（进程替换 <code>&gt;(tee ...)</code>），吹米上是 busybox ash，路径全对不上。<strong>解法</strong>：参照机器上已装小丑牌的极简模式自己写：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">cd</span> $(<span class="built_in">dirname</span> <span class="string">&quot;<span class="variable">$0</span>&quot;</span>)</span><br><span class="line"><span class="built_in">export</span> LD_LIBRARY_PATH=$(<span class="built_in">dirname</span> <span class="string">&quot;<span class="variable">$0</span>&quot;</span>)/lib:$(<span class="built_in">dirname</span> <span class="string">&quot;<span class="variable">$0</span>&quot;</span>)/lib/arm64-v8a:<span class="variable">$LD_LIBRARY_PATH</span></span><br><span class="line">/mnt/SDCARD/Ports/PortMaster/gptokeyb <span class="string">&quot;gmloadernext.aarch64&quot;</span> -c <span class="string">&quot;undertale.gptk&quot;</span> &amp;</span><br><span class="line"><span class="built_in">sleep</span> 1</span><br><span class="line">./gmloadernext.aarch64 -c <span class="string">&quot;./gmloader.json&quot;</span> &gt; log.txt 2&gt;&amp;1</span><br><span class="line"><span class="built_in">kill</span> -9 $(pidof gptokeyb)</span><br></pre></td></tr></table></figure>
+
+<p>再照仙剑的格式补一个 <code>config.json</code>（label 用了 <code>label.ch.lang</code> 写中文”传说之下”），SDL2 同样从 <code>/rom/usr/trimui/lib/</code> 复制一份，依赖检查 0 缺失。</p>
+<p><strong>其二</strong>，才是真正的重头戏：<code>undertale.port</code> 里只有各架构的 libyoyo.so 和启动图，<strong>没有任何游戏数据</strong>。第一次冒烟测试的日志把这一点写得明明白白：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">YoYo Games Android Runner V0.1        ← 引擎起来了</span><br><span class="line">Importing GL                          ← 显示正常</span><br><span class="line">RunnerLoadGame: game.droid</span><br><span class="line">_FileExists fail in zip - assets/game.droid</span><br><span class="line">Unable to find game!!                 ← 卡死在这</span><br></pre></td></tr></table></figure>
+
+<h3 id="用安卓-APK-重打包数据包"><a href="#用安卓-APK-重打包数据包" class="headerlink" title="用安卓 APK 重打包数据包"></a>用安卓 APK 重打包数据包</h3><p>正版的安卓 APK 里就有 gmloader 要的一切。手上有个 <code>undertale.apk</code>（2020-03 官方构建，149MB），解包验证三样东西：</p>
+<ul>
+<li><code>assets/game.droid</code>：76.4MB，游戏数据本体 ✅</li>
+<li><code>lib/arm64-v8a/libyoyo.so</code>：运行时 ✅</li>
+<li><code>assets/</code> 下还有 200 多个独立的 <code>.ogg</code> —— 全部背景音乐（后面有大用）</li>
+</ul>
+<p>打包用 Python（设备上没有 <code>zip</code> 命令，PC 端搞定），存储模式等价于原脚本的 <code>zip -r -0</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> zipfile</span><br><span class="line"></span><br><span class="line">apk = zipfile.ZipFile(<span class="string">&quot;D:/download/undertale.apk.v2.0.1.apk&quot;</span>)</span><br><span class="line">names = [n <span class="keyword">for</span> n <span class="keyword">in</span> apk.namelist()</span><br><span class="line">         <span class="keyword">if</span> n.startswith(<span class="string">&quot;assets/&quot;</span>) <span class="keyword">or</span> n == <span class="string">&quot;lib/arm64-v8a/libyoyo.so&quot;</span>]</span><br><span class="line"><span class="keyword">with</span> zipfile.ZipFile(<span class="string">&quot;undertale.port&quot;</span>, <span class="string">&quot;w&quot;</span>, zipfile.ZIP_STORED) <span class="keyword">as</span> out:</span><br><span class="line">    <span class="keyword">for</span> name <span class="keyword">in</span> names:</span><br><span class="line">        out.writestr(name, apk.read(name))</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行时特意用 APK 自带的 libyoyo</strong>，不用移植包附带的旧版——运行时和游戏数据同构建，钩子符号才对得上。</p>
+<h3 id="打了两次包：第一次进了游戏，但没音乐"><a href="#打了两次包：第一次进了游戏，但没音乐" class="headerlink" title="打了两次包：第一次进了游戏，但没音乐"></a>打了两次包：第一次进了游戏，但没音乐</h3><p>第一次只打包了 <code>game.droid + splash + libyoyo</code> 三个文件（82MB），推上去一跑——进程稳定存活 30 秒，日志里 <code>Entering main loop</code>、开场房间 <code>BeginToEnd</code> 加载完成、手柄绑定成功，<strong>游戏真的进去了</strong>。但日志末尾露馅：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">_FileExists fail in zip - assets/mus_story.ogg</span><br><span class="line">COggAudio::PlaySound- could not find audio file for sound mus_story.ogg</span><br></pre></td></tr></table></figure>
+
+<p>原来安卓版 Undertale 的音乐<strong>不在 game.droid 数据包里，而是 APK assets 下的独立 ogg 文件</strong>，引擎按文件名现取现放。只打数据文件等于无声版。</p>
+<p><strong>解法</strong>：把 APK 的 <strong>全部 assets</strong>（217 个文件，含全部音乐）+ libyoyo 一起打进去，最终 176MB。重新推送后再跑 30 秒：</p>
+<ul>
+<li>进程存活 ✅</li>
+<li>主循环进入、开场加载 ✅</li>
+<li><strong>音频错误 0 条</strong> ✅</li>
+</ul>
+<p>到掌机上刷新 Ports 列表，”传说之下”出现，直接能玩。日志里剩余的 <code>undertale.ini / config.ini 找不到</code>是首次运行的正常现象，存档后自动生成。</p>
+<h2 id="4-踩坑清单"><a href="#4-踩坑清单" class="headerlink" title="4. 踩坑清单"></a>4. 踩坑清单</h2><table>
+<thead>
+<tr>
+<th>#</th>
+<th>坑</th>
+<th>现象</th>
+<th>解法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>adb push 中文路径</td>
+<td>42 文件推成功但目录名 <code>sdlpal</code>→<code>sdl</code></td>
+<td>cd 到父目录用相对名推，或事后设备端 mv</td>
+</tr>
+<tr>
+<td>2</td>
+<td>系统 SDL2 不在默认路径</td>
+<td>依赖检查报 <code>libSDL2-2.0.so.0</code> 找不到</td>
+<td>从 <code>/rom/usr/trimui/lib/</code> 复制进移植包 <code>lib/</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>launch.sh 顺序 bug</td>
+<td>gptokeyb 启动失败</td>
+<td><code>export LD_LIBRARY_PATH</code> 提到所有启动之前</td>
+</tr>
+<tr>
+<td>4</td>
+<td>通用启动模板不兼容</td>
+<td><code>Undertale.sh</code> 里 bash 语法 + CFW 路径</td>
+<td>仿已装端口的极简模式重写</td>
+</tr>
+<tr>
+<td>5</td>
+<td>移植包不含商业数据</td>
+<td><code>Unable to find game!!</code></td>
+<td>用自备 APK 的 game.droid 重打包 port</td>
+</tr>
+<tr>
+<td>6</td>
+<td>只打 game.droid</td>
+<td>进游戏但 BGM 报 <code>could not find audio file</code></td>
+<td>APK 的<strong>全部 assets</strong> 都要打进 port</td>
+</tr>
+<tr>
+<td>7</td>
+<td>精简系统没 timeout</td>
+<td>没法限时跑冒烟测试</td>
+<td>后台 <code>&amp;</code> + <code>sleep</code> + <code>kill -9 $(pidof ...)</code></td>
+</tr>
+</tbody></table>
+<h2 id="5-通用流程总结"><a href="#5-通用流程总结" class="headerlink" title="5. 通用流程总结"></a>5. 通用流程总结</h2><p>给这台机器装任何移植游戏，照这个顺序走基本不踩坑：</p>
+<ol>
+<li><strong>验包</strong>：<code>file</code> 确认二进制 aarch64；<code>config.json</code> 对照已装端口格式；</li>
+<li><strong>推送</strong>：ASCII 路径下推，核对文件数和目录名（vfat 免 chmod）；</li>
+<li><strong>补库</strong>：依赖检查（<code>/lib/ld-linux-aarch64.so.1 --list</code>），缺 SDL2 就从 <code>/rom/usr/trimui/lib/</code> 拷；</li>
+<li><strong>审启动脚本</strong>：环境变量在所有进程启动之前设好；gmloader 类用极简模板；</li>
+<li><strong>冒烟测试</strong>：后台跑 15~30 秒，<code>pidof</code> 看进程、读日志找成功标志（gmloader 是 <code>Entering main loop</code>，音频类移植重点盯 <code>could not find audio</code>），然后 kill 干净；</li>
+<li><strong>UI 刷新</strong>：Ports 列表刷新即见，无需重启。</li>
+</ol>
+<p>两台”游戏”现在的状态：仙剑 95 版直接进；《传说之下》测试时已经跑进开场，存档在 <code>/mnt/SDCARD/Ports/undertale/save/</code>。下一个想装的是暗黑1（DevilutionX），不过那又是另一个需要自备数据文件的故事了。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/fun/" rel="tag"># fun</a>
+              <a href="/tags/trimui/" rel="tag"># trimui</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/28/crack/20261028-baidupan-checkin-crack/" rel="prev" title="逆向百度网盘签到自动化">
+      <i class="fa fa-chevron-left"></i> 逆向百度网盘签到自动化
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/11/21/crack/20261121-ffta-gba-panel-cn-romhack/" rel="next" title="FFTA GBA 汉化实战：8 个日文 UI 标签的中文替换与 ARM Hook 架构">
+      FFTA GBA 汉化实战：8 个日文 UI 标签的中文替换与 ARM Hook 架构 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E8%AE%BE%E5%A4%87%EF%BC%9A%E4%B8%8D%E6%98%AF%E5%AE%89%E5%8D%93%EF%BC%8C%E6%98%AF-TinaLinux"><span class="nav-number">1.</span> <span class="nav-text">1. 设备：不是安卓，是 TinaLinux</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Ports-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">1.1.</span> <span class="nav-text">Ports 是什么</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%BB%99%E5%89%911%EF%BC%88sdlpal%EF%BC%89%EF%BC%9A%E4%B8%89%E4%B8%AA%E5%9D%91"><span class="nav-number">2.</span> <span class="nav-text">2. 仙剑1（sdlpal）：三个坑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%91%E4%B8%80%EF%BC%9A%E4%B8%AD%E6%96%87%E8%B7%AF%E5%BE%84%E6%AF%81%E6%8E%89-adb-push-%E7%9A%84%E7%9B%AE%E6%A0%87%E7%9B%AE%E5%BD%95%E5%90%8D"><span class="nav-number">2.1.</span> <span class="nav-text">坑一：中文路径毁掉 adb push 的目标目录名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%91%E4%BA%8C%EF%BC%9A%E7%B3%BB%E7%BB%9F%E9%87%8C%E6%89%BE%E4%B8%8D%E5%88%B0-libSDL2"><span class="nav-number">2.2.</span> <span class="nav-text">坑二：系统里找不到 libSDL2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%91%E4%B8%89%EF%BC%9Alaunch-sh-%E7%9A%84%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E9%A1%BA%E5%BA%8F%E5%86%99%E5%8F%8D%E4%BA%86"><span class="nav-number">2.3.</span> <span class="nav-text">坑三：launch.sh 的环境变量顺序写反了</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Undertale%EF%BC%88gmloader%EF%BC%89%EF%BC%9A%E5%A3%B3%E5%92%8C%E6%95%B0%E6%8D%AE%E6%98%AF%E5%88%86%E5%BC%80%E7%9A%84"><span class="nav-number">3.</span> <span class="nav-text">3. Undertale（gmloader）：壳和数据是分开的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E5%AE%89%E5%8D%93-APK-%E9%87%8D%E6%89%93%E5%8C%85%E6%95%B0%E6%8D%AE%E5%8C%85"><span class="nav-number">3.1.</span> <span class="nav-text">用安卓 APK 重打包数据包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E4%BA%86%E4%B8%A4%E6%AC%A1%E5%8C%85%EF%BC%9A%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%BF%9B%E4%BA%86%E6%B8%B8%E6%88%8F%EF%BC%8C%E4%BD%86%E6%B2%A1%E9%9F%B3%E4%B9%90"><span class="nav-number">3.2.</span> <span class="nav-text">打了两次包：第一次进了游戏，但没音乐</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E8%B8%A9%E5%9D%91%E6%B8%85%E5%8D%95"><span class="nav-number">4.</span> <span class="nav-text">4. 踩坑清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E9%80%9A%E7%94%A8%E6%B5%81%E7%A8%8B%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">5. 通用流程总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">283</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">168</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-overlay.is-active {
+  display: flex;
+}
+.mermaid-zoom-content {
+  position: relative;
+  width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  background: #fffcf0;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-content svg {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.mermaid-zoom-content pre.mermaid,
+.mermaid-zoom-content .mermaid {
+  cursor: default;
+  text-align: center;
+  background: transparent;
+}
+.mermaid-zoom-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mermaid-zoom-close:focus {
+  outline: 2px solid #fff;
+}
+.post-body pre.mermaid,
+.post-body .mermaid {
+  cursor: zoom-in;
+  background: #fffcf0;
+  /* Center narrow diagrams inside the full-width block (Pele SVGs are
+     inline-level, so text-align applies). Error fallback overrides to left. */
+  text-align: center;
+}
+.post-body pre.mermaid svg,
+.post-body .mermaid svg {
+  margin: 0 auto;
+}
+.post-body pre.mermaid:hover,
+.post-body .mermaid:hover {
+  opacity: .98;
+}
+/* Pele theme tokens: defined on :root so the zoom overlay (appended to body)
+   keeps the same colors as the inline diagram. */
+:root {
+  --pele-bg: #fffcf0;
+  --pele-fg: #555;
+  --pele-muted: #6f6e69;
+  --pele-line: #555;
+  --pele-surface: #f2f0e5;
+  --pele-surface-alt: #e6e4d9;
+  --pele-border: #cecdc3;
+  --pele-accent: #0684bd;
+  --pele-font: "PingFang SC", "Microsoft YaHei", sans-serif;
+  --pele-font-mono: consolas, Menlo, monospace, "PingFang SC", "Microsoft YaHei";
+}
+.post-body pre.mermaid.mermaid-render-error {
+  cursor: auto;
+  text-align: left;
+  white-space: pre-wrap;
+  font-family: var(--pele-font-mono);
+  font-size: 13px;
+}
+.mermaid-render-error-tip {
+  margin: 4px 0 16px;
+  color: #ff2a2a;
+  font-size: 12px;
+  text-align: left;
+}
+</style>
+<script>
+(function() {
+  function openZoom(root) {
+    var clone = root.cloneNode(true);
+    clone.style.maxWidth = '';
+    clone.style.maxHeight = '';
+    clone.classList.remove('mermaid-click-zoom-root');
+
+    var hint = root.querySelector('.mermaid-click-zoom-hint');
+    if (hint) hint.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'mermaid-zoom-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Mermaid zoom');
+
+    var content = document.createElement('div');
+    content.className = 'mermaid-zoom-content';
+
+    var close = document.createElement('button');
+    close.className = 'mermaid-zoom-close';
+    close.type = 'button';
+    close.textContent = 'Close';
+    close.addEventListener('click', function() {
+      closeZoom(overlay);
+    });
+
+    content.appendChild(close);
+    content.appendChild(clone);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    overlay.addEventListener('click', function(event) {
+      if (event.target === overlay) {
+        closeZoom(overlay);
+      }
+    });
+
+    requestAnimationFrame(function() {
+      overlay.classList.add('is-active');
+      close.focus();
+    });
+  }
+
+  function closeZoom(overlay) {
+    overlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }
+
+  function openZoomFromTarget(target) {
+    var root = target.closest('.post-body pre.mermaid, .post-body .mermaid');
+    if (!root) return;
+    openZoom(root);
+  }
+
+  function bindMermaidZoom() {
+    var container = document.querySelector('.post-body') || document.body;
+    if (container.dataset.mermaidZoomDelegate === 'true') return;
+    container.dataset.mermaidZoomDelegate = 'true';
+
+    container.addEventListener('click', function(event) {
+      if (event.target.closest('.mermaid-zoom-overlay')) return;
+      openZoomFromTarget(event.target);
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        var active = document.querySelector('.mermaid-zoom-overlay.is-active');
+        if (active) closeZoom(active);
+      }
+    });
+  }
+
+  function clearRenderError(el) {
+    el.classList.remove('mermaid-render-error');
+    var next = el.nextElementSibling;
+    if (next && next.classList.contains('mermaid-render-error-tip')) {
+      next.parentNode.removeChild(next);
+    }
+  }
+
+  function showSourceFallback(el, source, error) {
+    el.textContent = source;
+    el.style.textAlign = 'left';
+    el.classList.add('mermaid-render-error');
+    var next = el.nextElementSibling;
+    if (!next || !next.classList.contains('mermaid-render-error-tip')) {
+      var tip = document.createElement('div');
+      tip.className = 'mermaid-render-error-tip';
+      tip.textContent = '图表渲染失败：' + (error && error.message ? error.message : error);
+      if (el.parentNode) el.parentNode.insertBefore(tip, el.nextSibling);
+    }
+  }
+
+  function renderDiagrams() {
+    var nodes = document.querySelectorAll('pre.mermaid, div.mermaid');
+    for (var i = 0; i < nodes.length; i++) {
+      (function(el) {
+        if (el.dataset.peleMounted === 'true') return;
+        el.dataset.peleMounted = 'true';
+
+        var source = el.textContent;
+        var failure = null;
+
+        try {
+          pele.mount(el, source, {
+            zoom: false,
+            // Pele default is 16px and ignores CSS font-size; this must be
+            // passed here so text is re-measured and nodes re-laid out.
+            fontSize: 16,
+            onRender: function() {
+              clearRenderError(el);
+            },
+            onError: function(error) {
+              failure = error;
+              // Later re-renders (resize / font load) can fail after a
+              // successful first paint, so restore the source here as well.
+              showSourceFallback(el, source, error);
+            }
+          });
+        } catch (error) {
+          failure = error;
+        }
+
+        if (failure) {
+          showSourceFallback(el, source, failure);
+        }
+      })(nodes[i]);
+    }
+  }
+
+  if (document.querySelectorAll('pre.mermaid, div.mermaid').length) {
+    NexT.utils.getScript('/lib/pele.global.min.js', function() {
+      renderDiagrams();
+      bindMermaidZoom();
+    }, window.pele);
+  } else {
+    bindMermaidZoom();
+  }
+})();
+</script>
+
+  
+
+  
+
+</body>
+</html>

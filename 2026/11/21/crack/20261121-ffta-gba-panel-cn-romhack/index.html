@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"forgives.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="从像素流定位、IRQ Hook、逐格内容校验到私有瓦片重定向，完整拆解《最终幻想战略版 Advance》状态面板&#x2F;商店&#x2F;编成界面的汉化实现，含 v9 到 v29 的全部失败根因与踩坑。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FFTA GBA 汉化实战：8 个日文 UI 标签的中文替换与 ARM Hook 架构">
+<meta property="og:url" content="https://forgives.github.io/2026/11/21/crack/20261121-ffta-gba-panel-cn-romhack/index.html">
+<meta property="og:site_name" content="Hello World">
+<meta property="og:description" content="从像素流定位、IRQ Hook、逐格内容校验到私有瓦片重定向，完整拆解《最终幻想战略版 Advance》状态面板&#x2F;商店&#x2F;编成界面的汉化实现，含 v9 到 v29 的全部失败根因与踩坑。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://forgives.github.io/res/20261121215101.png">
+<meta property="og:image" content="https://forgives.github.io/res/20261121215100.png">
+<meta property="og:image" content="https://forgives.github.io/res/20261121215102.png">
+<meta property="og:image" content="https://forgives.github.io/res/20261121215103.png">
+<meta property="og:image" content="https://forgives.github.io/res/20261121215104.png">
+<meta property="og:image" content="https://forgives.github.io/res/20261121215105.png">
+<meta property="article:published_time" content="2026-11-21T13:55:00.000Z">
+<meta property="article:modified_time" content="2026-11-21T09:17:38.341Z">
+<meta property="article:author" content="lianhui.klh">
+<meta property="article:tag" content="逆向">
+<meta property="article:tag" content="gba">
+<meta property="article:tag" content="romhack">
+<meta property="article:tag" content="arm">
+<meta property="article:tag" content="ffta">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://forgives.github.io/res/20261121215101.png">
+
+<link rel="canonical" href="https://forgives.github.io/2026/11/21/crack/20261121-ffta-gba-panel-cn-romhack/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>FFTA GBA 汉化实战：8 个日文 UI 标签的中文替换与 ARM Hook 架构 | Hello World</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hello World</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">吞风吻雨葬落日 欺山赶海踏雪径</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-工具">
+
+    <a href="/htm" rel="section"><i class="fa fa-fw fa-heartbeat"></i>工具</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <a href="/" class="back-to-home">
+    <i class="fa fa-home"></i>
+  </a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://forgives.github.io/2026/11/21/crack/20261121-ffta-gba-panel-cn-romhack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/res/avatar.png">
+      <meta itemprop="name" content="lianhui.klh">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hello World">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FFTA GBA 汉化实战：8 个日文 UI 标签的中文替换与 ARM Hook 架构
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-11-21 21:55:00" itemprop="dateCreated datePublished" datetime="2026-11-21T21:55:00+08:00">2026-11-21</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>《最终幻想战略版 Advance》（FFTA）的熊组汉化版里，人物状态面板、编成物品页、商店购买与卖出页还残留着 8 个日文标签：<code>いどう / ジャンプ / かいひ / 武器こうげき / ぼうぎょ / 魔法のつよさ / ぼうぎょ / スピード</code>。目标是把它们全部换成中文，并且不能破坏同一套 tilemap 上的数值、物品名、单位列表和菜单。</p>
+<p>这件事的难点不在”翻译”，而在于这些标签<strong>根本不是字符串</strong>。它们由游戏自带的比例字体引擎在进入画面时逐像素写进 VRAM 的动态瓦片里，tile 分配每次进画面都可能不同，相同假名还会跨标签共享瓦片。常规的”找文本表 → 改编码”路线在这里完全走不通。</p>
+<p>最终的方案是第三代架构：<strong>IRQ Hook + 逐格内容校验 + 私有瓦片重定向</strong>。它一个字节都不改游戏原有的字形瓦片，只在”当前格子的 tile 索引等于预期值”时，把这一格指向我们自己的中文瓦片。四个界面最终全部通过 mGBA 真机截图验证，并产出 3685 字节的 IPS 补丁。</p>
+<p><img src="/res/20261121215101.png" alt="v29 人物状态面板"></p>
+<!-- more -->
+
+<h2 id="先说结论"><a href="#先说结论" class="headerlink" title="先说结论"></a>先说结论</h2><ul>
+<li>ROM：<code>A.gba</code>，10,361,856 字节，SHA256 <code>552600D9…59550A44</code></li>
+<li>入口：ROM <code>0xFC</code> 改成 <code>E51FF004</code>（<code>ldr pc, [pc, #-4]</code>），<code>0x100</code> 放 Hook 地址 <code>0x089B9540</code></li>
+<li>Hook：240 字节（代码 200B + 字面量池 40B），每帧执行一次</li>
+<li>私有瓦片：68 个，2176 字节，落在 CBB2 的 <code>0x350-0x393</code>，目标 <code>0x0600EA00</code></li>
+<li>表：P 表 107 项（856B）、S 表 84 项（672B），每项 8 字节</li>
+<li>补丁：<code>ffta_panel_cn.ips</code>，3685 字节，35 条记录，应用回原版 ROM 后与交付 ROM 逐字节一致</li>
+</ul>
+<h2 id="一、这-8-个标签为什么不是”字符串”"><a href="#一、这-8-个标签为什么不是”字符串”" class="headerlink" title="一、这 8 个标签为什么不是”字符串”"></a>一、这 8 个标签为什么不是”字符串”</h2><p>GBA 的 2D 显示单位是 8×8 像素的瓦片（tile）。每个 BG 层有一张 tilemap，表项是 16 位：</p>
+<table>
+<thead>
+<tr>
+<th>位</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0-9</td>
+<td>tile 索引（0-1023）</td>
+</tr>
+<tr>
+<td>10</td>
+<td>水平翻转</td>
+</tr>
+<tr>
+<td>11</td>
+<td>垂直翻转</td>
+</tr>
+<tr>
+<td>12-15</td>
+<td>调色板 bank（0-15）</td>
+</tr>
+</tbody></table>
+<p>4bpp 模式下每个瓦片 32 字节。游戏文本引擎的工作方式是：把假名字形<strong>逐像素</strong>写进 CBB（Character Base Block）里当前空闲的瓦片，然后修改 tilemap 表项指向这些瓦片。</p>
+<pre class="mermaid">flowchart LR
+    A["ROM 字体与文本数据"] --> B["游戏文本引擎"]
+    B -->|"逐像素写入"| C["CBB2 瓦片缓存 0x06008000+"]
+    C --> D["BG tilemap 表项 tile 索引 + 调色板"]
+    D --> E["GBA PPU 合成"]
+    E --> F["屏幕像素"]</pre>
+
+<p>这个机制带来四个致命特性：</p>
+<ol>
+<li><strong>没有可改的字符串</strong>。在 ROM、EWRAM、IWRAM 里搜假名的编码序列全部阴性——字形是直接画上去的，标签文本不以字符串形式存在。</li>
+<li><strong>比例字体跨瓦片</strong>。每个假名约 10px 宽，一个标签会横跨多个瓦片的边界，相邻标签还会共享中间那一行瓦片。</li>
+<li><strong>相同假名共享瓦片</strong>。<code>ぼうぎょ</code>（防御）和 <code>ぼうぎょ</code>（魔防）日文完全相同，引擎去重后两行指向同一批 tile。在干净面板数据里能直接看到：两行的顶行（r13&#x2F;r16）都指向 <code>0x127-0x12C</code>、bank 14，只有底行各自独立（r14 是 <code>0x12F-0x134</code>，r17 是 <code>0x13F-0x144</code>）。你改一个瓦片的内容，两行一起变。</li>
+<li><strong>分配每次都可能不同</strong>。实测同一商店页两次进入，84 个格子的 tile 分配 <strong>0&#x2F;84 相同</strong>。任何”把预期 tile 写死在表里”的方案，进店第二次就可能全错。</li>
+</ol>
+<p>更麻烦的是 CBB2 里没有”所有画面都安全”的区域：</p>
+<table>
+<thead>
+<tr>
+<th>区域</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0x04C-0x14A</code></td>
+<td>状态面板字形流</td>
+</tr>
+<tr>
+<td><code>0x0A1-0x2CF</code></td>
+<td>商店购物流</td>
+</tr>
+<tr>
+<td><code>0x1A0-0x228</code></td>
+<td>角色头像</td>
+</tr>
+<tr>
+<td><code>0x1B6</code> 附近</td>
+<td>装备名字形流</td>
+</tr>
+<tr>
+<td><code>0x2D4 / 0x2E4 / 0x2EE / 0x2F4</code></td>
+<td>装备页 BG0 引用</td>
+</tr>
+<tr>
+<td><code>0x300-0x3FF</code></td>
+<td>每帧 DMA 填充区</td>
+</tr>
+</tbody></table>
+<p>把中文瓦片随便塞进任何一段，都会在某个画面上表现成碎片或花屏。这就是为什么前面两代方案反复翻车。</p>
+<h2 id="二、逆向环境与取证手法"><a href="#二、逆向环境与取证手法" class="headerlink" title="二、逆向环境与取证手法"></a>二、逆向环境与取证手法</h2><p>整个项目主要靠三种工具取证，互相校验。</p>
+<h3 id="2-1-mGBA-即时档解析"><a href="#2-1-mGBA-即时档解析" class="headerlink" title="2.1 mGBA 即时档解析"></a>2.1 mGBA 即时档解析</h3><p>用户实机用 mGBA 0.10.5，即时档 <code>.ssN</code> 在 ROM 同目录。这个文件本体是 PNG，自定义 chunk <code>gbAs</code> 里 zlib 解压后就是 state body，总长 <code>0x61000</code>：</p>
+<table>
+<thead>
+<tr>
+<th>区段</th>
+<th>偏移</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>头部 + CPU</td>
+<td><code>0x000-0x7FC</code></td>
+</tr>
+<tr>
+<td>调色板 PAL</td>
+<td><code>0x7FC-0xBFC</code></td>
+</tr>
+<tr>
+<td>VRAM</td>
+<td><code>0xBFC-0x18BFC</code></td>
+</tr>
+<tr>
+<td>OAM</td>
+<td><code>0x18BFC-0x19000</code></td>
+</tr>
+<tr>
+<td>IWRAM</td>
+<td><code>0x19000-0x21000</code></td>
+</tr>
+<tr>
+<td>EWRAM</td>
+<td><code>0x21000-0x61000</code></td>
+</tr>
+</tbody></table>
+<p>锚点校验：IWRAM + <code>0x7FFC</code> 是 <code>0x03000F10</code>，IWRAM + <code>0xF10</code> 是 IRQ 调度器的首字。调色板用白色 BGR555 <code>FF 7F</code> 搜索定位。IO 寄存器偏移在部分状态下不稳定（<code>DISPCNT</code> 有时读成 0），所以画面识别更多依赖”已知寄存器值硬编码 + 逐画面验证”，而不是盲信即时档里的 IO 快照。</p>
+<h3 id="2-2-GDB-Stub-注入"><a href="#2-2-GDB-Stub-注入" class="headerlink" title="2.2 GDB Stub 注入"></a>2.2 GDB Stub 注入</h3><p>即时档保存的是存档当时的 IWRAM。如果存档来自原版或旧版本，<code>0x03000F10</code> 里还是旧 IRQ 向量，新 Hook 根本不会运行——页面会显示原版日文，很容易误判为”补丁无效”。</p>
+<p>解决办法是让 mGBA 带 GDB stub 启动：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mgba -g -C gdb.port=2345 A_v29.gba</span><br></pre></td></tr></table></figure>
+
+<p><code>continue</code> 之前通过 <code>write_mem(0x03000F10, rom[0xFC:0x1FC])</code> 把入口跳板和字面量写进 IWRAM，等效于一次真实开机拷贝。这样载入任何旧即时档都能强制运行当前 Hook。</p>
+<h3 id="2-3-自动按键与截图"><a href="#2-3-自动按键与截图" class="headerlink" title="2.3 自动按键与截图"></a>2.3 自动按键与截图</h3><p>mGBA 的 Qt&#x2F;SDL2 窗口只对<strong>焦点窗口</strong>派发按键，后台 <code>PostMessage</code> 会被丢弃。所以脚本必须先把窗口抢到前台（<code>force_focus()</code>），再按虚拟键：</p>
+<table>
+<thead>
+<tr>
+<th>虚拟键</th>
+<th>实际键</th>
+<th>GBA 键</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>VK &quot;A&quot;</code> &#x3D; <code>0x58</code></td>
+<td>X</td>
+<td>B（取消）</td>
+</tr>
+<tr>
+<td><code>VK &quot;B&quot;</code> &#x3D; <code>0x5A</code></td>
+<td>Z</td>
+<td>A（确认）</td>
+</tr>
+<tr>
+<td><code>VK 0x0D</code></td>
+<td>Enter</td>
+<td>START</td>
+</tr>
+</tbody></table>
+<p>F12 会把 PNG 截图写到 ROM 同目录，脚本捕获新增文件并归档到 <code>analysis/shots/</code>。BizHawk 2.11（mGBA core）则用于早期自动导航，但要注意它每次 launch 都是冷启动，而且 <code>--load-state</code> 会挂起 Lua 的 <code>savestate.load</code>。</p>
+<h2 id="三、三代方案：从”改指向”到”改内容”再到”校验后改指向”"><a href="#三、三代方案：从”改指向”到”改内容”再到”校验后改指向”" class="headerlink" title="三、三代方案：从”改指向”到”改内容”再到”校验后改指向”"></a>三、三代方案：从”改指向”到”改内容”再到”校验后改指向”</h2><p>这个项目一共经历了三代架构，每一代都是被上一代的真实故障逼出来的。</p>
+<h3 id="3-1-第一代：tilemap-静态重定向（v13-v20）"><a href="#3-1-第一代：tilemap-静态重定向（v13-v20）" class="headerlink" title="3.1 第一代：tilemap 静态重定向（v13-v20）"></a>3.1 第一代：tilemap 静态重定向（v13-v20）</h3><p>思路很直接：把中文切片放进一块”空闲”瓦片区，然后把 84 个格子的 tilemap 表项改成指向这些瓦片。面板页一度工作得很好（v17 用户确认中文显示正常）。</p>
+<p>失败点有两个：</p>
+<ul>
+<li><strong>空闲区并不空闲</strong>。v16 把 blob 放进 <code>0x300-0x3FF</code>，那正是每帧 DMA 填充区；v13&#x2F;v15 用的 <code>0x084+</code> 在其他画面被字形流占用。判断”零引用”必须扫描全部 4 层 BG 的 tilemap，而且要区分 CBB 空间（BG0&#x2F;BG1 的 tile 索引是相对 CBB0 的，BG2&#x2F;BG3 才是 CBB2，同一索引号指向不同物理 VRAM）。</li>
+<li><strong>静态预期会过期</strong>。v19 实测商店两次进入的 84 格分配 0&#x2F;84 相同，写死的 <code>(addr, expected_tile)</code> 第二次进店就全部失效，表现就是数字和标签乱码。</li>
+</ul>
+<h3 id="3-2-第二代：字形内容替换（v24-v26）"><a href="#3-2-第二代：字形内容替换（v24-v26）" class="headerlink" title="3.2 第二代：字形内容替换（v24-v26）"></a>3.2 第二代：字形内容替换（v24-v26）</h3><p>既然分配会变，那就不猜分配，运行时读当前格子的 tile，直接把中文切片的 32 字节<strong>写进游戏已经分配的那个瓦片</strong>。这样不需要空闲区，也不需要预期值，面板、商店购买&#x2F;卖出都一度 8 标签全中文。</p>
+<p>代价是跨页面污染：</p>
+<ul>
+<li>中文被写进共享瓦片后，编成列表的单位标签、商店列表、买&#x2F;卖的幽灵数字 <code>1 2 3 4</code> 都会复用同一批 tile，于是出现碎片。</li>
+<li><code>ぼうぎょ1</code>（防御）和 <code>ぼうぎょ2</code>（魔防）共享底瓦片，一个瓦片只有一个内容位，两行不可能同时正确。v25 只能额外做 T3 局部重定向，把魔防顶行 6 格改到 <code>0x130-0x135</code>。</li>
+<li>这套方案本质上是”和游戏抢同一块画布”，只要还有别的页面复用这些瓦片，就不可能根治。</li>
+</ul>
+<h3 id="3-3-v25-崩溃：IRQ-里少保存一个寄存器"><a href="#3-3-v25-崩溃：IRQ-里少保存一个寄存器" class="headerlink" title="3.3 v25 崩溃：IRQ 里少保存一个寄存器"></a>3.3 v25 崩溃：IRQ 里少保存一个寄存器</h3><p>v25 真机进商店直接崩，mGBA 报：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Jumped to invalid address: 5EC002E4</span><br></pre></td></tr></table></figure>
+
+<p><code>0x5EC002E4</code> 在 ROM 和所有即时档里都不存在。根因是 Hook 用 <code>r6</code> 暂存 <code>0x3FF</code> 掩码，但 <code>push/pop</code> 列表里漏了 <code>r6</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">push &#123;r0, r1, r2, r3, r4, r5, r12&#125;</span><br></pre></td></tr></table></figure>
+
+<p>GBA BIOS 在进入 IRQ 时只保存 <code>r0-r3</code> 和 <code>r12</code>，<code>r4-r11</code> 属于被中断代码的上下文，必须由用户 IRQ 处理程序自己保存。商店绘图主循环正好把指针放在 <code>r6</code>，被 VBlank 打断后 <code>r6</code> 变成 <code>0x3FF</code>，后续按错误指针取数直接飞掉。</p>
+<p>运行时验证脚本载入 ss2、注入调度器、预设 <code>r6=0x12345678 / r7=0x0BADF00D / r5=0xCAFE123</code>，跑 0.6 秒读回：v25 的 <code>r6=000003FF</code>，且已出现 <code>PC=2A002A00</code>；v26 三次全部保持原值。修复只有 2 个字节——把 <code>r6</code> 加进 push&#x2F;pop，并在构建期断言寄存器集合完全一致。</p>
+<h3 id="3-4-第三代：逐格内容校验-私有瓦片（v27-起）"><a href="#3-4-第三代：逐格内容校验-私有瓦片（v27-起）" class="headerlink" title="3.4 第三代：逐格内容校验 + 私有瓦片（v27 起）"></a>3.4 第三代：逐格内容校验 + 私有瓦片（v27 起）</h3><p>核心转变：<strong>永远不写游戏已有的瓦片</strong>。</p>
+<ol>
+<li>每帧先把 68 个中文切片拷进一块经过验证的私有瓦片区（CBB2 <code>0x350-0x393</code>，4 个干净存档的全部 BG 层零引用、内容全零）。</li>
+<li>表项从”<code>(addr, expected_tile)</code>“升级成”<code>(addr, expected_tile, new_tile)</code>“。</li>
+<li>读当前格子的 tile 索引，只有<strong>等于预期值</strong>时才把该格改成 <code>(原调色板 | 私有 tile)</code>；不相等就一个字节都不写。</li>
+</ol>
+<p>这样做的直接结果是：其他页面、其他行、列表装饰、数字格子的 tile 都不匹配预期，Hook 自动跳过，<strong>不可能再产生中文碎片</strong>。同时 <code>ぼうぎょ1/2</code> 各自指向不同的私有瓦片，同形标签天然分离。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>第一代 静态重定向</th>
+<th>第二代 内容替换</th>
+<th>第三代 校验+私有瓦片</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>需要空闲区</td>
+<td>需要</td>
+<td>不需要</td>
+<td>不需要（私有区已验证）</td>
+</tr>
+<tr>
+<td>分配变化</td>
+<td>静态预期过期</td>
+<td>运行时自适应</td>
+<td>运行时自适应</td>
+</tr>
+<tr>
+<td>跨页污染</td>
+<td>无，但映射会错</td>
+<td><strong>有</strong>，共享瓦片</td>
+<td><strong>无</strong>，原瓦片零改动</td>
+</tr>
+<tr>
+<td>同形标签</td>
+<td>天然分离</td>
+<td>无法分离</td>
+<td>天然分离</td>
+</tr>
+<tr>
+<td>结果</td>
+<td>商店不可用</td>
+<td>四界面仍乱</td>
+<td>四界面全部通过</td>
+</tr>
+</tbody></table>
+<h2 id="四、最终架构拆解"><a href="#四、最终架构拆解" class="headerlink" title="四、最终架构拆解"></a>四、最终架构拆解</h2><h3 id="4-1-入口：只改-4-个字节"><a href="#4-1-入口：只改-4-个字节" class="headerlink" title="4.1 入口：只改 4 个字节"></a>4.1 入口：只改 4 个字节</h3><p>GBA 的 IRQ 向量链是：BIOS 跳到 <code>0x03007FFC</code> 指向的地址，游戏把它设成 IWRAM <code>0x03000F10</code>；而 <code>0x03000F10</code> 是开机时从 ROM <code>0xFC-0x1FB</code> 拷贝过来的调度器。因此改 ROM <code>0xFC</code> 会同时影响”BIOS 直跳 ROM”和”跳 IWRAM 拷贝”两条路径。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ROM 0xFC : E5 1F F0 04    ; ldr pc, [pc, #-4]  → 读取 0x100</span><br><span class="line">ROM 0x100: 40 95 9B 08    ; 0x089B9540</span><br></pre></td></tr></table></figure>
+
+<p>Hook 被放在 ROM 尾部的零区 <code>0x9B9540</code>。选择 ROM 尾部而不是中段零区，是踩过坑的：v14 曾把代码放进 <code>0x537C60</code> 的 1728 字节零区，结果那段位于文本指针表 <code>0x52DA6C-0x53B61C</code> 内部，零字节是数组的 null 终止符，写入指令后游戏读表越界，冷启动正常、读档黑屏。</p>
+<h3 id="4-2-门控：用三个-BG-控制寄存器区分画面"><a href="#4-2-门控：用三个-BG-控制寄存器区分画面" class="headerlink" title="4.2 门控：用三个 BG 控制寄存器区分画面"></a>4.2 门控：用三个 BG 控制寄存器区分画面</h3><p>Hook 每帧都跑，必须先判断”现在是不是我们的目标画面”。判据全部来自实测寄存器值：</p>
+<pre class="mermaid">flowchart TB
+    A["VBlank IRQ → IWRAM 0x03000F10"] --> B{"DISPCNT bit13 = 0 ?"}
+    B -->|"否（强制消隐）"| Z["pop 恢复"]
+    B -->|"是（显示开启）"| C{"BG0CNT = 0x4C03 且 BG2CNT = 0x0B08 ?"}
+    C -->|"是"| S["选 S 表 84 项（商店购买/卖出）"]
+    C -->|"否"| D{"BG3CNT = 0x2A08 ?"}
+    D -->|"是"| P["选 P 表 107 项（面板/编成/装备）"]
+    D -->|"否"| Z
+    S --> E["拷贝私有瓦片"]
+    P --> E
+    E --> F["逐格校验与重定向"]
+    F --> Z
+    Z --> G["恢复 r3 = 0x04000200，B 0x08000104"]</pre>
+
+<p>寄存器值的含义可以直接解出来：</p>
+<ul>
+<li><code>BG2CNT = 0x0B08</code>：map base &#x3D; 11 → <code>0x06005800</code>，char base &#x3D; 2 → <code>0x06008000</code>，4bpp，32×32。商店购买&#x2F;卖出共用这套配置。</li>
+<li><code>BG3CNT = 0x2A08</code>：map base &#x3D; 10 → <code>0x06005000</code>，char base &#x3D; 2，32×32。状态面板、编成列表、编成物品、装备页右侧 mini 面板共用。</li>
+<li><code>BG0CNT = 0x4C03</code>：作为商店分支的附加校验，把”同样是 BG2 0x5800”的其他页面排除掉。</li>
+</ul>
+<p><code>DISPCNT</code> 只测 bit13（forced blank），不比对整字。画面切换过渡帧里其他位可能变化，但这一位能可靠区分”显示中”与”消隐中”，避免在过渡帧乱写。</p>
+<h3 id="4-3-私有瓦片池"><a href="#4-3-私有瓦片池" class="headerlink" title="4.3 私有瓦片池"></a>4.3 私有瓦片池</h3><p>私有瓦片区选在 CBB2 的 <code>0x350</code> 起，VRAM 地址 <code>0x0600EA00</code>（<code>0x8000 + 0x350 × 32</code>）。v29 共 68 个瓦片，2176 字节，从 ROM <code>0x934E70</code> 连续拷贝：</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ldr</span> <span class="built_in">r4</span>, <span class="number">=0x08934E70</span>      <span class="comment">@ blob 源</span></span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r3</span>, <span class="number">=0x0600EA00</span>      <span class="comment">@ 私有瓦片目的</span></span><br><span class="line"><span class="keyword">mov</span> <span class="built_in">r2</span>, <span class="number">#136</span>             <span class="comment">@ 68 tiles × 32B / 16B</span></span><br><span class="line"><span class="symbol">copy_loop:</span></span><br><span class="line"><span class="keyword">ldmia</span> <span class="built_in">r4</span>!, &#123;<span class="built_in">r0</span>, <span class="built_in">r9</span>, <span class="built_in">r10</span>, <span class="built_in">r12</span>&#125;</span><br><span class="line"><span class="keyword">stmia</span> <span class="built_in">r3</span>!, &#123;<span class="built_in">r0</span>, <span class="built_in">r9</span>, <span class="built_in">r10</span>, <span class="built_in">r12</span>&#125;</span><br><span class="line"><span class="keyword">subs</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="number">#1</span></span><br><span class="line"><span class="keyword">bne</span> copy_loop</span><br></pre></td></tr></table></figure>
+
+<p>ARM 的 <code>LDM/STM</code> 一次搬 4 个寄存器 &#x3D; 16 字节，所以循环次数是 <code>2176 / 16 = 136</code>。这里用 <code>r9/r10/r12</code> 当搬运暂存，<code>r0</code> 此时已经完成门控判断，可以复用。</p>
+<p>私有瓦片的”安全”不是猜的，而是构建期断言：解析 4 个干净存档（面板&#x2F;编成物品&#x2F;购买&#x2F;卖出）的 BGxCNT，按 map base、char base、尺寸枚举全部 tilemap 表项，算出被引用的绝对 tile 集合，要求 <code>0x350-0x393</code> 与集合无交集，且这 68×32 字节在 4 份 VRAM 里全为零。</p>
+<h3 id="4-4-逐格校验"><a href="#4-4-逐格校验" class="headerlink" title="4.4 逐格校验"></a>4.4 逐格校验</h3><p>表项结构 8 字节：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">struct entry &#123;</span><br><span class="line">    u32 addr;          // BG map 表项地址（0x06005000 / 0x06005800 窗口内）</span><br><span class="line">    u16 expected_tile; // 预期 tile 索引</span><br><span class="line">    u16 new_tile;      // 0x350 + uid</span><br><span class="line">&#125; __attribute__((packed));</span><br></pre></td></tr></table></figure>
+
+<p>循环逻辑：</p>
+<pre class="mermaid">flowchart LR
+    A["读格子 u16"] --> B["tile = cell & 0x3FF"]
+    B --> C{"tile == expected ?"}
+    C -->|"否"| D["跳过：一个字节都不写"]
+    C -->|"是"| E["cell = (cell & 0xF000) | new_tile"]
+    E --> F["该格显示中文切片"]</pre>
+
+<p>对应的 ARM：</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ldr</span> <span class="built_in">r2</span>, <span class="number">=0x3FF</span></span><br><span class="line"><span class="symbol">loop:</span></span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r0</span>, [<span class="built_in">r5</span>], <span class="number">#4</span>     <span class="comment">@ 取 addr，表指针 +4</span></span><br><span class="line"><span class="keyword">ldrh</span> <span class="built_in">r1</span>, [<span class="built_in">r0</span>]        <span class="comment">@ 读当前格子</span></span><br><span class="line"><span class="keyword">and</span> <span class="built_in">r12</span>, <span class="built_in">r1</span>, <span class="built_in">r2</span>      <span class="comment">@ 取 tile 索引</span></span><br><span class="line"><span class="keyword">ldrh</span> <span class="built_in">r3</span>, [<span class="built_in">r5</span>], <span class="number">#2</span>    <span class="comment">@ 取 expected，指针 +2</span></span><br><span class="line"><span class="keyword">cmp</span> <span class="built_in">r12</span>, <span class="built_in">r3</span></span><br><span class="line"><span class="keyword">ldrh</span> <span class="built_in">r9</span>, [<span class="built_in">r5</span>], <span class="number">#2</span>    <span class="comment">@ 取 new_tile，指针 +2</span></span><br><span class="line"><span class="keyword">bne</span> next             <span class="comment">@ 不匹配 → 跳过</span></span><br><span class="line"><span class="keyword">and</span> <span class="built_in">r12</span>, <span class="built_in">r1</span>, <span class="number">#0xF000</span> <span class="comment">@ 只保留调色板 bank</span></span><br><span class="line"><span class="keyword">orr</span> <span class="built_in">r12</span>, <span class="built_in">r12</span>, <span class="built_in">r9</span>     <span class="comment">@ 拼上私有 tile</span></span><br><span class="line"><span class="keyword">strh</span> <span class="built_in">r12</span>, [<span class="built_in">r0</span>]       <span class="comment">@ 写回</span></span><br><span class="line"><span class="symbol">next:</span></span><br><span class="line"><span class="keyword">subs</span> <span class="built_in">r6</span>, <span class="built_in">r6</span>, <span class="number">#1</span></span><br><span class="line"><span class="keyword">bne</span> loop</span><br></pre></td></tr></table></figure>
+
+<p>这里有一个细节值得说明：<code>and r12, r1, #0xF000</code> 会同时清掉水平&#x2F;垂直翻转位（bit10&#x2F;11）。文字格的翻转位本来就是 0，所以安全；如果将来要处理带翻转的图形格，这里需要改成 <code>#0xFC00</code>。</p>
+<p>另外，整个循环只比较 tile 索引，不比较调色板。调色板的一致性由表生成阶段保证（P 表直接从同一页面取预期值；S 表在内容匹配时强制调色板 bank 相等）。运行时不比对调色板，是为了让同一个中文瓦片能在不同调色板 bank 下复用。</p>
+<h3 id="4-5-返回路径"><a href="#4-5-返回路径" class="headerlink" title="4.5 返回路径"></a>4.5 返回路径</h3><p>Hook 替换的是调度器的第一条指令。执行完必须回到调度器的第三条指令 <code>0x08000104</code>，并且恢复它期望的 <code>r3 = 0x04000200</code>：</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">done:</span></span><br><span class="line"><span class="keyword">pop</span> &#123;<span class="built_in">r0</span>, <span class="built_in">r1</span>, <span class="built_in">r2</span>, <span class="built_in">r3</span>, <span class="built_in">r4</span>, <span class="built_in">r5</span>, <span class="built_in">r6</span>, <span class="built_in">r9</span>, <span class="built_in">r10</span>, <span class="built_in">r12</span>&#125;</span><br><span class="line"><span class="keyword">mov</span> <span class="built_in">r3</span>, <span class="number">#0x04000000</span></span><br><span class="line"><span class="keyword">add</span> <span class="built_in">r3</span>, <span class="built_in">r3</span>, <span class="number">#0x200</span></span><br><span class="line"><span class="keyword">b</span> <span class="number">0x08000104</span></span><br></pre></td></tr></table></figure>
+
+<p>v9 曾经在结尾写 <code>bx 0x03000F10</code>，跳回<strong>已经被补丁的调度器开头</strong>，于是 <code>LDR PC → Hook → BX → LDR PC</code> 无限循环。当时用 Lua 测试还”成功”了——因为死循环本身在反复执行拷贝，截图看起来正常，但真机第一次 IRQ 就冻死。这个坑也是后来坚持”每条分支目标都做反汇编抽查”的原因。</p>
+<h3 id="4-6-完整-ARM-列表"><a href="#4-6-完整-ARM-列表" class="headerlink" title="4.6 完整 ARM 列表"></a>4.6 完整 ARM 列表</h3><p>把上面的片段拼起来就是 Hook 主体（由 Keystone 汇编生成，字面量池在代码之后）：</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">push</span> &#123;<span class="built_in">r0</span>, <span class="built_in">r1</span>, <span class="built_in">r2</span>, <span class="built_in">r3</span>, <span class="built_in">r4</span>, <span class="built_in">r5</span>, <span class="built_in">r6</span>, <span class="built_in">r9</span>, <span class="built_in">r10</span>, <span class="built_in">r12</span>&#125;</span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r0</span>, <span class="number">=0x04000000</span></span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r1</span>, [<span class="built_in">r0</span>]            <span class="comment">@ DISPCNT</span></span><br><span class="line"><span class="keyword">tst</span> <span class="built_in">r1</span>, <span class="number">#0x2000</span>         <span class="comment">@ forced blank</span></span><br><span class="line"><span class="keyword">bne</span> done</span><br><span class="line"></span><br><span class="line"><span class="keyword">ldrh</span> <span class="built_in">r1</span>, [<span class="built_in">r0</span>, <span class="number">#8</span>]       <span class="comment">@ BG0CNT</span></span><br><span class="line"><span class="keyword">cmp</span> <span class="built_in">r1</span>, <span class="number">#0x4C03</span></span><br><span class="line"><span class="keyword">bne</span> p_gate</span><br><span class="line"><span class="keyword">ldrh</span> <span class="built_in">r1</span>, [<span class="built_in">r0</span>, <span class="number">#0xC</span>]     <span class="comment">@ BG2CNT</span></span><br><span class="line"><span class="keyword">cmp</span> <span class="built_in">r1</span>, <span class="number">#0x0B08</span></span><br><span class="line"><span class="keyword">bne</span> done</span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r5</span>, <span class="symbol">=S_TABLE</span></span><br><span class="line"><span class="keyword">mov</span> <span class="built_in">r6</span>, <span class="number">#84</span></span><br><span class="line"><span class="keyword">b</span> setup</span><br><span class="line"></span><br><span class="line"><span class="symbol">p_gate:</span></span><br><span class="line"><span class="keyword">ldrh</span> <span class="built_in">r1</span>, [<span class="built_in">r0</span>, <span class="number">#0xE</span>]     <span class="comment">@ BG3CNT</span></span><br><span class="line"><span class="keyword">cmp</span> <span class="built_in">r1</span>, <span class="number">#0x2A08</span></span><br><span class="line"><span class="keyword">bne</span> done</span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r5</span>, <span class="symbol">=P_TABLE</span></span><br><span class="line"><span class="keyword">mov</span> <span class="built_in">r6</span>, <span class="number">#107</span></span><br><span class="line"></span><br><span class="line"><span class="symbol">setup:</span></span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r4</span>, <span class="symbol">=BLOB</span></span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r3</span>, <span class="number">=0x0600EA00</span></span><br><span class="line"><span class="keyword">mov</span> <span class="built_in">r2</span>, <span class="number">#136</span></span><br><span class="line"><span class="symbol">copy_loop:</span></span><br><span class="line"><span class="keyword">ldmia</span> <span class="built_in">r4</span>!, &#123;<span class="built_in">r0</span>, <span class="built_in">r9</span>, <span class="built_in">r10</span>, <span class="built_in">r12</span>&#125;</span><br><span class="line"><span class="keyword">stmia</span> <span class="built_in">r3</span>!, &#123;<span class="built_in">r0</span>, <span class="built_in">r9</span>, <span class="built_in">r10</span>, <span class="built_in">r12</span>&#125;</span><br><span class="line"><span class="keyword">subs</span> <span class="built_in">r2</span>, <span class="built_in">r2</span>, <span class="number">#1</span></span><br><span class="line"><span class="keyword">bne</span> copy_loop</span><br><span class="line"></span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r2</span>, <span class="number">=0x3FF</span></span><br><span class="line"><span class="symbol">loop:</span></span><br><span class="line"><span class="keyword">ldr</span> <span class="built_in">r0</span>, [<span class="built_in">r5</span>], <span class="number">#4</span></span><br><span class="line"><span class="keyword">ldrh</span> <span class="built_in">r1</span>, [<span class="built_in">r0</span>]</span><br><span class="line"><span class="keyword">and</span> <span class="built_in">r12</span>, <span class="built_in">r1</span>, <span class="built_in">r2</span></span><br><span class="line"><span class="keyword">ldrh</span> <span class="built_in">r3</span>, [<span class="built_in">r5</span>], <span class="number">#2</span></span><br><span class="line"><span class="keyword">cmp</span> <span class="built_in">r12</span>, <span class="built_in">r3</span></span><br><span class="line"><span class="keyword">ldrh</span> <span class="built_in">r9</span>, [<span class="built_in">r5</span>], <span class="number">#2</span></span><br><span class="line"><span class="keyword">bne</span> next</span><br><span class="line"><span class="keyword">and</span> <span class="built_in">r12</span>, <span class="built_in">r1</span>, <span class="number">#0xF000</span></span><br><span class="line"><span class="keyword">orr</span> <span class="built_in">r12</span>, <span class="built_in">r12</span>, <span class="built_in">r9</span></span><br><span class="line"><span class="keyword">strh</span> <span class="built_in">r12</span>, [<span class="built_in">r0</span>]</span><br><span class="line"><span class="symbol">next:</span></span><br><span class="line"><span class="keyword">subs</span> <span class="built_in">r6</span>, <span class="built_in">r6</span>, <span class="number">#1</span></span><br><span class="line"><span class="keyword">bne</span> loop</span><br><span class="line"></span><br><span class="line"><span class="symbol">done:</span></span><br><span class="line"><span class="keyword">pop</span> &#123;<span class="built_in">r0</span>, <span class="built_in">r1</span>, <span class="built_in">r2</span>, <span class="built_in">r3</span>, <span class="built_in">r4</span>, <span class="built_in">r5</span>, <span class="built_in">r6</span>, <span class="built_in">r9</span>, <span class="built_in">r10</span>, <span class="built_in">r12</span>&#125;</span><br><span class="line"><span class="keyword">mov</span> <span class="built_in">r3</span>, <span class="number">#0x04000000</span></span><br><span class="line"><span class="keyword">add</span> <span class="built_in">r3</span>, <span class="built_in">r3</span>, <span class="number">#0x200</span></span><br><span class="line"><span class="keyword">b</span> <span class="number">0x08000104</span></span><br></pre></td></tr></table></figure>
+
+<p>ROM 布局：</p>
+<table>
+<thead>
+<tr>
+<th>文件偏移</th>
+<th>内容</th>
+<th>大小</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0xFC-0x103</code></td>
+<td>入口跳板 <code>E51FF004</code> + Hook 地址</td>
+<td>8 B</td>
+</tr>
+<tr>
+<td><code>0x934E70</code></td>
+<td>中文瓦片 blob（68 × 32）</td>
+<td>2176 B</td>
+</tr>
+<tr>
+<td><code>0x9B4EF0</code></td>
+<td>P 表 107 × 8</td>
+<td>856 B</td>
+</tr>
+<tr>
+<td><code>0x9B53C8</code></td>
+<td>S 表 84 × 8</td>
+<td>672 B</td>
+</tr>
+<tr>
+<td><code>0x9B9540</code></td>
+<td>Hook 代码 + 字面量池</td>
+<td>240 B（预算 940 B）</td>
+</tr>
+</tbody></table>
+<h2 id="五、表是怎么”算”出来的"><a href="#五、表是怎么”算”出来的" class="headerlink" title="五、表是怎么”算”出来的"></a>五、表是怎么”算”出来的</h2><p>表不是手写的，而是从干净存档逐格推导出来的。输入是四份原版 ROM 产出的即时档（<code>c1o/c2o/c3o/c4o</code>）以及从面板 VRAM 导出的 84 格清单 <code>all_bg_entries.txt</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">BG3 idx 257 (r8 c1) tile 0FF pal 15</span><br><span class="line">BG3 idx 258 (r8 c2) tile 100 pal 15</span><br><span class="line">BG3 idx 259 (r8 c3) tile 101 pal 15</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>每行给出 tilemap 索引、行列、原始 tile 和调色板 bank。84 格正好覆盖 8 个标签在面板上的全部墨迹。</p>
+<h3 id="5-1-P-表：107-84-23"><a href="#5-1-P-表：107-84-23" class="headerlink" title="5.1 P 表：107 &#x3D; 84 + 23"></a>5.1 P 表：107 &#x3D; 84 + 23</h3><ul>
+<li>84 项：面板格，地址 <code>0x06005000 + idx*2</code>，预期 tile 直接取干净面板 VRAM 的当前值。</li>
+<li>23 项：装备页右侧 mini 面板。它显示的内容与面板顶部 23 格（<code>r8-r10</code>）一一对应，但位置不同、tile 分配也不同。匹配键用<strong>原始瓦片的 32 字节内容</strong>，而不是索引或坐标：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">topmap = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> idx <span class="keyword">in</span> panel_top:                 <span class="comment"># 面板顶部 23 格</span></span><br><span class="line">    key = tile(c4o[<span class="number">0</span>], cell(c4o[<span class="number">0</span>], <span class="number">0x06005000</span> + idx*<span class="number">2</span>) &amp; <span class="number">0x3FF</span>)</span><br><span class="line">    topmap[key] = idx                 <span class="comment"># 内容 → 面板格</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> a <span class="keyword">in</span> equip_mini_cells:            <span class="comment"># 装备页右侧 mini 的 23 个格子</span></span><br><span class="line">    cv = cell(c1o[<span class="number">0</span>], a)</span><br><span class="line">    m = topmap.get(tile(c1o[<span class="number">0</span>], cv &amp; <span class="number">0x3FF</span>))</span><br><span class="line">    <span class="keyword">if</span> m <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        extra.append((a, cv &amp; <span class="number">0x3FF</span>, uid_of[m]))</span><br></pre></td></tr></table></figure>
+
+<p>断言 <code>len(extra) == 23</code>。用内容做键的好处是：不依赖两页的相对偏移，也不依赖分配顺序，只要字形字节相同就能对上。</p>
+<h3 id="5-2-S-表：uid-不再可信"><a href="#5-2-S-表：uid-不再可信" class="headerlink" title="5.2 S 表：uid 不再可信"></a>5.2 S 表：uid 不再可信</h3><p>S 表的 84 个地址来自 v25 的商店分析（<code>t2_shop_v25.bin</code> 78 项 + <code>t3_redirect_v25.bin</code> 6 项），但 <strong>uid 不能沿用</strong>。</p>
+<p>原因在 v28：武器攻击&#x2F;魔法强度左移后，画布内容变化，去重顺序改变，私有瓦片从 69 个变成 68 个，uid 从 21 起整体错位。旧表里存死的 uid 会让商店标签错位。</p>
+<p>v29 的做法是每次构建都从内容重新推导：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> a, _old_uid <span class="keyword">in</span> T2:</span><br><span class="line">    eb = cell(c2o[<span class="number">0</span>], a) &amp; <span class="number">0x3FF</span>          <span class="comment"># 商店格原始 tile</span></span><br><span class="line">    cv = cell(c2o[<span class="number">0</span>], a)</span><br><span class="line">    W  = tile(c2o[<span class="number">0</span>], eb)                 <span class="comment"># 商店格原始 32 字节</span></span><br><span class="line">    cands = [i <span class="keyword">for</span> i, p <span class="keyword">in</span> panel_content.get(W, [])</span><br><span class="line">             <span class="keyword">if</span> p == ((cv &gt;&gt; <span class="number">12</span>) &amp; <span class="number">15</span>)]   <span class="comment"># 内容相同 + 调色板相同</span></span><br><span class="line">    row = (a - <span class="number">0x06005800</span>) // <span class="number">64</span></span><br><span class="line">    best = <span class="built_in">min</span>(cands, key=<span class="keyword">lambda</span> i: <span class="built_in">abs</span>(i//<span class="number">32</span> - row))  <span class="comment"># 取行距最近的</span></span><br><span class="line">    S.append((a, eb, uid_of[best]))</span><br></pre></td></tr></table></figure>
+
+<p><code>panel_content</code> 是从干净面板 VRAM 建的倒排索引：32 字节内容 → <code>[(面板格 idx, 调色板)]</code>。商店标签块与面板标签块逐格内容相同（v25 实测 61&#x2F;61 格一致，整体偏移 <code>-0x5E</code> 字节），所以内容匹配能 78&#x2F;78 复现旧映射，同时自动适配新的去重顺序。</p>
+<p>T3 的 6 格（魔防顶行）是商店页内的直接一一对应，直接用 <code>idx = (addr - 0x5800) / 2</code> 取 <code>uid_of[idx]</code>。</p>
+<h3 id="5-3-跨页误命中：必须为零"><a href="#5-3-跨页误命中：必须为零" class="headerlink" title="5.3 跨页误命中：必须为零"></a>5.3 跨页误命中：必须为零</h3><p>表生成后要验证”只在本页面命中”。这是第三代架构最关键的一条断言：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">chk = &#123;name: (<span class="built_in">len</span>(matches(pg, P)), <span class="built_in">len</span>(matches(pg, S))) <span class="keyword">for</span> name, pg <span class="keyword">in</span> pages.items()&#125;</span><br><span class="line"><span class="keyword">assert</span> chk[<span class="string">&quot;panel&quot;</span>][<span class="number">0</span>] == <span class="number">84</span> <span class="keyword">and</span> chk[<span class="string">&quot;equip&quot;</span>][<span class="number">0</span>] == <span class="number">84</span>   <span class="comment"># P 表恰好命中 84</span></span><br><span class="line"><span class="keyword">assert</span> chk[<span class="string">&quot;buy&quot;</span>][<span class="number">1</span>]   == <span class="number">84</span> <span class="keyword">and</span> chk[<span class="string">&quot;sell&quot;</span>][<span class="number">1</span>]  == <span class="number">84</span>   <span class="comment"># S 表恰好命中 84</span></span><br><span class="line"><span class="keyword">assert</span> chk[<span class="string">&quot;panel&quot;</span>][<span class="number">1</span>] == <span class="number">0</span>  <span class="keyword">and</span> chk[<span class="string">&quot;equip&quot;</span>][<span class="number">1</span>] == <span class="number">0</span>    <span class="comment"># P 页面不得命中 S 表</span></span><br><span class="line"><span class="keyword">assert</span> chk[<span class="string">&quot;buy&quot;</span>][<span class="number">0</span>]   == <span class="number">0</span>  <span class="keyword">and</span> chk[<span class="string">&quot;sell&quot;</span>][<span class="number">0</span>]  == <span class="number">0</span>    <span class="comment"># 商店不得命中 P 表</span></span><br></pre></td></tr></table></figure>
+
+<p><code>matches</code> 就是模拟运行时的 <code>(cell &amp; 0x3FF) == expected</code>。四项断言把”串页写坏别的界面”这个风险在构建期就封死了。</p>
+<p>同时还有一条私有瓦片安全断言：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> u <span class="keyword">in</span> <span class="built_in">range</span>(NT):</span><br><span class="line">    t = <span class="number">0x350</span> + u</span><br><span class="line">    <span class="keyword">assert</span> t <span class="keyword">not</span> <span class="keyword">in</span> used_all                       <span class="comment"># 4 页全部 BG 层零引用</span></span><br><span class="line">    <span class="keyword">for</span> name, (v, _, _) <span class="keyword">in</span> pages.items():</span><br><span class="line">        <span class="keyword">assert</span> v[<span class="number">0x8000</span> + t*<span class="number">32</span> : <span class="number">0x8000</span> + t*<span class="number">32</span> + <span class="number">32</span>] == <span class="string">b&quot;\0&quot;</span>*<span class="number">32</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="六、字形合成与排版"><a href="#六、字形合成与排版" class="headerlink" title="六、字形合成与排版"></a>六、字形合成与排版</h2><h3 id="6-1-画布与切片"><a href="#6-1-画布与切片" class="headerlink" title="6.1 画布与切片"></a>6.1 画布与切片</h3><p>中文不是直接生成 8×8 瓦片，而是先画在一张 240×160 的单色画布上，再按 84 个原始格子的 <code>(row, col)</code> 切成 8×8 瓦片。这样跨瓦片的字形（比如”攻”的左半边落在上一格）才能正确拼接。</p>
+<pre class="mermaid">flowchart TB
+    A["8 个标签文本"] --> B["240x160 单色画布 阴影 + 墨色"]
+    B --> C["按 84 个原始格子切 8x8"]
+    C --> D["84 个 4bpp 瓦片（原序）"]
+    D --> E["内容去重"]
+    E --> F["68 个唯一瓦片 = 2176B blob"]</pre>
+
+<p>字体用系统 SimSun 的 12px 内嵌点阵，PIL 直接命中点阵，不做缩放。每个字先渲染到 16×16 灰度图，取墨迹包围盒，再按目标高度删掉墨迹最少的多余行，得到 11px 字形。先画阴影（偏移 +1,+1）再画墨色，保证 4bpp 下标不越界。</p>
+<p>标签定义集中在 <code>compose_cn_v5.py</code> 的 <code>LABELS</code>：</p>
+<table>
+<thead>
+<tr>
+<th>标签</th>
+<th>文本</th>
+<th>x0</th>
+<th>y0</th>
+<th>墨色 &#x2F; 阴影</th>
+<th>ymax</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>idou</td>
+<td>移动</td>
+<td>10</td>
+<td>64</td>
+<td>7 &#x2F; 8（黄）</td>
+<td>75</td>
+</tr>
+<tr>
+<td>jump</td>
+<td>跳跃</td>
+<td>10</td>
+<td>76</td>
+<td>7 &#x2F; 8（黄）</td>
+<td>87</td>
+</tr>
+<tr>
+<td>kaihi</td>
+<td>回避</td>
+<td>70</td>
+<td>76</td>
+<td>3 &#x2F; 1（白）</td>
+<td>87</td>
+</tr>
+<tr>
+<td>buki</td>
+<td>武器攻击</td>
+<td>16</td>
+<td>91</td>
+<td>3 &#x2F; 1</td>
+<td>102</td>
+</tr>
+<tr>
+<td>bogyo1</td>
+<td>防御</td>
+<td>42</td>
+<td>104</td>
+<td>3 &#x2F; 1</td>
+<td>115</td>
+</tr>
+<tr>
+<td>mahou</td>
+<td>魔法强度</td>
+<td>16</td>
+<td>116</td>
+<td>3 &#x2F; 1</td>
+<td>127</td>
+</tr>
+<tr>
+<td>bogyo2</td>
+<td>魔防</td>
+<td>42</td>
+<td>128</td>
+<td>3 &#x2F; 1</td>
+<td>139</td>
+</tr>
+<tr>
+<td>speed</td>
+<td>速度</td>
+<td>20</td>
+<td>140</td>
+<td>3 &#x2F; 1</td>
+<td>151</td>
+</tr>
+</tbody></table>
+<p>字距 <code>ADV = 13</code>，所以”武器攻击”四个字的起点分别是 16 &#x2F; 29 &#x2F; 42 &#x2F; 55。</p>
+<h3 id="6-2-调色板约束"><a href="#6-2-调色板约束" class="headerlink" title="6.2 调色板约束"></a>6.2 调色板约束</h3><p>瓦片只存颜色下标，最终颜色由格子的调色板 bank 决定。标签用色号 3（墨）&#x2F;1（影）；在面板使用的 bank 13&#x2F;14&#x2F;15 里，色号 3 都是白色 <code>F8F8E8</code>，色号 1 是近黑色，所以同一个中文瓦片换 bank 仍然是白字。黄色标签用色号 7&#x2F;8（bank 15 下是 <code>F8E800</code> &#x2F; <code>B86800</code>）。</p>
+<p>这带来一个隐蔽限制：面板上有些空白格的原始 tile 是 <code>0x0FE</code>、调色板 bank 0。如果标签左移占用这些格子，格子仍保留 bank 0，中文就会显示成错误的颜色。所以”能左移到哪里”不仅受 tilemap 格子集合限制，还受调色板 bank 限制。</p>
+<h3 id="6-3-对齐：两次左移与”格子集合”边界"><a href="#6-3-对齐：两次左移与”格子集合”边界" class="headerlink" title="6.3 对齐：两次左移与”格子集合”边界"></a>6.3 对齐：两次左移与”格子集合”边界</h3><p>用户先后提了两次对齐需求：</p>
+<ol>
+<li>v28：武器攻击&#x2F;魔法强度 左对齐到 x&#x3D;16。</li>
+<li>v29：防御&#x2F;魔防 与上面两行的最后两字对齐（即”攻击”&#x2F;“强度”的起点）。</li>
+</ol>
+<p>v28 之所以能直接到 x&#x3D;16，是因为原日文 <code>武器こうげき</code> 本来就从 c2（x&#x3D;16）起，格子都在 84 项表内。</p>
+<p>v29 第一次尝试把防御&#x2F;魔防也直接移到 x&#x3D;16，真机只显示残字「御」「防」。对齐前的 v28 对照是这样的：</p>
+<p><img src="/res/20261121215100.png" alt="v28 对照：防御/魔防仍缩在右侧"></p>
+<p>原因：原日文 <code>ぼうぎょ</code> 的<strong>顶行</strong>（r13&#x2F;r16）只包含 c4-c9，c2-c3 不在 84 格集合里（底行 r14&#x2F;r17 才从 c2 起）。P&#x2F;S 表不会重定向顶行这两个格子，游戏原有的假名字形就露出来，与私有瓦片拼成残字。</p>
+<p>最终取 <code>x0 = 42</code>，正好是”攻击”&#x2F;“强度”两字的起点，仍然落在 c5 起的原格子集合内，只前移 2px：</p>
+<p><img src="/res/20261121215102.png" alt="v29 状态面板放大：四行左边缘 16 / 42 / 16 / 42"></p>
+<p>这条经验可以推广成一句规则：<strong>基于”原格子集合”的重定向架构，标签的可移动范围由原标签的格子跨度决定；要跳出去，必须先扩充表，并为新增格子逐格取证预期 tile。</strong></p>
+<p><img src="/res/20261121215103.png" alt="v29 商店购买页"></p>
+<p><img src="/res/20261121215104.png" alt="v29 商店卖出页"></p>
+<p><img src="/res/20261121215105.png" alt="v29 编成物品页"></p>
+<h3 id="6-4-没有做的那一项"><a href="#6-4-没有做的那一项" class="headerlink" title="6.4 没有做的那一项"></a>6.4 没有做的那一项</h3><p>编成页底部还有 6px 的 <code>START:アイテムソート</code> &#x2F; <code>START:アイテムリスト</code>。它不是 BG 文字，而是 3 个 OBJ 精灵拼成 80px（<code>32×8</code> 两块 + <code>16×8</code> 一块），字符跨瓦片且字号只有 6px。中文在 6px 下无法辨识，改造成本与收益不成比例，因此保留日文。这也是文档里唯一明确标注为”不做”的项。</p>
+<h2 id="七、验证链"><a href="#七、验证链" class="headerlink" title="七、验证链"></a>七、验证链</h2><h3 id="7-1-构建期断言"><a href="#7-1-构建期断言" class="headerlink" title="7.1 构建期断言"></a>7.1 构建期断言</h3><p><code>make_hook_v27.py</code> 在写 ROM 之前会做五类检查，任一失败直接终止构建：</p>
+<table>
+<thead>
+<tr>
+<th>检查</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>表地址</td>
+<td>落在对应 BG map 窗口、2 字节对齐、地址唯一</td>
+</tr>
+<tr>
+<td>表内容</td>
+<td>expected tile 非零且 &lt; 0x400；new tile 在 <code>0x350-0x393</code></td>
+</tr>
+<tr>
+<td>零区</td>
+<td>blob&#x2F;P&#x2F;S&#x2F;Hook 四个写入区在原版 ROM 中必须全零</td>
+</tr>
+<tr>
+<td>寄存器</td>
+<td>push&#x2F;pop 集合相等，且覆盖全部使用寄存器（<code>r0-r6/r9/r10/r12</code>）</td>
+</tr>
+<tr>
+<td>反汇编</td>
+<td>所有 LDR 字面量目标、B&#x2F;BNE 分支目标、返回目标逐条核对</td>
+</tr>
+</tbody></table>
+<p>最后一项不是形式主义。项目早期把 LDR 字面量的 imm12 当成”字偏移”编码，实际是<strong>字节偏移</strong>，导致 v9&#x2F;v12 的门控读到垃圾。后来所有字面量都由构建器计算 <code>imm = pool_byte_off - (slot*4 + 8)</code>，并断言 4 对齐、<code>&lt; 0x1000</code>。</p>
+<h3 id="7-2-模拟渲染"><a href="#7-2-模拟渲染" class="headerlink" title="7.2 模拟渲染"></a>7.2 模拟渲染</h3><p>在真机之前，先把表应用到干净 VRAM 快照上，按 BGxCNT 解出 map base &#x2F; char base &#x2F; 尺寸，渲染 3 倍图检查：</p>
+<ul>
+<li><code>v27_panel_bg3.png</code></li>
+<li><code>v27_equip_bg3.png</code></li>
+<li><code>v27_buy_bg2.png</code></li>
+<li><code>v27_sell_bg2.png</code></li>
+</ul>
+<p>模拟能发现”字切错、调色板错、标签错位”这类确定性问题，但发现不了 IRQ 上下文相关问题（比如 r6 被破坏），所以模拟通过不等于真机通过。</p>
+<h3 id="7-3-真机"><a href="#7-3-真机" class="headerlink" title="7.3 真机"></a>7.3 真机</h3><p>mGBA 载入干净即时档，用 GDB 注入 Hook 后截图。四个界面分别对应：</p>
+<table>
+<thead>
+<tr>
+<th>界面</th>
+<th>即时档</th>
+<th>截图</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>人物状态</td>
+<td>ss4</td>
+<td><code>v29_status_01.png</code></td>
+</tr>
+<tr>
+<td>编成物品</td>
+<td>ss1</td>
+<td><code>v29_equip_01.png</code></td>
+</tr>
+<tr>
+<td>商店购买</td>
+<td>ss2</td>
+<td><code>v29_buy_01.png</code></td>
+</tr>
+<tr>
+<td>商店卖出</td>
+<td>ss3</td>
+<td><code>v29_sell_01.png</code></td>
+</tr>
+</tbody></table>
+<p>另外还回归了编成人物列表、装备槽页、战斗页和冷启动，确认没有跨页面污染。</p>
+<h3 id="7-4-像素差分"><a href="#7-4-像素差分" class="headerlink" title="7.4 像素差分"></a>7.4 像素差分</h3><p>“看起来正常”不够，还要证明”只改了该改的地方”。</p>
+<ul>
+<li>v27 vs 原版：差异集中在标签&#x2F;页签区域，差分像素 3178 &#x2F; 2847 &#x2F; 2871（面板&#x2F;购买&#x2F;卖出），物品名、价格、数量、HP&#x2F;MP、数值列零差异。</li>
+<li>v28 vs v29：差异限定在 <code>x=42-68, y=104-139</code>，正好是防御&#x2F;魔防两行；其余区域零差异。</li>
+</ul>
+<p>差分也踩过坑：直接拿 <code>t4_01.png</code> 和 v28 截图差分会把 bbox 拉到 y&#x3D;33，因为两张不是同一画面&#x2F;同一动画帧。正确做法是用同一个 ss4 分别跑 v27 和 v28，同状态对比。</p>
+<h3 id="7-5-可复现构建与-IPS"><a href="#7-5-可复现构建与-IPS" class="headerlink" title="7.5 可复现构建与 IPS"></a>7.5 可复现构建与 IPS</h3><ul>
+<li>二次构建 <code>A_v29_check.gba</code> 与 <code>A_v29.gba</code> <strong>逐字节一致</strong>（length 10361856，equal True），证明交付 ROM 就是构建器产物，没有手工补丁。</li>
+<li>IPS 生成：逐字节找差异区段，间隔 ≤ 4 字节的区段合并，单条记录超过 <code>0xFFFF</code> 就切分；写入 24 位偏移 + 16 位长度 + 数据，最后 <code>EOF</code>。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">merged = []</span><br><span class="line"><span class="keyword">for</span> a, b <span class="keyword">in</span> diffs:</span><br><span class="line">    <span class="keyword">if</span> merged <span class="keyword">and</span> a - merged[-<span class="number">1</span>][<span class="number">1</span>] &lt;= <span class="number">4</span>:</span><br><span class="line">        merged[-<span class="number">1</span>] = (merged[-<span class="number">1</span>][<span class="number">0</span>], b)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        merged.append((a, b))</span><br></pre></td></tr></table></figure>
+
+<p>生成后再用独立的 IPS 应用函数回放一遍，和交付 ROM 比较。v29 的结果是 <strong>3685 字节 &#x2F; 35 条记录 &#x2F; PASS</strong>。</p>
+<h2 id="八、踩坑清单"><a href="#八、踩坑清单" class="headerlink" title="八、踩坑清单"></a>八、踩坑清单</h2><table>
+<thead>
+<tr>
+<th>#</th>
+<th>现象</th>
+<th>根因</th>
+<th>修复</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>冷启动第一次 IRQ 冻死</td>
+<td>结尾 <code>bx</code> 跳回已被补丁的调度器开头，无限循环</td>
+<td>重建 <code>r3</code> 并 <code>B 0x08000104</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>门控读到垃圾</td>
+<td>LDR 字面量 imm12 是字节偏移，不是字偏移</td>
+<td>构建器统一计算并断言</td>
+</tr>
+<tr>
+<td>3</td>
+<td>旧存档里 Hook 不生效</td>
+<td>存档 IWRAM 保存的是旧调度器</td>
+<td>GDB 注入 <code>0x03000F10</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>0x380+</code> 写中文后花屏</td>
+<td>那是 BG0 数字字形的家</td>
+<td>扫全 4 层 BG 引用找真空闲区</td>
+</tr>
+<tr>
+<td>5</td>
+<td>冷启动正常、读档黑屏</td>
+<td>代码放进文本指针表内的零区</td>
+<td>只使用 ROM 尾部已验证零区</td>
+</tr>
+<tr>
+<td>6</td>
+<td>拷贝多一个字节</td>
+<td><code>subs/bpl</code> 从 N 开始会拷 N+1 个</td>
+<td>起点改成 N-1</td>
+</tr>
+<tr>
+<td>7</td>
+<td>字形错位、跨行</td>
+<td>比例字体跨瓦片，相邻标签共享 tile 行</td>
+<td>虚拟画布 + 8×8 窗口切片</td>
+</tr>
+<tr>
+<td>8</td>
+<td>BizHawk 多段脚本位置漂移</td>
+<td>每次 launch 都是冷启动</td>
+<td>用 <code>savestate.save/load</code> 串联</td>
+</tr>
+<tr>
+<td>9</td>
+<td>用户存档被新游戏覆盖</td>
+<td>标题菜单被 START 连打跳过</td>
+<td>操作前备份 <code>A.sav</code>，验证后还原</td>
+</tr>
+<tr>
+<td>10</td>
+<td>命名界面输入异常</td>
+<td>A 是输入字符，B 是退格，START 才是确认</td>
+<td>按真实语义重写导航脚本</td>
+</tr>
+<tr>
+<td>11</td>
+<td>误判瓦片碰撞</td>
+<td>tile 索引是相对各自 CBB 的</td>
+<td>只统计 cbb&#x3D;2 的 BG2&#x2F;BG3</td>
+</tr>
+<tr>
+<td>12</td>
+<td>即时档 IO 偏移不一致</td>
+<td>不同状态保存时机不同</td>
+<td>放弃盲信 IO，用已知寄存器硬编码</td>
+</tr>
+<tr>
+<td>13</td>
+<td>面板正常、商店数字乱</td>
+<td>blob 落进每帧 DMA 填充区 <code>0x300-0x3FF</code></td>
+<td>私有瓦片改到 <code>0x350</code> 并验证零引用</td>
+</tr>
+<tr>
+<td>14</td>
+<td>静态表第二次进店全错</td>
+<td>商店 84 格分配每次不同（0&#x2F;84 相同）</td>
+<td>改为运行时读取 + 内容校验</td>
+</tr>
+<tr>
+<td>15</td>
+<td>改了构图后商店 uid 错位</td>
+<td>去重顺序变化，表里存死的 uid 失效</td>
+<td>构建时按内容重新推导 uid</td>
+</tr>
+<tr>
+<td>16</td>
+<td>标签左移后只剩残字</td>
+<td>新位置超出原标签占用的格子集合</td>
+<td>移动范围限制在原格子跨度内，或先扩表</td>
+</tr>
+</tbody></table>
+<p>其中第 15、16 条是 v28&#x2F;v29 新踩的，也最能说明这套架构的边界：它非常稳，但”可移动范围”和”uid 顺序”都由上游构图决定，任何构图变更都必须重新推导而不是复用旧表。</p>
+<h2 id="九、复现步骤与产物"><a href="#九、复现步骤与产物" class="headerlink" title="九、复现步骤与产物"></a>九、复现步骤与产物</h2><p>构建链（Windows，Python + keystone + capstone + Pillow）：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 合成画布 → cn_blob_v5.bin（84 tiles，按 84 格原序）</span></span><br><span class="line"><span class="built_in">Set-Location</span> d:/workspace/crack/gbagame/analysis</span><br><span class="line">python compose_cn_v5.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 去重 → cn_blob_v24.bin（68 tiles / 2176B）</span></span><br><span class="line"><span class="string">@&#x27;</span></span><br><span class="line"><span class="string">b = open(&#x27;cn_blob_v5.bin&#x27;,&#x27;rb&#x27;).read()</span></span><br><span class="line"><span class="string">t = [b[i*32:(i+1)*32] for i in range(len(b)//32)]</span></span><br><span class="line"><span class="string">seen, order = &#123;&#125;, []</span></span><br><span class="line"><span class="string">for x in t:</span></span><br><span class="line"><span class="string">    if x not in seen:</span></span><br><span class="line"><span class="string">        seen[x] = len(order); order.append(x)</span></span><br><span class="line"><span class="string">open(&#x27;cn_blob_v24.bin&#x27;,&#x27;wb&#x27;).write(b&#x27;&#x27;.join(order))</span></span><br><span class="line"><span class="string">&#x27;@</span> | python -</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 生成 P/S 表（必须在仓库根目录运行，脚本内路径为 analysis/）</span></span><br><span class="line"><span class="built_in">Set-Location</span> d:/workspace/crack/gbagame</span><br><span class="line">python analysis/gen_tables_v27.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 构建 ROM（含全部构建期断言）</span></span><br><span class="line">python analysis/make_hook_v27.py A_v29.gba</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 生成并自校验 IPS</span></span><br><span class="line">python analysis/make_ips.py A_v29.gba</span><br></pre></td></tr></table></figure>
+
+<p>产物：</p>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>A.gba</code> &#x2F; <code>A汉化.gba</code> &#x2F; <code>A_v29.gba</code></td>
+<td>交付 ROM，10361856 B</td>
+</tr>
+<tr>
+<td><code>ffta_panel_cn.ips</code></td>
+<td>3685 B，35 条记录</td>
+</tr>
+<tr>
+<td><code>analysis/cn_blob_v5.bin</code></td>
+<td>84 个中文切片（原序）</td>
+</tr>
+<tr>
+<td><code>analysis/cn_blob_v24.bin</code></td>
+<td>68 个去重瓦片，2176 B</td>
+</tr>
+<tr>
+<td><code>analysis/p_table_v27.bin</code></td>
+<td>P 表 856 B</td>
+</tr>
+<tr>
+<td><code>analysis/s_table_v27.bin</code></td>
+<td>S 表 672 B</td>
+</tr>
+<tr>
+<td><code>analysis/v27_tables_report.json</code></td>
+<td>表项与跨页命中统计</td>
+</tr>
+</tbody></table>
+<h2 id="十、方法论总结"><a href="#十、方法论总结" class="headerlink" title="十、方法论总结"></a>十、方法论总结</h2><p>这个项目最后能稳定下来，靠的不是某个”神级技巧”，而是四件事：</p>
+<ol>
+<li><strong>把 UI 文本当渲染结果，而不是数据。</strong> 找不到字符串时，不要继续在 ROM 里翻编码表，先去看 tilemap 和 CBB，确认它是怎么被画出来的。</li>
+<li><strong>用寄存器做门控，而不是用地址猜画面。</strong> <code>DISPCNT/BG0CNT/BG2CNT/BG3CNT</code> 的组合是画面身份的唯一可靠来源；同一段 VRAM 在不同画面含义完全不同。</li>
+<li><strong>不做盲写，做逐格校验。</strong> <code>(addr, expected, new)</code> 三元组把”重定向”变成一个幂等、可跳过、可自动容错的操作；未命中就不写，任何页面都不会被写坏。</li>
+<li><strong>把不变式放进构建器。</strong> 零区、寄存器集合、字面量目标、跨页命中、私有瓦片零引用——这些断言让”构建失败的次数”替代了”真机翻车的次数”。</li>
+</ol>
+<p>最终效果是四个界面、状态页、编成列表、装备槽页全部中文且无乱码，IPS 补丁 3.6KB，可复现构建，可回放验证。剩下 6px 的 OBJ 提示保留日文，是一个明确权衡后的取舍，而不是遗漏。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%80%86%E5%90%91/" rel="tag"># 逆向</a>
+              <a href="/tags/gba/" rel="tag"># gba</a>
+              <a href="/tags/romhack/" rel="tag"># romhack</a>
+              <a href="/tags/arm/" rel="tag"># arm</a>
+              <a href="/tags/ffta/" rel="tag"># ffta</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/30/fun/20261030-trimui-ports-install/" rel="prev" title="吹米 Trimui 掌机 adb 装机实战：仙剑1 与 Undertale">
+      <i class="fa fa-chevron-left"></i> 吹米 Trimui 掌机 adb 装机实战：仙剑1 与 Undertale
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%88%E8%AF%B4%E7%BB%93%E8%AE%BA"><span class="nav-number">1.</span> <span class="nav-text">先说结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E8%BF%99-8-%E4%B8%AA%E6%A0%87%E7%AD%BE%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E6%98%AF%E2%80%9D%E5%AD%97%E7%AC%A6%E4%B8%B2%E2%80%9D"><span class="nav-number">2.</span> <span class="nav-text">一、这 8 个标签为什么不是”字符串”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%80%86%E5%90%91%E7%8E%AF%E5%A2%83%E4%B8%8E%E5%8F%96%E8%AF%81%E6%89%8B%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">二、逆向环境与取证手法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-mGBA-%E5%8D%B3%E6%97%B6%E6%A1%A3%E8%A7%A3%E6%9E%90"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 mGBA 即时档解析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-GDB-Stub-%E6%B3%A8%E5%85%A5"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 GDB Stub 注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E8%87%AA%E5%8A%A8%E6%8C%89%E9%94%AE%E4%B8%8E%E6%88%AA%E5%9B%BE"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 自动按键与截图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%B8%89%E4%BB%A3%E6%96%B9%E6%A1%88%EF%BC%9A%E4%BB%8E%E2%80%9D%E6%94%B9%E6%8C%87%E5%90%91%E2%80%9D%E5%88%B0%E2%80%9D%E6%94%B9%E5%86%85%E5%AE%B9%E2%80%9D%E5%86%8D%E5%88%B0%E2%80%9D%E6%A0%A1%E9%AA%8C%E5%90%8E%E6%94%B9%E6%8C%87%E5%90%91%E2%80%9D"><span class="nav-number">4.</span> <span class="nav-text">三、三代方案：从”改指向”到”改内容”再到”校验后改指向”</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E7%AC%AC%E4%B8%80%E4%BB%A3%EF%BC%9Atilemap-%E9%9D%99%E6%80%81%E9%87%8D%E5%AE%9A%E5%90%91%EF%BC%88v13-v20%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 第一代：tilemap 静态重定向（v13-v20）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E7%AC%AC%E4%BA%8C%E4%BB%A3%EF%BC%9A%E5%AD%97%E5%BD%A2%E5%86%85%E5%AE%B9%E6%9B%BF%E6%8D%A2%EF%BC%88v24-v26%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 第二代：字形内容替换（v24-v26）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-v25-%E5%B4%A9%E6%BA%83%EF%BC%9AIRQ-%E9%87%8C%E5%B0%91%E4%BF%9D%E5%AD%98%E4%B8%80%E4%B8%AA%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">4.3.</span> <span class="nav-text">3.3 v25 崩溃：IRQ 里少保存一个寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-%E7%AC%AC%E4%B8%89%E4%BB%A3%EF%BC%9A%E9%80%90%E6%A0%BC%E5%86%85%E5%AE%B9%E6%A0%A1%E9%AA%8C-%E7%A7%81%E6%9C%89%E7%93%A6%E7%89%87%EF%BC%88v27-%E8%B5%B7%EF%BC%89"><span class="nav-number">4.4.</span> <span class="nav-text">3.4 第三代：逐格内容校验 + 私有瓦片（v27 起）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%9C%80%E7%BB%88%E6%9E%B6%E6%9E%84%E6%8B%86%E8%A7%A3"><span class="nav-number">5.</span> <span class="nav-text">四、最终架构拆解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E5%85%A5%E5%8F%A3%EF%BC%9A%E5%8F%AA%E6%94%B9-4-%E4%B8%AA%E5%AD%97%E8%8A%82"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 入口：只改 4 个字节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E9%97%A8%E6%8E%A7%EF%BC%9A%E7%94%A8%E4%B8%89%E4%B8%AA-BG-%E6%8E%A7%E5%88%B6%E5%AF%84%E5%AD%98%E5%99%A8%E5%8C%BA%E5%88%86%E7%94%BB%E9%9D%A2"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 门控：用三个 BG 控制寄存器区分画面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E7%A7%81%E6%9C%89%E7%93%A6%E7%89%87%E6%B1%A0"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 私有瓦片池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-%E9%80%90%E6%A0%BC%E6%A0%A1%E9%AA%8C"><span class="nav-number">5.4.</span> <span class="nav-text">4.4 逐格校验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5-%E8%BF%94%E5%9B%9E%E8%B7%AF%E5%BE%84"><span class="nav-number">5.5.</span> <span class="nav-text">4.5 返回路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-6-%E5%AE%8C%E6%95%B4-ARM-%E5%88%97%E8%A1%A8"><span class="nav-number">5.6.</span> <span class="nav-text">4.6 完整 ARM 列表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E8%A1%A8%E6%98%AF%E6%80%8E%E4%B9%88%E2%80%9D%E7%AE%97%E2%80%9D%E5%87%BA%E6%9D%A5%E7%9A%84"><span class="nav-number">6.</span> <span class="nav-text">五、表是怎么”算”出来的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-P-%E8%A1%A8%EF%BC%9A107-84-23"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 P 表：107 &#x3D; 84 + 23</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-S-%E8%A1%A8%EF%BC%9Auid-%E4%B8%8D%E5%86%8D%E5%8F%AF%E4%BF%A1"><span class="nav-number">6.2.</span> <span class="nav-text">5.2 S 表：uid 不再可信</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-%E8%B7%A8%E9%A1%B5%E8%AF%AF%E5%91%BD%E4%B8%AD%EF%BC%9A%E5%BF%85%E9%A1%BB%E4%B8%BA%E9%9B%B6"><span class="nav-number">6.3.</span> <span class="nav-text">5.3 跨页误命中：必须为零</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%AD%97%E5%BD%A2%E5%90%88%E6%88%90%E4%B8%8E%E6%8E%92%E7%89%88"><span class="nav-number">7.</span> <span class="nav-text">六、字形合成与排版</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-%E7%94%BB%E5%B8%83%E4%B8%8E%E5%88%87%E7%89%87"><span class="nav-number">7.1.</span> <span class="nav-text">6.1 画布与切片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-%E8%B0%83%E8%89%B2%E6%9D%BF%E7%BA%A6%E6%9D%9F"><span class="nav-number">7.2.</span> <span class="nav-text">6.2 调色板约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-%E5%AF%B9%E9%BD%90%EF%BC%9A%E4%B8%A4%E6%AC%A1%E5%B7%A6%E7%A7%BB%E4%B8%8E%E2%80%9D%E6%A0%BC%E5%AD%90%E9%9B%86%E5%90%88%E2%80%9D%E8%BE%B9%E7%95%8C"><span class="nav-number">7.3.</span> <span class="nav-text">6.3 对齐：两次左移与”格子集合”边界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-%E6%B2%A1%E6%9C%89%E5%81%9A%E7%9A%84%E9%82%A3%E4%B8%80%E9%A1%B9"><span class="nav-number">7.4.</span> <span class="nav-text">6.4 没有做的那一项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E9%AA%8C%E8%AF%81%E9%93%BE"><span class="nav-number">8.</span> <span class="nav-text">七、验证链</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-%E6%9E%84%E5%BB%BA%E6%9C%9F%E6%96%AD%E8%A8%80"><span class="nav-number">8.1.</span> <span class="nav-text">7.1 构建期断言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-%E6%A8%A1%E6%8B%9F%E6%B8%B2%E6%9F%93"><span class="nav-number">8.2.</span> <span class="nav-text">7.2 模拟渲染</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-%E7%9C%9F%E6%9C%BA"><span class="nav-number">8.3.</span> <span class="nav-text">7.3 真机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-4-%E5%83%8F%E7%B4%A0%E5%B7%AE%E5%88%86"><span class="nav-number">8.4.</span> <span class="nav-text">7.4 像素差分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-5-%E5%8F%AF%E5%A4%8D%E7%8E%B0%E6%9E%84%E5%BB%BA%E4%B8%8E-IPS"><span class="nav-number">8.5.</span> <span class="nav-text">7.5 可复现构建与 IPS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E8%B8%A9%E5%9D%91%E6%B8%85%E5%8D%95"><span class="nav-number">9.</span> <span class="nav-text">八、踩坑清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%A4%8D%E7%8E%B0%E6%AD%A5%E9%AA%A4%E4%B8%8E%E4%BA%A7%E7%89%A9"><span class="nav-number">10.</span> <span class="nav-text">九、复现步骤与产物</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81%E3%80%81%E6%96%B9%E6%B3%95%E8%AE%BA%E6%80%BB%E7%BB%93"><span class="nav-number">11.</span> <span class="nav-text">十、方法论总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="lianhui.klh"
+      src="/res/avatar.png">
+  <p class="site-author-name" itemprop="name">lianhui.klh</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">283</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">34</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">168</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">lianhui.klh</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+.mermaid-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-overlay.is-active {
+  display: flex;
+}
+.mermaid-zoom-content {
+  position: relative;
+  width: 95vw;
+  max-height: 95vh;
+  overflow: auto;
+  background: #fffcf0;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.mermaid-zoom-content svg {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.mermaid-zoom-content pre.mermaid,
+.mermaid-zoom-content .mermaid {
+  cursor: default;
+  text-align: center;
+  background: transparent;
+}
+.mermaid-zoom-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mermaid-zoom-close:focus {
+  outline: 2px solid #fff;
+}
+.post-body pre.mermaid,
+.post-body .mermaid {
+  cursor: zoom-in;
+  background: #fffcf0;
+  /* Center narrow diagrams inside the full-width block (Pele SVGs are
+     inline-level, so text-align applies). Error fallback overrides to left. */
+  text-align: center;
+}
+.post-body pre.mermaid svg,
+.post-body .mermaid svg {
+  margin: 0 auto;
+}
+.post-body pre.mermaid:hover,
+.post-body .mermaid:hover {
+  opacity: .98;
+}
+/* Pele theme tokens: defined on :root so the zoom overlay (appended to body)
+   keeps the same colors as the inline diagram. */
+:root {
+  --pele-bg: #fffcf0;
+  --pele-fg: #555;
+  --pele-muted: #6f6e69;
+  --pele-line: #555;
+  --pele-surface: #f2f0e5;
+  --pele-surface-alt: #e6e4d9;
+  --pele-border: #cecdc3;
+  --pele-accent: #0684bd;
+  --pele-font: "PingFang SC", "Microsoft YaHei", sans-serif;
+  --pele-font-mono: consolas, Menlo, monospace, "PingFang SC", "Microsoft YaHei";
+}
+.post-body pre.mermaid.mermaid-render-error {
+  cursor: auto;
+  text-align: left;
+  white-space: pre-wrap;
+  font-family: var(--pele-font-mono);
+  font-size: 13px;
+}
+.mermaid-render-error-tip {
+  margin: 4px 0 16px;
+  color: #ff2a2a;
+  font-size: 12px;
+  text-align: left;
+}
+</style>
+<script>
+(function() {
+  function openZoom(root) {
+    var clone = root.cloneNode(true);
+    clone.style.maxWidth = '';
+    clone.style.maxHeight = '';
+    clone.classList.remove('mermaid-click-zoom-root');
+
+    var hint = root.querySelector('.mermaid-click-zoom-hint');
+    if (hint) hint.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'mermaid-zoom-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', 'Mermaid zoom');
+
+    var content = document.createElement('div');
+    content.className = 'mermaid-zoom-content';
+
+    var close = document.createElement('button');
+    close.className = 'mermaid-zoom-close';
+    close.type = 'button';
+    close.textContent = 'Close';
+    close.addEventListener('click', function() {
+      closeZoom(overlay);
+    });
+
+    content.appendChild(close);
+    content.appendChild(clone);
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    overlay.addEventListener('click', function(event) {
+      if (event.target === overlay) {
+        closeZoom(overlay);
+      }
+    });
+
+    requestAnimationFrame(function() {
+      overlay.classList.add('is-active');
+      close.focus();
+    });
+  }
+
+  function closeZoom(overlay) {
+    overlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  }
+
+  function openZoomFromTarget(target) {
+    var root = target.closest('.post-body pre.mermaid, .post-body .mermaid');
+    if (!root) return;
+    openZoom(root);
+  }
+
+  function bindMermaidZoom() {
+    var container = document.querySelector('.post-body') || document.body;
+    if (container.dataset.mermaidZoomDelegate === 'true') return;
+    container.dataset.mermaidZoomDelegate = 'true';
+
+    container.addEventListener('click', function(event) {
+      if (event.target.closest('.mermaid-zoom-overlay')) return;
+      openZoomFromTarget(event.target);
+    });
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        var active = document.querySelector('.mermaid-zoom-overlay.is-active');
+        if (active) closeZoom(active);
+      }
+    });
+  }
+
+  function clearRenderError(el) {
+    el.classList.remove('mermaid-render-error');
+    var next = el.nextElementSibling;
+    if (next && next.classList.contains('mermaid-render-error-tip')) {
+      next.parentNode.removeChild(next);
+    }
+  }
+
+  function showSourceFallback(el, source, error) {
+    el.textContent = source;
+    el.style.textAlign = 'left';
+    el.classList.add('mermaid-render-error');
+    var next = el.nextElementSibling;
+    if (!next || !next.classList.contains('mermaid-render-error-tip')) {
+      var tip = document.createElement('div');
+      tip.className = 'mermaid-render-error-tip';
+      tip.textContent = '图表渲染失败：' + (error && error.message ? error.message : error);
+      if (el.parentNode) el.parentNode.insertBefore(tip, el.nextSibling);
+    }
+  }
+
+  function renderDiagrams() {
+    var nodes = document.querySelectorAll('pre.mermaid, div.mermaid');
+    for (var i = 0; i < nodes.length; i++) {
+      (function(el) {
+        if (el.dataset.peleMounted === 'true') return;
+        el.dataset.peleMounted = 'true';
+
+        var source = el.textContent;
+        var failure = null;
+
+        try {
+          pele.mount(el, source, {
+            zoom: false,
+            // Pele default is 16px and ignores CSS font-size; this must be
+            // passed here so text is re-measured and nodes re-laid out.
+            fontSize: 16,
+            onRender: function() {
+              clearRenderError(el);
+            },
+            onError: function(error) {
+              failure = error;
+              // Later re-renders (resize / font load) can fail after a
+              // successful first paint, so restore the source here as well.
+              showSourceFallback(el, source, error);
+            }
+          });
+        } catch (error) {
+          failure = error;
+        }
+
+        if (failure) {
+          showSourceFallback(el, source, failure);
+        }
+      })(nodes[i]);
+    }
+  }
+
+  if (document.querySelectorAll('pre.mermaid, div.mermaid').length) {
+    NexT.utils.getScript('/lib/pele.global.min.js', function() {
+      renderDiagrams();
+      bindMermaidZoom();
+    }, window.pele);
+  } else {
+    bindMermaidZoom();
+  }
+})();
+</script>
+
+  
+
+  
+
+</body>
+</html>
